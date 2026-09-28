@@ -18,14 +18,15 @@ beforeEach(function () {
     $this->lot = Lot::factory()->create(['plan_id' => Plan::where('code', 'starter')->value('id')]);
 });
 
-it('invites by phone with an SMS link', function () {
+it('invites by phone with a WhatsApp link', function () {
     invite($this->lot, '0803 555 1234')->assertSessionHasNoErrors();
 
     $invitation = LotInvitation::withoutGlobalScopes()->sole();
     expect($invitation->phone_or_email)->toBe('+2348035551234')
         ->and($invitation->role)->toBe(LotRole::Sales)
         ->and($invitation->expires_at->isSameDay(now()->addDays(7)))->toBeTrue()
-        ->and($this->sms->sent[0]['message'])->toContain(route('invitations.show', $invitation->token));
+        ->and($this->whatsapp->to('+2348035551234', 'staff_invitation')[0]->text)->toContain(route('invitations.show', $invitation->token))
+        ->and($this->whatsapp->to('+2348035551234', 'staff_invitation')[0]->buttonSuffix)->toBe('invitations/'.$invitation->token);
 });
 
 it('invites by email', function () {

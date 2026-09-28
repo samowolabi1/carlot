@@ -19,7 +19,7 @@ type NavItem = { label: string; icon: IconName; route?: string; match?: string }
 const nav: NavItem[] = [
     { label: 'Dashboard', icon: 'grid', route: 'dealer.dashboard' },
     { label: 'Stock', icon: 'car', route: 'dealer.vehicles.index', match: 'dealer.vehicles.*' },
-    { label: 'Calendar', icon: 'calendar' },
+    { label: 'Calendar', icon: 'calendar', route: 'dealer.calendar' },
     { label: 'Leads', icon: 'leads' },
     { label: 'Offers & trade-ins', icon: 'tag' },
     { label: 'Analytics', icon: 'chart' },

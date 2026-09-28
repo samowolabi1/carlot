@@ -26,10 +26,15 @@ return [
         'max_attempts' => 5,
         'max_sends' => 3,
         'send_window_minutes' => 15,
+        // whatsapp (falls back to SMS) or sms
+        'channel' => env('OTP_CHANNEL', 'whatsapp'),
     ],
 
     // log (writes to storage/logs) or termii.
     'sms_driver' => env('SMS_DRIVER', 'log'),
+
+    // log or meta (WhatsApp Business Cloud API). Templates to create in Meta: see README.
+    'whatsapp_driver' => env('WHATSAPP_DRIVER', 'log'),
 
     'invitation_ttl_days' => 7,
 

@@ -40,7 +40,7 @@ class StaffController extends Controller
             'id' => $invitation->id,
             'contact' => $invitation->isEmail() ? $invitation->phone_or_email : PhoneNumber::mask($invitation->phone_or_email),
             'role' => $invitation->role->value,
-            'channel' => $invitation->isEmail() ? 'email' : 'SMS',
+            'channel' => $invitation->isEmail() ? 'email' : 'WhatsApp',
             'expires_at' => $invitation->expires_at->toIso8601String(),
         ]);
 

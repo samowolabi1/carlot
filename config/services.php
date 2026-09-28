@@ -39,6 +39,13 @@ return [
         'base_url' => env('NHTSA_BASE_URL', 'https://vpic.nhtsa.dot.gov/api'),
     ],
 
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
+        'language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'en'),
+    ],
+
     'termii' => [
         'key' => env('TERMII_API_KEY'),
         'sender_id' => env('TERMII_SENDER_ID', 'LotLink'),

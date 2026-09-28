@@ -9,12 +9,11 @@ withDefaults(defineProps<{ active?: 'home' | 'search' | 'saved' | 'bookings' | '
 
 const { user } = useShared();
 
-// Bookings arrive with appointments (S4).
 const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
     { key: 'home', label: 'Home', icon: 'home', href: route('home') },
     { key: 'search', label: 'Search', icon: 'search', href: route('cars.index') },
     { key: 'saved', label: 'Saved', icon: 'heart', href: route('saved') },
-    { key: 'bookings', label: 'Bookings', icon: 'calendar' },
+    { key: 'bookings', label: 'Bookings', icon: 'calendar', href: route('bookings.index') },
 ];
 </script>
 
@@ -26,6 +25,7 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
                 <nav class="hidden items-center gap-6 text-[15px] font-medium md:flex" aria-label="Main">
                     <Link :href="route('cars.index')" class="no-underline hover:text-clay" :class="active === 'search' ? 'text-clay' : 'text-ink'">Buy a car</Link>
                     <Link :href="route('saved')" class="no-underline hover:text-clay" :class="active === 'saved' ? 'text-clay' : 'text-ink'">Saved</Link>
+                    <Link :href="route('bookings.index')" class="no-underline hover:text-clay" :class="active === 'bookings' ? 'text-clay' : 'text-ink'">Bookings</Link>
                     <Link :href="route('dealer.home')" class="text-ink no-underline hover:text-clay">For car lots</Link>
                 </nav>
                 <div class="flex items-center gap-2">

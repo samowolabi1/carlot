@@ -57,7 +57,7 @@ const roles: { role: LotRole; can: string }[] = [
 
         <div v-if="showInvite && canManage" class="card p-5">
             <InviteForm :lot-slug="slug" />
-            <p class="mt-2 text-[13px] text-muted">They'll get a link by SMS or email. Invites expire after 7 days.</p>
+            <p class="mt-2 text-[13px] text-muted">They'll get a link on WhatsApp (or SMS) or by email. Invites expire after 7 days.</p>
         </div>
 
         <div class="grid gap-5 xl:grid-cols-[1fr_320px]">

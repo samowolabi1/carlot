@@ -9,6 +9,11 @@ const props = defineProps<{
     checklist: { key: string; label: string; done: boolean }[];
     staffCount: number;
     stock: { live: number; drafts: number; ageing: number; limit: number | null };
+    visits: {
+        today: { ulid: string; time: string; customer: string; type: string; status: string; checked_in: boolean; staff: string | null }[];
+        week: number;
+        pending: number;
+    };
 }>();
 
 const { user, currentLot } = useShared();
@@ -25,10 +30,10 @@ const progress = computed(() => Math.round(((props.checklist.length - remaining.
 const canEdit = computed(() => lot.value.role === 'owner' || lot.value.role === 'manager');
 
 // KPI tiles from the D2 design; they fill in once stock (S2) and bookings (S4) exist.
-const kpis = [
+const kpis: { label: string; note: string; key?: string }[] = [
     { label: 'Views, last 7 days', note: 'View tracking arrives with analytics' },
     { label: 'New leads', note: 'Enquiries arrive with chat and offers' },
-    { label: 'Visits booked this week', note: 'Bookings open in a later update' },
+    { label: 'Visits booked this week', note: 'See the calendar', key: 'visits' },
     { label: 'Sold this month', note: 'Record sales in Lot Manager' },
 ];
 </script>
@@ -78,8 +83,11 @@ const kpis = [
         <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <div v-for="kpi in kpis" :key="kpi.label" class="card p-[18px]">
                 <div class="text-[13px] text-muted">{{ kpi.label }}</div>
-                <div class="font-display text-[28px] font-bold">0</div>
-                <div class="text-[12px] text-muted">{{ kpi.note }}</div>
+                <div class="font-display text-[28px] font-bold">{{ kpi.key === 'visits' ? visits.week : 0 }}</div>
+                <div class="text-[12px] text-muted">
+                    <template v-if="kpi.key === 'visits' && visits.pending">{{ visits.pending }} need confirming</template>
+                    <template v-else>{{ kpi.note }}</template>
+                </div>
             </div>
         </div>
 
@@ -107,10 +115,18 @@ const kpis = [
                     No cars yet. <Link :href="route('dealer.vehicles.create', lot.slug)" class="font-semibold">Add your first car</Link>: start with the VIN and we'll fill in the rest.
                 </p>
             </div>
-            <div class="card flex flex-col gap-2 p-[18px]">
-                <h2 class="font-sans text-[16px] font-bold">Today's visits</h2>
-                <p class="text-[14px] text-muted">No visits booked. Customers will book viewings and test drives in your opening hours.</p>
-                <Link v-if="canEdit" :href="route('dealer.settings', lot.slug)" class="text-[13px] font-semibold">Check your hours</Link>
+            <div class="card flex flex-col gap-1 p-[18px]">
+                <div class="flex justify-between">
+                    <h2 class="font-sans text-[16px] font-bold">Today's visits</h2>
+                    <Link :href="route('dealer.calendar', lot.slug)" class="text-[13px] font-semibold">Calendar</Link>
+                </div>
+                <p v-if="!visits.today.length" class="text-[14px] text-muted">No visits today. Buyers book viewings and test drives in your opening hours.</p>
+                <div v-for="v in visits.today" :key="v.ulid" class="flex items-center justify-between gap-2 border-t border-divider py-2.5 text-[14px]">
+                    <span><strong>{{ v.time }}</strong> {{ v.customer }} · {{ v.type }}</span>
+                    <span v-if="v.checked_in" class="text-[12px] font-semibold text-success">Checked in</span>
+                    <span v-else-if="v.status === 'pending'" class="text-[12px] font-semibold text-clay-dark">Needs confirming</span>
+                    <span v-else-if="v.staff" class="text-[12px] text-muted">with {{ v.staff }}</span>
+                </div>
             </div>
         </div>
     </DealerLayout>

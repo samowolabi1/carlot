@@ -3,6 +3,7 @@
 namespace App\Domain\Lots\Models;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
@@ -42,6 +43,8 @@ use Illuminate\Support\Str;
  * @property float|null $latitude
  * @property float|null $longitude
  * @property string $timezone
+ * @property bool $booking_auto_confirm
+ * @property int $booking_min_notice_minutes
  * @property LotStatus $status
  * @property Carbon|null $submitted_at
  * @property Carbon|null $verified_at
@@ -61,7 +64,7 @@ class Lot extends Model
     protected $fillable = [
         'owner_id', 'name', 'slug', 'tagline', 'about', 'logo_path', 'cover_path', 'brand_color',
         'phone', 'whatsapp', 'email', 'address', 'landmark', 'city', 'state', 'country',
-        'latitude', 'longitude', 'timezone', 'status', 'plan_id',
+        'latitude', 'longitude', 'timezone', 'status', 'plan_id', 'booking_auto_confirm', 'booking_min_notice_minutes',
     ];
 
     protected $hidden = ['id', 'owner_id', 'plan_id', 'location'];
@@ -74,6 +77,8 @@ class Lot extends Model
             'longitude' => 'float',
             'submitted_at' => 'datetime',
             'verified_at' => 'datetime',
+            'booking_auto_confirm' => 'boolean',
+            'booking_min_notice_minutes' => 'integer',
         ];
     }
 
@@ -146,6 +151,12 @@ class Lot extends Model
     public function closures(): HasMany
     {
         return $this->hasMany(LotClosure::class);
+    }
+
+    /** @return HasMany<Appointment, $this> */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
     }
 
     /** @return HasMany<LotInvitation, $this> */

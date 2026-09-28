@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Lots\Actions\SaveLotHours;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotClosure;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Dealer\LotBookingRulesRequest;
 use App\Http\Requests\Dealer\LotBrandingRequest;
 use App\Http\Requests\Dealer\LotHoursRequest;
 use App\Http\Requests\Dealer\LotLocationRequest;
@@ -27,6 +29,12 @@ class SettingsController extends Controller
 
         return Inertia::render('Dealer/Settings', [
             'lot' => new LotSettingsResource($lot),
+            'booking' => [
+                'auto_confirm' => $lot->booking_auto_confirm,
+                'min_notice_minutes' => $lot->booking_min_notice_minutes,
+                'closures' => LotClosure::query()->where('date', '>=', now($lot->timezone)->toDateString())->orderBy('date')->get()
+                    ->map(fn (LotClosure $c) => ['id' => $c->id, 'date' => $c->date->toDateString(), 'label' => $c->date->format('D j M Y'), 'reason' => $c->reason]),
+            ],
         ]);
     }
 
@@ -70,6 +78,35 @@ class SettingsController extends Controller
         $saveLotHours->run($lot, $request->validated());
 
         return $this->done($request, $lot, 'hours');
+    }
+
+    public function updateBooking(LotBookingRulesRequest $request, Lot $lot): RedirectResponse
+    {
+        $lot->update($request->validated());
+
+        return back()->with('success', 'Booking rules saved.');
+    }
+
+    public function storeClosure(Request $request, Lot $lot): RedirectResponse
+    {
+        Gate::authorize('update', $lot);
+
+        $data = $request->validate([
+            'date' => ['required', 'date', 'after_or_equal:today'],
+            'reason' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        LotClosure::query()->updateOrCreate(['lot_id' => $lot->id, 'date' => $data['date']], ['reason' => $data['reason'] ?? null]);
+
+        return back()->with('success', 'Closure added. Buyers can\'t book that day.');
+    }
+
+    public function destroyClosure(Lot $lot, LotClosure $closure): RedirectResponse
+    {
+        Gate::authorize('update', $lot);
+        $closure->delete();
+
+        return back()->with('success', 'Closure removed.');
     }
 
     /** Settings forms are shared with the onboarding wizard, which moves on to the next step. */

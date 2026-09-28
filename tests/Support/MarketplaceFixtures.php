@@ -13,8 +13,13 @@ use Meilisearch\Contracts\TasksQuery;
 /** Builds a small marketplace and, for Meilisearch runs, indexes it. */
 trait MarketplaceFixtures
 {
+    /** The throwaway index this test created, and the only one it may delete. */
+    private ?string $testIndex = null;
+
     protected function useSearchEngine(string $engine): void
     {
+        config(['scout.driver' => 'null']);
+
         if ($engine === 'meilisearch') {
             $host = env('MEILISEARCH_TEST_HOST');
 
@@ -28,10 +33,9 @@ trait MarketplaceFixtures
                 'scout.meilisearch.host' => $host,
                 'scout.meilisearch.key' => env('MEILISEARCH_TEST_KEY'),
             ]);
+            $this->testIndex = config('scout.prefix').'vehicles';
             Artisan::call('scout:sync-index-settings');
             $this->waitForMeilisearch();
-        } else {
-            config(['scout.driver' => 'null']);
         }
     }
 
@@ -61,9 +65,8 @@ trait MarketplaceFixtures
 
     protected function tearDownMeilisearch(): void
     {
-        if (config('scout.driver') === 'meilisearch') {
-            $client = app(Client::class);
-            $client->deleteIndex(config('scout.prefix').'vehicles');
+        if ($this->testIndex !== null && str_starts_with($this->testIndex, 'test_')) {
+            app(Client::class)->deleteIndex($this->testIndex);
         }
     }
 

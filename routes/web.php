@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
+use App\Http\Controllers\Bookings\BookingController;
+use App\Http\Controllers\Bookings\CustomerBookingController;
+use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealerHomeController;
 use App\Http\Controllers\Dealer\OnboardingController;
@@ -25,6 +28,12 @@ Route::get('/cars', SearchController::class)->middleware('throttle:120,1')->name
 Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
+Route::get('/lots/{lot:slug}/slots', [BookingController::class, 'slots'])->name('lots.slots');
+
+// Bookings (M7). Signed links from WhatsApp/SMS open these without signing in.
+Route::get('/bookings/{appointment}', [CustomerBookingController::class, 'show'])->name('bookings.show');
+Route::get('/bookings/{appointment}/calendar.ics', [CustomerBookingController::class, 'calendar'])->name('bookings.calendar');
+Route::post('/bookings/{appointment}/cancel', [CustomerBookingController::class, 'cancel'])->middleware('throttle:10,1')->name('bookings.cancel');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OtpLoginController::class, 'create'])->name('login');
@@ -52,6 +61,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
 
+    Route::get('/book/{lot:slug}', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('/appointments', [BookingController::class, 'store'])->middleware('throttle:10,1')->name('bookings.store');
+    Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
+    Route::patch('/bookings/{appointment}', [CustomerBookingController::class, 'update'])->middleware('throttle:10,1')->name('bookings.update');
+
     Route::get('/dealer', DealerHomeController::class)->name('dealer.home');
     Route::get('/dealer/start', [OnboardingController::class, 'create'])->name('dealer.onboarding.start');
     Route::post('/dealer/lots', [OnboardingController::class, 'store'])->name('dealer.lots.store');
@@ -78,6 +92,16 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::delete('/staff/invitations/{invitation}', [StaffController::class, 'cancel'])->name('staff.invitations.cancel');
             Route::patch('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
             Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
+
+            Route::put('/settings/booking', [SettingsController::class, 'updateBooking'])->name('settings.booking');
+            Route::post('/settings/closures', [SettingsController::class, 'storeClosure'])->name('settings.closures.store');
+            Route::delete('/settings/closures/{closure}', [SettingsController::class, 'destroyClosure'])->name('settings.closures.destroy');
+
+            // Appointments (M7)
+            Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+            Route::patch('/appointments/{appointment}', [CalendarController::class, 'update'])->name('appointments.update');
+            Route::post('/appointments/{appointment}/cancel', [CalendarController::class, 'cancel'])->name('appointments.cancel');
+            Route::get('/appointments/{appointment}/slots', [CalendarController::class, 'slots'])->name('appointments.slots');
 
             // Inventory (M3)
             Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');

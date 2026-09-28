@@ -77,9 +77,21 @@ Run all four before pushing.
 - The buyer's location lives in localStorage (`useLocation`) and is only sent as query params
   for distance sorting; it is never stored server-side.
 
+## Appointments (S4)
+
+- Slots come only from `SlotGenerator` (lot timezone in, UTC `starts_at` out). Bookings and moves go
+  through `BookAppointment` / `RescheduleAppointment`, which lock the lot row before checking
+  capacity; never insert appointments directly.
+- `Appointment::fromDateTime()` stores dates as UTC; keep it that way for any new date column.
+- Messages to buyers and lots use `App\Domain\Messaging\Message` (a Meta template name plus SMS
+  text) via the `phone` notification channel or `Messenger`: WhatsApp first, SMS fallback. New
+  business-initiated WhatsApp messages need a new approved template (list in README).
+- Links in messages are signed routes so they work without signing in.
+- Scheduler: `appointments:remind`, `appointments:mark-no-shows`, `appointments:escalate-pending`.
+
 ## External services
 
-Each sits behind an interface so it can be swapped by market: `SmsGateway` (log | Termii), `VinDecoder` (NHTSA vPIC);
+Each sits behind an interface so it can be swapped by market: `SmsGateway` (log | Termii), `WhatsAppGateway` (log | Meta Cloud API), `VinDecoder` (NHTSA vPIC);
 Paystack, WhatsApp Cloud API and others follow the same pattern. Tests bind fakes
 (`tests/Support/FakeSmsGateway`) and never call real services.
 
@@ -94,9 +106,9 @@ rather than fake data.
 
 ## Sprint plan (TDD)
 
-S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments · S5 Lot Manager lite ·
+S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ·
 S6 Sharing + budgeting (MVP launch) · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
-Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed), WhatsApp
-delivery of OTPs and invites (S4 templates), Redis/Horizon (the database queue for now).
+Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
+Redis/Horizon (the database queue for now).

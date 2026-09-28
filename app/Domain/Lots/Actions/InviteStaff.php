@@ -7,14 +7,15 @@ use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotInvitation;
 use App\Domain\Lots\Notifications\StaffInvitation;
-use App\Domain\Messaging\SmsGateway;
+use App\Domain\Messaging\Message;
+use App\Domain\Messaging\Messenger;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class InviteStaff
 {
-    public function __construct(private readonly SmsGateway $sms) {}
+    public function __construct(private readonly Messenger $messenger) {}
 
     /** @param string $contact E.164 phone or email address */
     public function run(Lot $lot, User $inviter, string $contact, LotRole $role): LotInvitation
@@ -72,10 +73,11 @@ class InviteStaff
             return;
         }
 
-        // WhatsApp delivery arrives with the WhatsApp templates in sprint S4.
-        $this->sms->send(
-            $invitation->phone_or_email,
-            "{$lot->name} has invited you to join their team on LotLink as {$invitation->role->label()}. Accept: {$url}",
-        );
+        $this->messenger->send($invitation->phone_or_email, new Message(
+            template: 'staff_invitation',
+            params: [$lot->name, $invitation->role->label()],
+            text: "{$lot->name} has invited you to join their team on LotLink as {$invitation->role->label()}. Accept: {$url}",
+            buttonSuffix: Message::suffix($url),
+        ));
     }
 }

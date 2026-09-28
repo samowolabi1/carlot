@@ -15,7 +15,8 @@ it('sends a hashed code to the normalised number', function () {
     requestCode();
 
     $otp = OtpCode::sole();
-    $code = $this->sms->lastCodeFor(PHONE);
+    $code = $this->lastCode(PHONE);
+    expect($this->whatsapp->to(PHONE, 'login_code'))->toHaveCount(1);
 
     expect($otp->phone)->toBe(PHONE)
         ->and($code)->not->toBeNull()
@@ -25,13 +26,13 @@ it('sends a hashed code to the normalised number', function () {
 it('rejects an invalid phone number', function () {
     $this->post(route('login.send'), ['phone' => '123'])->assertSessionHasErrors('phone');
 
-    expect($this->sms->sent)->toBeEmpty();
+    expect($this->sms->sent)->toBeEmpty()->and($this->whatsapp->sent)->toBeEmpty();
 });
 
 it('signs in and creates a customer on first login', function () {
     requestCode();
 
-    $this->post(route('login.check'), ['code' => $this->sms->lastCodeFor(PHONE)])
+    $this->post(route('login.check'), ['code' => $this->lastCode(PHONE)])
         ->assertRedirect(route('home'));
 
     $user = User::sole();
@@ -45,7 +46,7 @@ it('signs an existing user back in without creating a duplicate', function () {
     $existing = User::factory()->create(['phone' => PHONE]);
 
     requestCode();
-    $this->post(route('login.check'), ['code' => $this->sms->lastCodeFor(PHONE)]);
+    $this->post(route('login.check'), ['code' => $this->lastCode(PHONE)]);
 
     $this->assertAuthenticatedAs($existing);
     expect(User::count())->toBe(1);
@@ -62,7 +63,7 @@ it('asks new users for their name before the dealer area', function () {
 
 it('rejects a wrong code and locks the code after 5 attempts', function () {
     requestCode();
-    $real = $this->sms->lastCodeFor(PHONE);
+    $real = $this->lastCode(PHONE);
     $wrong = $real === '000000' ? '111111' : '000000';
 
     foreach (range(1, 5) as $attempt) {
@@ -79,20 +80,20 @@ it('rejects an expired code', function () {
     requestCode();
     $this->travel(6)->minutes();
 
-    $this->post(route('login.check'), ['code' => $this->sms->lastCodeFor(PHONE)])->assertSessionHasErrors('code');
+    $this->post(route('login.check'), ['code' => $this->lastCode(PHONE)])->assertSessionHasErrors('code');
     $this->assertGuest();
 });
 
 it('only accepts the newest code', function () {
     requestCode();
-    $first = $this->sms->lastCodeFor(PHONE);
+    $first = $this->lastCode(PHONE);
     $this->post(route('login.resend'));
 
-    if ($first !== $this->sms->lastCodeFor(PHONE)) {
+    if ($first !== $this->lastCode(PHONE)) {
         $this->post(route('login.check'), ['code' => $first])->assertSessionHasErrors('code');
     }
 
-    $this->post(route('login.check'), ['code' => $this->sms->lastCodeFor(PHONE)])->assertRedirect();
+    $this->post(route('login.check'), ['code' => $this->lastCode(PHONE)])->assertRedirect();
     $this->assertAuthenticated();
 });
 
@@ -102,14 +103,35 @@ it('allows 3 codes per phone every 15 minutes', function () {
     }
 
     $this->post(route('login.send'), ['phone' => PHONE])->assertSessionHasErrors('phone');
-    expect($this->sms->sent)->toHaveCount(3);
+    expect($this->whatsapp->sent)->toHaveCount(3);
 
     $this->travel(16)->minutes();
     requestCode();
-    expect($this->sms->sent)->toHaveCount(4);
+    expect($this->whatsapp->sent)->toHaveCount(4);
 });
 
 it('logs out', function () {
     $this->actingAs(User::factory()->create())->post(route('logout'))->assertRedirect(route('home'));
     $this->assertGuest();
+});
+
+it('falls back to SMS when WhatsApp fails', function () {
+    $this->whatsapp->failing = true;
+
+    requestCode();
+
+    expect($this->sms->lastCodeFor(PHONE))->not->toBeNull();
+    $this->get(route('login.verify'))->assertInertia(fn ($page) => $page->where('channel', 'sms'));
+});
+
+it('sends the code by SMS when asked', function () {
+    requestCode();
+    $this->get(route('login.verify'))->assertInertia(fn ($page) => $page->where('channel', 'whatsapp'));
+
+    $this->post(route('login.resend'), ['channel' => 'sms']);
+
+    $code = $this->sms->lastCodeFor(PHONE);
+    expect($code)->not->toBeNull();
+    $this->post(route('login.check'), ['code' => $code])->assertRedirect();
+    $this->assertAuthenticated();
 });

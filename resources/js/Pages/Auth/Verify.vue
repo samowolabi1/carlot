@@ -4,7 +4,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
-const props = defineProps<{ maskedPhone: string; resendAfter: number }>();
+const props = defineProps<{ maskedPhone: string; channel: 'whatsapp' | 'sms'; resendAfter: number }>();
 
 const LENGTH = 6;
 const digits = ref<string[]>(Array(LENGTH).fill(''));
@@ -71,9 +71,9 @@ function submit() {
     });
 }
 
-function resend() {
+function resend(channel?: 'sms') {
     resending.value = true;
-    router.post(route('login.resend'), {}, { preserveScroll: true, onFinish: () => (resending.value = false), onSuccess: startCountdown });
+    router.post(route('login.resend'), channel ? { channel } : {}, { preserveScroll: true, onFinish: () => (resending.value = false), onSuccess: startCountdown });
 }
 
 const countdown = computed(() => `0:${String(secondsLeft.value).padStart(2, '0')}`);
@@ -91,7 +91,7 @@ onBeforeUnmount(() => clearInterval(timer));
         <div class="flex flex-col gap-2">
             <h1 class="text-[30px] leading-[1.1] font-bold">Enter the code we sent you</h1>
             <p class="text-[15px] text-muted">
-                A 6-digit code went to <strong class="text-ink">{{ maskedPhone }}</strong> by SMS.
+                A 6-digit code went to <strong class="text-ink">{{ maskedPhone }}</strong> {{ channel === 'whatsapp' ? 'on WhatsApp' : 'by SMS' }}.
                 <Link :href="route('login')">Change number</Link>
             </p>
         </div>
@@ -119,9 +119,12 @@ onBeforeUnmount(() => clearInterval(timer));
             </fieldset>
             <InputError :message="form.errors.code" />
 
-            <div class="flex justify-between text-[14px]">
+            <div class="flex justify-between gap-3 text-[14px]">
                 <span v-if="secondsLeft > 0" class="text-muted">Resend code in {{ countdown }}</span>
-                <button v-else type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending" @click="resend">Send a new code</button>
+                <button v-else type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending" @click="resend()">Send a new code</button>
+                <button v-if="channel === 'whatsapp'" type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending || secondsLeft > 0" @click="resend('sms')">
+                    Send by SMS instead
+                </button>
             </div>
 
             <button type="submit" class="btn btn-primary" :disabled="!complete || form.processing">Continue</button>

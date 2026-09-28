@@ -83,6 +83,7 @@ function filter(query: Partial<Filters>) {
                 </a>
                 <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" label="Share" />
             </div>
+            <Link v-if="!preview" :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark mt-2.5 w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
 
             <div class="mt-5 grid gap-6 pb-12 lg:grid-cols-[1fr_320px]">
                 <div class="flex min-w-0 flex-col gap-4">

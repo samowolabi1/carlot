@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BookingRulesForm from '@/components/lot/BookingRulesForm.vue';
 import BrandingForm from '@/components/lot/BrandingForm.vue';
 import BusinessForm from '@/components/lot/BusinessForm.vue';
 import HoursForm from '@/components/lot/HoursForm.vue';
@@ -8,13 +9,17 @@ import type { LotSettings } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-defineProps<{ lot: LotSettings }>();
+defineProps<{
+    lot: LotSettings;
+    booking: { auto_confirm: boolean; min_notice_minutes: number; closures: { id: number; date: string; label: string; reason: string | null }[] };
+}>();
 
 const tabs = [
     { key: 'profile', label: 'Lot profile' },
     { key: 'branding', label: 'Logo and colours' },
     { key: 'location', label: 'Location' },
-    { key: 'hours', label: 'Hours and booking rules' },
+    { key: 'hours', label: 'Opening hours' },
+    { key: 'booking', label: 'Booking rules and closures' },
 ] as const;
 
 const initial = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
@@ -54,7 +59,8 @@ function select(key: string) {
                     <p class="mb-4 text-[14px] text-muted">Drag the pin to the lot gate. Customers get directions to this exact spot.</p>
                     <LocationForm :lot="lot" />
                 </template>
-                <HoursForm v-else :lot="lot" />
+                <HoursForm v-else-if="active === 'hours'" :lot="lot" />
+                <BookingRulesForm v-else :lot-slug="lot.slug" :booking="booking" />
             </section>
         </div>
     </DealerLayout>

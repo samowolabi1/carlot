@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Appointments\Models\Appointment;
+use App\Domain\Appointments\Policies\AppointmentPolicy;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
@@ -12,13 +14,18 @@ use App\Domain\Lots\Support\CurrentLot;
 use App\Domain\Marketplace\Search\DatabaseVehicleSearch;
 use App\Domain\Marketplace\Search\MeilisearchVehicleSearch;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use App\Domain\Messaging\Channels\PhoneChannel;
 use App\Domain\Messaging\LogSmsGateway;
+use App\Domain\Messaging\LogWhatsAppGateway;
+use App\Domain\Messaging\MetaWhatsAppGateway;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\TermiiSmsGateway;
+use App\Domain\Messaging\WhatsAppGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +34,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(CurrentLot::class);
+
+        $this->app->bind(WhatsAppGateway::class, fn () => match (config('lotlink.whatsapp_driver')) {
+            'meta' => new MetaWhatsAppGateway(
+                (string) config('services.whatsapp.token'),
+                (string) config('services.whatsapp.phone_number_id'),
+                (string) config('services.whatsapp.api_version'),
+                (string) config('services.whatsapp.language'),
+            ),
+            default => new LogWhatsAppGateway,
+        });
 
         $this->app->bind(VehicleSearch::class, fn () => config('scout.driver') === 'meilisearch'
             ? new MeilisearchVehicleSearch
@@ -48,8 +65,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventLazyLoading(! $this->app->isProduction());
 
+        Notification::extend('phone', fn ($app) => $app->make(PhoneChannel::class));
+
         Gate::policy(Lot::class, LotPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
+        Gate::policy(Appointment::class, AppointmentPolicy::class);
 
         RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
     }

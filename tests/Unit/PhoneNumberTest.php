@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Support\Name;
 use App\Domain\Support\PhoneNumber;
 
 it('normalises Nigerian numbers to E.164', function (string $input) {
@@ -12,4 +13,11 @@ it('rejects invalid numbers', function () {
 
 it('masks numbers for the dealer UI', function () {
     expect(PhoneNumber::mask('+2348031234412'))->toBe('+234 803 *** 4412');
+});
+
+it('shortens names for dealer lists', function () {
+    expect(Name::short('Tunde Adebayo'))->toBe('Tunde A.')
+        ->and(Name::short('Chioma Ngozi Okafor'))->toBe('Chioma O.')
+        ->and(Name::short('Kemi'))->toBe('Kemi')
+        ->and(Name::short(null))->toBe('Buyer');
 });

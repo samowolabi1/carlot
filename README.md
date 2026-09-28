@@ -14,6 +14,21 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S4 (Appointments) ✅**
+
+| Area | What works |
+| --- | --- |
+| Booking (M7) | Buyers book a viewing, test drive, inspection or trade-in valuation from a car or lot page: pick a day and a free slot (next 14 days, from opening hours, minus closures, full slots and the lot's minimum notice). Capacity is enforced with a row lock, so two buyers can't take the last place. |
+| Confirmation | Auto-confirm or manual confirm per lot. Buyers get WhatsApp (or SMS) plus email with a calendar file (.ics). Their booking page has directions, add to calendar, reschedule and cancel; links in messages work without signing in (signed URLs). |
+| Dealer calendar (D4) | Week grid by visit type; drag a booking to move it; Today panel with check-in, no-show and complete; "Needs confirmation" queue; drawer with call/WhatsApp, rep assignment, reschedule and cancel. Every change messages the buyer. |
+| Reminders and jobs | 24-hour and 2-hour reminders, no-shows 30 minutes after an unchecked start, unconfirmed requests escalated to the owner after 4 hours, visits auto-completed after check-in. |
+| WhatsApp | WhatsApp Business Cloud API behind an interface with SMS fallback. Sign-in codes and staff invites now go by WhatsApp first ("Send by SMS instead" on the code screen). |
+| Settings | Booking rules (auto-confirm, minimum notice) and closure days. |
+| Roles | Sales reps work their own and unassigned bookings; owners and managers assign reps and work all bookings. |
+| Quality | 188 tests (also on MySQL), including capacity, timezones, signed links, reminders and tenancy |
+
+Deferred as planned: test-drive deposits (S9, needs Paystack), lead records from bookings (S8), live location (S11), reviews after visits (S12), web push (S6).
+
 **Sprint S3 (Marketplace) ✅**
 
 | Area | What works |
@@ -55,7 +70,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S4 Appointments**: opening-hours slots, booking a viewing or test drive, the dealer calendar, and WhatsApp/SMS/email reminders.
+Next is **S5 Lot Manager lite**: walk-in register, customer book, orders with payments and WhatsApp receipts, the order tracking page, offline queue, and "List on LotLink".
 
 ## Run it on Windows with Laragon
 
@@ -95,6 +110,30 @@ cd carlot
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
+
+### Scheduled jobs (reminders)
+
+Reminders, no-shows and escalations run on Laravel's scheduler. On Laragon, keep
+`php artisan schedule:work` running in a terminal while testing bookings. In production add one
+cron entry: `* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1`.
+
+### WhatsApp in production
+
+Set `WHATSAPP_DRIVER=meta`, `WHATSAPP_TOKEN` and `WHATSAPP_PHONE_NUMBER_ID` from Meta's WhatsApp
+Business Cloud API, and create these templates (body variables in order; the URL button's base is
+your `APP_URL` with a `{{1}}` suffix):
+
+| Template | Category | Body variables | Button |
+| --- | --- | --- | --- |
+| `login_code` | Authentication | code | copy code |
+| `staff_invitation` | Utility | lot name, role | invitation link |
+| `booking_confirmed` | Utility | name, what, lot, when | manage booking |
+| `booking_pending` | Utility | name, what, lot, when | manage booking |
+| `appointment_reminder` | Utility | what, lot, when, directions | manage booking |
+| `appointment_update` | Utility | what, lot, change | manage booking |
+| `dealer_booking_alert` | Utility | event, buyer, what, when | open calendar |
+
+Until a template is approved, messages fall back to SMS automatically.
 
 ### Search in production (Meilisearch)
 

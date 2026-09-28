@@ -5,15 +5,20 @@ namespace App\Domain\Accounts\Actions;
 use App\Domain\Accounts\Enums\OtpPurpose;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Accounts\Models\OtpCode;
-use App\Domain\Messaging\SmsGateway;
+use App\Domain\Messaging\Message;
+use App\Domain\Messaging\Messenger;
 use Illuminate\Support\Facades\Hash;
 
 class SendOtp
 {
-    public function __construct(private readonly SmsGateway $sms) {}
+    public function __construct(private readonly Messenger $messenger) {}
 
-    /** @param string $phone E.164 number */
-    public function run(string $phone, OtpPurpose $purpose = OtpPurpose::Login): OtpCode
+    /**
+     * @param  string  $phone  E.164 number
+     * @param  'whatsapp'|'sms'|null  $channel  null uses the configured default
+     * @return array{otp: OtpCode, channel: 'whatsapp'|'sms'}
+     */
+    public function run(string $phone, OtpPurpose $purpose = OtpPurpose::Login, ?string $channel = null): array
     {
         $config = config('lotlink.otp');
 
@@ -43,8 +48,13 @@ class SendOtp
             'expires_at' => now()->addMinutes($config['ttl_minutes']),
         ]);
 
-        $this->sms->send($phone, "Your LotLink code is {$code}. It expires in {$config['ttl_minutes']} minutes. Don't share it with anyone.");
+        $used = $this->messenger->send($phone, new Message(
+            template: 'login_code',
+            params: [$code],
+            text: "Your LotLink code is {$code}. It expires in {$config['ttl_minutes']} minutes. Don't share it with anyone.",
+            authentication: true,
+        ), preferWhatsApp: ($channel ?? $config['channel']) === 'whatsapp');
 
-        return $otp;
+        return ['otp' => $otp, 'channel' => $used];
     }
 }

@@ -55,6 +55,8 @@ const whatsappHref = computed(() => {
     const text = `Hi ${props.lot.name}, I'm interested in the ${props.car.title}${props.car.price ? ` (${props.car.price})` : ''} I saw on LotLink: ${props.car.url}`;
     return `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(text)}`;
 });
+const bookHref = computed(() => route('bookings.create', { lot: props.lot.slug, car: props.car.ulid }));
+const testDriveHref = computed(() => route('bookings.create', { lot: props.lot.slug, car: props.car.ulid, type: 'test_drive' }));
 const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${props.car.price}` : ''} at ${props.lot.name}`);
 </script>
 
@@ -167,9 +169,11 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[30px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
-                        <template v-if="!sold">
-                            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-primary w-full"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
-                            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn w-full" :class="whatsappHref ? 'btn-outline' : 'btn-primary'"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
+                        <template v-if="!sold && !preview">
+                            <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
+                            <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
+                            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline w-full"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
+                            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline w-full"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
                         </template>
                     </div>
                     <LotBadge :lot="lot" />
@@ -185,9 +189,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
         </div>
 
         <!-- Phone action bar -->
-        <div v-if="!sold" class="fixed inset-x-0 bottom-[76px] z-30 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-3 md:hidden">
-            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn h-[52px] rounded-[14px] px-5" :class="whatsappHref ? 'btn-outline' : 'btn-primary grow'"><Icon name="phone" :size="18" /> Call</a>
-            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-primary h-[52px] grow rounded-[14px]"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
+        <div v-if="!sold && !preview" class="fixed inset-x-0 bottom-[76px] z-30 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-3 md:hidden">
+            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot"><Icon name="phone" :size="20" /></a>
+            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] rounded-[14px] px-4"><Icon name="whatsapp" :size="18" /> Chat</a>
+            <Link :href="bookHref" class="btn btn-primary h-[52px] grow rounded-[14px]">Book a viewing</Link>
         </div>
     </CustomerLayout>
 </template>

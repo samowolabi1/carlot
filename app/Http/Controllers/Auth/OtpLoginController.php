@@ -28,12 +28,12 @@ class OtpLoginController extends Controller
 
         try {
             $phone = PhoneNumber::normalize($request->string('phone'));
-            $sendOtp->run($phone);
+            ['channel' => $channel] = $sendOtp->run($phone);
         } catch (InvalidArgumentException|OtpException $e) {
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
         }
 
-        $request->session()->put('otp_phone', $phone);
+        $request->session()->put(['otp_phone' => $phone, 'otp_channel' => $channel]);
 
         return redirect()->route('login.verify');
     }
@@ -48,6 +48,7 @@ class OtpLoginController extends Controller
 
         return Inertia::render('Auth/Verify', [
             'maskedPhone' => PhoneNumber::mask($phone),
+            'channel' => $request->session()->get('otp_channel', 'sms'),
             'resendAfter' => 30,
         ]);
     }
@@ -83,13 +84,17 @@ class OtpLoginController extends Controller
             return redirect()->route('login');
         }
 
+        $channel = $request->input('channel') === 'sms' ? 'sms' : null;
+
         try {
-            $sendOtp->run($phone);
+            ['channel' => $used] = $sendOtp->run($phone, channel: $channel);
         } catch (OtpException $e) {
             throw ValidationException::withMessages(['code' => $e->getMessage()]);
         }
 
-        return back()->with('success', 'We sent you a new code.');
+        $request->session()->put('otp_channel', $used);
+
+        return back()->with('success', $used === 'sms' ? 'We sent a new code by SMS.' : 'We sent you a new code on WhatsApp.');
     }
 
     public function destroy(Request $request): RedirectResponse
