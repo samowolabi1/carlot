@@ -51,9 +51,21 @@ Run all four before pushing.
 "lots near me" with `ST_Distance_Sphere`. Lots with no pin sit at 0,0 there, so always filter
 `latitude IS NOT NULL`.
 
+## Inventory (S2)
+
+- `Vehicle` status changes go through `VehicleStateMachine`; never set `status` directly.
+  `PublishVehicle` checks completeness and the plan listing limit; selling happens via Lot Manager
+  orders (S5), not the stock list.
+- Prices are kobo on the model; forms and `VehicleResource` use whole naira. `SaveVehiclePrice`
+  writes `vehicle_price_history` once a car has been listed and fires `VehiclePriceDropped`.
+- Photos: browser → `MediaUploads` target (pre-signed R2 PUT, or the app's upload endpoint on a
+  local disk) → `AttachVehicleMedia` → `ProcessVehicleMedia` (queue `media`) → WebP 1600/800/400
+  on the media disk. Originals never reach the public disk.
+- `new arrival` (7 days) and `ageing` (45 days) are computed from `listed_at`, not stored.
+
 ## External services
 
-Each sits behind an interface so it can be swapped by market: `SmsGateway` (log | Termii) for now;
+Each sits behind an interface so it can be swapped by market: `SmsGateway` (log | Termii), `VinDecoder` (NHTSA vPIC);
 Paystack, WhatsApp Cloud API and others follow the same pattern. Tests bind fakes
 (`tests/Support/FakeSmsGateway`) and never call real services.
 
@@ -68,7 +80,7 @@ rather than fake data.
 
 ## Sprint plan (TDD)
 
-S1 Foundations ✅ · S2 Inventory · S3 Marketplace · S4 Appointments · S5 Lot Manager lite ·
+S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace · S4 Appointments · S5 Lot Manager lite ·
 S6 Sharing + budgeting (MVP launch) · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 

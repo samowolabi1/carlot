@@ -16,6 +16,10 @@ return [
     // Disk for logos, covers and (later) car photos. Cloudflare R2 in production.
     'media_disk' => env('LOTLINK_MEDIA_DISK', 'public'),
 
+    // Private disk for original uploads before processing. When it is an s3 disk (R2),
+    // browsers upload directly with pre-signed URLs; otherwise through the app.
+    'upload_disk' => env('LOTLINK_UPLOAD_DISK', 'local'),
+
     'otp' => [
         'length' => 6,
         'ttl_minutes' => 5,

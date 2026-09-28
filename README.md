@@ -12,7 +12,23 @@ Source documents (claude.ai artifacts):
 
 Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 4 · MySQL 8 · Filament 3 (admin) · Pest.
 
-## Status: Sprint S1 (Foundations) ✅
+## Status
+
+**Sprint S2 (Inventory) ✅**
+
+| Area | What works |
+| --- | --- |
+| Add a car (M3) | Four phone-first steps from the designs: VIN & model → details → photos → price & publish. Every step saves the draft. |
+| VIN decode | NHTSA vPIC lookup fills make, model, year, trim, engine, fuel, drivetrain and body type, cached 30 days. Without a VIN (or if the lookup fails), pick the make and model by hand. |
+| Catalogue | 25 makes and 213 models common on Nigerian lots, plus 33 features. Models a dealer types in wait for admin review in `/admin`. |
+| Photos | Up to 20 per car. Large photos are shrunk in the browser, uploaded (directly to Cloudflare R2 in production), then converted to WebP at 1600, 800 and 400 px with location data removed. Reorder, set cover, remove. |
+| Stock (D3) | Status tabs and counts, search by make, model or VIN, ageing flag at 45 days, new-arrival badge for 7 days, hide, unhide and reserve. |
+| Rules | Status state machine (draft → available → reserved → sold, plus hidden), plan listing limits, price history with price-drop event, VIN unique per lot, sales staff can't change live prices or delete. |
+| Quality | 114 Pest tests (also run on MySQL 8), Pint, Larastan level 6, vue-tsc |
+
+Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/fraud detection (S12), marking cars sold (Lot Manager orders, S5), views and leads per car (S11), share cards (S6), spotlight (S7), video and 360° photos (phase 2).
+
+**Sprint S1 (Foundations) ✅**
 
 | Area | What works |
 | --- | --- |
@@ -24,7 +40,7 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S2 Inventory**: vehicle CRUD, the 4-step add-car flow, VIN decode, photo pipeline.
+Next is **S3 Marketplace**: Meilisearch search and filters, "near me", car pages with Open Graph tags, compare, favourites and the lot mini-site.
 
 ## Run it on Windows with Laragon
 
@@ -53,6 +69,9 @@ cd carlot
 
 ### Trying it out
 
+- **Add a car**: Dealer dashboard → Stock → Add car. Try VIN `4T1B11HK8JU654821` (a 2018 Toyota Camry SE).
+  Photos are processed straight away because `.env.example` uses `QUEUE_CONNECTION=sync`.
+
 - **Sign in** at `/login` with any Nigerian mobile number. With `SMS_DRIVER=log` the code is
   written to `storage/logs/laravel.log` (search for "Your LotLink code").
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
@@ -61,6 +80,15 @@ cd carlot
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
+
+### Photos in production (Cloudflare R2)
+
+1. Create two R2 buckets: `lotlink-uploads` (private) and `lotlink-media` (public, connected to a
+   custom domain such as `media.yourdomain.com`), plus an API token with read/write on both.
+2. Add a CORS rule to `lotlink-uploads` so browsers can upload directly: allowed origin your app
+   URL, method `PUT`, header `Content-Type`.
+3. Set the `R2_*` variables, then `LOTLINK_UPLOAD_DISK=r2_uploads` and `LOTLINK_MEDIA_DISK=r2_media`.
+4. Run a queue worker for the `media` queue (`php artisan queue:work --queue=critical,notifications,media,default`).
 
 ## Commands
 

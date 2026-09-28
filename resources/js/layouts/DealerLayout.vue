@@ -13,12 +13,12 @@ const switcherOpen = ref(false);
 
 const lot = computed(() => currentLot.value!);
 
-type NavItem = { label: string; icon: IconName; route?: string };
+type NavItem = { label: string; icon: IconName; route?: string; match?: string };
 
 // Items without a route are later sprints; they stay visible so the dashboard matches the designs.
 const nav: NavItem[] = [
     { label: 'Dashboard', icon: 'grid', route: 'dealer.dashboard' },
-    { label: 'Stock', icon: 'car' },
+    { label: 'Stock', icon: 'car', route: 'dealer.vehicles.index', match: 'dealer.vehicles.*' },
     { label: 'Calendar', icon: 'calendar' },
     { label: 'Leads', icon: 'leads' },
     { label: 'Offers & trade-ins', icon: 'tag' },
@@ -29,7 +29,7 @@ const nav: NavItem[] = [
     { label: 'Settings', icon: 'settings', route: 'dealer.settings' },
 ];
 
-const isActive = (name?: string) => !!name && route().current(name);
+const isActive = (item: NavItem) => !!item.route && route().current(item.match ?? item.route);
 const otherLots = computed(() => lots.value.filter((l) => l.slug !== lot.value.slug));
 const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.url.includes('/onboarding'));
 </script>
@@ -85,8 +85,8 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                         v-if="item.route"
                         :href="route(item.route, lot.slug)"
                         class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"
-                        :class="isActive(item.route) ? 'bg-forest-700 font-semibold text-white' : 'text-mist hover:text-white'"
-                        :aria-current="isActive(item.route) ? 'page' : undefined"
+                        :class="isActive(item) ? 'bg-forest-700 font-semibold text-white' : 'text-mist hover:text-white'"
+                        :aria-current="isActive(item) ? 'page' : undefined"
                     >
                         <Icon :name="item.icon" :size="18" /><span class="truncate">{{ item.label }}</span>
                     </Link>

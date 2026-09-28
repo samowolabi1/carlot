@@ -7,6 +7,9 @@ use App\Http\Controllers\Dealer\DealerHomeController;
 use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\SettingsController;
 use App\Http\Controllers\Dealer\StaffController;
+use App\Http\Controllers\Dealer\VehicleController;
+use App\Http\Controllers\Dealer\VehicleMediaController;
+use App\Http\Controllers\Dealer\VinDecodeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
 use Illuminate\Support\Facades\Route;
@@ -58,5 +61,24 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::delete('/staff/invitations/{invitation}', [StaffController::class, 'cancel'])->name('staff.invitations.cancel');
             Route::patch('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
             Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
+
+            // Inventory (M3)
+            Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+            Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create');
+            Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
+            Route::post('/vehicles/decode-vin', VinDecodeController::class)->middleware('throttle:30,1')->name('vehicles.decode-vin');
+            Route::get('/vehicles/{vehicle}/edit/{step}', [VehicleController::class, 'edit'])->name('vehicles.edit');
+            Route::put('/vehicles/{vehicle}/identity', [VehicleController::class, 'updateIdentity'])->name('vehicles.identity');
+            Route::put('/vehicles/{vehicle}/details', [VehicleController::class, 'updateDetails'])->name('vehicles.details');
+            Route::put('/vehicles/{vehicle}/price', [VehicleController::class, 'updatePrice'])->name('vehicles.price');
+            Route::patch('/vehicles/{vehicle}/status', [VehicleController::class, 'updateStatus'])->name('vehicles.status');
+            Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+
+            Route::get('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'index'])->name('vehicles.media.index');
+            Route::post('/vehicles/{vehicle}/media/presign', [VehicleMediaController::class, 'presign'])->name('vehicles.media.presign');
+            Route::post('/vehicles/{vehicle}/media/upload', [VehicleMediaController::class, 'upload'])->name('vehicles.media.upload');
+            Route::post('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'store'])->name('vehicles.media.store');
+            Route::put('/vehicles/{vehicle}/media/order', [VehicleMediaController::class, 'reorder'])->name('vehicles.media.reorder');
+            Route::delete('/vehicles/{vehicle}/media/{media}', [VehicleMediaController::class, 'destroy'])->name('vehicles.media.destroy');
         });
 });

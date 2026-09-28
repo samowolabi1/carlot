@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    'nhtsa' => [
+        'base_url' => env('NHTSA_BASE_URL', 'https://vpic.nhtsa.dot.gov/api'),
+    ],
+
     'termii' => [
         'key' => env('TERMII_API_KEY'),
         'sender_id' => env('TERMII_SENDER_ID', 'LotLink'),

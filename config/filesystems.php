@@ -60,6 +60,32 @@ return [
             'report' => false,
         ],
 
+        // Cloudflare R2 (TDD: Files). Originals land in a private bucket straight from the
+        // browser; processed WebP photos go to a public bucket served through the CDN.
+        'r2_uploads' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_UPLOADS_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+        ],
+
+        'r2_media' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_MEDIA_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'url' => env('R2_MEDIA_URL'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'public',
+            'throw' => true,
+        ],
+
     ],
 
     /*

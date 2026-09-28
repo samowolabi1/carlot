@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dealer;
 
+use App\Domain\Inventory\Enums\VehicleStatus;
+use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
@@ -23,6 +25,12 @@ class DashboardController extends Controller
                 ['key' => 'submit', 'label' => 'Submit for approval', 'done' => $lot->submitted_at !== null],
             ],
             'staffCount' => $lot->members_count,
+            'stock' => [
+                'live' => Vehicle::live()->count(),
+                'drafts' => Vehicle::where('status', VehicleStatus::Draft)->count(),
+                'ageing' => Vehicle::where('status', VehicleStatus::Available)->where('listed_at', '<=', now()->subDays(Vehicle::AGEING_DAYS))->count(),
+                'limit' => $lot->plan()->value('listing_limit'),
+            ],
         ]);
     }
 }

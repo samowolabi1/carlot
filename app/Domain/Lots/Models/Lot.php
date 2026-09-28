@@ -3,6 +3,7 @@
 namespace App\Domain\Lots\Models;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use Database\Factories\LotFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -141,6 +142,12 @@ class Lot extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(LotInvitation::class);
+    }
+
+    /** @return HasMany<Vehicle, $this> */
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
     }
 
     /** @param Builder<Lot> $query */

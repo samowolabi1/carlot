@@ -8,6 +8,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     checklist: { key: string; label: string; done: boolean }[];
     staffCount: number;
+    stock: { live: number; drafts: number; ageing: number; limit: number | null };
 }>();
 
 const { user, currentLot } = useShared();
@@ -25,7 +26,7 @@ const canEdit = computed(() => lot.value.role === 'owner' || lot.value.role === 
 
 // KPI tiles from the D2 design; they fill in once stock (S2) and bookings (S4) exist.
 const kpis = [
-    { label: 'Views, last 7 days', note: 'Starts when your first car is live' },
+    { label: 'Views, last 7 days', note: 'View tracking arrives with analytics' },
     { label: 'New leads', note: 'Enquiries arrive with chat and offers' },
     { label: 'Visits booked this week', note: 'Bookings open in a later update' },
     { label: 'Sold this month', note: 'Record sales in Lot Manager' },
@@ -42,7 +43,7 @@ const kpis = [
             </div>
             <div class="flex gap-2.5">
                 <span class="btn btn-outline h-11 cursor-not-allowed px-4 text-[14px] opacity-50" aria-disabled="true">Share stock</span>
-                <span class="btn btn-primary h-11 cursor-not-allowed px-4 text-[14px] opacity-50" aria-disabled="true"><Icon name="plus" :size="16" :stroke-width="2.4" /> Add car</span>
+                <Link :href="route('dealer.vehicles.create', lot.slug)" class="btn btn-primary h-11 px-4 text-[14px]"><Icon name="plus" :size="16" :stroke-width="2.4" /> Add car</Link>
             </div>
         </div>
 
@@ -84,8 +85,27 @@ const kpis = [
 
         <div class="grid gap-3 xl:grid-cols-[1.6fr_1fr]">
             <div class="card flex flex-col gap-2 p-[18px]">
-                <h2 class="font-sans text-[16px] font-bold">Your stock</h2>
-                <p class="text-[14px] text-muted">Adding cars (with VIN decode and photos) is the next update. Your listings, views and shares will show here.</p>
+                <div class="flex justify-between">
+                    <h2 class="font-sans text-[16px] font-bold">Your stock</h2>
+                    <Link :href="route('dealer.vehicles.index', lot.slug)" class="text-[13px] font-semibold">Open stock</Link>
+                </div>
+                <template v-if="stock.live + stock.drafts > 0">
+                    <div class="flex justify-between border-t border-divider py-2.5 text-[14px]">
+                        <span>Live on the marketplace</span>
+                        <strong>{{ stock.live }}<template v-if="stock.limit"> of {{ stock.limit }}</template></strong>
+                    </div>
+                    <div class="flex justify-between border-t border-divider py-2.5 text-[14px]">
+                        <span>Drafts to finish</span>
+                        <Link v-if="stock.drafts" :href="route('dealer.vehicles.index', { lot: lot.slug, status: 'draft' })" class="font-semibold">{{ stock.drafts }}</Link>
+                        <strong v-else>0</strong>
+                    </div>
+                    <div v-if="stock.ageing" class="flex justify-between border-t border-divider py-2.5 text-[14px] text-clay-dark">
+                        <span>Over 45 days</span><strong>{{ stock.ageing }}</strong>
+                    </div>
+                </template>
+                <p v-else class="text-[14px] text-muted">
+                    No cars yet. <Link :href="route('dealer.vehicles.create', lot.slug)" class="font-semibold">Add your first car</Link>: start with the VIN and we'll fill in the rest.
+                </p>
             </div>
             <div class="card flex flex-col gap-2 p-[18px]">
                 <h2 class="font-sans text-[16px] font-bold">Today's visits</h2>
