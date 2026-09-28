@@ -41,7 +41,7 @@ const exportUrl = (type: string) => route('dealer.analytics', { lot: lot.value.s
 // Funnel: bars below views aren't to scale (design D8), so the small stages stay readable.
 const funnelWidth = (i: number, value: number) => {
     if (!props.data) return 0;
-    if (i === 0) return 100;
+    if (i === 0) return 62;
     const leads = props.data.funnel[1].value || 1;
     return Math.max(5, Math.min(40, (value / leads) * 40));
 };
@@ -111,7 +111,7 @@ const flag: Record<Car['flag'], { label: string; tone: string }> = {
                     <ol class="flex flex-col gap-2.5">
                         <li v-for="(f, i) in data.funnel" :key="f.label" class="flex items-center gap-3">
                             <span class="h-[34px] shrink-0 rounded-[6px]" :class="funnelTone[i]" :style="{ width: `${funnelWidth(i, f.value)}%` }" aria-hidden="true" />
-                            <span class="text-[13px] font-semibold whitespace-nowrap">{{ n(f.value) }} {{ f.label }}<template v-if="f.note"> · {{ f.note }}</template></span>
+                            <span class="min-w-0 text-[13px] font-semibold">{{ n(f.value) }} {{ f.label }}<template v-if="f.note"> · {{ f.note }}</template></span>
                         </li>
                     </ol>
                     <p class="mt-2 text-[12px] text-muted">Bars below views are not to scale, so the smaller stages stay readable.</p>

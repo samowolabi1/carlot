@@ -46,31 +46,53 @@ const heading = computed(() => {
 let clock: ReturnType<typeof setInterval> | undefined;
 let poller: ReturnType<typeof setInterval> | undefined;
 let watchId: number | null = null;
-let lastSent = 0;
 const channel = `location-session.${props.session.ulid}`;
 
-/** The sharer's phone sends a point at most every 10 s while this page is open (TDD M8). */
+/**
+ * The sharer's phone sends its latest point every 10 s while this page is open (TDD M8). A fix
+ * that arrives between sends waits for the next tick rather than being dropped.
+ */
+let pending = false;
+let sender: ReturnType<typeof setInterval> | undefined;
+
+async function send() {
+    if (!pending || !point.value) return;
+    pending = false;
+    try {
+        const res = await json<{ live: boolean }>('POST', route('location.position', props.session.ulid), { lat: point.value.lat, lng: point.value.lng, accuracy: point.value.accuracy });
+        live.value = res.live;
+        if (!res.live) stopWatching();
+    } catch {
+        pending = true; // offline for a moment: try again on the next tick
+    }
+}
+
+function stopWatching() {
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    clearInterval(sender);
+}
+
 function startSharing() {
     if (!('geolocation' in navigator)) {
         error.value = "This browser can't share its location.";
         return;
     }
+    let first = true;
     watchId = navigator.geolocation.watchPosition(
-        async (pos) => {
+        (pos) => {
             error.value = null;
             point.value = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy), at: new Date().toISOString() };
-            if (Date.now() - lastSent < 10_000) return;
-            lastSent = Date.now();
-            try {
-                const res = await json<{ live: boolean }>('POST', route('location.position', props.session.ulid), { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy });
-                live.value = res.live;
-            } catch {
-                // Offline for a moment: the next point tries again.
+            pending = true;
+            if (first) {
+                first = false;
+                send();
             }
         },
         (e) => (error.value = e.code === e.PERMISSION_DENIED ? 'Allow location access for this site to share where you are.' : "Couldn't get your location. Check that location is on."),
         { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
     );
+    sender = setInterval(send, 10_000);
 }
 
 async function poll() {
@@ -109,12 +131,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
     clearInterval(clock);
     clearInterval(poller);
-    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    stopWatching();
     echo()?.leave(channel);
 });
 
 function stop() {
-    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    stopWatching();
     router.post(route('location.stop', props.session.ulid), { back: props.back });
 }
 
