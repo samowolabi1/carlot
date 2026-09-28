@@ -5,6 +5,7 @@ namespace App\Domain\Appointments\Actions;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Notifications\BookingNotice;
+use App\Domain\Location\Actions\EndLocationSession;
 use Illuminate\Validation\ValidationException;
 
 /** Dealer-side steps: confirm a request, check the buyer in, mark a no-show, complete. */
@@ -12,7 +13,7 @@ class UpdateAppointmentStatus
 {
     public const ACTIONS = ['confirm', 'check_in', 'no_show', 'complete'];
 
-    public function __construct(private readonly RefundDeposit $refundDeposit) {}
+    public function __construct(private readonly RefundDeposit $refundDeposit, private readonly EndLocationSession $endLocation) {}
 
     public function run(Appointment $appointment, string $action): Appointment
     {
@@ -38,6 +39,11 @@ class UpdateAppointmentStatus
 
         if ($action === 'confirm') {
             $appointment->customer->notify(new BookingNotice($appointment, BookingNotice::CONFIRMED));
+        }
+
+        // Live location stops once the visit is over (TDD M8).
+        if (in_array($action, ['complete', 'no_show'], true)) {
+            $this->endLocation->forAppointment($appointment);
         }
 
         // The buyer turned up, so a test-drive deposit goes back; a no-show keeps it.

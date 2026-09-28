@@ -58,6 +58,7 @@ const props = defineProps<{
         features: { group: string; items: { id: number; name: string }[] }[];
     };
     missing: string[];
+    guide?: { low: number; median: number; high: number; count: number } | null;
     canChangePrice: boolean;
 }>();
 
@@ -481,6 +482,12 @@ function nextStep() {
                     @input="onPriceInput"
                 />
                 <InputError :message="price.errors.price" />
+                <span v-if="guide" class="rounded-xl bg-ivory px-3 py-2.5 font-normal">
+                    <strong>Pricing guide:</strong> {{ guide.count }} similar cars on LotLink are listed from {{ formatNaira(guide.low) }} to {{ formatNaira(guide.high) }}, median
+                    <strong>{{ formatNaira(guide.median) }}</strong>.
+                    <template v-if="parseAmount(price.price) && parseAmount(price.price)! > guide.median * 1.15"> Yours is above most of them.</template>
+                    <template v-else-if="parseAmount(price.price) && parseAmount(price.price)! < guide.median * 0.85"> Yours is below most of them.</template>
+                </span>
                 <span v-if="!canChangePrice" class="font-normal text-muted">Ask the owner or a manager to change the price of a live car.</span>
             </label>
 

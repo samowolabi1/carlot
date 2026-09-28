@@ -10,6 +10,7 @@ use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Bookings\CustomerBookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\LeadIntentController;
+use App\Http\Controllers\Dealer\AnalyticsController;
 use App\Http\Controllers\Dealer\BillingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Deals\OfferController;
 use App\Http\Controllers\Deals\ReservationController;
 use App\Http\Controllers\Deals\TradeInController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\Location\LocationSessionController;
 use App\Http\Controllers\Marketplace\CarController;
 use App\Http\Controllers\Marketplace\CompareController;
 use App\Http\Controllers\Marketplace\FavouriteController;
@@ -139,6 +141,13 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/bookings/{appointment}/deposit', [BookingController::class, 'deposit'])->middleware('throttle:10,1')->name('bookings.deposit');
     Route::get('/bookings/deposit/callback', [BookingController::class, 'depositCallback'])->name('bookings.deposit.callback');
 
+    // Live location for a booking (M8)
+    Route::post('/appointments/{appointment}/location', [LocationSessionController::class, 'start'])->middleware('throttle:10,1')->name('location.start');
+    Route::get('/location/{session}', [LocationSessionController::class, 'show'])->name('location.show');
+    Route::post('/location/{session}/position', [LocationSessionController::class, 'position'])->middleware('throttle:30,1')->name('location.position');
+    Route::get('/location/{session}/point', [LocationSessionController::class, 'point'])->middleware('throttle:60,1')->name('location.point');
+    Route::post('/location/{session}/stop', [LocationSessionController::class, 'stop'])->name('location.stop');
+
     // Offers, trade-ins and reservations (M12)
     Route::get('/car/{car}/offer', [OfferController::class, 'create'])->name('offers.create');
     Route::post('/vehicles/{car}/offers', [OfferController::class, 'store'])->middleware('throttle:10,1')->name('offers.store');
@@ -221,6 +230,7 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::delete('/vehicles/{vehicle}/costs/{cost}', [VehicleCostController::class, 'destroy'])->name('vehicles.costs.destroy');
             Route::get('/vehicles/{vehicle}/costs/{cost}/receipt', [VehicleCostController::class, 'receipt'])->name('vehicles.costs.receipt');
             Route::get('/referrals', ReferralController::class)->name('referrals');
+            Route::get('/analytics', AnalyticsController::class)->name('analytics');
 
             // Offers, trade-ins and reservations (M12)
             Route::get('/offers', [DealController::class, 'index'])->name('offers.index');

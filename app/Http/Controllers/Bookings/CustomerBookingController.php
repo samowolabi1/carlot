@@ -17,6 +17,8 @@ use App\Domain\Deals\Enums\TradeInStatus;
 use App\Domain\Deals\Models\Offer;
 use App\Domain\Deals\Models\Reservation;
 use App\Domain\Deals\Models\TradeIn;
+use App\Domain\Location\Actions\StartLocationSession;
+use App\Domain\Location\Models\LocationSession;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
@@ -93,6 +95,12 @@ class CustomerBookingController extends Controller
             ],
             'lot' => MarketplacePresenter::lot($lot),
             'justBooked' => $appointment->created_at->gt(now()->subMinutes(2)) && ! $signed,
+            // Live location (TDD M8): share yours on the way, or follow the lot's.
+            'location' => [
+                'can_share' => $request->user()?->id === $appointment->customer_id && StartLocationSession::canShare($appointment),
+                'live' => LocationSession::withoutGlobalScopes()->live()->where('appointment_id', $appointment->id)->get()
+                    ->map(fn (LocationSession $s) => ['ulid' => $s->ulid, 'mine' => $s->sharer_side === LocationSession::CUSTOMER, 'expires' => $s->expires_at->copy()->setTimezone($lot->timezone)->format('H:i')])->values(),
+            ],
             'links' => [
                 'calendar' => $signed ? URL::signedRoute('bookings.calendar', $appointment, $expires) : route('bookings.calendar', $appointment),
                 'cancel' => $signed ? URL::signedRoute('bookings.cancel', $appointment, $expires) : route('bookings.cancel', $appointment),

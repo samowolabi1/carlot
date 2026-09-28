@@ -114,13 +114,20 @@ it('adds a valued trade-in to an order', function () {
     $this->actingAs($this->owner)->get(route('dealer.manager.orders.create', $this->lot))
         ->assertInertia(fn (Assert $page) => $page->where('tradeIns.0.ulid', $tradeIn->ulid)->where('tradeIns.0.value', 3_800_000));
 
+    $this->car->update(['price' => 1_000_000_000]);
+
+    // A trade-in worth more than the car is refused.
+    $this->actingAs($this->owner)->post(route('dealer.manager.orders.store', $this->lot), [
+        'vehicle' => $this->car->ulid, 'name' => 'Ibrahim Kabir', 'phone' => '08035550001', 'trade_in' => $tradeIn->ulid, 'trade_in_value' => '11,000,000',
+    ])->assertSessionHasErrors('trade_in_value');
+
     $this->actingAs($this->owner)->post(route('dealer.manager.orders.store', $this->lot), [
         'vehicle' => $this->car->ulid, 'name' => 'Ibrahim Kabir', 'phone' => '08035550001', 'trade_in' => $tradeIn->ulid, 'trade_in_value' => '4,000,000',
     ])->assertSessionHasNoErrors();
 
     $order = SalesOrder::withoutGlobalScopes()->sole();
     expect($order)->trade_in_id->toBe($tradeIn->id)->trade_in_value->toBe(400_000_000)
-        ->and($order->balance)->toBe($order->agreed_price - 400_000_000)
+        ->and($order->balance)->toBe(600_000_000)
         ->and($tradeIn->fresh()->status)->toBe(TradeInStatus::Accepted);
 });
 

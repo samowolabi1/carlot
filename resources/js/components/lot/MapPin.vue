@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import Icon from '@/components/Icon.vue';
+import { loadGoogleMaps, mapsKey } from '@/lib/googleMaps';
 import { onMounted, ref, watch } from 'vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-declare global {
-    interface Window {
-        google?: any;
-        __lotlinkMapsReady?: () => void;
-    }
-}
-
 export interface PlaceParts {
     address?: string;
     city?: string;
@@ -22,7 +16,7 @@ const emit = defineEmits<{ place: [parts: PlaceParts] }>();
 
 // Centre of Lagos until the owner drops a pin.
 const FALLBACK = { lat: 6.5244, lng: 3.3792 };
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+const apiKey = mapsKey;
 
 const mapEl = ref<HTMLElement | null>(null);
 const locating = ref(false);
@@ -32,19 +26,6 @@ const mapsFailed = ref(false);
 let map: any = null;
 let marker: any = null;
 let geocoder: any = null;
-
-function loadGoogleMaps(): Promise<void> {
-    if (window.google?.maps) return Promise.resolve();
-
-    return new Promise((resolve, reject) => {
-        window.__lotlinkMapsReady = () => resolve();
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey!)}&callback=__lotlinkMapsReady&loading=async`;
-        script.async = true;
-        script.onerror = () => reject(new Error('Google Maps failed to load'));
-        document.head.appendChild(script);
-    });
-}
 
 function round(value: number) {
     return Math.round(value * 1e7) / 1e7;

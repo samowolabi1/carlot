@@ -8,6 +8,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 interface Item {
+    location: { can_share: boolean; live: { ulid: string; who: string; side: 'customer' | 'lot' }[] };
     ulid: string;
     type: 'viewing' | 'test_drive' | 'inspection' | 'trade_in';
     type_label: string;
@@ -138,6 +139,12 @@ function reschedule(a: Item, date: string, time: string, startsAt?: string) {
 
 /* Detail drawer */
 const selected = ref<Item | null>(null);
+const shareMinutes = ref(30);
+
+// A team member driving a car out to the buyer can share their location with them.
+function shareLocation() {
+    if (selected.value) router.post(route('location.start', selected.value.ulid), { minutes: shareMinutes.value });
+}
 const slots = ref<{ date: string; weekday: string; day: number; closed: boolean; slots: { time: string; starts_at: string; available: boolean }[] }[]>([]);
 const moveDate = ref('');
 const moveError = ref<string | null>(null);
@@ -335,6 +342,31 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
                 <div class="flex gap-2">
                     <a :href="`tel:${selected.phone}`" class="btn btn-outline h-11 grow text-[14px]"><Icon name="phone" :size="18" /> Call</a>
                     <a :href="`https://wa.me/${selected.whatsapp}`" target="_blank" rel="noopener" class="btn btn-outline h-11 grow text-[14px]"><Icon name="whatsapp" :size="18" /> WhatsApp</a>
+                </div>
+
+                <!-- Live location (TDD M8) -->
+                <div v-if="selected.location.live.length || selected.location.can_share" class="flex flex-col gap-2 rounded-xl bg-ivory p-3">
+                    <Link
+                        v-for="l in selected.location.live"
+                        :key="l.ulid"
+                        :href="route('location.show', l.ulid)"
+                        class="flex items-center gap-2 text-[14px] font-semibold no-underline"
+                    >
+                        <span class="h-2.5 w-2.5 rounded-full bg-[#22C55E]" aria-hidden="true" />
+                        {{ l.side === 'customer' ? `${l.who} is sharing live location` : `${l.who} is sharing the lot's location` }} · View
+                    </Link>
+                    <form v-if="selected.location.can_share" class="flex items-center gap-2" @submit.prevent="shareLocation">
+                        <label class="text-[13px]">
+                            <span class="sr-only">For how long</span>
+                            <select v-model.number="shareMinutes" class="field h-10 w-auto text-[13px]">
+                                <option :value="15">15 min</option>
+                                <option :value="30">30 min</option>
+                                <option :value="60">1 hour</option>
+                                <option :value="120">2 hours</option>
+                            </select>
+                        </label>
+                        <button type="submit" class="btn btn-outline h-10 text-[13px]"><Icon name="navigate" :size="16" /> Share my location</button>
+                    </form>
                 </div>
 
                 <div v-if="selected.status === 'pending' || selected.status === 'confirmed'" class="flex flex-wrap gap-2">

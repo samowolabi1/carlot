@@ -14,6 +14,16 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S11 (Location and analytics) ✅**
+
+| Area | What works |
+| --- | --- |
+| Live location (14) | A buyer with a visit in the next 3 hours can tap **Share live location** on their booking for 15, 30, 60 or 120 minutes. The lot's team gets a notification and follows along from the calendar: a map, the distance and a rough time, and a call button. A team member can also share their location with the buyer, who gets a WhatsApp link. Only the two sides of the booking can see it. Only the latest point is stored, and it is cleared when sharing stops, runs out (`location:end-expired`, every minute), or the visit is completed, marked a no-show or cancelled. The browser sends a point every 10 seconds while the page is open; phones pause sharing when locked. With a Google Maps browser key the map is Google's; without one, a simple map shows both points. |
+| Event tracking | Car views (once per visitor per 30 minutes, not bots or link previews, not the lot's own staff), saves, shares, leads and bookings are recorded by a queued `TrackEvent`. Views that came from a share link are credited to that platform. `stats:rollup` (hourly) turns them into daily per-car numbers in each lot's timezone; raw events are kept 90 days. |
+| Analytics (D8) | **Analytics** in the dealer sidebar (owners and managers): listing views, leads, visits booked, cars sold and average days in stock, each with the change on the previous period. Also the view → lead → visit → sale funnel, views per day, and every car's views and leads. Cars are flagged "Ageing" at 45 days and "Stale" at 90, with **Reduce price** and **Spotlight** shortcuts. On Pro: where leads came from, shares by platform, staff (leads, average first reply, visits, cars sold) and CSV exports of stock, leads and sales. Basic analytics come with Starter. |
+| Pricing guide | On a car's price step, dealers see the median and range of what the same make, model and year (±1) is listed for across LotLink, when there are 5 or more to compare. Analytics flags cars priced well above similar ones. |
+| Quality | 404 tests, including visitor counting and bot filtering, rollups across midnight in Lagos, analytics figures, plan and role gating, CSV exports, the pricing guide, and live location access, expiry and clearing. |
+
 **Sprint S10 (Lot Manager Pro) ✅**
 
 | Area | What works |

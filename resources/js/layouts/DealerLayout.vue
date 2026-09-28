@@ -15,7 +15,7 @@ const switcherOpen = ref(false);
 
 const lot = computed(() => currentLot.value!);
 
-type NavItem = { label: string; icon: IconName; route?: string; match?: string; badge?: () => number };
+type NavItem = { label: string; icon: IconName; route?: string; match?: string; badge?: () => number; managers?: boolean };
 
 // Items without a route are later sprints; they stay visible so the dashboard matches the designs.
 const nav: NavItem[] = [
@@ -24,7 +24,7 @@ const nav: NavItem[] = [
     { label: 'Calendar', icon: 'calendar', route: 'dealer.calendar' },
     { label: 'Leads', icon: 'leads', route: 'dealer.leads.index', match: 'dealer.leads.*', badge: () => currentLot.value?.leads_badge ?? 0 },
     { label: 'Offers & trade-ins', icon: 'tag', route: 'dealer.offers.index', match: 'dealer.offers.*', badge: () => currentLot.value?.deals_badge ?? 0 },
-    { label: 'Analytics', icon: 'chart' },
+    { label: 'Analytics', icon: 'chart', route: 'dealer.analytics', managers: true },
     { label: 'Mini-site & QR', icon: 'qr' },
     { label: 'Staff', icon: 'user', route: 'dealer.staff' },
     { label: 'Billing', icon: 'card', route: 'dealer.billing' },
@@ -37,12 +37,14 @@ const manager: NavItem[] = [
     { label: 'Walk-ins', icon: 'walkIn', route: 'dealer.manager.walk-ins.index' },
     { label: 'Customers', icon: 'book', route: 'dealer.manager.customers.index', match: 'dealer.manager.customers.*' },
     { label: 'Orders', icon: 'receipt', route: 'dealer.manager.orders.index', match: 'dealer.manager.orders.*' },
-    { label: 'Reports', icon: 'chart', route: 'dealer.manager.reports', match: 'dealer.manager.reports' },
+    { label: 'Reports', icon: 'receipt', route: 'dealer.manager.reports', match: 'dealer.manager.reports', managers: true },
 ];
 
 const queue = useOfflineQueue(() => currentLot.value?.slug);
 const install = usePwaInstall();
 
+// Analytics and reports are for owners and managers.
+const visible = (item: NavItem) => !item.managers || ['owner', 'manager'].includes(lot.value.role ?? '');
 const isActive = (item: NavItem) => !!item.route && route().current(item.match ?? item.route);
 const otherLots = computed(() => lots.value.filter((l) => l.slug !== lot.value.slug));
 const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.url.includes('/onboarding'));
@@ -94,7 +96,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             </div>
 
             <div class="flex flex-col gap-0.5">
-                <template v-for="item in nav" :key="item.label">
+                <template v-for="item in nav.filter(visible)" :key="item.label">
                     <Link
                         v-if="item.route"
                         :href="route(item.route, lot.slug)"
@@ -115,7 +117,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             <div class="flex flex-col gap-0.5">
                 <span class="px-2.5 pb-1 text-[11px] font-semibold tracking-wider text-sage uppercase">Lot Manager</span>
                 <Link
-                    v-for="item in manager.filter((m) => m.route !== 'dealer.manager.reports' || ['owner', 'manager'].includes(lot.role ?? ''))"
+                    v-for="item in manager.filter(visible)"
                     :key="item.label"
                     :href="route(item.route!, lot.slug)"
                     class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"

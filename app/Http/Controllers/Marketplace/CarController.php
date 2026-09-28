@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Marketplace;
 
+use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
+use App\Domain\Sharing\Models\ShareLink;
 use App\Domain\Sharing\Support\ShareCard;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Controller;
@@ -43,6 +45,13 @@ class CarController extends Controller
         }
 
         $user = $request->user();
+
+        // TDD M15: count the view (not the lot's own staff), attributed to a share link if it came from one.
+        if ($public && ! $user?->hasLotRole($vehicle->lot)) {
+            $channel = $request->filled('ref') ? ShareLink::where('code', (string) $request->query('ref'))->first()?->platform->value : null;
+            Tracker::view($request, $vehicle, $channel);
+        }
+
         $cover = $vehicle->media->first();
         // Link previews show the branded share card once it has been rendered.
         $card = $vehicle->share_card_hash !== null && $vehicle->share_card_hash === $cards->hash($vehicle) ? $cards->urls($vehicle) : null;

@@ -3,6 +3,7 @@
 namespace App\Domain\Appointments\Actions;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Enums\AppointmentType;
 use App\Domain\Appointments\Models\Appointment;
@@ -91,6 +92,8 @@ class BookAppointment
     /** The lead, the chat line and the messages, once the booking stands (after any deposit). */
     public function announce(Appointment $appointment, Lot $lot, User $customer, ?Vehicle $vehicle): void
     {
+        Tracker::record('booking', $lot->id, $vehicle?->id, $appointment->type->value);
+
         // Every booking creates or updates a lead (TDD M7), and shows in its chat if there is one.
         $lead = $this->captureLead->run($lot, $customer, LeadSource::Booking, $vehicle);
         if ($conversation = $lead->conversation()->first()) {

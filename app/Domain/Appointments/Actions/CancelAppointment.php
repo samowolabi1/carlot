@@ -6,11 +6,12 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Notifications\BookingNotice;
+use App\Domain\Location\Actions\EndLocationSession;
 use Illuminate\Validation\ValidationException;
 
 class CancelAppointment
 {
-    public function __construct(private readonly NotifyLot $notifyLot, private readonly RefundDeposit $refundDeposit) {}
+    public function __construct(private readonly NotifyLot $notifyLot, private readonly RefundDeposit $refundDeposit, private readonly EndLocationSession $endLocation) {}
 
     public function run(Appointment $appointment, ?User $by, ?string $reason = null): Appointment
     {
@@ -24,6 +25,8 @@ class CancelAppointment
             'cancelled_by' => $by?->id,
             'cancel_reason' => $reason,
         ])->save();
+
+        $this->endLocation->forAppointment($appointment);
 
         // Cancelling before the slot (by either side) returns a test-drive deposit.
         $this->refundDeposit->run($appointment, $by);

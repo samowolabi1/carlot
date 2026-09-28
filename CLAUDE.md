@@ -57,6 +57,16 @@ Run all four before pushing.
 - Reports come from `ManagerReports` (one shape for the page and `ReportExport` to Excel).
 - Time-of-day jobs (reminders 09:00, summary 19:00) run hourly and check each lot's local time.
 
+## Location and analytics (S11)
+
+- Record analytics only through `Tracker` (`view()` dedupes and filters bots; `record()` for saves,
+  shares, leads, bookings), which queues `TrackEvent`. Dashboards read `daily_vehicle_stats`
+  (`stats:rollup`, idempotent per local day), never the raw events.
+- `DealerAnalytics` builds the analytics page; `PricingGuide` needs 5+ comparables (same model, year ±1).
+- Live location: `StartLocationSession` / `UpdateLocation` / `EndLocationSession`. Only the latest point
+  is stored and it is cleared on end; only the two sides of the appointment may view it (the
+  `location-session.{ulid}` channel uses the same rule). End sessions whenever a visit ends.
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -185,7 +195,7 @@ rather than fake data.
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro ✅ · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
+S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
 Redis/Horizon (the database queue for now).

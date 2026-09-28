@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dealer;
 
+use App\Domain\Analytics\Support\PricingGuide;
 use App\Domain\Inventory\Actions\ChangeVehicleStatus;
 use App\Domain\Inventory\Actions\PublishVehicle;
 use App\Domain\Inventory\Actions\SaveVehicleDetails;
@@ -204,6 +205,10 @@ class VehicleController extends Controller
             'makes' => fn () => $step === 'identity' ? $this->catalogue() : [],
             'options' => fn () => $step === 'details' ? $this->detailOptions() : [],
             'missing' => fn () => $vehicle && $step === 'price' ? app(PublishVehicle::class)->missing($vehicle) : [],
+            // TDD M15: what similar cars are listed for across LotLink (whole naira).
+            'guide' => fn () => $vehicle && $step === 'price' && ($g = PricingGuide::for($vehicle)) ? [
+                'low' => intdiv($g['low'], 100), 'median' => intdiv($g['median'], 100), 'high' => intdiv($g['high'], 100), 'count' => $g['count'],
+            ] : null,
             'canChangePrice' => $vehicle ? request()->user()->can('changePrice', $vehicle) : true,
             'uploadsDirect' => config('filesystems.disks.'.config('lotlink.upload_disk').'.driver') === 's3',
         ]);

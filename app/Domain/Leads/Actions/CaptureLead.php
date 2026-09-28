@@ -3,6 +3,7 @@
 namespace App\Domain\Leads\Actions;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Enums\LeadSource;
 use App\Domain\Leads\Enums\LeadStage;
@@ -64,6 +65,7 @@ class CaptureLead
         });
 
         if ($lead->wasRecentlyCreated) {
+            Tracker::record('lead', $lot->id, $vehicle?->id, $source->value);
             LeadCreated::dispatch($lead);
             Notification::send($lot->members()->get(), new NewLeadAlert($lead));
         }

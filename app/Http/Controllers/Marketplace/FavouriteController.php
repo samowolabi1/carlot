@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketplace;
 
+use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Support\Money;
@@ -62,7 +63,10 @@ class FavouriteController extends Controller
     private function save(Request $request, string $ulid): Vehicle
     {
         $car = $this->find($ulid, onMarketplace: true);
-        $request->user()->favourites()->syncWithoutDetaching([$car->id => ['saved_price' => $car->price]]);
+        $changes = $request->user()->favourites()->syncWithoutDetaching([$car->id => ['saved_price' => $car->price]]);
+        if ($changes['attached'] !== []) {
+            Tracker::record('save', $car->lot_id, $car->id);
+        }
 
         return $car;
     }

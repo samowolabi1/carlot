@@ -3,7 +3,7 @@ import Icon from '@/components/Icon.vue';
 import type { PublicLot } from '@/components/marketplace/types-lot';
 import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ShareLocation from '@/components/marketplace/ShareLocation.vue';
 
@@ -27,11 +27,14 @@ const props = defineProps<{
     booking: BookingSummary & { staff: string | null; notes: string | null; whatsapp_reminders: boolean };
     lot: PublicLot;
     justBooked: boolean;
+    location?: { can_share: boolean; live: { ulid: string; mine: boolean; expires: string }[] };
     links: { calendar: string; cancel: string; reschedule: string };
 }>();
 
 const { user } = useShared();
 const cancelling = ref(false);
+const shareMinutes = ref(30);
+const shareLive = () => router.post(route('location.start', props.booking.ulid), { minutes: shareMinutes.value });
 const cancelForm = useForm({ reason: '' });
 
 const heading = computed(() => {
@@ -99,6 +102,35 @@ function cancel() {
                 <div v-if="booking.staff" class="flex justify-between gap-4 border-t border-divider py-2.5"><dt class="text-muted">With</dt><dd class="text-right font-semibold">{{ booking.staff }}</dd></div>
                 <div class="flex justify-between gap-4 border-t border-divider py-2.5"><dt class="text-muted">Status</dt><dd class="text-right font-semibold">{{ booking.status_label }}</dd></div>
             </dl>
+
+            <!-- Live location (TDD M8, design 14) -->
+            <div v-if="location && (location.live.length || location.can_share)" class="card flex flex-col gap-3 p-4">
+                <Link
+                    v-for="l in location.live"
+                    :key="l.ulid"
+                    :href="route('location.show', l.ulid)"
+                    class="flex items-center gap-2.5 text-[15px] font-semibold no-underline"
+                >
+                    <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-[#22C55E]" aria-hidden="true" />
+                    {{ l.mine ? `You're sharing your live location until ${l.expires}` : `${lot.name} is sharing their live location` }}
+                    <Icon name="chevronDown" :size="18" class="ml-auto -rotate-90" />
+                </Link>
+                <form v-if="location.can_share && !location.live.some((l) => l.mine)" class="flex flex-col gap-2" @submit.prevent="shareLive">
+                    <p class="text-[14px] text-muted">On your way? Let {{ lot.name }} see where you are. Only they can see it, and it stops on its own.</p>
+                    <div class="flex gap-2">
+                        <label>
+                            <span class="sr-only">For how long</span>
+                            <select v-model.number="shareMinutes" class="field h-11 w-auto">
+                                <option :value="15">15 min</option>
+                                <option :value="30">30 min</option>
+                                <option :value="60">1 hour</option>
+                                <option :value="120">2 hours</option>
+                            </select>
+                        </label>
+                        <button type="submit" class="btn btn-primary h-11 grow text-[14px]"><Icon name="navigate" :size="18" /> Share live location</button>
+                    </div>
+                </form>
+            </div>
 
             <div v-if="booking.upcoming" class="card overflow-hidden">
                 <a v-if="lot.directions_url" :href="lot.directions_url" target="_blank" rel="noopener" class="relative block h-[110px] bg-map" aria-label="Open directions in Google Maps">

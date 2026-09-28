@@ -9,16 +9,20 @@ use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Enums\AppointmentType;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Support\SlotGenerator;
+use App\Domain\Location\Actions\StartLocationSession;
+use App\Domain\Location\Models\LocationSession;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotHour;
 use App\Domain\Lots\Models\LotMember;
+use App\Domain\Support\Name;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -140,9 +144,13 @@ class CalendarController extends Controller
         return response()->json($slots->days($lot, ignore: $appointment));
     }
 
+    /** @var Collection<int, Collection<int, LocationSession>>|null */
+    private $liveLocations = null;
+
     private function present(Appointment $a, string $tz): array
     {
         $start = $a->starts_at->copy()->setTimezone($tz);
+        $this->liveLocations ??= LocationSession::query()->live()->with('sharer')->get()->groupBy('appointment_id');
 
         return [
             'ulid' => $a->ulid,
@@ -164,6 +172,15 @@ class CalendarController extends Controller
             'staff' => $a->staff ? ['ulid' => $a->staff->ulid, 'name' => $a->staff->name] : null,
             'checked_in' => $a->checked_in_at !== null,
             'past' => $a->starts_at->isPast(),
+            // Live location (TDD M8): follow a buyer on the way, or share the lot's.
+            'location' => [
+                'can_share' => StartLocationSession::canShare($a),
+                'live' => $this->liveLocations->get($a->id, collect())->map(fn (LocationSession $s) => [
+                    'ulid' => $s->ulid,
+                    'who' => $s->sharer_side === LocationSession::CUSTOMER ? Name::short($a->customer->name ?? 'Buyer') : ($s->sharer->name ?? 'Your team'),
+                    'side' => $s->sharer_side,
+                ])->values(),
+            ],
         ];
     }
 }

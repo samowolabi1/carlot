@@ -87,6 +87,11 @@ class CreateOrder
                     throw ValidationException::withMessages(['agreed_price' => 'Enter the agreed price.']);
                 }
 
+                $tradeInValue = $data['trade_in_value'] ?? $tradeIn->estimate_low ?? 0;
+                if (($data['discount'] ?? 0) + $tradeInValue > $agreed) {
+                    throw ValidationException::withMessages([$tradeInValue > 0 ? 'trade_in_value' : 'discount' => 'The discount and trade-in can\'t be more than the agreed price.']);
+                }
+
                 $order = SalesOrder::withoutGlobalScopes()->make([
                     'lot_id' => $lot->id,
                     'order_no' => LotCounter::next($lot, 'order'),
@@ -97,7 +102,7 @@ class CreateOrder
                     'agreed_price' => $agreed,
                     'discount' => $data['discount'] ?? 0,
                     'trade_in_id' => $tradeIn?->id,
-                    'trade_in_value' => $data['trade_in_value'] ?? $tradeIn->estimate_low ?? 0,
+                    'trade_in_value' => $tradeInValue,
                     'reservation_id' => $reservation?->id,
                     'deposit_required' => $data['deposit_required'] ?? 0,
                     'total_paid' => 0,

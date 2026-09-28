@@ -14,6 +14,8 @@ const look: Record<string, { icon: IconName; tone: string }> = {
     offer: { icon: 'tag', tone: 'bg-blush text-clay-dark' },
     trade_in: { icon: 'swap', tone: 'bg-map text-forest' },
     reservation: { icon: 'shield', tone: 'bg-[#DCEFE3] text-[#166534]' },
+    location: { icon: 'navigate', tone: 'bg-[#E0ECF8] text-[#1E3A8A]' },
+    summary: { icon: 'chart', tone: 'bg-sand text-ink' },
     info: { icon: 'bell', tone: 'bg-sand text-ink' },
 };
 </script>

@@ -37,3 +37,7 @@ Schedule::command('appointments:release-unpaid')->everyFiveMinutes()->withoutOve
 Schedule::command('manager:instalment-reminders')->hourly()->withoutOverlapping();
 Schedule::command('manager:mark-overdue')->hourlyAt(30)->withoutOverlapping();
 Schedule::command('manager:daily-summary')->hourly()->withoutOverlapping();
+
+// Location and analytics (TDD M8, M15)
+Schedule::command('stats:rollup')->hourly()->withoutOverlapping();
+Schedule::command('location:end-expired')->everyMinute()->withoutOverlapping();

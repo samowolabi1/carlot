@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Sharing;
 
+use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
@@ -42,7 +43,10 @@ class ShareController extends Controller
         $link = $user === null && ($code = $request->session()->get($key))
             ? ShareLink::where('code', $code)->first()
             : null;
-        $link ??= $create->run($target, $platform, $user);
+        if ($link === null) {
+            $link = $create->run($target, $platform, $user);
+            Tracker::record('share', $target instanceof Vehicle ? $target->lot_id : $target->id, $target instanceof Vehicle ? $target->id : null, $platform->value);
+        }
 
         if ($user === null) {
             $request->session()->put($key, $link->code);
