@@ -58,6 +58,19 @@ Run all four before pushing.
 - The service worker (`public/sw.js`) caches only built assets and Lot Manager pages; bump its
   `VERSION` when changing caching rules.
 
+## Billing and spotlight (S7)
+
+- Money a lot pays LotLink is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
+  changes state in `FulfilPayment`, which re-verifies with the `PaymentGateway` and checks the
+  amount; never mark a payment paid from a redirect or webhook body. Webhooks are stored in
+  `webhook_events` (unique body hash), so each delivery is handled once.
+- `lots.plan_id` is the effective plan used by limits; `subscriptions` says how it's paid for.
+  Downgrades go through `DowngradeToFree` (hides extra cars via the state machine, never deletes).
+- Spotlights set `vehicles.spotlight_until` / `lots.featured_until` via `ActivateSpotlight`; use
+  `save()` on vehicles so search re-indexes. Sponsored results come from `VehicleSearch::sponsored()`
+  (both engines).
+- Tests bind `Tests\Support\FakePaymentGateway` (`$this->payments`); never call Paystack.
+
 ## Multi-lot tenancy
 
 - Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
@@ -131,7 +144,7 @@ rather than fake data.
 ## Sprint plan (TDD)
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
-S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
+S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),

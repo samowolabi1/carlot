@@ -18,3 +18,8 @@ Schedule::command('otp:prune')->daily();
 // Lot Manager (TDD M19)
 Schedule::command('manager:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('share-links:prune')->daily();
+
+// Billing and spotlight (TDD M16, M5)
+Schedule::command('subscriptions:enforce-limits')->dailyAt('02:00')->withoutOverlapping();
+Schedule::command('spotlights:expire')->hourly()->withoutOverlapping();
+Schedule::command('followers:notify')->everyThirtyMinutes()->withoutOverlapping();

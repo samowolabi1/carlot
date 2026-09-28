@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Policies\AppointmentPolicy;
+use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaystackGateway;
+use App\Domain\Billing\Gateways\SandboxGateway;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
@@ -60,6 +63,17 @@ class AppServiceProvider extends ServiceProvider
                 (string) config('services.termii.base_url'),
             ),
             default => new LogSmsGateway,
+        });
+
+        $this->app->bind(PaymentGateway::class, function () {
+            if (config('lotlink.billing.driver') === 'paystack') {
+                return new PaystackGateway((string) config('services.paystack.secret_key'), (string) config('services.paystack.base_url'));
+            }
+
+            // The sandbox never takes real money, so it is refused in production.
+            abort_if(app()->isProduction(), 500, 'PAYMENT_DRIVER must be paystack in production.');
+
+            return new SandboxGateway;
         });
     }
 

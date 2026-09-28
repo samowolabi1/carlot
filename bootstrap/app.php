@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Paystack can't send a CSRF token; the webhook checks its signature instead.
+        $middleware->validateCsrfTokens(except: ['webhooks/paystack']);
+
         $middleware->alias([
             'lot.member' => SetCurrentLot::class,
             'profile.complete' => EnsureProfileComplete::class,

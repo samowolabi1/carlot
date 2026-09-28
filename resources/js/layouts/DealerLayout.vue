@@ -27,7 +27,7 @@ const nav: NavItem[] = [
     { label: 'Analytics', icon: 'chart' },
     { label: 'Mini-site & QR', icon: 'qr' },
     { label: 'Staff', icon: 'user', route: 'dealer.staff' },
-    { label: 'Billing', icon: 'card' },
+    { label: 'Billing', icon: 'card', route: 'dealer.billing' },
     { label: 'Settings', icon: 'settings', route: 'dealer.settings' },
 ];
 

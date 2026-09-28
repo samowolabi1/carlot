@@ -93,6 +93,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->belongsToMany(Vehicle::class, 'favourites')->withPivot('saved_price')->withTimestamps();
     }
 
+    /** @return BelongsToMany<Lot, $this> */
+    public function followedLots(): BelongsToMany
+    {
+        return $this->belongsToMany(Lot::class, 'lot_followers')->withTimestamps();
+    }
+
     /** @return HasOne<Budget, $this> */
     public function budget(): HasOne
     {

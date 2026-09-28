@@ -4,6 +4,7 @@ namespace App\Domain\Lots\Actions;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Billing\Actions\StartTrial;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
@@ -40,6 +41,7 @@ class CreateLot
             }
 
             app(SaveLotHours::class)->run($lot, SaveLotHours::defaults());
+            app(StartTrial::class)->run($lot);
 
             return $lot;
         });

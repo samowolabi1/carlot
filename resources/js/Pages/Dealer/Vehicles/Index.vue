@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CarGlyph from '@/components/CarGlyph.vue';
+import SpotlightSheet from '@/components/billing/SpotlightSheet.vue';
 import Icon from '@/components/Icon.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import { useShared } from '@/composables/useShared';
@@ -21,6 +22,7 @@ interface Row {
     next_statuses: string[];
     order: { ulid: string; order_no: string } | null;
     share_url: string | null;
+    spotlight_until: string | null;
 }
 
 const props = defineProps<{
@@ -34,6 +36,7 @@ const props = defineProps<{
 const { currentLot } = useShared();
 const lot = computed(() => currentLot.value!);
 const search = ref(props.filters.q);
+const spotlighting = ref<Row | null>(null);
 
 const tabs = computed(() => [
     { key: null, label: 'All', count: props.counts.all },
@@ -167,6 +170,7 @@ function editHref(row: Row) {
                                 <template v-else-if="row.vin_tail">VIN ···{{ row.vin_tail }}</template>
                                 <template v-else>{{ row.photos }} photos</template>
                                 <span v-if="row.new_arrival" class="ml-1.5 rounded-lg bg-blush px-1.5 py-0.5 text-[11px] font-semibold text-clay-dark">New arrival</span>
+                                <span v-if="row.spotlight_until" class="ml-1.5 rounded-lg bg-forest px-1.5 py-0.5 text-[11px] font-semibold text-white">Spotlight to {{ row.spotlight_until }}</span>
                             </span>
                         </span>
                     </Link>
@@ -202,6 +206,7 @@ function editHref(row: Row) {
                             class="text-clay"
                             >Mark sold</Link
                         >
+                        <button v-if="canManage && row.status === 'available' && row.share_url" type="button" class="text-clay hover:text-clay-dark" @click="spotlighting = row">Spotlight</button>
                         <template v-if="canManage">
                             <button
                                 v-for="next in row.next_statuses.filter((n) => !(row.order && n === 'available'))"
@@ -231,5 +236,6 @@ function editHref(row: Row) {
                 </template>
             </nav>
         </div>
+        <SpotlightSheet :lot="lot.slug" :car="spotlighting" @close="spotlighting = null" />
     </DealerLayout>
 </template>

@@ -28,6 +28,22 @@ class HomeController extends Controller
 
         return Inertia::render('Home', [
             'arrivals' => $search->search($criteria)->getCollection()->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds)),
+            // Spotlighted cars rotate on each visit; the row is hidden when there are none.
+            'spotlight' => Vehicle::query()->marketplace()->where('vehicles.spotlight_until', '>', now())
+                ->with(['make', 'model', 'lot', 'cover'])->inRandomOrder()->limit(8)->get()
+                ->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds)),
+            'featuredLots' => Lot::active()->where('featured_until', '>', now())->withCount(['vehicles as live_count' => fn ($q) => $q->withoutGlobalScopes()->whereIn('status', ['available', 'reserved'])])
+                ->inRandomOrder()->limit(6)->get()
+                ->map(fn (Lot $lot) => [
+                    'slug' => $lot->slug,
+                    'url' => route('lots.show', $lot),
+                    'name' => $lot->name,
+                    'initials' => $lot->initials(),
+                    'logo_url' => $lot->logo_url,
+                    'city' => $lot->city,
+                    'verified' => $lot->verified_at !== null,
+                    'cars' => (int) $lot->getAttribute('live_count'),
+                ]),
             'carCount' => Vehicle::query()->marketplace()->count(),
             'lotCount' => Lot::active()->count(),
             'nearMe' => $criteria->hasLocation(),

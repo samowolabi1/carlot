@@ -43,9 +43,14 @@ class RenderShareCard implements ShouldBeUnique, ShouldQueue
 
     public function handle(ShareCard $cards): void
     {
-        $vehicle = Vehicle::withoutGlobalScopes()->with(['make', 'model', 'lot', 'cover'])->find($this->vehicleId);
+        $vehicle = Vehicle::withoutGlobalScopes()->with(['make', 'model', 'lot.plan', 'cover'])->find($this->vehicleId);
 
         if ($vehicle === null || ! $vehicle->isOnMarketplace() || $vehicle->price === null) {
+            return;
+        }
+
+        // Share cards come with Starter and up (product spec: plans).
+        if ($vehicle->lot->plan !== null && ! $vehicle->lot->plan->allows('share_cards')) {
             return;
         }
 

@@ -4,8 +4,10 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
+use App\Http\Controllers\Billing\SandboxCheckoutController;
 use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Bookings\CustomerBookingController;
+use App\Http\Controllers\Dealer\BillingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealerHomeController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Dealer\Manager\TodayController;
 use App\Http\Controllers\Dealer\Manager\WalkInController;
 use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\SettingsController;
+use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
@@ -26,11 +29,13 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Marketplace\CarController;
 use App\Http\Controllers\Marketplace\CompareController;
 use App\Http\Controllers\Marketplace\FavouriteController;
+use App\Http\Controllers\Marketplace\FollowController;
 use App\Http\Controllers\Marketplace\HomeController;
 use App\Http\Controllers\Marketplace\LotSiteController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Orders\OrderTrackingController;
 use App\Http\Controllers\Sharing\ShareController;
+use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Marketplace (M4) and lot mini-sites (M6)
@@ -41,6 +46,15 @@ Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
 Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
+// Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
+Route::post('/webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
+
+// Local stand-in for Paystack's checkout (PAYMENT_DRIVER=sandbox).
+Route::middleware('signed')->group(function () {
+    Route::get('/billing/sandbox/{payment}', [SandboxCheckoutController::class, 'show'])->name('billing.sandbox');
+    Route::post('/billing/sandbox/{payment}', [SandboxCheckoutController::class, 'complete'])->name('billing.sandbox.complete');
+});
+
 Route::get('/c/{code}', [ShareController::class, 'go'])->where('code', '[a-z2-9]{8}')->name('share.go');
 Route::post('/shares', [ShareController::class, 'store'])->middleware('throttle:30,1')->name('shares.store');
 Route::get('/lots/{lot:slug}/slots', [BookingController::class, 'slots'])->name('lots.slots');
@@ -75,6 +89,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/saved', [FavouriteController::class, 'index'])->name('saved');
     Route::get('/account', AccountController::class)->name('account');
+    Route::get('/following', [FollowController::class, 'index'])->name('following');
+    Route::post('/lots/{lot:slug}/follow', [FollowController::class, 'store'])->name('lots.follow');
+    Route::delete('/lots/{lot:slug}/follow', [FollowController::class, 'destroy'])->name('lots.unfollow');
     Route::put('/budget', [BudgetController::class, 'update'])->name('budget.update');
     Route::delete('/budget', [BudgetController::class, 'destroy'])->name('budget.destroy');
     Route::post('/favourites/{vehicle}', [FavouriteController::class, 'store'])->name('favourites.store');
@@ -145,6 +162,18 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'store'])->name('vehicles.media.store');
             Route::put('/vehicles/{vehicle}/media/order', [VehicleMediaController::class, 'reorder'])->name('vehicles.media.reorder');
             Route::delete('/vehicles/{vehicle}/media/{media}', [VehicleMediaController::class, 'destroy'])->name('vehicles.media.destroy');
+
+            // Billing and spotlight (M16, M5)
+            Route::get('/billing', [BillingController::class, 'show'])->name('billing');
+            Route::post('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+            Route::get('/billing/callback', [BillingController::class, 'callback'])->name('billing.callback');
+            Route::post('/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
+            Route::post('/billing/coupon', [BillingController::class, 'coupon'])->middleware('throttle:10,1')->name('billing.coupon');
+            Route::get('/billing/card', [BillingController::class, 'card'])->name('billing.card');
+            Route::get('/billing/invoices/{billingPayment}', [BillingController::class, 'invoice'])->name('billing.invoice');
+            Route::get('/spotlight/options', [SpotlightController::class, 'options'])->name('spotlight.options');
+            Route::post('/vehicles/{vehicle}/spotlight', [SpotlightController::class, 'car'])->name('vehicles.spotlight');
+            Route::post('/spotlight/featured', [SpotlightController::class, 'featured'])->name('spotlight.featured');
 
             // Lot Manager lite (M19) and sales (M13)
             Route::prefix('/manager')->name('manager.')->group(function () {

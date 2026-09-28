@@ -31,6 +31,8 @@ class LotSiteController extends Controller
             'total' => Vehicle::query()->marketplace()->where('vehicles.lot_id', $lot->id)->count(),
             'filters' => $criteria->toArray(),
             'preview' => $preview,
+            'following' => $request->user() ? $lot->followers()->whereKey($request->user()->id)->exists() : false,
+            'followers' => $lot->followers()->count(),
         ])->withViewData(['meta' => [
             'title' => $lot->name.($lot->city ? " — cars for sale in {$lot->city}" : ''),
             'description' => $lot->tagline ?? "See {$lot->name}'s cars, opening hours and directions on LotLink.",

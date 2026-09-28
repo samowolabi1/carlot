@@ -18,6 +18,7 @@ const props = defineProps<{
     filters: Filters;
     activeFilters: number;
     options: FilterOptions;
+    sponsored: CarCardData[];
 }>();
 
 const q = ref(props.filters.q ?? '');
@@ -140,6 +141,13 @@ const heading = computed(() => {
                     </div>
                 </div>
                 <p v-if="locationError" class="text-[13px] text-danger" role="alert">{{ locationError }}</p>
+
+                <section v-if="sponsored.length" aria-labelledby="sponsored-heading" class="flex flex-col gap-2 rounded-2xl bg-map/60 p-3">
+                    <h2 id="sponsored-heading" class="font-sans text-[12px] font-semibold tracking-wide text-forest uppercase">Sponsored</h2>
+                    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        <CarCard v-for="car in sponsored" :key="`s-${car.ulid}`" :car="car" compare />
+                    </div>
+                </section>
 
                 <div v-if="results.data.length" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     <CarCard v-for="car in results.data" :key="car.ulid" :car="car" compare />

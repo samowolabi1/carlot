@@ -10,7 +10,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     profile: { name: string | null; initials: string; phone: string };
     budget: string | null;
-    counts: { saved: number; bookings: number };
+    counts: { saved: number; bookings: number; following: number };
     orders: { order_no: string; car: string | null; lot: string | null; status: string; balance: string | null; url: string }[];
     lots: { name: string; url: string }[];
 }>();
@@ -40,7 +40,7 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
                 <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
                 <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
                 <span :class="row" class="text-muted/60" aria-disabled="true">Offers and trade-ins<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
-                <span :class="row" class="text-muted/60" aria-disabled="true">Lots I follow<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
+                <Link :href="route('following')" :class="row">Lots I follow<span class="text-[13px] text-muted">{{ counts.following || '' }}</span></Link>
             </nav>
 
             <section v-if="orders.length" class="card overflow-hidden" aria-labelledby="orders-heading">

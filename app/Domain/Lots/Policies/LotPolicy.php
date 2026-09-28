@@ -26,6 +26,18 @@ class LotPolicy
         return $user->hasLotRole($lot, LotRole::Owner);
     }
 
+    /** Choose and pay for a plan, cancel it, use a coupon. */
+    public function manageBilling(User $user, Lot $lot): bool
+    {
+        return $user->hasLotRole($lot, LotRole::Owner);
+    }
+
+    /** Buy spotlights and featured-lot slots. */
+    public function buySpotlight(User $user, Lot $lot): bool
+    {
+        return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager);
+    }
+
     public function submit(User $user, Lot $lot): bool
     {
         return $user->hasLotRole($lot, LotRole::Owner);

@@ -38,6 +38,20 @@ return [
 
     'invitation_ttl_days' => 7,
 
+    // Billing (TDD M16). "sandbox" fakes the Paystack checkout so plans and spotlights can be
+    // tried locally without keys; "paystack" is the real thing (keys in config/services.php).
+    'billing' => [
+        'driver' => env('PAYMENT_DRIVER', 'sandbox'),
+        'trial_days' => 14,
+        'grace_days' => 7,
+        'free_plan' => 'free',
+        // Placeholder prices in whole naira; set real ones after talking to the first lots.
+        'spotlight' => [
+            'car' => [7 => 5000, 14 => 9000, 30 => 18000],
+            'featured_lot' => [7 => 15000, 14 => 27000, 30 => 50000],
+        ],
+    ],
+
     // Share-card images (TDD M9), rendered on the media queue.
     'share_cards' => (bool) env('LOTLINK_SHARE_CARDS', true),
 

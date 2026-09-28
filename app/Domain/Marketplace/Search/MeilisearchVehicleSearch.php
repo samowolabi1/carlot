@@ -4,6 +4,7 @@ namespace App\Domain\Marketplace\Search;
 
 use App\Domain\Inventory\Models\Vehicle;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
@@ -21,6 +22,21 @@ class MeilisearchVehicleSearch implements VehicleSearch
             ]))
             ->query(fn (Builder $query) => $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover']))
             ->paginate($criteria->perPage, 'page', $criteria->page);
+    }
+
+    public function sponsored(SearchCriteria $criteria, int $limit = 3): Collection
+    {
+        // Meilisearch has no random order, so a handful are fetched and shuffled here.
+        $ids = Vehicle::search($criteria->query ?? '')
+            ->options(['filter' => [...$this->filters($criteria), 'spotlight_until > '.now()->getTimestamp()]])
+            ->take(20)
+            ->keys()
+            ->shuffle()
+            ->take($limit)
+            ->all();
+
+        return Vehicle::query()->withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover'])->whereIn('id', $ids)->get()
+            ->sortBy(fn (Vehicle $v) => array_search($v->id, $ids, false))->values();
     }
 
     /** @return list<string> Meilisearch filter expressions, ANDed together */

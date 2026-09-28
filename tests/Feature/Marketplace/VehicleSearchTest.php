@@ -101,3 +101,20 @@ it('drops cars from results when their lot is suspended', function (string $engi
 
     expect(run([]))->toBe(['Accord', 'Camry']);
 })->with('engines');
+
+it('finds spotlighted cars that match the search for the sponsored row', function (string $engine) {
+    $this->useSearchEngine($engine);
+    $cars = seedCars();
+    $cars['rav4']->forceFill(['spotlight_until' => now()->addDays(3)])->save();
+    $cars['accord']->forceFill(['spotlight_until' => now()->addDay()])->save();
+    $cars['camry']->forceFill(['spotlight_until' => now()->subHour()])->save(); // ended
+    $cars['pendingLot']->forceFill(['spotlight_until' => now()->addDays(3)])->save(); // lot not live
+    test()->reindex();
+
+    $sponsored = fn (array $criteria) => app(VehicleSearch::class)->sponsored(new SearchCriteria(...$criteria))->map(fn (Vehicle $v) => $v->model->name)->all();
+
+    expect($sponsored([]))->toEqualCanonicalizing(['RAV4', 'Accord'])
+        ->and($sponsored(['bodyTypes' => ['suv']]))->toBe(['RAV4'])
+        ->and($sponsored(['query' => 'honda']))->toBe(['Accord'])
+        ->and(app(VehicleSearch::class)->sponsored(new SearchCriteria, 1))->toHaveCount(1);
+})->with('engines');

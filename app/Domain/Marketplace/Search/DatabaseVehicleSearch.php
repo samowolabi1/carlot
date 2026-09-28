@@ -4,6 +4,7 @@ namespace App\Domain\Marketplace\Search;
 
 use App\Domain\Inventory\Models\Vehicle;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
@@ -26,6 +27,20 @@ class DatabaseVehicleSearch implements VehicleSearch
         $this->applySort($query, $criteria);
 
         return $query->paginate($criteria->perPage, ['vehicles.*'], 'page', $criteria->page);
+    }
+
+    public function sponsored(SearchCriteria $criteria, int $limit = 3): Collection
+    {
+        $query = Vehicle::query()
+            ->marketplace()
+            ->select('vehicles.*')
+            ->join('lots', 'lots.id', '=', 'vehicles.lot_id')
+            ->with(['make', 'model', 'lot', 'cover'])
+            ->where('vehicles.spotlight_until', '>', now());
+
+        $this->applyFilters($query, $criteria);
+
+        return $query->inRandomOrder()->limit($limit)->get();
     }
 
     /** @param Builder<Vehicle> $query */

@@ -11,7 +11,26 @@ import { formatNaira } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-const props = defineProps<{ arrivals: CarCardData[]; carCount: number; lotCount: number; nearMe: boolean; options: FilterOptions }>();
+interface FeaturedLot {
+    slug: string;
+    url: string;
+    name: string;
+    initials: string;
+    logo_url: string | null;
+    city: string | null;
+    verified: boolean;
+    cars: number;
+}
+
+const props = defineProps<{
+    arrivals: CarCardData[];
+    spotlight: CarCardData[];
+    featuredLots: FeaturedLot[];
+    carCount: number;
+    lotCount: number;
+    nearMe: boolean;
+    options: FilterOptions;
+}>();
 
 const q = ref('');
 const { location, locate, locating, error } = useLocation();
@@ -62,6 +81,30 @@ const chips = computed(() => [
                     class="flex h-9 shrink-0 items-center rounded-full border border-line bg-white px-3.5 text-[14px] text-ink no-underline hover:border-forest hover:text-forest"
                     >{{ chip.label }}</Link
                 >
+            </div>
+        </section>
+
+        <section v-if="spotlight.length" class="mx-auto mt-7 flex max-w-6xl flex-col gap-3 px-5" aria-labelledby="spotlight-heading">
+            <div class="flex items-baseline justify-between gap-3">
+                <h2 id="spotlight-heading" class="text-xl font-bold">Spotlight</h2>
+                <Link :href="route('cars.index')" class="text-[14px] font-medium">See all</Link>
+            </div>
+            <div class="-mr-5 flex snap-x gap-3 overflow-x-auto pr-5 pb-1 [scrollbar-width:none]">
+                <div v-for="car in spotlight" :key="car.ulid" class="w-[290px] shrink-0 snap-start"><CarCard :car="car" /></div>
+            </div>
+        </section>
+
+        <section v-if="featuredLots.length" class="mx-auto mt-7 flex max-w-6xl flex-col gap-3 px-5" aria-labelledby="featured-heading">
+            <h2 id="featured-heading" class="text-xl font-bold">Featured lots</h2>
+            <div class="-mr-5 flex gap-3 overflow-x-auto pr-5 pb-1 [scrollbar-width:none]">
+                <Link v-for="lot in featuredLots" :key="lot.slug" :href="lot.url" class="card flex w-[240px] shrink-0 items-center gap-3 p-3 text-ink no-underline hover:border-forest">
+                    <img v-if="lot.logo_url" :src="lot.logo_url" alt="" class="h-12 w-12 rounded-xl object-cover" />
+                    <span v-else class="flex h-12 w-12 items-center justify-center rounded-xl bg-forest font-display text-[16px] font-bold text-white">{{ lot.initials }}</span>
+                    <span class="flex min-w-0 flex-col">
+                        <span class="flex items-center gap-1 truncate text-[15px] font-semibold">{{ lot.name }}<Icon v-if="lot.verified" name="shield" :size="15" class="shrink-0 text-forest" /></span>
+                        <span class="truncate text-[13px] text-muted">{{ lot.cars }} {{ lot.cars === 1 ? 'car' : 'cars' }}<template v-if="lot.city"> · {{ lot.city }}</template></span>
+                    </span>
+                </Link>
             </div>
         </section>
 

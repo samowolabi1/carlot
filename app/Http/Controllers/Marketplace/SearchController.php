@@ -28,6 +28,8 @@ class SearchController extends Controller
 
         return Inertia::render('Marketplace/Search', [
             'results' => $results->through(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds)),
+            // Up to 3 spotlighted cars matching the search, labelled "Sponsored" (TDD M5).
+            'sponsored' => $search->sponsored($criteria)->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds))->values(),
             'lotCount' => $results->getCollection()->pluck('lot.slug')->unique()->count(),
             'filters' => $criteria->toArray(),
             'activeFilters' => $criteria->activeFilterCount(),

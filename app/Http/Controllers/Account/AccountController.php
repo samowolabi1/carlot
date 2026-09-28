@@ -38,6 +38,7 @@ class AccountController extends Controller
             'budget' => $user->budget ? '₦'.number_format($user->budget->max_price / 100) : null,
             'counts' => [
                 'saved' => $user->favourites()->count(),
+                'following' => $user->followedLots()->count(),
                 'bookings' => Appointment::withoutGlobalScopes()->where('customer_id', $user->id)->active()->where('starts_at', '>', now())->count(),
             ],
             'orders' => $orders->map(fn (SalesOrder $o) => [

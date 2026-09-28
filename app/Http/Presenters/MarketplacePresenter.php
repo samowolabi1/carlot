@@ -40,6 +40,7 @@ class MarketplacePresenter
             'new_arrival' => $v->isNewArrival(),
             'reserved' => $v->status === VehicleStatus::Reserved,
             'saved' => in_array($v->id, $savedIds, true),
+            'sponsored' => $v->spotlight_until?->isFuture() ?? false,
         ];
     }
 

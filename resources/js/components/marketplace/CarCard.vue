@@ -20,6 +20,7 @@ export interface CarCardData {
     new_arrival: boolean;
     reserved: boolean;
     saved: boolean;
+    sponsored?: boolean;
 }
 
 withDefaults(defineProps<{ car: CarCardData; variant?: 'tile' | 'row'; compare?: boolean }>(), { variant: 'tile', compare: false });
@@ -51,6 +52,7 @@ function toggleCompare(ulid: string) {
             <div v-else class="flex h-full items-center justify-center"><CarGlyph :width="variant === 'row' ? 56 : 96" /></div>
 
             <span v-if="car.reserved" class="absolute top-3 left-3 rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white" :class="{ 'top-1.5 left-1.5 px-2 py-0.5 text-[11px]': variant === 'row' }">Reserved</span>
+            <span v-else-if="car.sponsored && variant === 'tile'" class="absolute top-3 left-3 rounded-xl bg-forest px-2.5 py-1 text-[12px] font-semibold text-white">Spotlight</span>
             <span v-else-if="car.new_arrival && variant === 'tile'" class="absolute top-3 left-3 rounded-xl bg-blush px-2.5 py-1 text-[12px] font-semibold text-clay-dark">New arrival</span>
 
             <div v-if="variant === 'tile'" class="absolute top-2 right-2 z-10">

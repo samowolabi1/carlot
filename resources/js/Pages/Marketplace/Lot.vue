@@ -8,6 +8,7 @@ import type { Filters } from '@/components/marketplace/types';
 import { toQuery } from '@/components/marketplace/types';
 import type { PublicLot } from '@/components/marketplace/types-lot';
 import { distanceKm, formatDistance, useLocation } from '@/composables/useLocation';
+import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -18,7 +19,21 @@ const props = defineProps<{
     total: number;
     filters: Filters;
     preview: boolean;
+    following: boolean;
+    followers: number;
 }>();
+
+const { user } = useShared();
+
+function toggleFollow() {
+    if (!user.value) {
+        router.visit(route('login'));
+        return;
+    }
+    const url = route('lots.follow', props.lot.slug);
+    if (props.following) router.delete(url, { preserveScroll: true });
+    else router.post(url, {}, { preserveScroll: true });
+}
 
 const tab = ref<'stock' | 'about'>('stock');
 const { location } = useLocation();
@@ -84,7 +99,19 @@ function filter(query: Partial<Filters>) {
                 </a>
                 <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" />
             </div>
-            <Link v-if="!preview" :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark mt-2.5 w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
+            <div v-if="!preview" class="mt-2.5 flex flex-col gap-2.5 md:flex-row md:items-center">
+                <Link :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
+                <button
+                    type="button"
+                    class="btn h-12 w-full md:w-auto"
+                    :class="following ? 'btn-outline' : 'border border-line bg-white text-ink hover:border-forest'"
+                    :aria-pressed="following"
+                    @click="toggleFollow"
+                >
+                    <Icon :name="following ? 'check' : 'bell'" :size="18" /> {{ following ? 'Following' : 'Follow for new stock' }}
+                </button>
+                <span v-if="followers > 0" class="text-center text-[13px] text-muted md:text-left">{{ followers }} {{ followers === 1 ? 'follower' : 'followers' }}</span>
+            </div>
 
             <div class="mt-5 grid gap-6 pb-12 lg:grid-cols-[1fr_320px]">
                 <div class="flex min-w-0 flex-col gap-4">

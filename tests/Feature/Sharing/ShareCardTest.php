@@ -2,6 +2,7 @@
 
 use App\Domain\Inventory\Actions\SaveVehiclePrice;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\Plan;
 use App\Domain\Sharing\Enums\SharePlatform;
 use App\Domain\Sharing\Jobs\RenderShareCard;
 use App\Domain\Sharing\Models\ShareLink;
@@ -83,4 +84,12 @@ it('does not render cards for cars buyers cannot see', function () {
 
     expect($this->camry->refresh()->share_card_hash)->toBeNull()
         ->and($this->disk->allFiles('share-cards'))->toBe([]);
+});
+
+it('makes share cards for Starter lots and up, not Free', function () {
+    $this->lot->update(['plan_id' => Plan::where('code', 'free')->value('id')]);
+
+    RenderShareCard::dispatchSync($this->camry->id);
+
+    expect($this->camry->refresh()->share_card_hash)->toBeNull();
 });

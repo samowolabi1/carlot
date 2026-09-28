@@ -14,6 +14,23 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S7 (Billing and spotlight) ✅**
+
+| Area | What works |
+| --- | --- |
+| Plans and trials (M16) | Every new lot starts a 14-day Starter trial. Existing lots started theirs when this sprint's migration ran. The owner gets a WhatsApp reminder 3 days before the end. When a trial ends unpaid, or a renewal doesn't arrive, the lot gets 7 days of grace. After that it moves to Free: cars above Free's 10-car limit are **hidden, not deleted** (the newest and spotlighted stay live, reserved cars always stay). Choosing Free on a paid plan keeps it until the paid month ends. |
+| Paystack | Checkout goes to Paystack with the plan's Paystack code, so the card is charged monthly. Every payment is verified with Paystack's API before anything changes, and the amount must match. The webhook (`/webhooks/paystack`) checks the HMAC SHA-512 signature, stores each event and handles it once. It covers first payments, renewals, the subscription code, failed renewals (past due and grace) and cancellations. Admins refund from `/admin/payments`. |
+| Sandbox | Without Paystack keys (`PAYMENT_DRIVER=sandbox`, the default locally) payments go to a LotLink test page with "Pay" and "Decline" buttons, and then through the same verification code. It is refused in production. |
+| Billing page (D11) | Current plan, trial days left, card, this month's usage (listings, staff, free spotlights), the four plans with choose/switch, a coupon box, featuring the lot, running spotlights, and payments with PDF invoices. Only the owner can change the plan; managers can view it. |
+| Coupons | `LAUNCH3` (seeded, 20 uses) gives 90 days free on Starter, per the spec's launch offer. Create more in `/admin/coupons`. |
+| Spotlight (M5) | Stock → **Spotlight** on a live car: 7, 14 or 30 days. The car shows in a "Sponsored" row (at most 3) above matching search results, in both search engines, and in the home page's Spotlight carousel. Pro includes 2 free 7-day spotlights a month. Buying more adds days to the end. The hourly `spotlights:expire` ends them. |
+| Featured lots | From Billing, owners and managers can pay to put the lot in the home page's "Featured lots" row for 7, 14 or 30 days. |
+| Follow a lot | "Follow for new stock" on lot pages, and "Lots I follow" in Account. Every 30 minutes followers get one WhatsApp message per lot about cars listed since the last one. |
+| Plan limits | Listings (Free 10, Starter 50), staff (1/3/10) and open orders (Free 10) are enforced. Share-card images come with Starter and up. |
+| Quality | 305 tests (also on MySQL), including webhook signature and idempotency, verification and amount checks, trial, grace and downgrade, the free spotlight allowance, sponsored search on both engines, and follower batching. |
+
+Prices are placeholders (Starter ₦15,000, Pro ₦45,000 a month; spotlights from ₦5,000). Set real ones in `/admin/plans` and `config/lotlink.php` after talking to your first lots. Deferred: test-drive and reservation deposits (S9), web push (S8 notification centre), admin-editable spotlight prices (S12).
+
 **Sprint S6 (Sharing and budgeting, MVP launch) ✅**
 
 | Area | What works |
@@ -101,7 +118,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S7 Billing and spotlight**: plans and trials, Paystack subscriptions, paid spotlight, featured lots and following a lot.
+Next is **S8 Leads and chat**: lead capture from every source into the customer book, a kanban board, follow-ups, live chat and the notification centre.
 
 ## Run it on Windows with Laragon
 
@@ -142,6 +159,9 @@ cd carlot
   on an available car to start an order and record payments. Receipts and messages are written to
   `storage/logs/laravel.log` while `WHATSAPP_DRIVER=log`. To test the offline queue, turn off the
   network in the browser's DevTools and record a payment.
+- **Billing and spotlight**: Dealer dashboard → Billing. With `PAYMENT_DRIVER=sandbox` (the
+  default) "Choose Pro" opens a test checkout; press Pay and you're back on Pro. Try the code
+  `LAUNCH3`, then Stock → Spotlight. To take real payments, see "Paystack in production" below.
 - **Budget and sharing**: open `/budget`, then any car page. Share cards are saved under
   `storage/app/public/share-cards`, so run `php artisan storage:link` once if images don't load.
 - **Install the app**: the service worker only runs over HTTPS or on `localhost`/`127.0.0.1`,
@@ -174,9 +194,18 @@ your `APP_URL` with a `{{1}}` suffix):
 | `dealer_booking_alert` | Utility | event, buyer, what, when | open calendar |
 | `payment_receipt` | Utility | name, amount, lot, car, receipt no, balance | track order |
 | `order_update` | Utility | name, car, lot, update | track order |
+| `billing_update` | Utility | lot, message | open billing |
+| `lot_new_stock` | Marketing | lot, number of cars, example car | open the lot |
 | `follow_up_due` | Utility | staff name, type, customer, lot | open Today |
 
 Until a template is approved, messages fall back to SMS automatically.
+
+### Paystack in production
+
+1. Set `PAYMENT_DRIVER=paystack`, `PAYSTACK_PUBLIC_KEY` and `PAYSTACK_SECRET_KEY`.
+2. In `/admin/plans`, set real prices, then press "Create on Paystack" on each paid plan so it renews monthly.
+3. In the Paystack dashboard, set the webhook URL to `https://your-domain/webhooks/paystack`.
+4. Keep the scheduler running: `subscriptions:enforce-limits` runs daily at 02:00, `spotlights:expire` hourly, and `followers:notify` every 30 minutes.
 
 ### Search in production (Meilisearch)
 
@@ -219,6 +248,7 @@ app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per mod
   LotManager/            Walk-ins, customers, orders, payments, receipts, follow-ups
   Sharing/               Share links (/c/{code}), share cards, QR codes
   Finance/               Budgets and the FinanceCalculator (same formulas in resources/js/lib/finance.ts)
+  Billing/               Plans, subscriptions, payments, coupons, spotlights; PaymentGateway (Paystack | sandbox)
   Messaging/             SmsGateway (log, Termii)
   Support/               PhoneNumber (E.164)
 app/Http/Controllers/    Thin controllers calling Actions; Dealer/ for /dealer/{lot}

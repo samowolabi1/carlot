@@ -251,6 +251,7 @@ class Vehicle extends Model
             'mileage_km' => $this->mileage_km,
             'status' => $this->status->value,
             'listed_at' => $this->listed_at?->getTimestamp(),
+            'spotlight_until' => $this->spotlight_until?->getTimestamp() ?? 0,
             '_geo' => $this->lot->hasLocation() ? ['lat' => $this->lot->latitude, 'lng' => $this->lot->longitude] : null,
         ];
     }

@@ -89,6 +89,7 @@ class VehicleController extends Controller
             'new_arrival' => $v->isNewArrival(),
             'order' => ($o = $orders->get($v->id)) ? ['ulid' => $o->ulid, 'order_no' => $o->order_no] : null,
             // Shareable once buyers can see it (the lot is approved and the car is live).
+            'spotlight_until' => $v->spotlight_until?->isFuture() ? $v->spotlight_until->copy()->setTimezone($lot->timezone)->format('j M') : null,
             'share_url' => $lot->status === LotStatus::Active && in_array($v->status, VehicleStatus::live(), true) ? url($v->publicPath()) : null,
             // Quick actions on the stock list. Drafts are finished in the add-car flow,
             // and selling goes through Lot Manager, so neither appears here.

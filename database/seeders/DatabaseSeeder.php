@@ -10,7 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([PlanSeeder::class, VehicleCatalogueSeeder::class]);
+        $this->call([PlanSeeder::class, CouponSeeder::class, VehicleCatalogueSeeder::class]);
 
         // Platform admin for the Filament panel at /admin.
         User::updateOrCreate(

@@ -4,6 +4,9 @@ namespace App\Domain\Lots\Models;
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Models\Appointment;
+use App\Domain\Billing\Models\Payment;
+use App\Domain\Billing\Models\Spotlight;
+use App\Domain\Billing\Models\Subscription;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\LotManager\Models\FollowUpTask;
 use App\Domain\LotManager\Models\LotCustomer;
@@ -21,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -54,6 +58,8 @@ use Illuminate\Support\Str;
  * @property Carbon|null $submitted_at
  * @property Carbon|null $verified_at
  * @property int|null $plan_id
+ * @property Carbon|null $featured_until
+ * @property Carbon|null $followers_notified_at
  * @property-read string|null $logo_url
  * @property-read string|null $cover_url
  * @property-read LotMember $pivot
@@ -84,6 +90,8 @@ class Lot extends Model
             'verified_at' => 'datetime',
             'booking_auto_confirm' => 'boolean',
             'booking_min_notice_minutes' => 'integer',
+            'featured_until' => 'datetime',
+            'followers_notified_at' => 'datetime',
         ];
     }
 
@@ -110,7 +118,7 @@ class Lot extends Model
             }
 
             // Share cards show the lot's name, phone and logo, and exist only while it is live.
-            if ($lot->wasChanged(['status', 'name', 'phone', 'logo_path'])) {
+            if ($lot->wasChanged(['status', 'name', 'phone', 'logo_path', 'plan_id'])) {
                 $lot->vehicles()->withoutGlobalScopes()->whereIn('status', ['available', 'reserved'])->pluck('id')
                     ->each(fn (int $id) => RenderShareCard::refresh($id));
             }
@@ -141,6 +149,35 @@ class Lot extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /** @return HasOne<Subscription, $this> */
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    /** Buyers following the lot for new stock (TDD M5). @return BelongsToMany<User, $this> */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'lot_followers')->withTimestamps();
+    }
+
+    /** What the lot has paid LotLink (plans, spotlights); {billingPayment} route bindings. @return HasMany<Payment, $this> */
+    public function billingPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /** @return HasMany<Spotlight, $this> */
+    public function spotlights(): HasMany
+    {
+        return $this->hasMany(Spotlight::class);
+    }
+
+    public function isFeatured(): bool
+    {
+        return $this->featured_until?->isFuture() ?? false;
     }
 
     /** @return BelongsToMany<User, $this, LotMember> */
