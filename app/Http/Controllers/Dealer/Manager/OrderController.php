@@ -118,7 +118,7 @@ class OrderController extends Controller
                 'receipt_url' => route('dealer.manager.orders.receipt', [$lot, $order, $p]),
             ]),
             'steps' => collect([OrderStatus::Draft, OrderStatus::DepositPaid, OrderStatus::FullyPaid, OrderStatus::PapersReady, OrderStatus::Delivered])
-                ->map(fn (OrderStatus $s) => ['value' => $s->value, 'label' => $s->label(), 'done' => $order->status !== OrderStatus::Cancelled && $order->status->rank() >= $s->rank()]),
+                ->map(fn (OrderStatus $s) => ['value' => $s->value, 'label' => $s->label(), 'done' => $order->status !== OrderStatus::Cancelled && $order->status->rank() >= $s->rank() && ($s !== OrderStatus::FullyPaid || $order->balance <= 0)]),
             'can' => [
                 'pay' => $order->isOpen() && $order->balance > 0 && $user->can('recordPayment', $order),
                 'papers' => in_array($order->status, [OrderStatus::DepositPaid, OrderStatus::FullyPaid], true),

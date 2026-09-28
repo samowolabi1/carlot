@@ -43,7 +43,7 @@ it('gives every order the standard papers checklist', function () {
 });
 
 it('waits for the required papers before "papers ready", and hands them over on delivery', function () {
-    $this->actingAs($this->owner)->post(route('dealer.manager.orders.payments.store', [$this->lot, $this->order]), ['amount' => '9,600,000', 'method' => 'transfer']);
+    $this->actingAs($this->owner)->post(route('dealer.manager.orders.payments.store', [$this->lot, $this->order]), ['amount' => '5,000,000', 'method' => 'transfer']);
     $update = fn (string $type, string $status, array $extra = []) => $this->actingAs($this->sales)
         ->post(route('dealer.manager.orders.documents.update', [$this->lot, $this->order, ($this->doc)($type)]), ['status' => $status, ...$extra]);
 
@@ -58,7 +58,13 @@ it('waits for the required papers before "papers ready", and hands them over on 
     Storage::disk('local')->assertExists($customs->file_path);
     $this->actingAs($this->sales)->get(route('dealer.manager.orders.documents.file', [$this->lot, $this->order, $customs]))->assertOk();
 
+    // Papers ready before the last payment: "Fully paid" isn't ticked on either page.
     $this->actingAs($this->owner)->patch(route('dealer.manager.orders.update', [$this->lot, $this->order]), ['status' => 'papers_ready'])->assertSessionHasNoErrors();
+    $this->actingAs($this->owner)->get(route('dealer.manager.orders.show', [$this->lot, $this->order]))
+        ->assertInertia(fn (Assert $page) => $page->where('steps.2.done', false)->where('steps.3.done', true));
+    $this->get(URL::signedRoute('orders.track', ['order' => $this->order->ulid]))->assertInertia(fn (Assert $page) => $page->where('steps.2.done', false));
+
+    $this->actingAs($this->owner)->post(route('dealer.manager.orders.payments.store', [$this->lot, $this->order]), ['amount' => '4,600,000', 'method' => 'transfer'])->assertSessionHasNoErrors();
     $this->actingAs($this->owner)->patch(route('dealer.manager.orders.update', [$this->lot, $this->order]), ['status' => 'delivered'])->assertSessionHasNoErrors();
 
     expect(($this->doc)('plate_number')->status)->toBe(DocumentStatus::HandedOver)

@@ -49,7 +49,7 @@ class OrderTrackingController extends Controller
             ],
             'steps' => collect($steps)->map(fn (OrderStatus $s) => [
                 'label' => $s === OrderStatus::Draft ? 'Order started' : $s->label(),
-                'done' => $order->status !== OrderStatus::Cancelled && $order->status->rank() >= $s->rank(),
+                'done' => $order->status !== OrderStatus::Cancelled && $order->status->rank() >= $s->rank() && ($s !== OrderStatus::FullyPaid || $order->balance <= 0),
             ]),
             'payments' => $order->payments->whereNull('voided_at')->values()->map(fn (OrderPayment $p) => [
                 'amount' => $order->money(abs($p->amount)),
