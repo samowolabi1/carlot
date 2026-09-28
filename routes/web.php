@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
 use App\Http\Controllers\Bookings\BookingController;
@@ -28,6 +30,7 @@ use App\Http\Controllers\Marketplace\HomeController;
 use App\Http\Controllers\Marketplace\LotSiteController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Orders\OrderTrackingController;
+use App\Http\Controllers\Sharing\ShareController;
 use Illuminate\Support\Facades\Route;
 
 // Marketplace (M4) and lot mini-sites (M6)
@@ -36,6 +39,10 @@ Route::get('/cars', SearchController::class)->middleware('throttle:120,1')->name
 Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
+Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
+Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
+Route::get('/c/{code}', [ShareController::class, 'go'])->where('code', '[a-z2-9]{8}')->name('share.go');
+Route::post('/shares', [ShareController::class, 'store'])->middleware('throttle:30,1')->name('shares.store');
 Route::get('/lots/{lot:slug}/slots', [BookingController::class, 'slots'])->name('lots.slots');
 
 // Bookings (M7). Signed links from WhatsApp/SMS open these without signing in.
@@ -67,6 +74,9 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/saved', [FavouriteController::class, 'index'])->name('saved');
+    Route::get('/account', AccountController::class)->name('account');
+    Route::put('/budget', [BudgetController::class, 'update'])->name('budget.update');
+    Route::delete('/budget', [BudgetController::class, 'destroy'])->name('budget.destroy');
     Route::post('/favourites/{vehicle}', [FavouriteController::class, 'store'])->name('favourites.store');
     Route::delete('/favourites/{vehicle}', [FavouriteController::class, 'destroy'])->name('favourites.destroy');
     Route::get('/favourites/{vehicle}/save', [FavouriteController::class, 'remember'])->name('favourites.remember');

@@ -6,6 +6,7 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 
 class SaveVehicleIdentity
 {
@@ -53,6 +54,7 @@ class SaveVehicleIdentity
         }
 
         $vehicle->save();
+        RenderShareCard::refresh($vehicle->id);
 
         return $vehicle;
     }

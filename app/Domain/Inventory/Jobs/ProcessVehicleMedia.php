@@ -5,6 +5,7 @@ namespace App\Domain\Inventory\Jobs;
 use App\Domain\Inventory\Enums\MediaStatus;
 use App\Domain\Inventory\Models\VehicleMedia;
 use App\Domain\Inventory\Support\MediaUploads;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -90,6 +91,10 @@ class ProcessVehicleMedia implements ShouldQueue
         ]);
 
         $source->delete($originalPath);
+
+        if ($media->is_cover) {
+            RenderShareCard::refresh($media->vehicle_id);
+        }
     }
 
     /** After the last retry: show the photo as failed so the dealer can remove it and try again. */

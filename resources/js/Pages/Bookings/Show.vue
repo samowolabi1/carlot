@@ -5,6 +5,7 @@ import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import ShareLocation from '@/components/marketplace/ShareLocation.vue';
 
 export interface BookingSummary {
     ulid: string;
@@ -92,6 +93,9 @@ function cancel() {
                 <div class="flex gap-2 p-3">
                     <a v-if="lot.directions_url" :href="lot.directions_url" target="_blank" rel="noopener" class="btn btn-primary h-11 grow px-3 text-[14px]"><Icon name="navigate" :size="18" /> Get directions</a>
                     <a :href="links.calendar" class="btn btn-outline h-11 px-3.5 text-[14px]"><Icon name="calendar" :size="18" /> Add to calendar</a>
+                </div>
+                <div v-if="lot.directions_url" class="px-3 pb-3">
+                    <ShareLocation :name="lot.name" :address="lot.city" :directions="lot.directions_url" block />
                 </div>
             </div>
 

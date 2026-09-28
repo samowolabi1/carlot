@@ -7,12 +7,13 @@ import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 type Cell = { value: string | number | null; best: boolean };
-const props = defineProps<{ cars: (CarCardData & { rows: Record<string, Cell> })[] }>();
+const props = defineProps<{ cars: (CarCardData & { rows: Record<string, Cell> })[]; terms: { deposit_percent: number; months: number; rate: number } }>();
 
 const compare = useCompare();
 
 const rows: { key: string; label: string }[] = [
     { key: 'price', label: 'Price' },
+    { key: 'monthly', label: 'Monthly (estimate)' },
     { key: 'year', label: 'Year' },
     { key: 'mileage', label: 'Mileage' },
     { key: 'engine', label: 'Engine' },
@@ -78,7 +79,7 @@ function remove(ulid: string) {
                     </tbody>
                 </table>
             </div>
-            <p v-if="cars.length >= 2" class="text-[12px] text-muted">Green marks the best value in each row: lowest price and mileage, newest year.</p>
+            <p v-if="cars.length >= 2" class="text-[12px] text-muted">Green marks the best value in each row: lowest price and mileage, newest year. Monthly figures assume {{ terms.deposit_percent }}% down over {{ terms.months }} months at {{ terms.rate }}% a year.</p>
         </div>
     </CustomerLayout>
 </template>

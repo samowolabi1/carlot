@@ -11,6 +11,7 @@ use App\Domain\LotManager\Models\OrderPayment;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 use Database\Factories\LotFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -106,6 +107,12 @@ class Lot extends Model
         static::updated(function (Lot $lot): void {
             if ($lot->wasChanged(['status', 'name', 'city', 'latitude', 'longitude'])) {
                 SyncLotVehiclesToSearch::dispatch($lot->id);
+            }
+
+            // Share cards show the lot's name, phone and logo, and exist only while it is live.
+            if ($lot->wasChanged(['status', 'name', 'phone', 'logo_path'])) {
+                $lot->vehicles()->withoutGlobalScopes()->whereIn('status', ['available', 'reserved'])->pluck('id')
+                    ->each(fn (int $id) => RenderShareCard::refresh($id));
             }
         });
     }

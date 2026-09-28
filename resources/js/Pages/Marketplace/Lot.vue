@@ -2,6 +2,7 @@
 import Icon from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
+import ShareLocation from '@/components/marketplace/ShareLocation.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import type { Filters } from '@/components/marketplace/types';
 import { toQuery } from '@/components/marketplace/types';
@@ -81,7 +82,7 @@ function filter(query: Partial<Filters>) {
                 <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="whatsapp" :size="20" /> WhatsApp
                 </a>
-                <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" label="Share" />
+                <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" />
             </div>
             <Link v-if="!preview" :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark mt-2.5 w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
 
@@ -130,6 +131,7 @@ function filter(query: Partial<Filters>) {
                             <span v-if="lot.address">{{ lot.address }}, {{ lot.city }}</span>
                             <span v-if="lot.landmark" class="text-muted">{{ lot.landmark }}</span>
                             <span v-if="distance" class="text-muted">{{ distance }} from you</span>
+                            <div v-if="lot.directions_url" class="mt-2"><ShareLocation :name="lot.name" :address="lot.address ? `${lot.address}, ${lot.city}` : lot.city" :directions="lot.directions_url" /></div>
                         </div>
                     </div>
                     <div v-if="lot.hours.length" class="card flex flex-col gap-2 p-3.5">

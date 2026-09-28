@@ -5,6 +5,8 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
+import { listenForInstall } from './composables/usePwaInstall';
+import { registerServiceWorker } from './lib/pwa';
 
 const appName = import.meta.env.VITE_APP_NAME || 'LotLink';
 
@@ -21,3 +23,6 @@ createInertiaApp({
         color: '#C2410C',
     },
 });
+
+listenForInstall();
+registerServiceWorker();

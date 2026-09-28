@@ -61,6 +61,8 @@ class HandleInertiaRequests extends Middleware
                     'submitted' => $lot->submitted_at !== null,
                 ];
             },
+            // The buyer's saved maximum price, for "Within budget" tags (whole naira).
+            'budget' => fn () => $user?->budget ? intdiv($user->budget->max_price, 100) : null,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

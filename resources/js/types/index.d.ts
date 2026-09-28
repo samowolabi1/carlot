@@ -73,6 +73,7 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     lots: LotSummary[];
     currentLot: CurrentLot | null;
+    budget: number | null;
     flash: { success: string | null; error: string | null };
     errors: Record<string, string>;
 }

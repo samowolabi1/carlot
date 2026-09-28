@@ -22,6 +22,7 @@ use App\Domain\Inventory\Support\VehicleStateMachine;
 use App\Domain\LotManager\Enums\OrderStatus;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotRole;
+use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
@@ -87,6 +88,8 @@ class VehicleController extends Controller
             'ageing' => $v->isAgeing(),
             'new_arrival' => $v->isNewArrival(),
             'order' => ($o = $orders->get($v->id)) ? ['ulid' => $o->ulid, 'order_no' => $o->order_no] : null,
+            // Shareable once buyers can see it (the lot is approved and the car is live).
+            'share_url' => $lot->status === LotStatus::Active && in_array($v->status, VehicleStatus::live(), true) ? url($v->publicPath()) : null,
             // Quick actions on the stock list. Drafts are finished in the add-car flow,
             // and selling goes through Lot Manager, so neither appears here.
             'next_statuses' => $v->status === VehicleStatus::Draft ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(

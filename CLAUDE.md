@@ -45,6 +45,19 @@ Run all four before pushing.
 - Offline-capable writes (walk-ins, orders, payments) take a `client_uuid` and must stay idempotent.
 - Customers are only messaged with `consent_whatsapp`. Changes to money or status go in `AuditLog`.
 
+## Sharing and budgets (S6)
+
+- Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
+  clicks can be attributed. Share cards come only from `RenderShareCard` / `ShareCard`; call
+  `RenderShareCard::refresh()` wherever something on the card changes. Prices on images use the
+  Bricolage font (DM Sans has no ₦ glyph). Tests keep cards off (`LOTLINK_SHARE_CARDS=false`)
+  unless they test them.
+- Budget maths lives in `FinanceCalculator` (PHP) and `resources/js/lib/finance.ts`; change both
+  together and keep `tests/Unit/FinanceCalculatorTest.php` matching the design. The server
+  recomputes `max_price`; never trust the browser's. Rates are in `config('lotlink.finance')`.
+- The service worker (`public/sw.js`) caches only built assets and Lot Manager pages; bump its
+  `VERSION` when changing caching rules.
+
 ## Multi-lot tenancy
 
 - Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
@@ -118,7 +131,7 @@ rather than fake data.
 ## Sprint plan (TDD)
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
-S6 Sharing + budgeting (MVP launch) · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
+S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),

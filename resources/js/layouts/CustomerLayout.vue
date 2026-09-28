@@ -25,7 +25,9 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
                 <nav class="hidden items-center gap-6 text-[15px] font-medium md:flex" aria-label="Main">
                     <Link :href="route('cars.index')" class="no-underline hover:text-clay" :class="active === 'search' ? 'text-clay' : 'text-ink'">Buy a car</Link>
                     <Link :href="route('saved')" class="no-underline hover:text-clay" :class="active === 'saved' ? 'text-clay' : 'text-ink'">Saved</Link>
+                    <Link :href="route('budget')" class="text-ink no-underline hover:text-clay">What can I afford?</Link>
                     <Link :href="route('bookings.index')" class="no-underline hover:text-clay" :class="active === 'bookings' ? 'text-clay' : 'text-ink'">Bookings</Link>
+                    <Link v-if="user" :href="route('account')" class="no-underline hover:text-clay" :class="active === 'account' ? 'text-clay' : 'text-ink'">Account</Link>
                     <Link :href="route('dealer.home')" class="text-ink no-underline hover:text-clay">For car lots</Link>
                 </nav>
                 <div class="flex items-center gap-2">
@@ -66,10 +68,12 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
                 </span>
             </template>
             <Link
-                :href="user ? (user.role === 'staff' ? route('dealer.home') : route('saved')) : route('login')"
-                class="flex flex-col items-center justify-center gap-1 text-[11px] text-muted no-underline"
+                :href="user ? route('account') : route('login')"
+                class="flex flex-col items-center justify-center gap-1 text-[11px] no-underline"
+                :class="active === 'account' ? 'font-semibold text-clay' : 'text-muted'"
+                :aria-current="active === 'account' ? 'page' : undefined"
             >
-                <Icon name="user" :size="22" />Account
+                <Icon name="user" :size="22" :stroke-width="active === 'account' ? 2 : 1.8" />Account
             </Link>
         </nav>
 

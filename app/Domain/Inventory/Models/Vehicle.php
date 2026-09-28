@@ -59,6 +59,7 @@ use Laravel\Scout\Searchable;
  * @property Carbon|null $listed_at
  * @property Carbon|null $sold_at
  * @property Carbon|null $price_changed_at
+ * @property string|null $share_card_hash
  * @property int|null $created_by
  * @property-read int|null $ready_media_count
  * @property-read Pivot $pivot

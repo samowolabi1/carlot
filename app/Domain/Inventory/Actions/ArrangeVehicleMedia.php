@@ -4,6 +4,7 @@ namespace App\Domain\Inventory\Actions;
 
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Models\VehicleMedia;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +29,8 @@ class ArrangeVehicleMedia
                 $media[$ulid]->update(['sort_order' => $position, 'is_cover' => $position === 0]);
             }
         });
+
+        RenderShareCard::refresh($vehicle->id);
     }
 
     public function delete(Vehicle $vehicle, VehicleMedia $media): void
@@ -45,6 +48,7 @@ class ArrangeVehicleMedia
         });
 
         Storage::disk(config('lotlink.media_disk'))->delete($files);
+        RenderShareCard::refresh($vehicle->id);
 
         if ($media->original_path) {
             Storage::disk(config('lotlink.upload_disk'))->delete($media->original_path);

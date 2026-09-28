@@ -14,6 +14,22 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S6 (Sharing and budgeting, MVP launch) ✅**
+
+| Area | What works |
+| --- | --- |
+| Share links (M9) | Every share goes through a short tracked link, `/c/{code}`. It redirects to the car or lot page with `?ref=` so later analytics can credit the platform. Clicks are counted, but link-preview bots (WhatsApp, Facebook) are not. The same person sharing the same car to the same app reuses one link. Unused links are pruned after 90 days; QR links are kept. |
+| Share cards | Each live car gets two branded PNG images: 1080×1080 for posts and 1080×1920 for WhatsApp Status and Stories. They show the photo, price, title, specs, the lot and a QR code that opens the car. Cards are re-rendered when the price, details or cover photo change, or when the lot's name, phone or logo change. They are also the image in link previews (`og:image`). |
+| Sharing | On the car page the phone's share sheet sends the card image and link where supported. Otherwise a menu offers WhatsApp, Facebook, X, Telegram, Instagram (saves the Story image) and copy link. Dealers can share from the stock list and download the card images. |
+| Budget (M10) | "What can I afford?" (design 08): income, commitments, deposit, loan length and rate give a maximum price, a monthly payment and the loan amount, plus "Show N cars within budget". The budget saves to the account, or to the phone for guests. Search results and cards show a "Within budget" tag, and Home and Search have a "Within my budget" filter. |
+| Car page finance | "From ₦343,500/mo" at the default terms, a loan calculator (deposit, length, rate) and yearly running costs (insurance, papers, fuel, servicing). All figures are labelled estimates. Compare adds a monthly row. |
+| Location | "Share location" on lot pages and booking pages sends the lot's name, address and a Google Maps link by share sheet, WhatsApp, SMS or copy. |
+| Installable app (PWA) | Manifest, icons, an install button (Home, Account, dealer sidebar) and "Add to Home Screen" help for iPhone. A service worker caches the app's files and keeps Lot Manager pages that were opened before, so they reopen with no signal; other pages show an offline screen. |
+| Account (design 21) | Budget, bookings, saved cars, and orders and receipts from lots that recorded this phone number. Staff get links to their dealer dashboards. |
+| Quality | 267 tests (also on MySQL), including the budget formula checked against the design, share-link tracking, share-card rendering and re-rendering, and the manifest. |
+
+Deferred as planned: live location sessions (S11), social auto-posting (phase 3), QR posters and windscreen stickers (S13), shares-by-platform analytics (S11), web push (with notifications), admin-editable finance rates (S12).
+
 **Sprint S5 (Lot Manager lite) ✅**
 
 | Area | What works |
@@ -85,7 +101,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S6 Sharing + budgeting (MVP launch)**.
+Next is **S7 Billing and spotlight**: plans and trials, Paystack subscriptions, paid spotlight, featured lots and following a lot.
 
 ## Run it on Windows with Laragon
 
@@ -126,13 +142,18 @@ cd carlot
   on an available car to start an order and record payments. Receipts and messages are written to
   `storage/logs/laravel.log` while `WHATSAPP_DRIVER=log`. To test the offline queue, turn off the
   network in the browser's DevTools and record a payment.
+- **Budget and sharing**: open `/budget`, then any car page. Share cards are saved under
+  `storage/app/public/share-cards`, so run `php artisan storage:link` once if images don't load.
+- **Install the app**: the service worker only runs over HTTPS or on `localhost`/`127.0.0.1`,
+  and only with the built files (`npm run build`), not `npm run dev`. On `http://carlot.test`
+  the site works normally without it; enable SSL in Laragon to try installing on a phone.
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
 
 ### Scheduled jobs (reminders)
 
-Reminders, no-shows, escalations and follow-up reminders run on Laravel's scheduler. On Laragon, keep
+Reminders, no-shows, escalations, follow-up reminders and share-link pruning run on Laravel's scheduler. On Laragon, keep
 `php artisan schedule:work` running in a terminal while testing bookings. In production add one
 cron entry: `* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1`.
 
@@ -196,6 +217,8 @@ app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per mod
   Accounts/              Users, OTP codes, SendOtp / VerifyOtp
   Lots/                  Lots, members, invitations, hours; BelongsToLot tenancy
   LotManager/            Walk-ins, customers, orders, payments, receipts, follow-ups
+  Sharing/               Share links (/c/{code}), share cards, QR codes
+  Finance/               Budgets and the FinanceCalculator (same formulas in resources/js/lib/finance.ts)
   Messaging/             SmsGateway (log, Termii)
   Support/               PhoneNumber (E.164)
 app/Http/Controllers/    Thin controllers calling Actions; Dealer/ for /dealer/{lot}

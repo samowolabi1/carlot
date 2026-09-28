@@ -8,6 +8,7 @@ use App\Domain\Inventory\Events\VehiclePublished;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Support\VehicleStateMachine;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -30,6 +31,8 @@ class PublishVehicle
             if ($firstPublish) {
                 DB::afterCommit(fn () => VehiclePublished::dispatch($vehicle));
             }
+
+            RenderShareCard::refresh($vehicle->id);
 
             return $vehicle;
         });

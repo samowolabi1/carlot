@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
+import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -19,6 +20,7 @@ interface Row {
     new_arrival: boolean;
     next_statuses: string[];
     order: { ulid: string; order_no: string } | null;
+    share_url: string | null;
 }
 
 const props = defineProps<{
@@ -181,6 +183,16 @@ function editHref(row: Row) {
                     </span>
 
                     <span class="ml-auto flex shrink-0 items-center gap-3 text-[13px] font-semibold">
+                        <ShareMenu
+                            v-if="row.share_url"
+                            :title="row.title"
+                            :text="`${row.title}${row.price ? ` — ${row.price}` : ''} at ${lot.name}`"
+                            :url="row.share_url"
+                            :vehicle="row.ulid"
+                            label="Share"
+                            images
+                            compact
+                        />
                         <Link v-if="row.status === 'draft'" :href="editHref(row)">List on LotLink</Link>
                         <Link v-else :href="editHref(row)">Edit</Link>
                         <Link v-if="row.order" :href="route('dealer.manager.orders.show', [lot.slug, row.order.ulid])" class="text-clay">Order {{ row.order.order_no }}</Link>

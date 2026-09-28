@@ -3,6 +3,7 @@
 namespace App\Domain\Accounts\Models;
 
 use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Finance\Models\Budget;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
@@ -14,6 +15,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -89,6 +91,12 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function favourites(): BelongsToMany
     {
         return $this->belongsToMany(Vehicle::class, 'favourites')->withPivot('saved_price')->withTimestamps();
+    }
+
+    /** @return HasOne<Budget, $this> */
+    public function budget(): HasOne
+    {
+        return $this->hasOne(Budget::class);
     }
 
     public function isAdmin(): bool

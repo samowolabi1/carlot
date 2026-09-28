@@ -2,6 +2,7 @@
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
 import SaveButton from '@/components/marketplace/SaveButton.vue';
+import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -11,6 +12,7 @@ export interface CarCardData {
     url: string;
     title: string;
     price: string | null;
+    price_value?: number | null;
     specs: string;
     image: { src: string; srcset: string } | null;
     lot: { name: string; slug: string; city: string | null };
@@ -23,6 +25,7 @@ export interface CarCardData {
 withDefaults(defineProps<{ car: CarCardData; variant?: 'tile' | 'row'; compare?: boolean }>(), { variant: 'tile', compare: false });
 
 const compareList = useCompare();
+const budget = useBudget();
 const compareFull = ref(false);
 
 function toggleCompare(ulid: string) {
@@ -57,7 +60,10 @@ function toggleCompare(ulid: string) {
 
         <div class="flex min-w-0 flex-col gap-1" :class="variant === 'row' ? 'justify-center py-0.5' : 'px-3.5 pt-3 pb-3.5'">
             <h3 class="truncate font-sans font-semibold" :class="variant === 'row' ? 'text-[15px]' : 'text-[16px]'">{{ car.title }}</h3>
-            <div class="font-display font-bold text-forest" :class="variant === 'row' ? 'text-[16px]' : 'text-[20px]'">{{ car.price }}</div>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="font-display font-bold text-forest" :class="variant === 'row' ? 'text-[16px]' : 'text-[20px]'">{{ car.price }}</span>
+                <span v-if="budget.within(car.price_value)" class="rounded-lg bg-[#E3F1E8] px-1.5 py-0.5 text-[11px] font-semibold text-success">Within budget</span>
+            </div>
             <div class="truncate text-[13px] text-muted">{{ car.specs }}</div>
             <div class="flex items-center gap-1 truncate text-[13px] text-muted">
                 <Icon name="pin" :size="14" class="shrink-0 text-clay" :stroke-width="2" />

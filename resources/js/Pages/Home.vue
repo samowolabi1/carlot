@@ -3,8 +3,11 @@ import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import type { FilterOptions } from '@/components/marketplace/types';
+import { useBudget } from '@/composables/useBudget';
 import { useLocation } from '@/composables/useLocation';
+import { usePwaInstall } from '@/composables/usePwaInstall';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
+import { formatNaira } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -22,12 +25,18 @@ async function showNearMe() {
     if (here) router.get(route('home'), { lat: here.lat, lng: here.lng }, { preserveScroll: true, preserveState: true });
 }
 
-// Quick filters from the home design; "Within my budget" arrives with the budget tools (S6).
+const budget = useBudget();
+const install = usePwaInstall();
+
+// Quick filters from the home design. "Within my budget" goes to the calculator until a budget is set.
 const chips = computed(() => [
-    { label: 'SUVs', query: { body: ['suv'] } },
-    { label: 'Under ₦10m', query: { price_max: 10000000 } },
-    { label: 'Foreign used', query: { condition: ['foreign_used'] } },
-    ...props.options.makes.slice(0, 4).map((m) => ({ label: m.name, query: { make: [m.id] } })),
+    budget.maxPrice.value !== null
+        ? { label: 'Within my budget', href: route('cars.index', { price_max: budget.maxPrice.value }) }
+        : { label: 'What can I afford?', href: route('budget') },
+    { label: 'SUVs', href: route('cars.index', { body: ['suv'] }) },
+    { label: 'Under ₦10m', href: route('cars.index', { price_max: 10000000 }) },
+    { label: 'Foreign used', href: route('cars.index', { condition: ['foreign_used'] }) },
+    ...props.options.makes.slice(0, 4).map((m) => ({ label: m.name, href: route('cars.index', { make: [m.id] }) })),
 ]);
 </script>
 
@@ -49,7 +58,7 @@ const chips = computed(() => [
                 <Link
                     v-for="chip in chips"
                     :key="chip.label"
-                    :href="route('cars.index', chip.query)"
+                    :href="chip.href"
                     class="flex h-9 shrink-0 items-center rounded-full border border-line bg-white px-3.5 text-[14px] text-ink no-underline hover:border-forest hover:text-forest"
                     >{{ chip.label }}</Link
                 >
@@ -78,7 +87,24 @@ const chips = computed(() => [
             </div>
         </section>
 
-        <section class="mx-auto mt-8 mb-10 max-w-6xl px-5">
+        <section class="mx-auto mt-8 grid max-w-6xl gap-3 px-5 md:grid-cols-2">
+            <div class="card flex flex-col gap-2 p-5">
+                <h2 class="text-xl font-bold">What can I afford?</h2>
+                <p class="text-[15px] text-muted">
+                    <template v-if="budget.maxPrice.value !== null">Your budget is up to {{ formatNaira(budget.maxPrice.value) }}. Cars within reach are tagged.</template>
+                    <template v-else>Tell us your income and deposit. We'll tag every car within reach and show the monthly cost.</template>
+                </p>
+                <Link :href="route('budget')" class="btn btn-outline mt-1 h-[46px] self-start">{{ budget.maxPrice.value !== null ? 'Edit my budget' : 'Work out my budget' }}</Link>
+            </div>
+            <div v-if="install.available.value" class="card flex flex-col gap-2 p-5">
+                <h2 class="text-xl font-bold">Get the LotLink app</h2>
+                <p class="text-[15px] text-muted">Add LotLink to your home screen. It opens like an app and uses less data.</p>
+                <button v-if="install.canPrompt.value" type="button" class="btn btn-dark mt-1 h-[46px] self-start" @click="install.prompt()">Install LotLink</button>
+                <p v-else class="text-[14px] text-ink">{{ install.hint.value }}</p>
+            </div>
+        </section>
+
+        <section class="mx-auto mt-3 mb-10 max-w-6xl px-5">
             <div class="flex flex-col justify-between gap-4 rounded-2xl bg-forest p-6 text-white md:flex-row md:items-center">
                 <div class="flex flex-col gap-2">
                     <span class="text-[13px] font-semibold tracking-wide text-peach uppercase">For car lots</span>

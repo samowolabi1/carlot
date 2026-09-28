@@ -3,9 +3,11 @@ import Icon from '@/components/Icon.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import FiltersPanel from '@/components/marketplace/FiltersPanel.vue';
 import { toQuery, type FilterOptions, type Filters } from '@/components/marketplace/types';
+import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
 import { useLocation } from '@/composables/useLocation';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
+import { shortNaira } from '@/lib/finance';
 import { formatNaira } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -21,6 +23,8 @@ const props = defineProps<{
 const q = ref(props.filters.q ?? '');
 const sheetOpen = ref(false);
 const compare = useCompare();
+const budget = useBudget();
+const budgetApplied = computed(() => budget.maxPrice.value !== null && props.filters.price_max === budget.maxPrice.value && !props.filters.price_min);
 const { locate, locating, error: locationError } = useLocation();
 
 const sorts = computed(() => [
@@ -50,7 +54,8 @@ const label = (list: { value: string; label: string }[], v: string) => list.find
 const chips = computed(() => {
     const f = props.filters;
     const out: { label: string; remove: Partial<Filters> }[] = [];
-    if (f.price_min || f.price_max) out.push({ label: `${f.price_min ? formatNaira(f.price_min) : 'Any'} – ${f.price_max ? formatNaira(f.price_max) : 'Any'}`, remove: { price_min: null, price_max: null } });
+    if (budgetApplied.value) out.push({ label: `Within my budget (${shortNaira(f.price_max!)})`, remove: { price_min: null, price_max: null } });
+    else if (f.price_min || f.price_max) out.push({ label: `${f.price_min ? formatNaira(f.price_min) : 'Any'} – ${f.price_max ? formatNaira(f.price_max) : 'Any'}`, remove: { price_min: null, price_max: null } });
     if (f.radius) out.push({ label: `Within ${f.radius} km`, remove: { radius: null } });
     f.make.forEach((id) => out.push({ label: props.options.makes.find((m) => m.id === id)?.name ?? 'Make', remove: { make: f.make.filter((m) => m !== id) } }));
     f.body.forEach((b) => out.push({ label: label(props.options.body_types, b), remove: { body: f.body.filter((x) => x !== b) } }));
@@ -107,7 +112,16 @@ const heading = computed(() => {
             <div class="flex min-w-0 grow flex-col gap-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <h1 class="font-sans text-[15px] text-muted"><strong class="text-ink">{{ heading }}</strong></h1>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button
+                            v-if="budget.maxPrice.value !== null && !budgetApplied"
+                            type="button"
+                            class="flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[13px] font-semibold text-forest"
+                            @click="apply({ price_min: null, price_max: budget.maxPrice.value })"
+                        >
+                            Within my budget ({{ shortNaira(budget.maxPrice.value) }})
+                        </button>
+                        <Link :href="route('budget')" class="flex h-9 items-center px-1 text-[13px] font-semibold">{{ budget.maxPrice.value !== null ? 'Edit budget' : 'What can I afford?' }}</Link>
                         <button
                             v-if="filters.lat === null"
                             type="button"

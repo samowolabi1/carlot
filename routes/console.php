@@ -17,3 +17,4 @@ Schedule::command('otp:prune')->daily();
 
 // Lot Manager (TDD M19)
 Schedule::command('manager:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
+Schedule::command('share-links:prune')->daily();

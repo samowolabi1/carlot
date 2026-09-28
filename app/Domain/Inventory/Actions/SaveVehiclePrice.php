@@ -5,6 +5,7 @@ namespace App\Domain\Inventory\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Inventory\Events\VehiclePriceDropped;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Sharing\Jobs\RenderShareCard;
 use Illuminate\Support\Facades\DB;
 
 class SaveVehiclePrice
@@ -37,6 +38,8 @@ class SaveVehiclePrice
             }
 
             $vehicle->save();
+
+            RenderShareCard::refresh($vehicle->id);
 
             if ($vehicle->listed_at !== null && $old !== null && $price < $old) {
                 DB::afterCommit(fn () => VehiclePriceDropped::dispatch($vehicle, $old, $price));

@@ -3,6 +3,7 @@ import FlashMessage from '@/components/FlashMessage.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
 import { useOfflineQueue } from '@/composables/useOfflineQueue';
+import { usePwaInstall } from '@/composables/usePwaInstall';
 import { useShared } from '@/composables/useShared';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -39,6 +40,7 @@ const manager: NavItem[] = [
 ];
 
 const queue = useOfflineQueue(() => currentLot.value?.slug);
+const install = usePwaInstall();
 
 const isActive = (item: NavItem) => !!item.route && route().current(item.match ?? item.route);
 const otherLots = computed(() => lots.value.filter((l) => l.slug !== lot.value.slug));
@@ -123,6 +125,9 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             </div>
 
             <div class="mt-auto flex flex-col gap-0.5 border-t border-forest-600 pt-3">
+                <button v-if="install.canPrompt.value" type="button" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-left text-[14px] text-peach hover:text-white" @click="install.prompt()">
+                    <Icon name="download" :size="18" />Install the app
+                </button>
                 <Link :href="route('home')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
                     <Icon name="home" :size="18" />Marketplace
                 </Link>

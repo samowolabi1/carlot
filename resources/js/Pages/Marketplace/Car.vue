@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
+import CarFinance, { type CarFinanceData } from '@/components/finance/CarFinance.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import LotBadge from '@/components/marketplace/LotBadge.vue';
 import SaveButton from '@/components/marketplace/SaveButton.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import type { PublicLot } from '@/components/marketplace/types-lot';
+import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
+import { formatNaira } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -34,7 +37,11 @@ const props = defineProps<{
     preview: string | null;
     saved: boolean;
     similar: CarCardData[];
+    finance: CarFinanceData | null;
 }>();
+
+const budget = useBudget();
+const withinBudget = computed(() => !props.sold && !!props.finance && budget.within(props.finance.price));
 
 const slide = ref(0);
 const track = ref<HTMLElement | null>(null);
@@ -87,7 +94,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Icon name="chevronLeft" :size="20" :stroke-width="2" />
                     </Link>
                     <div class="absolute top-4 right-4 flex gap-2">
-                        <ShareMenu :title="car.title" :text="shareText" :url="car.url" compact />
+                        <ShareMenu :title="car.title" :text="shareText" :url="car.url" :vehicle="sold || preview ? undefined : car.ulid" images compact />
                         <SaveButton v-if="!sold" :ulid="car.ulid" :saved="saved" />
                     </div>
                     <template v-if="car.photos.length > 1">
@@ -111,6 +118,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <span v-if="car.reserved" class="rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">Reserved</span>
                         <span v-if="car.new_arrival" class="rounded-xl bg-blush px-2.5 py-1 text-[12px] font-semibold text-clay-dark">New arrival</span>
                         <span v-if="lot.verified" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">Verified lot</span>
+                        <span v-if="withinBudget" class="rounded-xl bg-[#E3F1E8] px-2.5 py-1 text-[12px] font-semibold text-success">Within your budget</span>
                     </div>
 
                     <div class="flex flex-col gap-1 lg:hidden">
@@ -119,6 +127,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[28px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
+                        <p v-if="!sold && finance" class="text-[13px] text-muted">
+                            From <strong class="text-ink">{{ formatNaira(finance.from.monthly) }}/mo</strong> · {{ finance.from.deposit_percent }}% down, {{ finance.from.months }} mo,
+                            {{ finance.from.rate }}% p.a. (estimate) · <Link :href="route('budget')">Check budget</Link>
+                        </p>
                     </div>
 
                     <dl class="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -129,6 +141,11 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                     </dl>
 
                     <div class="lg:hidden"><LotBadge :lot="lot" /></div>
+
+                    <div v-if="!sold && !preview" class="flex items-center gap-3">
+                        <span class="grow text-[13px] text-muted">Send it to a friend or post it to your Status</span>
+                        <ShareMenu :title="car.title" :text="shareText" :url="car.url" :vehicle="car.ulid" label="Share" images />
+                    </div>
 
                     <section v-if="car.description" class="flex flex-col gap-2">
                         <h2 class="font-sans text-[16px] font-bold">About this car</h2>
@@ -146,6 +163,8 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             </ul>
                         </div>
                     </section>
+
+                    <template v-if="!sold && finance"><CarFinance :finance="finance" /></template>
 
                     <button
                         v-if="!sold"
@@ -169,6 +188,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[30px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
+                        <p v-if="!sold && finance" class="text-[13px] text-muted">
+                            From <strong class="text-ink">{{ formatNaira(finance.from.monthly) }}/mo</strong> ({{ finance.from.deposit_percent }}% down, {{ finance.from.months }} mo, estimate) ·
+                            <Link :href="route('budget')">What can I afford?</Link>
+                        </p>
                         <template v-if="!sold && !preview">
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
