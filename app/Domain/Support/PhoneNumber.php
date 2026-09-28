@@ -43,6 +43,18 @@ final class PhoneNumber
         }
     }
 
+    /** "+2348031234412" → "0803 123 4412" in the number's own country format. */
+    public static function display(string $e164): string
+    {
+        $util = PhoneNumberUtil::getInstance();
+
+        try {
+            return $util->format($util->parse($e164), PhoneNumberFormat::NATIONAL);
+        } catch (NumberParseException) {
+            return $e164;
+        }
+    }
+
     /** "+2348031234412" → "+234 803 *** 4412", as shown in the dealer UI. */
     public static function mask(string $e164): string
     {

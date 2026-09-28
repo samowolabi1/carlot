@@ -63,6 +63,20 @@ Run all four before pushing.
   on the media disk. Originals never reach the public disk.
 - `new arrival` (7 days) and `ageing` (45 days) are computed from `listed_at`, not stored.
 
+## Marketplace (S3)
+
+- Buyers only see `Vehicle::marketplace()`: available or reserved cars at active lots. Public
+  pages use `MarketplacePresenter`, never model `toArray()`, so dealer-only fields don't leak
+  (VIN shows as its last four characters).
+- Search goes through the `VehicleSearch` interface: `MeilisearchVehicleSearch` (Scout,
+  production) or `DatabaseVehicleSearch` (SCOUT_DRIVER=null, Laragon). Any new filter must be
+  added to both and to the shared engine tests in `tests/Feature/Marketplace/VehicleSearchTest.php`
+  (set `MEILISEARCH_TEST_HOST` to run the Meilisearch side locally).
+- Share previews: controllers pass `->withViewData(['meta' => [...]])`; `app.blade.php` renders
+  the Open Graph tags on the server.
+- The buyer's location lives in localStorage (`useLocation`) and is only sent as query params
+  for distance sorting; it is never stored server-side.
+
 ## External services
 
 Each sits behind an interface so it can be swapped by market: `SmsGateway` (log | Termii), `VinDecoder` (NHTSA vPIC);
@@ -80,7 +94,7 @@ rather than fake data.
 
 ## Sprint plan (TDD)
 
-S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace · S4 Appointments · S5 Lot Manager lite ·
+S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments · S5 Lot Manager lite ·
 S6 Sharing + budgeting (MVP launch) · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 

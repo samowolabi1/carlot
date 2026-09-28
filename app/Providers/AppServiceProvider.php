@@ -9,6 +9,9 @@ use App\Domain\Inventory\Support\VinDecoder;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Policies\LotPolicy;
 use App\Domain\Lots\Support\CurrentLot;
+use App\Domain\Marketplace\Search\DatabaseVehicleSearch;
+use App\Domain\Marketplace\Search\MeilisearchVehicleSearch;
+use App\Domain\Marketplace\Search\VehicleSearch;
 use App\Domain\Messaging\LogSmsGateway;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\TermiiSmsGateway;
@@ -24,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(CurrentLot::class);
+
+        $this->app->bind(VehicleSearch::class, fn () => config('scout.driver') === 'meilisearch'
+            ? new MeilisearchVehicleSearch
+            : new DatabaseVehicleSearch);
 
         $this->app->bind(VinDecoder::class, fn () => new NhtsaVinDecoder(config('services.nhtsa.base_url')));
 

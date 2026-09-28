@@ -3,6 +3,7 @@
 namespace App\Domain\Accounts\Models;
 
 use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotMember;
@@ -82,6 +83,12 @@ class User extends Authenticatable implements FilamentUser, HasName
             ->using(LotMember::class)
             ->withPivot(['role', 'accepted_at'])
             ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Vehicle, $this> */
+    public function favourites(): BelongsToMany
+    {
+        return $this->belongsToMany(Vehicle::class, 'favourites')->withPivot('saved_price')->withTimestamps();
     }
 
     public function isAdmin(): bool

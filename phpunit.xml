@@ -34,6 +34,8 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="NHTSA_BASE_URL" value="https://vpic.nhtsa.dot.gov/api" force="true"/>
         <env name="SMS_DRIVER" value="log" force="true"/>
+        <env name="SCOUT_DRIVER" value="null" force="true"/>
+        <env name="SCOUT_QUEUE" value="false" force="true"/>
         <env name="LOTLINK_UPLOAD_DISK" value="local" force="true"/>
         <env name="LOTLINK_MEDIA_DISK" value="public" force="true"/>
     </php>

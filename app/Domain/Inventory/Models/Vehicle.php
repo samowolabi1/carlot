@@ -12,6 +12,7 @@ use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Lots\Concerns\BelongsToLot;
+use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Support\Money;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,9 +23,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int $id
@@ -58,11 +61,12 @@ use Illuminate\Support\Str;
  * @property Carbon|null $price_changed_at
  * @property int|null $created_by
  * @property-read int|null $ready_media_count
+ * @property-read Pivot $pivot
  */
 class Vehicle extends Model
 {
     /** @use HasFactory<VehicleFactory> */
-    use BelongsToLot, HasFactory, HasUlids, SoftDeletes;
+    use BelongsToLot, HasFactory, HasUlids, Searchable, SoftDeletes;
 
     public const MAX_PHOTOS = 20;
 
@@ -179,6 +183,81 @@ class Vehicle extends Model
     public function scopeLive(Builder $query): void
     {
         $query->whereIn('status', VehicleStatus::live());
+    }
+
+    /**
+     * What buyers can see: available and reserved cars at approved lots.
+     *
+     * @param  Builder<Vehicle>  $query
+     */
+    public function scopeMarketplace(Builder $query): void
+    {
+        $query->withoutGlobalScope('lot')
+            ->whereIn($query->qualifyColumn('status'), VehicleStatus::live())
+            ->whereHas('lot', fn (Builder $q) => $q->where('status', LotStatus::Active));
+    }
+
+    public function isOnMarketplace(): bool
+    {
+        return in_array($this->status, VehicleStatus::live(), true)
+            && ! $this->trashed()
+            && $this->lot()->where('status', LotStatus::Active)->exists();
+    }
+
+    /** "/car/01j9…-2018-toyota-camry-se" */
+    public function publicPath(): string
+    {
+        return '/car/'.$this->ulid.($this->slug ? '-'.$this->slug : '');
+    }
+
+    /* Search index (Scout + Meilisearch). Only marketplace cars are indexed. */
+
+    public function searchableAs(): string
+    {
+        return config('scout.prefix').'vehicles';
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->isOnMarketplace();
+    }
+
+    /** @return array<string, mixed> */
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['make', 'model', 'lot']);
+
+        return [
+            'id' => $this->id,
+            'ulid' => $this->ulid,
+            'title' => $this->title(),
+            'make' => $this->make?->name,
+            'model' => $this->model?->name,
+            'trim' => $this->trim,
+            'description' => $this->description,
+            'lot_name' => $this->lot->name,
+            'lot_id' => $this->lot_id,
+            'city' => $this->lot->city,
+            'make_id' => $this->make_id,
+            'vehicle_model_id' => $this->vehicle_model_id,
+            'body_type' => $this->body_type?->value,
+            'condition' => $this->condition?->value,
+            'transmission' => $this->transmission?->value,
+            'fuel' => $this->fuel?->value,
+            'colour' => $this->colour ? Str::lower($this->colour) : null,
+            'year' => $this->year,
+            'price' => $this->price,
+            'mileage_km' => $this->mileage_km,
+            'status' => $this->status->value,
+            'listed_at' => $this->listed_at?->getTimestamp(),
+            '_geo' => $this->lot->hasLocation() ? ['lat' => $this->lot->latitude, 'lng' => $this->lot->longitude] : null,
+        ];
+    }
+
+    /** @param Builder<Vehicle> $query */
+    protected function makeAllSearchableUsing(Builder $query): Builder
+    {
+        return $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot']);
     }
 
     /** "2018 Toyota Camry SE". Needs make and model loaded to avoid extra queries in lists. */

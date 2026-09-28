@@ -12,12 +12,15 @@
         "php": "^8.3",
         "filament/filament": "^3.3",
         "giggsey/libphonenumber-for-php": "^8.13",
+        "http-interop/http-factory-guzzle": "^1.2",
         "inertiajs/inertia-laravel": "^2.0",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
+        "laravel/scout": "^10.11",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.29",
+        "meilisearch/meilisearch-php": "^1.11",
         "tightenco/ziggy": "^2.5"
     },
     "require-dev": {

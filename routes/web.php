@@ -10,11 +10,21 @@ use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
 use App\Http\Controllers\Dealer\VinDecodeController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\Marketplace\CarController;
+use App\Http\Controllers\Marketplace\CompareController;
+use App\Http\Controllers\Marketplace\FavouriteController;
+use App\Http\Controllers\Marketplace\HomeController;
+use App\Http\Controllers\Marketplace\LotSiteController;
+use App\Http\Controllers\Marketplace\SearchController;
 use Illuminate\Support\Facades\Route;
 
+// Marketplace (M4) and lot mini-sites (M6)
 Route::get('/', HomeController::class)->name('home');
+Route::get('/cars', SearchController::class)->middleware('throttle:120,1')->name('cars.index');
+Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
+Route::get('/compare', CompareController::class)->name('compare');
+Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OtpLoginController::class, 'create'])->name('login');
@@ -30,6 +40,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [OtpLoginController::class, 'destroy'])->name('logout');
     Route::get('/welcome', [ProfileNameController::class, 'edit'])->name('profile.name');
     Route::put('/welcome', [ProfileNameController::class, 'update'])->name('profile.name.update');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/saved', [FavouriteController::class, 'index'])->name('saved');
+    Route::post('/favourites/{vehicle}', [FavouriteController::class, 'store'])->name('favourites.store');
+    Route::delete('/favourites/{vehicle}', [FavouriteController::class, 'destroy'])->name('favourites.destroy');
+    Route::get('/favourites/{vehicle}/save', [FavouriteController::class, 'remember'])->name('favourites.remember');
 });
 
 Route::middleware(['auth', 'profile.complete'])->group(function () {

@@ -14,6 +14,21 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S3 (Marketplace) ✅**
+
+| Area | What works |
+| --- | --- |
+| Search (M4) | `/cars` with text search, make, body type, price, year, mileage, gearbox, condition and fuel filters, sorting, and removable filter chips. Filter sheet on phones, sidebar on desktop. |
+| Near me | Uses the phone's location (asked first, never stored on the server) to sort by distance or limit to 5–100 km, with distances on every card. |
+| Search engines | Meilisearch in production (typo-tolerant, geo filters) via Laravel Scout; plain MySQL on Laragon. Both pass the same tests. |
+| Car page | `/car/{id}-{slug}`: photo gallery, specs, features, lot card with open/closed status and directions, WhatsApp (message pre-filled with the car and link) and Call buttons, share menu, similar cars. Link previews (Open Graph) are rendered on the server. Sold cars stay reachable but marked sold. |
+| Compare | Up to 3 cars side by side, best value in each row highlighted. |
+| Favourites | Heart on every car; guests sign in and the car is saved when they return. `/saved` shows price drops. |
+| Lot mini-site (M6) | `/l/{slug}`: branded page with logo, cover and colour, stock with quick filters, opening hours, directions, call, WhatsApp and share. Unapproved lots can preview their own page. |
+| Quality | 149 tests, including the search suite on both engines against a real Meilisearch |
+
+Try it on Laragon with demo data: `php artisan db:seed --class=DemoMarketplaceSeeder` (3 demo lots, 10 cars).
+
 **Sprint S2 (Inventory) ✅**
 
 | Area | What works |
@@ -40,7 +55,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S3 Marketplace**: Meilisearch search and filters, "near me", car pages with Open Graph tags, compare, favourites and the lot mini-site.
+Next is **S4 Appointments**: opening-hours slots, booking a viewing or test drive, the dealer calendar, and WhatsApp/SMS/email reminders.
 
 ## Run it on Windows with Laragon
 
@@ -80,6 +95,19 @@ cd carlot
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
+
+### Search in production (Meilisearch)
+
+Run Meilisearch (Laravel Forge can install it, or use Meilisearch Cloud), then set
+`SCOUT_DRIVER=meilisearch`, `MEILISEARCH_HOST` and `MEILISEARCH_KEY`, and run:
+
+```bash
+php artisan scout:sync-index-settings
+php artisan scout:import "App\Domain\Inventory\Models\Vehicle"
+```
+
+Cars are added to and removed from the index automatically as they are published, hidden or
+sold, and when a lot is approved or suspended.
 
 ### Photos in production (Cloudflare R2)
 

@@ -5,6 +5,7 @@ namespace App\Domain\Lots\Models;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
+use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
 use Database\Factories\LotFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -89,6 +90,15 @@ class Lot extends Model
     protected static function newFactory(): LotFactory
     {
         return LotFactory::new();
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (Lot $lot): void {
+            if ($lot->wasChanged(['status', 'name', 'city', 'latitude', 'longitude'])) {
+                SyncLotVehiclesToSearch::dispatch($lot->id);
+            }
+        });
     }
 
     public static function uniqueSlug(string $name): string

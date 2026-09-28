@@ -16,6 +16,12 @@ jobs:
           MYSQL_ROOT_PASSWORD: password
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+      meilisearch:
+        image: getmeili/meilisearch:v1.12
+        env:
+          MEILI_MASTER_KEY: ci-master-key-1234567890
+          MEILI_NO_ANALYTICS: 'true'
+        ports: ['7700:7700']
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +57,10 @@ jobs:
           npm run typecheck
           npm run build
 
-      - name: Tests (SQLite)
+      - name: Tests (SQLite; search runs on both engines)
+        env:
+          MEILISEARCH_TEST_HOST: http://127.0.0.1:7700
+          MEILISEARCH_TEST_KEY: ci-master-key-1234567890
         run: vendor/bin/pest
 
       - name: Migrations on MySQL 8 (spatial index)
