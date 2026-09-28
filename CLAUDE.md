@@ -34,6 +34,17 @@ Run all four before pushing.
 - **Phone numbers**: always E.164 via `App\Domain\Support\PhoneNumber`; mask them in dealer UI
   until the customer engages.
 
+## Lot Manager (S5)
+
+- Sales are `SalesOrder`s; every payment, void, status change and cancel goes through its Action,
+  which locks the order row. `OrderLedger` recalculates totals from `order_payments` and keeps the
+  car's status in step (past draft = reserved, delivered = sold). Never set `vehicles.status` to
+  sold anywhere else.
+- Payments are never deleted: void with a reason. Refunds are negative payments.
+- Order and receipt numbers come from `LotCounter::next()` inside the transaction.
+- Offline-capable writes (walk-ins, orders, payments) take a `client_uuid` and must stay idempotent.
+- Customers are only messaged with `consent_whatsapp`. Changes to money or status go in `AuditLog`.
+
 ## Multi-lot tenancy
 
 - Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
@@ -106,7 +117,7 @@ rather than fake data.
 
 ## Sprint plan (TDD)
 
-S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ·
+S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) · S7 Billing + spotlight · S8 Leads + chat · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 

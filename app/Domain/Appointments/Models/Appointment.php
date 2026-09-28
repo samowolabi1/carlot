@@ -7,6 +7,7 @@ use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Enums\AppointmentType;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Concerns\BelongsToLot;
+use App\Domain\Support\StoresUtc;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -41,7 +42,7 @@ use Illuminate\Support\Carbon;
 class Appointment extends Model
 {
     /** @use HasFactory<AppointmentFactory> */
-    use BelongsToLot, HasFactory, HasUlids;
+    use BelongsToLot, HasFactory, HasUlids, StoresUtc;
 
     protected $fillable = [
         'lot_id', 'vehicle_id', 'customer_id', 'staff_id', 'type', 'starts_at', 'ends_at', 'status', 'notes',
@@ -66,15 +67,6 @@ class Appointment extends Model
             'reminded_2h_at' => 'datetime',
             'escalated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Store every date as UTC. Laravel otherwise writes a timezone-aware value's wall-clock
-     * time, so a 10:00 Lagos slot would be saved as 10:00 UTC.
-     */
-    public function fromDateTime($value): ?string
-    {
-        return parent::fromDateTime($value instanceof \DateTimeInterface ? Carbon::instance($value)->utc() : $value);
     }
 
     public function uniqueIds(): array

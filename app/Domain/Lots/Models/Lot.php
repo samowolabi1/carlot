@@ -5,6 +5,10 @@ namespace App\Domain\Lots\Models;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\LotManager\Models\FollowUpTask;
+use App\Domain\LotManager\Models\LotCustomer;
+use App\Domain\LotManager\Models\OrderPayment;
+use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
 use Database\Factories\LotFactory;
@@ -169,6 +173,35 @@ class Lot extends Model
     public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);
+    }
+
+    /**
+     * Lot Manager (M19). Scoped route bindings use these for {customer}, {order},
+     * {payment} and {task}.
+     *
+     * @return HasMany<LotCustomer, $this>
+     */
+    public function customers(): HasMany
+    {
+        return $this->hasMany(LotCustomer::class);
+    }
+
+    /** @return HasMany<SalesOrder, $this> */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(SalesOrder::class);
+    }
+
+    /** @return HasMany<OrderPayment, $this> */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class);
+    }
+
+    /** @return HasMany<FollowUpTask, $this> */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(FollowUpTask::class);
     }
 
     /** @param Builder<Lot> $query */

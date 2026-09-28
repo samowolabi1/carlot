@@ -19,6 +19,8 @@ use App\Domain\Inventory\Models\Feature;
 use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Support\VehicleStateMachine;
+use App\Domain\LotManager\Enums\OrderStatus;
+use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Money;
@@ -65,25 +67,33 @@ class VehicleController extends Controller
             ->orderByRaw("case status when 'draft' then 0 when 'available' then 1 when 'reserved' then 2 when 'hidden' then 3 else 4 end")
             ->latest('updated_at')
             ->paginate(25)
-            ->withQueryString()
-            ->through(fn (Vehicle $v) => [
-                'ulid' => $v->ulid,
-                'title' => $v->title() ?: 'Untitled draft',
-                'vin_tail' => $v->vinTail(),
-                'thumb_url' => $v->cover?->thumbUrl(),
-                'photos' => $v->ready_media_count,
-                'price' => $v->formattedPrice(),
-                'status' => $v->status->value,
-                'days_listed' => $v->daysListed(),
-                'ageing' => $v->isAgeing(),
-                'new_arrival' => $v->isNewArrival(),
-                // Quick actions on the stock list. Drafts are finished in the add-car flow,
-                // and selling goes through Lot Manager, so neither appears here.
-                'next_statuses' => $v->status === VehicleStatus::Draft ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(
-                    $stateMachine->allowedFrom($v->status),
-                    fn (VehicleStatus $s) => $s !== VehicleStatus::Sold,
-                ))),
-            ]);
+            ->withQueryString();
+
+        // Cars on an open Lot Manager order link to it instead of offering "Mark sold".
+        $orders = SalesOrder::query()->whereIn('vehicle_id', collect($vehicles->items())->pluck('id'))
+            ->whereIn('status', OrderStatus::open())
+            ->get(['ulid', 'order_no', 'vehicle_id'])
+            ->keyBy('vehicle_id');
+
+        $vehicles = $vehicles->through(fn (Vehicle $v) => [
+            'ulid' => $v->ulid,
+            'title' => $v->title() ?: 'Untitled draft',
+            'vin_tail' => $v->vinTail(),
+            'thumb_url' => $v->cover?->thumbUrl(),
+            'photos' => $v->ready_media_count,
+            'price' => $v->formattedPrice(),
+            'status' => $v->status->value,
+            'days_listed' => $v->daysListed(),
+            'ageing' => $v->isAgeing(),
+            'new_arrival' => $v->isNewArrival(),
+            'order' => ($o = $orders->get($v->id)) ? ['ulid' => $o->ulid, 'order_no' => $o->order_no] : null,
+            // Quick actions on the stock list. Drafts are finished in the add-car flow,
+            // and selling goes through Lot Manager, so neither appears here.
+            'next_statuses' => $v->status === VehicleStatus::Draft ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(
+                $stateMachine->allowedFrom($v->status),
+                fn (VehicleStatus $s) => $s !== VehicleStatus::Sold,
+            ))),
+        ]);
 
         $counts = Vehicle::query()->toBase()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
 

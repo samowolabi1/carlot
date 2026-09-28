@@ -14,6 +14,21 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S5 (Lot Manager lite) ✅**
+
+| Area | What works |
+| --- | --- |
+| Walk-in register (M19) | Dealer sidebar → Lot Manager → Today or Walk-ins → "Walk-in". Only name and phone are required; add the cars viewed (searched from your stock), interest, next step, source, budget, a note and WhatsApp consent. Returning visitors are matched by phone (E.164), so one person is one customer. "Call back" creates a follow-up for the next working day at 10:00, and the attending staff member gets a reminder when it is due. |
+| Customer book | One record per person per lot with tags (hot, cash buyer, instalment, trade-in, repeat), budget, notes and consent, plus a timeline of visits, orders, payments, follow-ups and LotLink bookings made with the same phone. Customers who already use LotLink are linked. Only that lot can see its customers. |
+| Orders (M13) | Start an order from a customer and an available or reserved car, or use "Mark sold" on the stock list, which opens an order with the car filled in. Numbers run per lot (`PM-2026-00001`). Status: draft → deposit paid → fully paid → papers ready → delivered, or cancelled. The first payment reserves the car and delivery marks it sold. Handing over a car that isn't fully paid needs the owner and a reason, which goes in the audit log. Cancelling with money paid records a refund or keeps it as credit, and puts the car back in stock. Free lots can have 10 open orders. |
+| Payments and receipts | Cash, transfer, POS or other. The order row is locked while totals are recalculated, so payments made at the same time can't corrupt the balance. Each payment gets a numbered PDF receipt that links to the order tracking page. With consent, the receipt goes to the customer on WhatsApp (SMS fallback) and by email when there is an address. Mistakes are voided with a reason, never deleted. |
+| Order tracking | `/o/{order}` is a signed link (no sign-in) showing progress, payments, balance and receipts, with "Powered by LotLink". |
+| Offline queue | If the network drops, walk-ins and payments are saved in the browser (IndexedDB), and a "N items waiting to sync" banner shows. They are sent when the connection returns. The server ignores repeats of the same `client_uuid`, so nothing is saved twice. |
+| List on LotLink | The stock list's actions now read "List on LotLink" / "Take off LotLink". A car that a paid order holds can't be un-reserved by hand. |
+| Quality | 245 tests (also on MySQL), including idempotent sync, payment balances, status flow, signed links, receipt numbering, consent, plan limit and tenancy. |
+
+Deferred as planned: instalment plans, papers checklist, car costs and profit, daily summary and reports (S10); trade-ins and reservations (S9); Paystack payments (S7); installing the PWA with an offline app shell (S6). The offline queue works when the page is already open and the signal drops.
+
 **Sprint S4 (Appointments) ✅**
 
 | Area | What works |
@@ -70,7 +85,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 | Admin | Filament panel at `/admin`: approve or suspend lots, manage users |
 | Quality | 53 Pest tests (OTP limits, tenancy isolation, invitations, onboarding, admin), Pint, Larastan level 6, vue-tsc, GitHub Actions CI |
 
-Next is **S5 Lot Manager lite**: walk-in register, customer book, orders with payments and WhatsApp receipts, the order tracking page, offline queue, and "List on LotLink".
+Next is **S6 Sharing + budgeting (MVP launch)**.
 
 ## Run it on Windows with Laragon
 
@@ -107,13 +122,17 @@ cd carlot
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
 - **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password`. Change these in `.env`
   (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) before seeding anywhere public.
+- **Lot Manager**: Dealer dashboard → Lot Manager → Today. Record a walk-in, then Stock → "Mark sold"
+  on an available car to start an order and record payments. Receipts and messages are written to
+  `storage/logs/laravel.log` while `WHATSAPP_DRIVER=log`. To test the offline queue, turn off the
+  network in the browser's DevTools and record a payment.
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
 
 ### Scheduled jobs (reminders)
 
-Reminders, no-shows and escalations run on Laravel's scheduler. On Laragon, keep
+Reminders, no-shows, escalations and follow-up reminders run on Laravel's scheduler. On Laragon, keep
 `php artisan schedule:work` running in a terminal while testing bookings. In production add one
 cron entry: `* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1`.
 
@@ -132,6 +151,9 @@ your `APP_URL` with a `{{1}}` suffix):
 | `appointment_reminder` | Utility | what, lot, when, directions | manage booking |
 | `appointment_update` | Utility | what, lot, change | manage booking |
 | `dealer_booking_alert` | Utility | event, buyer, what, when | open calendar |
+| `payment_receipt` | Utility | name, amount, lot, car, receipt no, balance | track order |
+| `order_update` | Utility | name, car, lot, update | track order |
+| `follow_up_due` | Utility | staff name, type, customer, lot | open Today |
 
 Until a template is approved, messages fall back to SMS automatically.
 
@@ -173,6 +195,7 @@ sold, and when a lot is approved or suspended.
 app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per module
   Accounts/              Users, OTP codes, SendOtp / VerifyOtp
   Lots/                  Lots, members, invitations, hours; BelongsToLot tenancy
+  LotManager/            Walk-ins, customers, orders, payments, receipts, follow-ups
   Messaging/             SmsGateway (log, Termii)
   Support/               PhoneNumber (E.164)
 app/Http/Controllers/    Thin controllers calling Actions; Dealer/ for /dealer/{lot}

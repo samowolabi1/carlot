@@ -18,6 +18,7 @@ interface Row {
     ageing: boolean;
     new_arrival: boolean;
     next_statuses: string[];
+    order: { ulid: string; order_no: string } | null;
 }
 
 const props = defineProps<{
@@ -62,7 +63,9 @@ const badge: Record<Row['status'], string> = {
     sold: 'bg-forest text-white',
 };
 
-const actionLabel: Record<string, string> = { hidden: 'Hide', available: 'Show on marketplace', reserved: 'Mark reserved' };
+// "List on LotLink" is the M3 publish flow; hiding takes a car off the marketplace.
+const actionLabel = (row: Row, next: string) =>
+    ({ hidden: 'Take off LotLink', available: row.status === 'reserved' ? 'Release reservation' : 'List on LotLink', reserved: 'Mark reserved' })[next] ?? next;
 
 function setStatus(row: Row, status: string) {
     router.patch(route('dealer.vehicles.status', [lot.value.slug, row.ulid]), { status }, { preserveScroll: true });
@@ -178,17 +181,24 @@ function editHref(row: Row) {
                     </span>
 
                     <span class="ml-auto flex shrink-0 items-center gap-3 text-[13px] font-semibold">
-                        <Link v-if="row.status === 'draft'" :href="editHref(row)">Finish listing</Link>
+                        <Link v-if="row.status === 'draft'" :href="editHref(row)">List on LotLink</Link>
                         <Link v-else :href="editHref(row)">Edit</Link>
+                        <Link v-if="row.order" :href="route('dealer.manager.orders.show', [lot.slug, row.order.ulid])" class="text-clay">Order {{ row.order.order_no }}</Link>
+                        <Link
+                            v-else-if="row.status === 'available' || row.status === 'reserved'"
+                            :href="route('dealer.manager.orders.create', { lot: lot.slug, vehicle: row.ulid })"
+                            class="text-clay"
+                            >Mark sold</Link
+                        >
                         <template v-if="canManage">
                             <button
-                                v-for="next in row.next_statuses"
+                                v-for="next in row.next_statuses.filter((n) => !(row.order && n === 'available'))"
                                 :key="next"
                                 type="button"
                                 class="text-forest hover:text-clay"
                                 @click="setStatus(row, next)"
                             >
-                                {{ actionLabel[next] }}
+                                {{ actionLabel(row, next) }}
                             </button>
                             <button v-if="row.status === 'draft' || row.status === 'hidden'" type="button" class="text-muted hover:text-danger" @click="remove(row)">Delete</button>
                         </template>

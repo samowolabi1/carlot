@@ -2,6 +2,7 @@
 import FlashMessage from '@/components/FlashMessage.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
+import { useOfflineQueue } from '@/composables/useOfflineQueue';
 import { useShared } from '@/composables/useShared';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -28,6 +29,16 @@ const nav: NavItem[] = [
     { label: 'Billing', icon: 'card' },
     { label: 'Settings', icon: 'settings', route: 'dealer.settings' },
 ];
+
+// Lot Manager (M19): the everyday tools for walk-ins, orders and payments.
+const manager: NavItem[] = [
+    { label: 'Today', icon: 'sun', route: 'dealer.manager.today' },
+    { label: 'Walk-ins', icon: 'walkIn', route: 'dealer.manager.walk-ins.index' },
+    { label: 'Customers', icon: 'book', route: 'dealer.manager.customers.index', match: 'dealer.manager.customers.*' },
+    { label: 'Orders', icon: 'receipt', route: 'dealer.manager.orders.index', match: 'dealer.manager.orders.*' },
+];
+
+const queue = useOfflineQueue(() => currentLot.value?.slug);
 
 const isActive = (item: NavItem) => !!item.route && route().current(item.match ?? item.route);
 const otherLots = computed(() => lots.value.filter((l) => l.slug !== lot.value.slug));
@@ -97,6 +108,20 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                 </template>
             </div>
 
+            <div class="flex flex-col gap-0.5">
+                <span class="px-2.5 pb-1 text-[11px] font-semibold tracking-wider text-sage uppercase">Lot Manager</span>
+                <Link
+                    v-for="item in manager"
+                    :key="item.label"
+                    :href="route(item.route!, lot.slug)"
+                    class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"
+                    :class="isActive(item) ? 'bg-forest-700 font-semibold text-white' : 'text-mist hover:text-white'"
+                    :aria-current="isActive(item) ? 'page' : undefined"
+                >
+                    <Icon :name="item.icon" :size="18" /><span class="truncate">{{ item.label }}</span>
+                </Link>
+            </div>
+
             <div class="mt-auto flex flex-col gap-0.5 border-t border-forest-600 pt-3">
                 <Link :href="route('home')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
                     <Icon name="home" :size="18" />Marketplace
@@ -129,6 +154,34 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                     Finish setting up and submit your lot so buyers can find it.
                     <Link :href="route('dealer.onboarding.show', [lot.slug, 'submit'])" class="font-semibold">Continue setup</Link>
                 </template>
+            </div>
+
+            <div
+                v-if="queue.waiting.value || queue.failed.value.length"
+                class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-apricot bg-cream px-5 py-2.5 text-[14px] text-clay-dark lg:px-8"
+                role="status"
+            >
+                <Icon name="cloudOff" :size="18" />
+                <span v-if="queue.waiting.value">
+                    <strong>{{ queue.waiting.value }} {{ queue.waiting.value === 1 ? 'item' : 'items' }} waiting to sync.</strong>
+                    They'll send when you're back online.
+                </span>
+                <span v-if="queue.failed.value.length">
+                    <strong>{{ queue.failed.value.length }} couldn't be saved:</strong>
+                    <template v-for="(item, i) in queue.failed.value" :key="item.client_uuid">
+                        {{ i ? '; ' : '' }}{{ item.label }} ({{ item.error }})
+                        <button type="button" class="font-semibold underline" @click="queue.discard(item)">Discard</button>
+                    </template>
+                </span>
+                <button
+                    v-if="queue.waiting.value"
+                    type="button"
+                    class="ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border border-apricot bg-white px-3 font-semibold"
+                    :disabled="queue.syncing.value"
+                    @click="queue.sync()"
+                >
+                    <Icon name="refresh" :size="16" /> {{ queue.syncing.value ? 'Syncing…' : 'Sync now' }}
+                </button>
             </div>
 
             <main class="flex flex-col gap-5 px-5 py-6 lg:px-8 lg:py-7">

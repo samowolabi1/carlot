@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $listing_limit
  * @property int|null $staff_limit
  * @property int $free_spotlights
+ * @property array<string, int|bool|null>|null $features
  */
 class Plan extends Model
 {
@@ -24,6 +25,14 @@ class Plan extends Model
             'price' => 'integer',
             'features' => 'array',
         ];
+    }
+
+    /** A numeric plan limit from features (e.g. open_orders); null means unlimited. */
+    public function limit(string $feature): ?int
+    {
+        $value = $this->features[$feature] ?? null;
+
+        return $value === null ? null : (int) $value;
     }
 
     public static function default(): ?self

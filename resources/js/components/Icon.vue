@@ -34,6 +34,13 @@ const paths = {
     shield: 'M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6zM9 12l2 2 4-4',
     copy: 'M9 9h11v11H9zM5 15H4V4h11v1',
     clock: 'M12 3a9 9 0 1 1 0 18a9 9 0 0 1 0-18M12 7v5l3 2',
+    sun: 'M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',
+    walkIn: 'M13 4a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3M10 21l2-6 3 3v3M9 12l2-3.5 3 1 2 3M12 8.5L10 15',
+    book: 'M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM5 18a2 2 0 0 1 2-2h11M9 8h5',
+    receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3',
+    cloudOff: 'M3 3l18 18M7 18h9M18.5 15.5A4 4 0 0 0 17 8h-1A6 6 0 0 0 8.6 6.1M5.5 8.6A5 5 0 0 0 7 18',
+    refresh: 'M20 11a8 8 0 0 0-14.7-4M4 5v4h4M4 13a8 8 0 0 0 14.7 4M20 19v-4h-4',
+    download: 'M12 4v12M7 11l5 5 5-5M4 20h16',
 } as const;
 
 export type IconName = keyof typeof paths;

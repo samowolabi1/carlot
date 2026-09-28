@@ -13,8 +13,9 @@ class PlanSeeder extends Seeder
 {
     public function run(): void
     {
+        // Lot Manager gating (TDD M19: Plan gating): Free lots keep up to 10 open orders.
         $plans = [
-            ['code' => 'free', 'name' => 'Free', 'listing_limit' => 10, 'staff_limit' => 1, 'free_spotlights' => 0],
+            ['code' => 'free', 'name' => 'Free', 'listing_limit' => 10, 'staff_limit' => 1, 'free_spotlights' => 0, 'features' => ['open_orders' => 10]],
             ['code' => 'starter', 'name' => 'Starter', 'listing_limit' => 50, 'staff_limit' => 3, 'free_spotlights' => 0],
             ['code' => 'pro', 'name' => 'Pro', 'listing_limit' => null, 'staff_limit' => 10, 'free_spotlights' => 2],
             ['code' => 'enterprise', 'name' => 'Enterprise', 'listing_limit' => null, 'staff_limit' => null, 'free_spotlights' => 2],

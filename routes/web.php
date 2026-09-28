@@ -7,6 +7,13 @@ use App\Http\Controllers\Bookings\CustomerBookingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealerHomeController;
+use App\Http\Controllers\Dealer\Manager\CustomerController;
+use App\Http\Controllers\Dealer\Manager\OrderController;
+use App\Http\Controllers\Dealer\Manager\PaymentController;
+use App\Http\Controllers\Dealer\Manager\SyncController;
+use App\Http\Controllers\Dealer\Manager\TaskController;
+use App\Http\Controllers\Dealer\Manager\TodayController;
+use App\Http\Controllers\Dealer\Manager\WalkInController;
 use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\SettingsController;
 use App\Http\Controllers\Dealer\StaffController;
@@ -20,6 +27,7 @@ use App\Http\Controllers\Marketplace\FavouriteController;
 use App\Http\Controllers\Marketplace\HomeController;
 use App\Http\Controllers\Marketplace\LotSiteController;
 use App\Http\Controllers\Marketplace\SearchController;
+use App\Http\Controllers\Orders\OrderTrackingController;
 use Illuminate\Support\Facades\Route;
 
 // Marketplace (M4) and lot mini-sites (M6)
@@ -34,6 +42,12 @@ Route::get('/lots/{lot:slug}/slots', [BookingController::class, 'slots'])->name(
 Route::get('/bookings/{appointment}', [CustomerBookingController::class, 'show'])->name('bookings.show');
 Route::get('/bookings/{appointment}/calendar.ics', [CustomerBookingController::class, 'calendar'])->name('bookings.calendar');
 Route::post('/bookings/{appointment}/cancel', [CustomerBookingController::class, 'cancel'])->middleware('throttle:10,1')->name('bookings.cancel');
+
+// Order tracking (M19). Signed links on receipts and messages; no sign-in needed.
+Route::middleware(['signed', 'throttle:60,1'])->scopeBindings()->group(function () {
+    Route::get('/o/{order}', [OrderTrackingController::class, 'show'])->name('orders.track');
+    Route::get('/o/{order}/receipts/{payment}', [OrderTrackingController::class, 'receipt'])->name('orders.receipt');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OtpLoginController::class, 'create'])->name('login');
@@ -121,5 +135,26 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'store'])->name('vehicles.media.store');
             Route::put('/vehicles/{vehicle}/media/order', [VehicleMediaController::class, 'reorder'])->name('vehicles.media.reorder');
             Route::delete('/vehicles/{vehicle}/media/{media}', [VehicleMediaController::class, 'destroy'])->name('vehicles.media.destroy');
+
+            // Lot Manager lite (M19) and sales (M13)
+            Route::prefix('/manager')->name('manager.')->group(function () {
+                Route::get('/today', TodayController::class)->name('today');
+                Route::get('/walk-ins', [WalkInController::class, 'index'])->name('walk-ins.index');
+                Route::post('/walk-ins', [WalkInController::class, 'store'])->name('walk-ins.store');
+                Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+                Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+                Route::patch('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+                Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+                Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+                Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+                Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+                Route::patch('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+                Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+                Route::post('/orders/{order}/payments', [PaymentController::class, 'store'])->name('orders.payments.store');
+                Route::get('/orders/{order}/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('orders.receipt');
+                Route::post('/payments/{payment}/void', [PaymentController::class, 'void'])->name('payments.void');
+                Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+                Route::post('/sync', SyncController::class)->middleware('throttle:30,1')->name('sync');
+            });
         });
 });
