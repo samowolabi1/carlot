@@ -5,9 +5,12 @@ namespace App\Domain\LotManager\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Leads\Actions\CloseLeadsForSale;
+use App\Domain\LotManager\Enums\DocumentStatus;
 use App\Domain\LotManager\Enums\OrderStatus;
+use App\Domain\LotManager\Models\OrderDocument;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Notifications\OrderUpdate;
+use App\Domain\LotManager\Support\OrderDocuments;
 use App\Domain\LotManager\Support\OrderLedger;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
@@ -39,6 +42,11 @@ class ChangeOrderStatus
                 throw ValidationException::withMessages(['status' => "A {$from->label()} order can't be marked {$to->label()}."]);
             }
 
+            // TDD M19: papers ready needs every required paper in.
+            if ($to === OrderStatus::PapersReady && ($missing = OrderDocuments::missing($locked)) !== []) {
+                throw ValidationException::withMessages(['status' => 'Still waiting for: '.implode(', ', $missing).'.']);
+            }
+
             if ($to === OrderStatus::Delivered && $locked->balance > 0) {
                 $lot = Lot::findOrFail($locked->lot_id);
 
@@ -56,6 +64,9 @@ class ChangeOrderStatus
             $locked->status = $to;
             if ($to === OrderStatus::Delivered) {
                 $locked->delivered_at = now();
+                // Whatever came in for the car goes with it.
+                OrderDocument::withoutGlobalScopes()->where('sales_order_id', $locked->id)->where('status', DocumentStatus::Received)
+                    ->update(['status' => DocumentStatus::HandedOver, 'handed_over_at' => now()]);
             }
             $locked->save();
 

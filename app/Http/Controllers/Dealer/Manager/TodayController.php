@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Dealer\Manager;
 
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\LotManager\Enums\InstalmentStatus;
 use App\Domain\LotManager\Enums\OrderStatus;
 use App\Domain\LotManager\Models\FollowUpTask;
+use App\Domain\LotManager\Models\Instalment;
 use App\Domain\LotManager\Models\OrderPayment;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Models\WalkIn;
@@ -39,6 +41,11 @@ class TodayController extends Controller
             ->where('balance', '>', 0)
             ->orderByDesc('balance')->limit(10)->get();
 
+        // TDD M19: overdue instalments show on the owner's day.
+        $overdue = Instalment::query()->where('lot_id', $lot->id)->where('status', InstalmentStatus::Overdue)
+            ->whereIn('sales_order_id', SalesOrder::query()->whereIn('status', OrderStatus::open())->select('id'))
+            ->with(['order.customer', 'order.vehicle.make', 'order.vehicle.model'])->orderBy('due_date')->limit(20)->get();
+
         $received = (int) OrderPayment::query()->where('lot_id', $lot->id)->whereNull('voided_at')
             ->where('amount', '>', 0)
             ->whereBetween('paid_at', [$start->utc(), $end->utc()])
@@ -55,6 +62,14 @@ class TodayController extends Controller
             'walkIns' => $walkIns->map(fn (WalkIn $w) => Presenter::walkIn($w, $tz, $cars)),
             'tasks' => $tasks->map(fn (FollowUpTask $t) => Presenter::task($t, $tz)),
             'balances' => $balances->map(fn (SalesOrder $o) => Presenter::order($o, $tz)),
+            'overdue' => $overdue->map(fn (Instalment $i) => [
+                'order_ulid' => $i->order->ulid,
+                'order_no' => $i->order->order_no,
+                'customer' => $i->order->customer->name ?? '',
+                'car' => $i->order->vehicle?->title(),
+                'amount' => $i->order->money($i->remaining()),
+                'due' => $i->due_date->format('j M'),
+            ]),
             'stock' => Presenter::stock(),
             'options' => Presenter::options(),
         ]);

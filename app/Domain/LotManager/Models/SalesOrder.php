@@ -42,6 +42,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $cancelled_reason
  * @property string|null $notes
  * @property string|null $client_uuid
+ * @property string $payment_plan full or instalments
+ * @property int|null $instalments_from_paid total_paid when the plan was set
  */
 class SalesOrder extends Model
 {
@@ -105,6 +107,22 @@ class SalesOrder extends Model
     }
 
     /** What the customer owes in total: agreed price less discount and trade-in. */
+    /** @return HasMany<Instalment, $this> */
+    public function instalments(): HasMany
+    {
+        return $this->hasMany(Instalment::class)->orderBy('sequence');
+    }
+
+    /**
+     * Scoped route bindings for {document}.
+     *
+     * @return HasMany<OrderDocument, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(OrderDocument::class)->orderBy('id');
+    }
+
     public function total(): int
     {
         return max(0, $this->agreed_price - $this->discount - $this->trade_in_value);

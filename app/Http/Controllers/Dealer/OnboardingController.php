@@ -20,6 +20,11 @@ class OnboardingController extends Controller
 
     public function create(Request $request): Response
     {
+        // /dealer/start?ref=CODE from another lot's invite (TDD M19: lot referrals).
+        if ($request->filled('ref')) {
+            $request->session()->put('referral_code', strtoupper(substr((string) $request->query('ref'), 0, 12)));
+        }
+
         return Inertia::render('Dealer/Onboarding', [
             'step' => 'business',
             'steps' => self::STEPS,
@@ -30,7 +35,7 @@ class OnboardingController extends Controller
 
     public function store(LotProfileRequest $request, CreateLot $createLot): RedirectResponse
     {
-        $lot = $createLot->run($request->user(), $request->validated());
+        $lot = $createLot->run($request->user(), $request->validated(), $request->session()->pull('referral_code'));
 
         return redirect()->route('dealer.onboarding.show', [$lot, 'branding']);
     }

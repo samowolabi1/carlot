@@ -17,6 +17,7 @@ use App\Domain\LotManager\Models\LotCustomer;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Support\CustomerBook;
 use App\Domain\LotManager\Support\LotCounter;
+use App\Domain\LotManager\Support\OrderDocuments;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Name;
@@ -111,6 +112,7 @@ class CreateOrder
 
                 AuditLog::record('order.created', $order, ['order_no' => $order->order_no, 'agreed_price' => $agreed], $staff);
 
+                OrderDocuments::ensure($order);
                 $reservation?->forceFill(['status' => ReservationStatus::Converted, 'ended_at' => now(), 'end_reason' => "Order {$order->order_no}", 'sales_order_id' => $order->id])->save();
 
                 return $order;

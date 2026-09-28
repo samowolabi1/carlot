@@ -32,3 +32,8 @@ Schedule::command('chat:notify-unread')->everyFiveMinutes()->withoutOverlapping(
 Schedule::command('offers:expire')->hourly()->withoutOverlapping();
 Schedule::command('reservations:expire')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('appointments:release-unpaid')->everyFiveMinutes()->withoutOverlapping();
+
+// Lot Manager Pro (TDD M19). Hourly so each lot gets them at its own local time.
+Schedule::command('manager:instalment-reminders')->hourly()->withoutOverlapping();
+Schedule::command('manager:mark-overdue')->hourlyAt(30)->withoutOverlapping();
+Schedule::command('manager:daily-summary')->hourly()->withoutOverlapping();

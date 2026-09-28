@@ -33,6 +33,9 @@ defineProps<{
         directions: string | null;
         url: string;
     };
+    instalments: { due: string; amount: string; status: string; status_label: string }[];
+    next: { due: string; amount: string; overdue: boolean } | null;
+    documents: { name: string; status: string; status_label: string }[];
     poweredBy: string;
 }>();
 </script>
@@ -90,6 +93,34 @@ defineProps<{
                             <span class="block text-[13px] text-muted">{{ p.method }} · {{ p.when }}</span>
                         </span>
                         <a :href="p.receipt_url" target="_blank" rel="noopener" class="inline-flex h-11 items-center gap-1.5 font-semibold"><Icon name="download" :size="16" /> Receipt</a>
+                    </li>
+                </ul>
+            </section>
+
+            <section v-if="instalments.length" class="card p-4" aria-labelledby="plan-heading">
+                <h2 id="plan-heading" class="mb-2 font-sans text-[16px] font-bold">Instalment plan</h2>
+                <p v-if="next" class="mb-3 rounded-xl px-3 py-2.5 text-[14px]" :class="next.overdue ? 'bg-[#FDECEC] text-danger' : 'bg-cream text-clay-dark'">
+                    <strong>{{ next.overdue ? 'Overdue' : 'Next' }}: {{ next.amount }}</strong> {{ next.overdue ? 'was due' : 'due' }} {{ next.due }}
+                </p>
+                <ul class="divide-y divide-divider text-[14px]">
+                    <li v-for="i in instalments" :key="i.due" class="flex items-center justify-between gap-3 py-2">
+                        <span>{{ i.due }}</span>
+                        <span class="flex items-center gap-3">
+                            <span class="font-semibold">{{ i.amount }}</span>
+                            <span class="w-20 text-right text-[13px]" :class="i.status === 'paid' ? 'text-success' : i.status === 'overdue' ? 'text-danger' : 'text-muted'">{{ i.status_label }}</span>
+                        </span>
+                    </li>
+                </ul>
+            </section>
+
+            <section v-if="documents.length && !order.cancelled" class="card p-4" aria-labelledby="papers-heading">
+                <h2 id="papers-heading" class="mb-2 font-sans text-[16px] font-bold">Papers and handover</h2>
+                <ul class="flex flex-col gap-1.5 text-[14px]">
+                    <li v-for="d in documents" :key="d.name" class="flex items-center justify-between gap-3">
+                        <span class="flex items-center gap-2">
+                            <Icon :name="d.status === 'pending' ? 'clock' : 'check'" :size="16" :class="d.status === 'pending' ? 'text-muted' : 'text-success'" />{{ d.name }}
+                        </span>
+                        <span class="text-[13px] text-muted">{{ d.status_label }}</span>
                     </li>
                 </ul>
             </section>

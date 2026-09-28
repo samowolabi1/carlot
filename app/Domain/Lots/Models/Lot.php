@@ -70,6 +70,8 @@ use Illuminate\Support\Str;
  * @property bool $reservation_refundable
  * @property int|null $test_drive_deposit
  * @property string|null $paystack_subaccount
+ * @property string|null $referral_code
+ * @property Carbon|null $daily_summary_sent_on
  * @property-read string|null $logo_url
  * @property-read string|null $cover_url
  * @property-read LotMember $pivot
@@ -107,6 +109,7 @@ class Lot extends Model
             'reservation_deposit' => 'integer',
             'reservation_refundable' => 'boolean',
             'test_drive_deposit' => 'integer',
+            'daily_summary_sent_on' => 'date',
         ];
     }
 
@@ -212,6 +215,16 @@ class Lot extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /** "PRIMEAB3": shared as /dealer/start?ref=… (TDD M19: lot referrals). */
+    public function referralCode(): string
+    {
+        if ($this->referral_code === null) {
+            $this->forceFill(['referral_code' => strtoupper(Str::random(8))])->save();
+        }
+
+        return (string) $this->referral_code;
     }
 
     /** A plan feature such as offers or deposits (spec: monetisation). */

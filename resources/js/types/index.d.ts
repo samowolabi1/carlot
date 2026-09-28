@@ -31,6 +31,7 @@ export interface CurrentLot {
     submitted: boolean;
     leads_badge: number;
     deals_badge: number;
+    can_costs: boolean;
 }
 
 export interface HoursDay {

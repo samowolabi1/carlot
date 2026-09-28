@@ -206,6 +206,7 @@ function editHref(row: Row) {
                             class="text-clay"
                             >Mark sold</Link
                         >
+                        <Link v-if="lot.can_costs && row.status !== 'draft'" :href="route('dealer.vehicles.costs.index', [lot.slug, row.ulid])">Costs</Link>
                         <button v-if="canManage && row.status === 'available' && row.share_url" type="button" class="text-clay hover:text-clay-dark" @click="spotlighting = row">Spotlight</button>
                         <template v-if="canManage">
                             <button

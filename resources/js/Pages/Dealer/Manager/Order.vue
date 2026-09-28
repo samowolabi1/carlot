@@ -6,7 +6,7 @@ import { submitOrQueue, useOfflineQueue } from '@/composables/useOfflineQueue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
 import { formatNaira } from '@/lib/format';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 interface Payment {
@@ -38,12 +38,36 @@ type Order = OrderRow & {
     track_url: string;
 };
 
+interface InstalmentRow {
+    sequence: number;
+    due: string;
+    amount: string;
+    paid: string;
+    status: 'pending' | 'part_paid' | 'paid' | 'overdue';
+    status_label: string;
+}
+
+interface DocumentRow {
+    ulid: string;
+    name: string;
+    mandatory: boolean;
+    status: 'pending' | 'received' | 'handed_over';
+    status_label: string;
+    removable: boolean;
+    when: string | null;
+    file_url: string | null;
+}
+
 const props = defineProps<{
     order: Order;
     customer: Customer | null;
     payments: Payment[];
     steps: { value: string; label: string; done: boolean }[];
     can: { pay: boolean; papers: boolean; deliver: boolean; void: boolean; cancel: boolean };
+    instalments: InstalmentRow[];
+    plan: { allowed: boolean; can: boolean; frequencies: Option[]; first_due: string };
+    documents: DocumentRow[];
+    profit: { revenue: string; costs: string; profit: string; margin: number | null; negative: boolean; costs_url: string } | null;
     methods: Option[];
     share: string | null;
 }>();
@@ -120,6 +144,42 @@ const hasPayments = computed(() => props.payments.some((p) => !p.void && !p.refu
 function cancelOrder() {
     cancelForm.post(route('dealer.manager.orders.cancel', [lot.value.slug, props.order.ulid]), { preserveScroll: true, onSuccess: () => (cancelling.value = false) });
 }
+
+// Instalment plan (TDD M19): split what is left into up to 24 dated amounts.
+const planning = ref(false);
+const planForm = useForm({ count: 3, first_due: props.plan.first_due, frequency: 'monthly' });
+const perInstalment = computed(() => (planForm.count > 0 ? Math.floor(props.order.balance_major / planForm.count) : 0));
+
+function savePlan() {
+    planForm.put(route('dealer.manager.orders.instalments.update', [lot.value.slug, props.order.ulid]), { preserveScroll: true, onSuccess: () => (planning.value = false) });
+}
+
+function removePlan() {
+    if (confirm('Remove the instalment plan? Payments already made stay on the order.')) {
+        router.delete(route('dealer.manager.orders.instalments.destroy', [lot.value.slug, props.order.ulid]), { preserveScroll: true });
+    }
+}
+
+// Papers and handover checklist.
+function setDocument(d: DocumentRow, status: DocumentRow['status'], file?: File) {
+    router.post(route('dealer.manager.orders.documents.update', [lot.value.slug, props.order.ulid, d.ulid]), { status, file: file ?? null }, { preserveScroll: true, forceFormData: !!file });
+}
+
+function uploadDocument(d: DocumentRow, event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) setDocument(d, d.status === 'pending' ? 'received' : d.status, file);
+}
+
+const extra = useForm({ label: '', mandatory: false });
+function addDocument() {
+    extra.post(route('dealer.manager.orders.documents.store', [lot.value.slug, props.order.ulid]), { preserveScroll: true, onSuccess: () => extra.reset() });
+}
+
+function removeDocument(d: DocumentRow) {
+    router.delete(route('dealer.manager.orders.documents.destroy', [lot.value.slug, props.order.ulid, d.ulid]), { preserveScroll: true });
+}
+
+const missingPapers = computed(() => props.documents.filter((d) => d.mandatory && d.status === 'pending').map((d) => d.name));
 
 const copied = ref(false);
 async function copyLink() {
@@ -205,6 +265,62 @@ async function copyLink() {
                         </div>
                     </form>
                 </section>
+
+                <section v-if="instalments.length || (plan.can && order.open)" class="card overflow-hidden" aria-labelledby="plan-heading">
+                    <div class="flex items-center justify-between gap-3 border-b border-divider px-4 py-3">
+                        <h2 id="plan-heading" class="font-sans text-[16px] font-bold">Instalment plan</h2>
+                        <div v-if="plan.can && plan.allowed" class="flex gap-3 text-[14px] font-semibold">
+                            <button type="button" class="h-11" @click="planning = !planning">{{ instalments.length ? 'Change' : 'Set up a plan' }}</button>
+                            <button v-if="instalments.length" type="button" class="h-11 text-muted hover:text-danger" @click="removePlan">Remove</button>
+                        </div>
+                    </div>
+                    <p v-if="!plan.allowed" class="px-4 py-4 text-[14px] text-muted">
+                        Instalment plans with reminders come with the Starter plan. <Link :href="route('dealer.billing', lot.slug)">Upgrade</Link>
+                    </p>
+                    <p v-else-if="!instalments.length && !planning" class="px-4 py-4 text-[14px] text-muted">
+                        Split the {{ order.balance }} balance into dated amounts. The customer gets a WhatsApp reminder 3 days before each one and on the day.
+                    </p>
+                    <form v-if="planning" class="grid gap-3 border-b border-divider bg-ivory p-4 sm:grid-cols-3" @submit.prevent="savePlan">
+                        <label class="field-label">Instalments<input v-model.number="planForm.count" type="number" min="1" max="24" class="field" required /></label>
+                        <label class="field-label">First one due<input v-model="planForm.first_due" type="date" class="field" required /></label>
+                        <label class="field-label">
+                            How often
+                            <select v-model="planForm.frequency" class="field">
+                                <option v-for="f in plan.frequencies" :key="f.value" :value="f.value">{{ f.label }}</option>
+                            </select>
+                        </label>
+                        <p class="text-[13px] text-muted sm:col-span-2">
+                            About {{ formatNaira(perInstalment) }} each. LotLink doesn't lend money: this is your own arrangement with the customer.
+                        </p>
+                        <button type="submit" class="btn btn-dark h-11 text-[14px]" :disabled="planForm.processing">Save plan</button>
+                        <InputError class="sm:col-span-3" :message="planForm.errors.count || planForm.errors.first_due" />
+                    </form>
+                    <ul v-if="instalments.length" class="divide-y divide-divider">
+                        <li v-for="i in instalments" :key="i.sequence" class="flex items-center justify-between gap-3 px-4 py-2.5 text-[14px]">
+                            <span class="flex flex-col"><span class="font-semibold">{{ i.amount }}</span><span class="text-[13px] text-muted">{{ i.due }}</span></span>
+                            <span class="text-right text-[13px]">
+                                <span class="block font-semibold" :class="{ 'text-success': i.status === 'paid', 'text-danger': i.status === 'overdue', 'text-clay-dark': i.status === 'part_paid' }">{{ i.status_label }}</span>
+                                <span v-if="i.status === 'part_paid' || i.status === 'overdue'" class="text-muted">{{ i.paid }} paid</span>
+                            </span>
+                        </li>
+                    </ul>
+                </section>
+
+                <section v-if="profit" class="card p-5" aria-labelledby="profit-heading">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <h2 id="profit-heading" class="font-sans text-[16px] font-bold">Profit</h2>
+                        <Link :href="profit.costs_url" class="text-[14px] font-semibold">Car costs</Link>
+                    </div>
+                    <dl class="flex flex-col gap-2 text-[14px]">
+                        <div class="flex justify-between"><dt class="text-muted">Sale (after discount)</dt><dd>{{ profit.revenue }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-muted">Car costs</dt><dd>−{{ profit.costs }}</dd></div>
+                        <div class="flex justify-between border-t border-divider pt-2 font-semibold">
+                            <dt>{{ profit.negative ? 'Loss' : 'Profit' }}</dt>
+                            <dd :class="profit.negative ? 'text-danger' : 'text-success'">{{ profit.negative ? '−' : '' }}{{ profit.profit }}<template v-if="profit.margin !== null"> ({{ profit.margin }}%)</template></dd>
+                        </div>
+                    </dl>
+                    <p class="mt-2 text-[12px] text-muted">Only owners and managers see this.</p>
+                </section>
             </div>
 
             <div class="flex flex-col gap-5">
@@ -230,10 +346,36 @@ async function copyLink() {
                     </form>
                 </section>
 
-                <section v-if="order.open && (can.papers || can.deliver || order.status !== 'draft')" class="card flex flex-col gap-3 p-5" aria-labelledby="handover-heading">
+                <section class="card flex flex-col gap-3 p-5" aria-labelledby="handover-heading">
                     <h2 id="handover-heading" class="font-sans text-[16px] font-bold">Papers and handover</h2>
+                    <ul class="flex flex-col divide-y divide-divider rounded-xl border border-line">
+                        <li v-for="d in documents" :key="d.ulid" class="flex flex-col gap-2 px-3 py-2.5 text-[14px]">
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="flex flex-col">
+                                    <span class="font-semibold">{{ d.name }}<span v-if="d.mandatory" class="text-clay" title="Needed before papers are ready"> *</span></span>
+                                    <span class="text-[12px] text-muted">{{ d.status_label }}<template v-if="d.when"> · {{ d.when }}</template></span>
+                                </span>
+                                <a v-if="d.file_url" :href="d.file_url" class="inline-flex h-9 items-center gap-1 text-[13px] font-semibold"><Icon name="download" :size="14" /> Scan</a>
+                            </div>
+                            <div v-if="order.open || d.status !== 'handed_over'" class="flex flex-wrap gap-1.5">
+                                <button v-if="d.status === 'pending'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold" @click="setDocument(d, 'received')">Received</button>
+                                <button v-if="d.status === 'received'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold" @click="setDocument(d, 'handed_over')">Handed over</button>
+                                <button v-if="d.status !== 'pending'" type="button" class="h-9 px-1.5 text-[13px] text-muted" @click="setDocument(d, 'pending')">Undo</button>
+                                <label class="inline-flex h-9 cursor-pointer items-center rounded-lg border border-dashed border-line-strong px-2.5 text-[13px] font-semibold">
+                                    {{ d.file_url ? 'Replace scan' : 'Add scan' }}
+                                    <input type="file" accept="image/*,application/pdf" class="sr-only" @change="uploadDocument(d, $event)" />
+                                </label>
+                                <button v-if="d.removable" type="button" class="h-9 px-1.5 text-[13px] text-muted hover:text-danger" @click="removeDocument(d)">Remove</button>
+                            </div>
+                        </li>
+                    </ul>
+                    <form v-if="order.open" class="flex gap-2" @submit.prevent="addDocument">
+                        <label class="grow"><span class="sr-only">Another item</span><input v-model="extra.label" class="field h-11" maxlength="80" placeholder="Another item, e.g. service book" /></label>
+                        <button type="submit" class="btn btn-outline h-11 text-[14px]" :disabled="!extra.label || extra.processing">Add</button>
+                    </form>
+                    <p v-if="can.papers && missingPapers.length" class="text-[13px] text-muted">Papers are ready once these are in: {{ missingPapers.join(', ') }}.</p>
                     <InputError :message="status.errors.status" />
-                    <button v-if="can.papers" type="button" class="btn btn-outline h-11 text-[14px]" :disabled="status.processing" @click="setStatus('papers_ready')">Papers are ready</button>
+                    <button v-if="can.papers" type="button" class="btn btn-outline h-11 text-[14px]" :disabled="status.processing || missingPapers.length > 0" @click="setStatus('papers_ready')">Papers are ready</button>
                     <button v-if="can.deliver" type="button" class="btn btn-dark h-11 text-[14px]" :disabled="status.processing" @click="setStatus('delivered')">
                         <Icon name="check" :size="18" /> Hand over the car
                     </button>

@@ -17,17 +17,22 @@ use App\Http\Controllers\Dealer\DealController;
 use App\Http\Controllers\Dealer\DealerHomeController;
 use App\Http\Controllers\Dealer\LeadController;
 use App\Http\Controllers\Dealer\Manager\CustomerController;
+use App\Http\Controllers\Dealer\Manager\DocumentController;
+use App\Http\Controllers\Dealer\Manager\InstalmentController;
 use App\Http\Controllers\Dealer\Manager\OrderController;
 use App\Http\Controllers\Dealer\Manager\PaymentController;
+use App\Http\Controllers\Dealer\Manager\ReportController;
 use App\Http\Controllers\Dealer\Manager\SyncController;
 use App\Http\Controllers\Dealer\Manager\TaskController;
 use App\Http\Controllers\Dealer\Manager\TodayController;
 use App\Http\Controllers\Dealer\Manager\WalkInController;
 use App\Http\Controllers\Dealer\OnboardingController;
+use App\Http\Controllers\Dealer\ReferralController;
 use App\Http\Controllers\Dealer\SettingsController;
 use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
+use App\Http\Controllers\Dealer\VehicleCostController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
 use App\Http\Controllers\Dealer\VinDecodeController;
 use App\Http\Controllers\Deals\OfferController;
@@ -210,6 +215,13 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/leads/{lead}/messages', [LeadController::class, 'message'])->middleware('throttle:60,1')->name('leads.messages.store');
             Route::post('/leads/{lead}/read', [LeadController::class, 'read'])->name('leads.read');
 
+            // Car costs (M19, owners and managers)
+            Route::get('/vehicles/{vehicle}/costs', [VehicleCostController::class, 'index'])->name('vehicles.costs.index');
+            Route::post('/vehicles/{vehicle}/costs', [VehicleCostController::class, 'store'])->name('vehicles.costs.store');
+            Route::delete('/vehicles/{vehicle}/costs/{cost}', [VehicleCostController::class, 'destroy'])->name('vehicles.costs.destroy');
+            Route::get('/vehicles/{vehicle}/costs/{cost}/receipt', [VehicleCostController::class, 'receipt'])->name('vehicles.costs.receipt');
+            Route::get('/referrals', ReferralController::class)->name('referrals');
+
             // Offers, trade-ins and reservations (M12)
             Route::get('/offers', [DealController::class, 'index'])->name('offers.index');
             Route::post('/offers/{offer}/respond', [DealController::class, 'respond'])->name('offers.respond');
@@ -248,6 +260,14 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
                 Route::get('/orders/{order}/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('orders.receipt');
                 Route::post('/payments/{payment}/void', [PaymentController::class, 'void'])->name('payments.void');
                 Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+                // Lot Manager Pro (M19): instalments, papers and handover, reports
+                Route::put('/orders/{order}/instalments', [InstalmentController::class, 'update'])->name('orders.instalments.update');
+                Route::delete('/orders/{order}/instalments', [InstalmentController::class, 'destroy'])->name('orders.instalments.destroy');
+                Route::post('/orders/{order}/documents', [DocumentController::class, 'store'])->name('orders.documents.store');
+                Route::post('/orders/{order}/documents/{document}', [DocumentController::class, 'update'])->name('orders.documents.update');
+                Route::delete('/orders/{order}/documents/{document}', [DocumentController::class, 'destroy'])->name('orders.documents.destroy');
+                Route::get('/orders/{order}/documents/{document}/file', [DocumentController::class, 'file'])->name('orders.documents.file');
+                Route::get('/reports', ReportController::class)->name('reports');
                 Route::post('/sync', SyncController::class)->middleware('throttle:30,1')->name('sync');
             });
         });

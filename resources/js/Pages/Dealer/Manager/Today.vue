@@ -13,6 +13,7 @@ defineProps<{
     walkIns: WalkInRow[];
     tasks: TaskRow[];
     balances: OrderRow[];
+    overdue: { order_ulid: string; order_no: string; customer: string; car: string | null; amount: string; due: string }[];
     stock: StockCar[];
     options: ManagerOptions;
 }>();
@@ -107,6 +108,21 @@ function task(t: TaskRow, action: 'done' | 'tomorrow') {
                                 <button type="button" class="btn btn-dark h-10 px-3 text-[13px]" @click="task(t, 'done')"><Icon name="check" :size="16" /> Done</button>
                                 <button type="button" class="h-10 px-2 text-[13px] font-semibold text-muted hover:text-ink" @click="task(t, 'tomorrow')">Tomorrow</button>
                             </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section v-if="overdue.length" class="card overflow-hidden border-2 border-danger/40" aria-labelledby="overdue-heading">
+                    <h2 id="overdue-heading" class="border-b border-divider px-4 py-3 font-sans text-[16px] font-bold text-danger">Overdue instalments</h2>
+                    <ul class="divide-y divide-divider">
+                        <li v-for="o in overdue" :key="`${o.order_ulid}-${o.due}`">
+                            <Link :href="route('dealer.manager.orders.show', [lot.slug, o.order_ulid])" class="flex items-center justify-between gap-3 px-4 py-3 text-ink no-underline hover:bg-ivory">
+                                <span class="min-w-0">
+                                    <span class="block truncate font-semibold">{{ o.customer }}</span>
+                                    <span class="block truncate text-[13px] text-muted">{{ o.car }} · {{ o.order_no }} · was due {{ o.due }}</span>
+                                </span>
+                                <span class="shrink-0 font-display font-bold text-danger">{{ o.amount }}</span>
+                            </Link>
                         </li>
                     </ul>
                 </section>

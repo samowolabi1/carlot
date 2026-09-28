@@ -8,13 +8,14 @@ use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Billing\Notifications\BillingNotice;
+use App\Domain\Lots\Actions\RewardReferral;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\Plan;
 use Throwable;
 
 class ActivateSubscription
 {
-    public function __construct(private readonly PaymentGateway $gateway) {}
+    public function __construct(private readonly PaymentGateway $gateway, private readonly RewardReferral $rewardReferral) {}
 
     /** A paid plan starts (or changes) now and runs for a month; Paystack renews it. */
     public function run(Payment $payment, GatewayTransaction $transaction): Subscription
@@ -50,6 +51,7 @@ class ActivateSubscription
         $lot->forceFill(['plan_id' => $plan->id])->save();
 
         $lot->owner?->notify(new BillingNotice($lot, "Your {$plan->name} plan is active. Thank you!"));
+        $this->rewardReferral->run($lot);
 
         return $subscription;
     }

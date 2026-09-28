@@ -37,6 +37,7 @@ const manager: NavItem[] = [
     { label: 'Walk-ins', icon: 'walkIn', route: 'dealer.manager.walk-ins.index' },
     { label: 'Customers', icon: 'book', route: 'dealer.manager.customers.index', match: 'dealer.manager.customers.*' },
     { label: 'Orders', icon: 'receipt', route: 'dealer.manager.orders.index', match: 'dealer.manager.orders.*' },
+    { label: 'Reports', icon: 'chart', route: 'dealer.manager.reports', match: 'dealer.manager.reports' },
 ];
 
 const queue = useOfflineQueue(() => currentLot.value?.slug);
@@ -114,7 +115,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             <div class="flex flex-col gap-0.5">
                 <span class="px-2.5 pb-1 text-[11px] font-semibold tracking-wider text-sage uppercase">Lot Manager</span>
                 <Link
-                    v-for="item in manager"
+                    v-for="item in manager.filter((m) => m.route !== 'dealer.manager.reports' || ['owner', 'manager'].includes(lot.role ?? ''))"
                     :key="item.label"
                     :href="route(item.route!, lot.slug)"
                     class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"

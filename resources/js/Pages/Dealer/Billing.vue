@@ -4,7 +4,7 @@ import InputError from '@/components/InputError.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
 import { formatNaira } from '@/lib/format';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Plan {
@@ -104,6 +104,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                     <template v-else>No payment needed</template>
                 </span>
                 <span v-if="subscription.coupon" class="text-[13px] text-peach">Code {{ subscription.coupon }} applied</span>
+                <Link v-if="can.manage" :href="route('dealer.referrals', lot.slug)" class="text-[13px] font-semibold text-peach hover:text-white">Refer a lot and get a free month</Link>
                 <div v-if="can.manage && subscription.can_update_card" class="mt-1.5 flex gap-2">
                     <a :href="route('dealer.billing.card', lot.slug)" class="inline-flex h-11 items-center rounded-[10px] border border-forest-600 px-3.5 text-[13px] font-semibold text-white no-underline hover:text-white">Update card</a>
                 </div>

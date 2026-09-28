@@ -45,6 +45,18 @@ Run all four before pushing.
 - Offline-capable writes (walk-ins, orders, payments) take a `client_uuid` and must stay idempotent.
 - Customers are only messaged with `consent_whatsapp`. Changes to money or status go in `AuditLog`.
 
+## Lot Manager Pro (S10)
+
+- Instalments are a schedule, not money: `SetInstalmentPlan` creates them and `InstalmentSchedule::apply()`
+  recomputes paid amounts and status from `total_paid − instalments_from_paid` (oldest first). It is
+  called from `OrderLedger`, so payments, voids and refunds keep it right; never edit `paid_amount` directly.
+- Papers: `OrderDocuments::ensure()` gives each order its checklist; papers_ready needs the mandatory
+  items in; delivery marks received items handed over. Scans and cost receipts use the private `local` disk.
+- Costs and profit (`VehicleCost`, `Profit`) are gated by `LotPolicy::viewCosts` (owner/manager + Pro).
+  Never add them to customer pages, receipts, presenters for buyers or API resources.
+- Reports come from `ManagerReports` (one shape for the page and `ReportExport` to Excel).
+- Time-of-day jobs (reminders 09:00, summary 19:00) run hourly and check each lot's local time.
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -173,7 +185,7 @@ rather than fake data.
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
+S10 Lot Manager pro ✅ · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
 Redis/Horizon (the database queue for now).

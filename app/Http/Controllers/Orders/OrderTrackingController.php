@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Orders;
 
+use App\Domain\LotManager\Enums\InstalmentStatus;
 use App\Domain\LotManager\Enums\OrderStatus;
+use App\Domain\LotManager\Models\Instalment;
+use App\Domain\LotManager\Models\OrderDocument;
 use App\Domain\LotManager\Models\OrderPayment;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Support\OrderLinks;
@@ -22,7 +25,7 @@ class OrderTrackingController extends Controller
 {
     public function show(SalesOrder $order): Response
     {
-        $order->load(['vehicle.make', 'vehicle.model', 'vehicle.cover', 'customer', 'payments']);
+        $order->load(['vehicle.make', 'vehicle.model', 'vehicle.cover', 'customer', 'payments', 'instalments', 'documents']);
         $lot = Lot::withTrashed()->findOrFail($order->lot_id);
         $tz = $lot->timezone;
 
@@ -56,6 +59,17 @@ class OrderTrackingController extends Controller
                 'receipt_no' => $p->receipt_no,
                 'receipt_url' => OrderLinks::receipt($p, $order),
             ]),
+            // TDD M19: the customer sees their next instalment and the papers.
+            'instalments' => $order->instalments->map(fn (Instalment $i) => [
+                'due' => $i->due_date->format('j M Y'),
+                'amount' => $order->money($i->amount),
+                'status' => $i->status->value,
+                'status_label' => $i->status->label(),
+            ]),
+            'next' => ($n = $order->instalments->first(fn (Instalment $i) => $i->status !== InstalmentStatus::Paid))
+                ? ['due' => $n->due_date->format('D j M'), 'amount' => $order->money($n->remaining()), 'overdue' => $n->status === InstalmentStatus::Overdue]
+                : null,
+            'documents' => $order->documents->map(fn (OrderDocument $d) => ['name' => $d->name(), 'status' => $d->status->value, 'status_label' => $d->status->label()]),
             'lot' => [
                 'name' => $lot->name,
                 'initials' => $lot->initials(),

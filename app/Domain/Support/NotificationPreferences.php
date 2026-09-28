@@ -18,6 +18,7 @@ final class NotificationPreferences
         'new_stock' => ['New cars from lots I follow', 'buyers'],
         'leads' => ['New leads and follow-ups', 'dealers'],
         'billing' => ['Billing and plan', 'dealers'],
+        'summary' => ['Daily summary', 'dealers'],
     ];
 
     public const OPTIONAL = ['phone', 'mail'];

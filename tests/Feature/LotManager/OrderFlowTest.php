@@ -7,6 +7,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\LotManager\Actions\RecordPayment;
 use App\Domain\LotManager\Enums\OrderStatus;
 use App\Domain\LotManager\Models\LotCustomer;
+use App\Domain\LotManager\Models\OrderDocument;
 use App\Domain\LotManager\Models\OrderPayment;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Actions\CreateLot;
@@ -182,6 +183,10 @@ it('voids a payment with a reason and reruns the totals', function () {
 it('hands over a paid car and marks it sold', function () {
     $order = ($this->order)();
     ($this->pay)($order, '10000000');
+
+    // Papers ready waits for the required papers (S10).
+    $this->actingAs($this->owner)->patch(route('dealer.manager.orders.update', [$this->lot, $order]), ['status' => 'papers_ready'])->assertSessionHasErrors('status');
+    OrderDocument::withoutGlobalScopes()->where('sales_order_id', $order->id)->where('mandatory', true)->update(['status' => 'received', 'received_at' => now()]);
 
     $this->actingAs($this->owner)->patch(route('dealer.manager.orders.update', [$this->lot, $order]), ['status' => 'papers_ready'])->assertSessionHasNoErrors();
     expect($order->fresh()->status)->toBe(OrderStatus::PapersReady)

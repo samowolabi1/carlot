@@ -66,6 +66,8 @@ class HandleInertiaRequests extends Middleware
                     'status_label' => $lot->status->label(),
                     'plan' => $lot->plan?->name,
                     'role' => $request->user()?->roleIn($lot)?->value,
+                    // Car costs and profit: owners and managers on Pro (TDD M19).
+                    'can_costs' => (bool) $request->user()?->can('viewCosts', $lot),
                     'submitted' => $lot->submitted_at !== null,
                     // Leads badge: new leads plus leads with unread chat messages.
                     'leads_badge' => Lead::query()->where('stage', LeadStage::New)->count()

@@ -14,6 +14,19 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S10 (Lot Manager Pro) ✅**
+
+| Area | What works |
+| --- | --- |
+| Instalment plans | On an order, owners and managers split what is left into up to 24 dated amounts (weekly, every 2 weeks or monthly). Payments go to the oldest instalment first, and voids and refunds put the schedule right again. Customers who agreed to WhatsApp get a reminder 3 days before and on the day, from 09:00 lot time (`manager:instalment-reminders`). Unpaid instalments turn overdue after their date (`manager:mark-overdue`) and show on **Today** and in the balances report. The tracking page shows the plan and the next amount due. LotLink doesn't lend money: the plan is the lot's own arrangement. |
+| Papers and handover | Every order has a checklist: customs papers, proof of ownership and plate number (required), plus registration and spare key. You can add your own items. Each item can be marked received or handed over and have a scan attached; scans are private. "Papers are ready" waits for the required items. Handing over the car marks everything received as handed over. The customer sees the checklist on the tracking page. |
+| Car costs and profit | **Costs** on each car in Stock records the purchase price and extras (clearing, repairs, transport, cleaning), with an optional receipt. The order page shows profit (agreed price − discount − costs). Only owners and managers see costs; they never appear on customer pages, receipts or the API. |
+| Daily summary | At 19:00 lot time the owner gets one WhatsApp message covering the day's walk-ins, new orders, money received by method, balances still owed and overdue instalments, with a link to the report (`manager:daily-summary`). |
+| Reports | **Lot Manager → Reports**: sales by month, outstanding balances, walk-ins by source with conversion, and staff performance, for the last 30 or 90 days, this year or last year. Owners and managers only. Profit, the staff report and Excel export are Pro. |
+| Referrals | **Billing → Refer a lot**: each lot has a code and a link (`/dealer/start?ref=CODE`). When a lot that signed up with it pays for its first plan, the referrer gets a free month. It is added to the end of their trial or plan; a lot on Free gets a month of Starter. |
+| Plan gating | Instalments and the daily summary from Starter; costs, profit, the staff report and Excel export on Pro (TDD M19). |
+| Quality | 390 tests, including instalment allocation, voids, overdue marking and reminders in lot time, the papers rule, the sales role and costs, report figures, Excel export, the daily summary and referral rewards. |
+
 **Sprint S9 (Offers and deals) ✅**
 
 | Area | What works |
@@ -230,6 +243,8 @@ your `APP_URL` with a `{{1}}` suffix):
 | `offer_update` | Utility | name, car, lot, update | open bookings and offers |
 | `trade_in_update` | Utility | name, car, lot, update | open bookings and offers |
 | `reservation_update` | Utility | name, car, lot, update | open bookings and offers |
+| `instalment_reminder` | Utility | name, amount, car, lot, due date | track order |
+| `daily_summary` | Utility | lot, date, walk-ins, new orders, money received, balances due, overdue instalments | open the report |
 
 Until a template is approved, messages fall back to SMS automatically.
 

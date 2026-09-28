@@ -38,6 +38,18 @@ class LotPolicy
         return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager);
     }
 
+    /** Car costs and profit (TDD M19): owners and managers on a plan with them; never sales. */
+    public function viewCosts(User $user, Lot $lot): bool
+    {
+        return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager) && $lot->planAllows('costs');
+    }
+
+    /** Lot Manager reports; the staff report and Excel export also need viewCosts' plan. */
+    public function viewReports(User $user, Lot $lot): bool
+    {
+        return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager);
+    }
+
     public function submit(User $user, Lot $lot): bool
     {
         return $user->hasLotRole($lot, LotRole::Owner);

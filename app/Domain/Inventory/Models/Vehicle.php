@@ -11,6 +11,7 @@ use App\Domain\Inventory\Enums\MediaStatus;
 use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
 use App\Domain\Inventory\Enums\VehicleStatus;
+use App\Domain\LotManager\Models\VehicleCost;
 use App\Domain\Lots\Concerns\BelongsToLot;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Support\Money;
@@ -206,6 +207,16 @@ class Vehicle extends Model
     }
 
     /** "/car/01j9…-2018-toyota-camry-se" */
+    /**
+     * What the lot spent on the car; owners and managers only. Scoped {cost} bindings.
+     *
+     * @return HasMany<VehicleCost, $this>
+     */
+    public function costs(): HasMany
+    {
+        return $this->hasMany(VehicleCost::class);
+    }
+
     public function publicPath(): string
     {
         return '/car/'.$this->ulid.($this->slug ? '-'.$this->slug : '');

@@ -36,6 +36,7 @@ class OrderLedger
         }
 
         $order->save();
+        InstalmentSchedule::apply($order);
         $this->syncVehicle($order);
     }
 
