@@ -2,15 +2,19 @@
 
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\BudgetController;
+use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
 use App\Http\Controllers\Billing\SandboxCheckoutController;
 use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Bookings\CustomerBookingController;
+use App\Http\Controllers\Chat\ConversationController;
+use App\Http\Controllers\Chat\LeadIntentController;
 use App\Http\Controllers\Dealer\BillingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealerHomeController;
+use App\Http\Controllers\Dealer\LeadController;
 use App\Http\Controllers\Dealer\Manager\CustomerController;
 use App\Http\Controllers\Dealer\Manager\OrderController;
 use App\Http\Controllers\Dealer\Manager\PaymentController;
@@ -90,6 +94,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/saved', [FavouriteController::class, 'index'])->name('saved');
     Route::get('/account', AccountController::class)->name('account');
     Route::get('/following', [FollowController::class, 'index'])->name('following');
+
+    // Notification centre (M18)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/settings', [NotificationController::class, 'settings'])->name('notifications.settings');
+    Route::put('/notifications/settings', [NotificationController::class, 'update'])->name('notifications.update');
+
+    // Chat (M11). Poll is used by both sides when Reverb isn't running.
+    Route::get('/messages', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations/start', [ConversationController::class, 'start'])->middleware('throttle:20,1')->name('conversations.start');
+    Route::post('/conversations', [ConversationController::class, 'store'])->middleware('throttle:20,1')->name('conversations.store');
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'reply'])->middleware('throttle:60,1')->name('conversations.reply');
+    Route::get('/conversations/{conversation}/messages', [ConversationController::class, 'poll'])->middleware('throttle:240,1')->name('conversations.poll');
+    Route::post('/leads/intent', LeadIntentController::class)->middleware('throttle:30,1')->name('leads.intent');
     Route::post('/lots/{lot:slug}/follow', [FollowController::class, 'store'])->name('lots.follow');
     Route::delete('/lots/{lot:slug}/follow', [FollowController::class, 'destroy'])->name('lots.unfollow');
     Route::put('/budget', [BudgetController::class, 'update'])->name('budget.update');
@@ -162,6 +180,14 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'store'])->name('vehicles.media.store');
             Route::put('/vehicles/{vehicle}/media/order', [VehicleMediaController::class, 'reorder'])->name('vehicles.media.reorder');
             Route::delete('/vehicles/{vehicle}/media/{media}', [VehicleMediaController::class, 'destroy'])->name('vehicles.media.destroy');
+
+            // Leads and chat (M11)
+            Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+            Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
+            Route::patch('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
+            Route::post('/leads/{lead}/notes', [LeadController::class, 'note'])->name('leads.notes.store');
+            Route::post('/leads/{lead}/messages', [LeadController::class, 'message'])->middleware('throttle:60,1')->name('leads.messages.store');
+            Route::post('/leads/{lead}/read', [LeadController::class, 'read'])->name('leads.read');
 
             // Billing and spotlight (M16, M5)
             Route::get('/billing', [BillingController::class, 'show'])->name('billing');

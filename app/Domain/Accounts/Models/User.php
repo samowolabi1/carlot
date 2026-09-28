@@ -35,6 +35,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $last_seen_at
  * @property Carbon|null $deleted_at
+ * @property array<string, array<string, bool>>|null $notification_preferences
  */
 class User extends Authenticatable implements FilamentUser, HasName
 {
@@ -60,6 +61,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function casts(): array
     {
         return [
+            'notification_preferences' => 'array',
             'phone_verified_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'last_seen_at' => 'datetime',

@@ -71,6 +71,18 @@ Run all four before pushing.
   (both engines).
 - Tests bind `Tests\Support\FakePaymentGateway` (`$this->payments`); never call Paystack.
 
+## Leads and chat (S8)
+
+- Every enquiry goes through `CaptureLead` (dedupes lot + buyer + car over 30 days, adds the buyer to
+  the customer book, alerts the lot). New lead sources (offers, trade-ins, reservations) call it too.
+- Chat messages only go through `SendMessage`: it updates read markers, moves a new lead to
+  contacted on the lot's first reply and broadcasts `MessageSent`. Chat must keep working without
+  Reverb (`useChat` polls when `VITE_REVERB_APP_KEY` is empty).
+- Channel rules in `routes/channels.php` must match the page policies (`ConversationPolicy`).
+- Notifications that go by WhatsApp/SMS or email pass their channels through
+  `NotificationPreferences::filter()` with their type, and add `database` with a `toArray()`
+  (`kind`, `text`, `url`) so they show in the notification centre.
+
 ## Multi-lot tenancy
 
 - Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
@@ -144,7 +156,7 @@ rather than fake data.
 ## Sprint plan (TDD)
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
-S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat · S9 Offers ·
+S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),

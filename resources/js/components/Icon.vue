@@ -41,6 +41,7 @@ const paths = {
     cloudOff: 'M3 3l18 18M7 18h9M18.5 15.5A4 4 0 0 0 17 8h-1A6 6 0 0 0 8.6 6.1M5.5 8.6A5 5 0 0 0 7 18',
     refresh: 'M20 11a8 8 0 0 0-14.7-4M4 5v4h4M4 13a8 8 0 0 0 14.7 4M20 19v-4h-4',
     download: 'M12 4v12M7 11l5 5 5-5M4 20h16',
+    chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
 } as const;
 
 export type IconName = keyof typeof paths;

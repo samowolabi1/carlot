@@ -29,6 +29,7 @@ export interface CurrentLot {
     plan: string | null;
     role: LotRole | null;
     submitted: boolean;
+    leads_badge: number;
 }
 
 export interface HoursDay {
@@ -74,6 +75,7 @@ export interface SharedProps {
     lots: LotSummary[];
     currentLot: CurrentLot | null;
     budget: number | null;
+    unread: { notifications: number; messages: number } | null;
     flash: { success: string | null; error: string | null };
     errors: Record<string, string>;
 }

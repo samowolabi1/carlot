@@ -7,8 +7,13 @@ use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Enums\AppointmentType;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Notifications\BookingNotice;
+use App\Domain\Appointments\Support\AppointmentText;
 use App\Domain\Appointments\Support\SlotGenerator;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Leads\Actions\CaptureLead;
+use App\Domain\Leads\Actions\SendMessage;
+use App\Domain\Leads\Enums\LeadSource;
+use App\Domain\Leads\Models\Message;
 use App\Domain\Lots\Models\Lot;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +24,8 @@ class BookAppointment
     public function __construct(
         private readonly SlotGenerator $slots,
         private readonly NotifyLot $notifyLot,
+        private readonly CaptureLead $captureLead,
+        private readonly SendMessage $sendMessage,
     ) {}
 
     /**
@@ -70,7 +77,12 @@ class BookAppointment
             ]);
         });
 
-        // Lead capture from bookings arrives with the lead manager (S8).
+        // Every booking creates or updates a lead (TDD M7), and shows in its chat if there is one.
+        $lead = $this->captureLead->run($lot, $customer, LeadSource::Booking, $vehicle);
+        if ($conversation = $lead->conversation()->first()) {
+            $this->sendMessage->run($conversation, null, Message::SYSTEM, AppointmentText::what($appointment).' booked · '.AppointmentText::when($appointment, $lot));
+        }
+
         $customer->notify(new BookingNotice($appointment, BookingNotice::RECEIVED));
         $this->notifyLot->run($appointment, $appointment->status === AppointmentStatus::Confirmed ? 'new' : 'needs_confirmation');
 

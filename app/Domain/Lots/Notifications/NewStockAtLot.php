@@ -4,6 +4,7 @@ namespace App\Domain\Lots\Notifications;
 
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Messaging\Message;
+use App\Domain\Support\NotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -24,7 +25,7 @@ class NewStockAtLot extends Notification implements ShouldQueue
     /** @return list<string> */
     public function via(object $notifiable): array
     {
-        return ['phone', 'database'];
+        return NotificationPreferences::filter($notifiable, 'new_stock', ['phone', 'database']);
     }
 
     public function summary(): string
@@ -44,6 +45,6 @@ class NewStockAtLot extends Notification implements ShouldQueue
     /** @return array<string, string> */
     public function toArray(object $notifiable): array
     {
-        return ['lot' => $this->lot->slug, 'text' => $this->summary(), 'url' => route('lots.show', $this->lot->slug)];
+        return ['kind' => 'new_stock', 'lot' => $this->lot->slug, 'text' => $this->summary(), 'url' => route('lots.show', $this->lot->slug)];
     }
 }

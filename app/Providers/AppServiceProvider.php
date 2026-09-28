@@ -11,6 +11,8 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
 use App\Domain\Inventory\Support\VinDecoder;
+use App\Domain\Leads\Models\Conversation;
+use App\Domain\Leads\Policies\ConversationPolicy;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Policies\SalesOrderPolicy;
 use App\Domain\Lots\Models\Lot;
@@ -87,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(SalesOrder::class, SalesOrderPolicy::class);
+        Gate::policy(Conversation::class, ConversationPolicy::class);
 
         RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
     }

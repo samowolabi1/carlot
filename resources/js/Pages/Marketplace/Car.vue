@@ -9,9 +9,11 @@ import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import type { PublicLot } from '@/components/marketplace/types-lot';
 import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
+import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { formatNaira } from '@/lib/format';
-import { Head, Link } from '@inertiajs/vue3';
+import { recordIntent } from '@/lib/leads';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -64,6 +66,24 @@ const whatsappHref = computed(() => {
 });
 const bookHref = computed(() => route('bookings.create', { lot: props.lot.slug, car: props.car.ulid }));
 const testDriveHref = computed(() => route('bookings.create', { lot: props.lot.slug, car: props.car.ulid, type: 'test_drive' }));
+const { user, lots } = useShared();
+// Staff looking at their own lot's car can't message themselves.
+const ownLot = computed(() => !!user.value && !!props.lot.slug && lots.value.some((l) => l.slug === props.lot.slug));
+const starting = ref(false);
+
+function intent(source: 'whatsapp' | 'call') {
+    if (user.value && !ownLot.value) recordIntent(source, { vehicle: props.car.ulid });
+}
+
+/** In-app chat with the lot (design 15). Guests sign in first and come back to the thread. */
+function message() {
+    if (!user.value) {
+        router.visit(route('conversations.start', { vehicle: props.car.ulid }));
+        return;
+    }
+    router.post(route('conversations.store'), { vehicle: props.car.ulid }, { onStart: () => (starting.value = true), onFinish: () => (starting.value = false) });
+}
+
 const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${props.car.price}` : ''} at ${props.lot.name}`);
 </script>
 
@@ -195,8 +215,9 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <template v-if="!sold && !preview">
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
-                            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline w-full"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
-                            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline w-full"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
+                            <button v-if="!ownLot" type="button" class="btn btn-outline w-full" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Message the lot</button>
+                            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline w-full" @click="intent('whatsapp')"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
+                            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline w-full" @click="intent('call')"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
                         </template>
                     </div>
                     <LotBadge :lot="lot" />
@@ -213,9 +234,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
 
         <!-- Phone action bar -->
         <div v-if="!sold && !preview" class="fixed inset-x-0 bottom-[76px] z-30 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-3 md:hidden">
-            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot"><Icon name="phone" :size="20" /></a>
-            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] rounded-[14px] px-4"><Icon name="whatsapp" :size="18" /> Chat</a>
-            <Link :href="bookHref" class="btn btn-primary h-[52px] grow rounded-[14px]">Book a viewing</Link>
+            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot" @click="intent('call')"><Icon name="phone" :size="20" /></a>
+            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="WhatsApp the lot" @click="intent('whatsapp')"><Icon name="whatsapp" :size="20" /></a>
+            <button v-if="!ownLot" type="button" class="btn btn-outline h-[52px] shrink-0 rounded-[14px] px-3" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Chat</button>
+            <Link :href="bookHref" class="btn btn-primary h-[52px] grow rounded-[14px] px-3 whitespace-nowrap">Book viewing</Link>
         </div>
     </CustomerLayout>
 </template>

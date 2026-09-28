@@ -5,6 +5,7 @@ import { usePwaInstall } from '@/composables/usePwaInstall';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { formatNaira } from '@/lib/format';
 import { Head, Link } from '@inertiajs/vue3';
+import { useShared } from '@/composables/useShared';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -15,6 +16,7 @@ const props = defineProps<{
     lots: { name: string; url: string }[];
 }>();
 
+const { unread } = useShared();
 const local = useBudget();
 const install = usePwaInstall();
 // A budget worked out before signing in still shows until it is saved to the account.
@@ -36,6 +38,9 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
             </div>
 
             <nav class="card overflow-hidden" aria-label="Your LotLink">
+                <Link :href="route('conversations.index')" :class="row"
+                    >Messages<span v-if="unread?.messages" class="rounded-full bg-clay px-2 py-0.5 text-[12px] font-semibold text-white">{{ unread.messages }} new</span></Link
+                >
                 <Link :href="route('budget')" :class="row">My budget<span class="text-[13px] text-muted">{{ budgetLabel ? `Up to ${budgetLabel}` : 'Work it out' }}</span></Link>
                 <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
                 <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
@@ -60,7 +65,7 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
             <nav class="card overflow-hidden" aria-label="Settings">
                 <button v-if="install.canPrompt.value" type="button" :class="row" class="w-full text-left" @click="install.prompt()">Install the LotLink app<Icon name="download" :size="18" class="text-muted" /></button>
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
-                <span :class="row" class="text-muted/60" aria-disabled="true">Notifications<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
+                <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <span :class="row" class="text-muted/60" aria-disabled="true">Privacy and my data<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
             </nav>
 

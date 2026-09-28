@@ -88,7 +88,7 @@ it('emails a calendar file when the buyer has an email address', function () {
     Notification::assertSentTo($this->buyer, BookingNotice::class, function (BookingNotice $n, array $channels) {
         $mail = $n->toMail($this->buyer);
 
-        return $channels === ['phone', 'mail'] && $mail->rawAttachments[0]['name'] === 'lotlink-visit.ics';
+        return $channels === ['phone', 'mail', 'database'] && $mail->rawAttachments[0]['name'] === 'lotlink-visit.ics';
     });
 });
 

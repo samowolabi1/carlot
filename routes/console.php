@@ -23,3 +23,7 @@ Schedule::command('share-links:prune')->daily();
 Schedule::command('subscriptions:enforce-limits')->dailyAt('02:00')->withoutOverlapping();
 Schedule::command('spotlights:expire')->hourly()->withoutOverlapping();
 Schedule::command('followers:notify')->everyThirtyMinutes()->withoutOverlapping();
+
+// Leads and chat (TDD M11)
+Schedule::command('leads:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
+Schedule::command('chat:notify-unread')->everyFiveMinutes()->withoutOverlapping();

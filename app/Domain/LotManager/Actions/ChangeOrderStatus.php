@@ -4,6 +4,7 @@ namespace App\Domain\LotManager\Actions;
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Audit\AuditLog;
+use App\Domain\Leads\Actions\CloseLeadsForSale;
 use App\Domain\LotManager\Enums\OrderStatus;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Notifications\OrderUpdate;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class ChangeOrderStatus
 {
-    public function __construct(private readonly OrderLedger $ledger) {}
+    public function __construct(private readonly OrderLedger $ledger, private readonly CloseLeadsForSale $closeLeads) {}
 
     /**
      * The steps staff take by hand: papers ready, then delivered. Payments move the
@@ -59,6 +60,9 @@ class ChangeOrderStatus
             $locked->save();
 
             $this->ledger->syncVehicle($locked);
+            if ($to === OrderStatus::Delivered) {
+                $this->closeLeads->run($locked);
+            }
             AuditLog::record('order.status', $locked, ['from' => $from->value, 'to' => $to->value], $user);
 
             return $locked;

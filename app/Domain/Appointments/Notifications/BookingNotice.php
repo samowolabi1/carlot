@@ -7,6 +7,7 @@ use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Support\AppointmentText;
 use App\Domain\Appointments\Support\IcsCalendar;
 use App\Domain\Messaging\Message;
+use App\Domain\Support\NotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -38,7 +39,7 @@ class BookingNotice extends Notification implements ShouldQueue
     /** @return list<string> */
     public function via(object $notifiable): array
     {
-        return $notifiable->email ? ['phone', 'mail'] : ['phone'];
+        return NotificationPreferences::filter($notifiable, 'bookings', $notifiable->email ? ['phone', 'mail', 'database'] : ['phone', 'database']);
     }
 
     public function prefersWhatsApp(object $notifiable): bool
@@ -65,6 +66,26 @@ class BookingNotice extends Notification implements ShouldQueue
             default => new Message('appointment_update', [$what, $lot->name, 'cancelled'.($a->cancel_reason ? ": {$a->cancel_reason}" : '')],
                 "{$lot->name} cancelled your {$what} on {$when}".($a->cancel_reason ? " ({$a->cancel_reason})" : '').". Book another time: {$url}", Message::suffix($url)),
         };
+    }
+
+    /** @return array<string, string> the notification centre entry */
+    public function toArray(object $notifiable): array
+    {
+        $a = $this->appointment;
+        $lot = AppointmentText::lot($a);
+        $what = AppointmentText::what($a);
+        $when = AppointmentText::when($a, $lot);
+
+        return [
+            'kind' => 'booking',
+            'text' => match (true) {
+                $this->event === self::CANCELLED => "{$lot->name} cancelled your {$what} on {$when}.",
+                $this->event === self::RESCHEDULED => "Your {$what} at {$lot->name} moved to {$when}.",
+                $a->status === AppointmentStatus::Confirmed => "{$what} confirmed for {$when} at {$lot->name}.",
+                default => "{$lot->name} has your request for {$what} on {$when}.",
+            },
+            'url' => AppointmentText::manageUrl($a),
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage

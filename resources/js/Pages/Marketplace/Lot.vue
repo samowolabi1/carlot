@@ -10,6 +10,7 @@ import type { PublicLot } from '@/components/marketplace/types-lot';
 import { distanceKm, formatDistance, useLocation } from '@/composables/useLocation';
 import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
+import { recordIntent } from '@/lib/leads';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -23,7 +24,7 @@ const props = defineProps<{
     followers: number;
 }>();
 
-const { user } = useShared();
+const { user, lots } = useShared();
 
 function toggleFollow() {
     if (!user.value) {
@@ -39,6 +40,10 @@ const tab = ref<'stock' | 'about'>('stock');
 const { location } = useLocation();
 const distance = computed(() => (location.value && props.lot.location ? formatDistance(distanceKm(location.value, props.lot.location)) : null));
 const brand = computed(() => props.lot.brand_color ?? '#16302B');
+function intent(source: 'whatsapp' | 'call') {
+    if (user.value && !lots.value.some((l) => l.slug === props.lot.slug)) recordIntent(source, { lot: props.lot.slug });
+}
+
 const whatsappHref = computed(() => (props.lot.whatsapp ? `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(`Hi ${props.lot.name}, I found you on LotLink.`)}` : null));
 
 // Quick filters from the W4 design.
@@ -91,16 +96,25 @@ function filter(query: Partial<Filters>) {
                 <a v-if="lot.directions_url" :href="lot.directions_url" target="_blank" rel="noopener" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] bg-clay text-[12px] font-semibold text-white no-underline hover:bg-clay-dark hover:text-white md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="navigate" :size="20" /> Directions
                 </a>
-                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
+                <a v-if="lot.phone" :href="`tel:${lot.phone}`" @click="intent('call')" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="phone" :size="20" /> Call
                 </a>
-                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
+                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" @click="intent('whatsapp')" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="whatsapp" :size="20" /> WhatsApp
                 </a>
                 <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" />
             </div>
             <div v-if="!preview" class="mt-2.5 flex flex-col gap-2.5 md:flex-row md:items-center">
                 <Link :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
+                <Link
+                    v-if="!lots.some((l) => l.slug === lot.slug)"
+                    :href="user ? route('conversations.store') : route('conversations.start', { lot: lot.slug })"
+                    :method="user ? 'post' : 'get'"
+                    :data="user ? { lot: lot.slug } : undefined"
+                    :as="user ? 'button' : 'a'"
+                    class="btn btn-outline w-full md:w-auto"
+                    ><Icon name="chat" :size="18" /> Message the lot</Link
+                >
                 <button
                     type="button"
                     class="btn h-12 w-full md:w-auto"

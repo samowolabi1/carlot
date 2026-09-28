@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Domain\Leads\Enums;
+
+use App\Domain\Support\HasOptions;
+
+enum LeadSource: string
+{
+    use HasOptions;
+
+    case Chat = 'chat';
+    case WhatsApp = 'whatsapp';
+    case Booking = 'booking';
+    case Call = 'call';
+    case Offer = 'offer';          // S9
+    case TradeIn = 'trade_in';     // S9
+    case Reservation = 'reservation'; // S9
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Chat => 'Chat',
+            self::WhatsApp => 'WhatsApp',
+            self::Booking => 'Booking',
+            self::Call => 'Call',
+            self::Offer => 'Offer',
+            self::TradeIn => 'Trade-in',
+            self::Reservation => 'Reservation',
+        };
+    }
+}

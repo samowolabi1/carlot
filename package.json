@@ -20,5 +20,9 @@
         "vue": "^3.5.43",
         "vue-tsc": "^3.3.11",
         "ziggy-js": "^2.6.4"
+    },
+    "dependencies": {
+        "laravel-echo": "^2.5.0",
+        "pusher-js": "^8.6.0"
     }
 }

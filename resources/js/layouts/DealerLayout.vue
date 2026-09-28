@@ -8,21 +8,21 @@ import { useShared } from '@/composables/useShared';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-const { currentLot, lots } = useShared();
+const { currentLot, lots, unread } = useShared();
 const page = usePage();
 const menuOpen = ref(false);
 const switcherOpen = ref(false);
 
 const lot = computed(() => currentLot.value!);
 
-type NavItem = { label: string; icon: IconName; route?: string; match?: string };
+type NavItem = { label: string; icon: IconName; route?: string; match?: string; badge?: () => number };
 
 // Items without a route are later sprints; they stay visible so the dashboard matches the designs.
 const nav: NavItem[] = [
     { label: 'Dashboard', icon: 'grid', route: 'dealer.dashboard' },
     { label: 'Stock', icon: 'car', route: 'dealer.vehicles.index', match: 'dealer.vehicles.*' },
     { label: 'Calendar', icon: 'calendar', route: 'dealer.calendar' },
-    { label: 'Leads', icon: 'leads' },
+    { label: 'Leads', icon: 'leads', route: 'dealer.leads.index', match: 'dealer.leads.*', badge: () => currentLot.value?.leads_badge ?? 0 },
     { label: 'Offers & trade-ins', icon: 'tag' },
     { label: 'Analytics', icon: 'chart' },
     { label: 'Mini-site & QR', icon: 'qr' },
@@ -102,6 +102,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                         :aria-current="isActive(item) ? 'page' : undefined"
                     >
                         <Icon :name="item.icon" :size="18" /><span class="truncate">{{ item.label }}</span>
+                        <span v-if="item.badge?.()" class="ml-auto shrink-0 rounded-full bg-clay px-2 py-0.5 text-[11px] font-bold text-white">{{ item.badge() }}</span>
                     </Link>
                     <span v-else class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist/45" aria-disabled="true">
                         <Icon :name="item.icon" :size="18" /><span class="truncate">{{ item.label }}</span>
@@ -128,6 +129,14 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                 <button v-if="install.canPrompt.value" type="button" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-left text-[14px] text-peach hover:text-white" @click="install.prompt()">
                     <Icon name="download" :size="18" />Install the app
                 </button>
+                <Link
+                    :href="route('notifications')"
+                    class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"
+                    :class="route().current('notifications*') ? 'bg-forest-700 font-semibold text-white' : 'text-mist hover:text-white'"
+                >
+                    <Icon name="bell" :size="18" />Notifications
+                    <span v-if="unread?.notifications" class="ml-auto rounded-full bg-clay px-2 py-0.5 text-[11px] font-bold text-white">{{ unread.notifications }}</span>
+                </Link>
                 <Link :href="route('home')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
                     <Icon name="home" :size="18" />Marketplace
                 </Link>
@@ -148,7 +157,14 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                     <Icon name="filters" />
                 </button>
                 <span class="truncate px-3 text-[15px] font-semibold">{{ lot.name }}</span>
-                <Logo size="sm" />
+                <Link
+                    :href="route('notifications')"
+                    class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-line text-ink"
+                    :aria-label="unread?.notifications ? `Notifications, ${unread.notifications} unread` : 'Notifications'"
+                >
+                    <Icon name="bell" />
+                    <span v-if="unread?.notifications" class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-clay" />
+                </Link>
             </div>
 
             <div v-if="showPendingBanner" class="border-b border-apricot bg-cream px-5 py-3 text-[14px] text-clay-dark lg:px-8">

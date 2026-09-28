@@ -7,7 +7,7 @@ import { Link } from '@inertiajs/vue3';
 
 withDefaults(defineProps<{ active?: 'home' | 'search' | 'saved' | 'bookings' | 'account' | null; bare?: boolean }>(), { active: null, bare: false });
 
-const { user } = useShared();
+const { user, unread } = useShared();
 
 const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
     { key: 'home', label: 'Home', icon: 'home', href: route('home') },
@@ -32,6 +32,22 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
                 </nav>
                 <div class="flex items-center gap-2">
                     <template v-if="user">
+                        <Link
+                            :href="route('conversations.index')"
+                            class="relative flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink"
+                            :aria-label="unread?.messages ? `Messages, ${unread.messages} unread` : 'Messages'"
+                        >
+                            <Icon name="chat" :size="20" />
+                            <span v-if="unread?.messages" class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-clay" />
+                        </Link>
+                        <Link
+                            :href="route('notifications')"
+                            class="relative flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink"
+                            :aria-label="unread?.notifications ? `Notifications, ${unread.notifications} unread` : 'Notifications'"
+                        >
+                            <Icon name="bell" :size="20" />
+                            <span v-if="unread?.notifications" class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-clay" />
+                        </Link>
                         <Link
                             v-if="user.role === 'staff'"
                             :href="route('dealer.home')"

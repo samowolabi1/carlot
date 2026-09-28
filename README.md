@@ -14,6 +14,21 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S8 (Leads and chat) ✅**
+
+| Area | What works |
+| --- | --- |
+| Lead capture (M11) | Every chat, booking, WhatsApp tap and call tap from a signed-in buyer becomes a lead. The same buyer asking about the same car within 30 days stays one lead. The buyer is added to the lot's customer book (matched by phone), and everyone at the lot gets a notification. A booking moves the lead to "Test drive". Delivering a car in Lot Manager marks that buyer's lead Won and closes other open leads on the car as Lost ("Car sold"). |
+| Leads board | `/dealer/{lot}/leads`: New, Contacted, Test drive, Negotiating and Won columns. Drag cards between columns, search by name, phone or car, and filter to "Mine" or "Unassigned". The sidebar badge counts new leads and unread chats. |
+| Lead page (D6) | The chat with presets ("Send lot location", "Suggest similar cars") and photos. Also stage (Lost asks why), assignment, follow-up date, team-only notes, the customer book link and "Continue on WhatsApp". The first reply moves a New lead to Contacted and assigns it to whoever replied. Sales reps can take a lead; owners and managers assign anyone. |
+| Buyer chat (15) | "Chat" on car pages and "Message the lot" on lot pages open a thread with the lot, with quick replies, photos and read markers. Guests sign in and land back in the thread. "Messages" in Account lists their chats. |
+| Real time | With Laravel Reverb running, messages and typing arrive instantly. Without it, chat checks for new messages every 4 seconds, so everything works on Laragon as is. |
+| Alerts | If a message is still unread after 10 minutes, the other side gets one WhatsApp message (SMS fallback) (`chat:notify-unread`, every 5 minutes). Due follow-ups go to the assigned rep, or else the owner (`leads:follow-up-reminders`, every 15 minutes). |
+| Notification centre (20) | The bell in the header and dealer sidebar opens every notification (leads, bookings, new stock, billing, follow-ups). **Account → Notifications** turns WhatsApp/SMS and email on or off per type. Sign-in codes and receipts are always sent. |
+| Quality | 330 tests (also on MySQL), including dedupe, chat permissions and channel auth, unread counts and alerts, board filters, assignment rules, follow-up reminders, closing leads on delivery, notification preferences and lead tenancy. |
+
+Deferred: offers, trade-ins and reservations as lead sources (S9), the inspection report preset (S12), web push (later), and response-time analytics (S11).
+
 **Sprint S7 (Billing and spotlight) ✅**
 
 | Area | What works |
@@ -173,7 +188,7 @@ cd carlot
 
 ### Scheduled jobs (reminders)
 
-Reminders, no-shows, escalations, follow-up reminders and share-link pruning run on Laravel's scheduler. On Laragon, keep
+Reminders, no-shows, escalations, follow-up reminders, chat alerts and share-link pruning run on Laravel's scheduler. On Laragon, keep
 `php artisan schedule:work` running in a terminal while testing bookings. In production add one
 cron entry: `* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1`.
 
@@ -196,9 +211,19 @@ your `APP_URL` with a `{{1}}` suffix):
 | `order_update` | Utility | name, car, lot, update | track order |
 | `billing_update` | Utility | lot, message | open billing |
 | `lot_new_stock` | Marketing | lot, number of cars, example car | open the lot |
-| `follow_up_due` | Utility | staff name, type, customer, lot | open Today |
+| `follow_up_due` | Utility | staff name, type, customer, lot | open Today / the lead |
+| `new_message` | Utility | sender, message snippet | open the chat |
 
 Until a template is approved, messages fall back to SMS automatically.
+
+### Live chat (Laravel Reverb, optional)
+
+Chat works without this: it polls every 4 seconds. For instant messages:
+
+1. In `.env`, set `BROADCAST_CONNECTION=reverb` and give `REVERB_APP_KEY` and `REVERB_APP_SECRET`
+   any random strings (e.g. `php -r "echo bin2hex(random_bytes(16));"`). Keep `REVERB_HOST=127.0.0.1` and `REVERB_PORT=8080` locally.
+2. Run `npm run build` again so the browser picks up the `VITE_REVERB_*` values.
+3. Keep `php artisan reverb:start` running in a terminal (in production, under Supervisor behind your web server's WebSocket proxy with `REVERB_SCHEME=https`).
 
 ### Paystack in production
 
@@ -249,6 +274,7 @@ app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per mod
   Sharing/               Share links (/c/{code}), share cards, QR codes
   Finance/               Budgets and the FinanceCalculator (same formulas in resources/js/lib/finance.ts)
   Billing/               Plans, subscriptions, payments, coupons, spotlights; PaymentGateway (Paystack | sandbox)
+  Leads/                 Leads, notes, conversations and chat messages; CaptureLead, SendMessage, UpdateLead
   Messaging/             SmsGateway (log, Termii)
   Support/               PhoneNumber (E.164)
 app/Http/Controllers/    Thin controllers calling Actions; Dealer/ for /dealer/{lot}

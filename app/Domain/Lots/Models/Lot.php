@@ -8,6 +8,7 @@ use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Leads\Models\Lead;
 use App\Domain\LotManager\Models\FollowUpTask;
 use App\Domain\LotManager\Models\LotCustomer;
 use App\Domain\LotManager\Models\OrderPayment;
@@ -173,6 +174,12 @@ class Lot extends Model
     public function spotlights(): HasMany
     {
         return $this->hasMany(Spotlight::class);
+    }
+
+    /** Scoped route bindings for {lead}. @return HasMany<Lead, $this> */
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
     }
 
     public function isFeatured(): bool
