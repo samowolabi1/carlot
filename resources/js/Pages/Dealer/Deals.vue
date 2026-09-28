@@ -153,7 +153,7 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                 :class="active === t.key ? 'bg-white font-semibold text-ink' : 'font-medium text-muted'"
                 @click="select(t.key)"
             >
-                {{ t.label }}<template v-if="t.n"> {{ t.n }}</template>
+                {{ t.n ? `${t.label} ${t.n}` : t.label }}
             </button>
         </div>
 

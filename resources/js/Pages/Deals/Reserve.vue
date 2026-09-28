@@ -30,7 +30,7 @@ const submit = () => form.post(route('reservations.store', props.car.ulid));
 <template>
     <Head title="Reserve this car" />
     <CustomerLayout bare>
-        <div class="mx-auto flex max-w-xl flex-col gap-4 px-5 pt-4 pb-44">
+        <div class="mx-auto flex max-w-xl flex-col gap-4 px-5 pt-4 pb-60 md:pb-44">
             <div class="flex items-center gap-2">
                 <button type="button" aria-label="Back" class="-ml-2 flex h-11 w-11 items-center justify-center text-ink" @click="goBack"><Icon name="chevronLeft" :size="22" /></button>
                 <h1 class="text-[22px] font-bold">Reserve this car</h1>
@@ -88,8 +88,8 @@ const submit = () => form.post(route('reservations.store', props.car.ulid));
             </fieldset>
         </div>
 
-        <div class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white">
-            <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-6">
+        <div class="fixed inset-x-0 bottom-[76px] z-30 border-t border-line bg-white md:bottom-0">
+            <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-3 md:pb-6">
                 <button type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing" @click="submit">Pay {{ deposit }} and reserve</button>
                 <span class="text-center text-[12px] text-muted">Secured by Paystack</span>
             </div>

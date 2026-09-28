@@ -57,7 +57,10 @@ class CustomerBookingController extends Controller
         $dealLots = Lot::withTrashed()->whereIn('id', $offers->pluck('lot_id')->merge($reservations->pluck('lot_id'))->merge($tradeIns->pluck('lot_id'))->unique())->get()->keyBy('id');
 
         // Open deals first (design 19: "Offers and reservations"), closed ones under Past.
-        $openOffer = fn (Offer $o) => $o->isOpen() || ($o->status === OfferStatus::Accepted && $o->closed_at?->gt(now()->subDays(7)));
+        // An accepted offer that became a reservation shows as the reservation.
+        $reservedCars = $reservations->where('status', ReservationStatus::Active)->pluck('vehicle_id')->all();
+        $openOffer = fn (Offer $o) => $o->isOpen()
+            || ($o->status === OfferStatus::Accepted && $o->closed_at?->gt(now()->subDays(7)) && ! in_array($o->vehicle_id, $reservedCars, true));
 
         return Inertia::render('Bookings/Index', [
             'upcoming' => $appointments->filter(fn (Appointment $a) => $a->isUpcoming() || $a->status === AppointmentStatus::AwaitingDeposit)->sortBy('starts_at')->values()->map($map),

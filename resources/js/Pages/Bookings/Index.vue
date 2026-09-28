@@ -60,7 +60,7 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
 <template>
     <Head title="Bookings and offers" />
     <CustomerLayout active="bookings">
-        <div class="mx-auto flex max-w-xl flex-col gap-2.5 px-5 py-6">
+        <div class="mx-auto flex max-w-xl flex-col gap-2.5 px-5 pt-6 pb-28 md:pb-16">
             <h1 class="mb-1 text-[28px] font-bold">Bookings and offers</h1>
 
             <h2 class="mt-1.5 font-sans text-[13px] font-semibold tracking-wide text-muted uppercase">Upcoming</h2>

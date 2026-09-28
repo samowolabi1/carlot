@@ -75,7 +75,7 @@ const goBack = () => window.history.back();
 <template>
     <Head title="Trade in your car" />
     <CustomerLayout bare>
-        <form class="mx-auto flex max-w-xl flex-col gap-4 px-5 pt-4 pb-44" @submit.prevent="submit">
+        <form class="mx-auto flex max-w-xl flex-col gap-4 px-5 pt-4 pb-60 md:pb-44" @submit.prevent="submit">
             <div class="flex items-center gap-2">
                 <button type="button" aria-label="Back" class="-ml-2 flex h-11 w-11 items-center justify-center text-ink" @click="goBack"><Icon name="chevronLeft" :size="22" /></button>
                 <div class="flex flex-col">
@@ -157,8 +157,8 @@ const goBack = () => window.history.back();
             </label>
         </form>
 
-        <div class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white">
-            <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-6">
+        <div class="fixed inset-x-0 bottom-[76px] z-30 border-t border-line bg-white md:bottom-0">
+            <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-3 md:pb-6">
                 <button type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing || form.photos.length === 0" @click="submit">
                     {{ form.processing ? 'Sending…' : 'Send for valuation' }}
                 </button>

@@ -97,7 +97,7 @@ function submit() {
                     <InputError :message="form.errors.vehicle" />
                 </label>
                 <p v-if="car?.reservation" class="rounded-xl bg-cream px-3 py-2.5 text-[14px] text-clay-dark">
-                    Reserved by <strong>{{ car.reservation.by }}</strong>. Their {{ car.reservation.deposit }} deposit is added to the order as a payment.
+                    Reserved by <strong>{{ car.reservation.by }}</strong>: their {{ car.reservation.deposit }} deposit is added to the order as a payment.
                 </p>
                 <p v-if="orderable.length === 0" class="text-[14px] text-muted">
                     Only cars listed on LotLink can be ordered.
