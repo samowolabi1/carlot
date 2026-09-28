@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.{vue,ts}';
+
+/* LotLink design tokens, taken from the "LotLink — MVP Screens" canvas. */
+@theme {
+    --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Bricolage Grotesque', 'DM Sans', ui-sans-serif, sans-serif;
+
+    --color-ivory: #f6f4ef;
+    --color-ink: #16181d;
+    --color-muted: #5b5f66;
+    --color-line: #e1dcd2;
+    --color-line-strong: #d9d3c8;
+    --color-divider: #eeeae3;
+    --color-sand: #e9e5dc;
+    --color-stone: #a39c90;
+
+    --color-forest: #16302b;
+    --color-forest-800: #1d3a34;
+    --color-forest-700: #2a4b44;
+    --color-forest-600: #2f5048;
+    --color-mist: #b9ccc6;
+    --color-sage: #9db8b0;
+    --color-map: #e4ece9;
+
+    --color-clay: #c2410c;
+    --color-clay-dark: #9a3412;
+    --color-clay-light: #f28c4b;
+    --color-peach: #fdba8c;
+    --color-blush: #fde8dc;
+    --color-cream: #fff6f0;
+    --color-apricot: #f6c9ac;
+
+    --color-success: #15803d;
+    --color-danger: #b91c1c;
+}
+
+@layer base {
+    body {
+        @apply bg-ivory font-sans text-ink antialiased;
+    }
+
+    a {
+        @apply text-clay hover:text-clay-dark;
+    }
+
+    h1,
+    h2,
+    h3 {
+        @apply font-display;
+    }
+}
+
+@utility logo {
+    @apply font-display font-bold tracking-tight text-forest;
+}
+
+@utility btn {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold no-underline transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility btn-primary {
+    @apply bg-clay text-white hover:bg-clay-dark hover:text-white;
+}
+
+@utility btn-dark {
+    @apply bg-forest text-white hover:bg-forest-800 hover:text-white;
+}
+
+@utility btn-outline {
+    @apply border border-forest bg-white text-forest hover:bg-ivory hover:text-forest;
+}
+
+@utility card {
+    @apply rounded-2xl border border-line bg-white;
+}
+
+@utility field {
+    @apply h-12 w-full rounded-xl border border-line-strong bg-white px-3 text-[15px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted focus:border-forest focus:ring-2 focus:ring-forest/15;
+}
+
+@utility field-label {
+    @apply flex flex-col gap-1.5 text-[13px] font-semibold;
+}
