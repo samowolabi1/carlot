@@ -2,6 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Deals\Enums\OfferStatus;
+use App\Domain\Deals\Enums\TradeInStatus;
+use App\Domain\Deals\Models\Offer;
+use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Leads\Enums\LeadStage;
 use App\Domain\Leads\Models\Conversation;
 use App\Domain\Leads\Models\Lead;
@@ -66,6 +70,9 @@ class HandleInertiaRequests extends Middleware
                     // Leads badge: new leads plus leads with unread chat messages.
                     'leads_badge' => Lead::query()->where('stage', LeadStage::New)->count()
                         + Conversation::query()->unreadFor(Message::LOT)->whereIn('lead_id', Lead::query()->where('stage', '!=', LeadStage::New)->select('id'))->count(),
+                    // Offers & trade-ins badge: offers and trade-ins waiting for the lot.
+                    'deals_badge' => Offer::query()->where('status', OfferStatus::Pending)->count()
+                        + TradeIn::query()->where('status', TradeInStatus::Submitted)->count(),
                 ];
             },
             // The buyer's saved maximum price, for "Within budget" tags (whole naira).

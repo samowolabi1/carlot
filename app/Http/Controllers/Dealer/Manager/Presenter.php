@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers\Dealer\Manager;
 
+use App\Domain\Deals\Enums\ReservationStatus;
+use App\Domain\Deals\Enums\TradeInStatus;
+use App\Domain\Deals\Models\Reservation;
+use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Leads\Models\Lead;
 use App\Domain\LotManager\Enums\CustomerSource;
 use App\Domain\LotManager\Enums\Interest;
 use App\Domain\LotManager\Enums\NextStep;
@@ -14,6 +19,7 @@ use App\Domain\LotManager\Models\OrderPayment;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Models\WalkIn;
 use App\Domain\Support\Money;
+use App\Domain\Support\Name;
 use App\Domain\Support\PhoneNumber;
 use Illuminate\Support\Collection;
 
@@ -129,6 +135,11 @@ final class Presenter
     /** Cars staff can pick in the walk-in and order forms (not sold). @return list<array<string, mixed>> */
     public static function stock(): array
     {
+        // Paid reservations: the order form fills in the buyer and the price (TDD M12).
+        $reservations = Reservation::query()->where('status', ReservationStatus::Active)->with('customer')->get()->keyBy('vehicle_id');
+        $bookIds = Lead::query()->whereIn('id', $reservations->pluck('lead_id')->filter())->pluck('lot_customer_id', 'id');
+        $book = LotCustomer::query()->whereIn('id', $bookIds->filter())->pluck('ulid', 'id');
+
         return Vehicle::query()->with(['make', 'model'])
             ->where('status', '!=', VehicleStatus::Sold)
             ->orderByDesc('listed_at')->orderByDesc('id')
@@ -141,7 +152,30 @@ final class Presenter
                 'price_label' => $v->formattedPrice(),
                 'status' => $v->status->value,
                 'orderable' => in_array($v->status, [VehicleStatus::Available, VehicleStatus::Reserved], true),
+                'reservation' => ($r = $reservations->get($v->id)) ? [
+                    'by' => Name::short($r->customer->name),
+                    'customer' => $book[$bookIds[$r->lead_id] ?? 0] ?? null,
+                    'deposit' => $r->money(),
+                    'price' => intdiv($r->price, 100),
+                ] : null,
             ])->all();
+    }
+
+    /** Valued trade-ins the lot can take against an order. @return list<array<string, mixed>> */
+    public static function tradeIns(): array
+    {
+        $tradeIns = TradeIn::query()->whereIn('status', [TradeInStatus::Valued, TradeInStatus::Accepted])
+            ->whereNotIn('id', SalesOrder::query()->whereNotNull('trade_in_id')->select('trade_in_id'))
+            ->with(['make', 'model', 'customer'])->latest('valued_at')->limit(100)->get();
+        $bookIds = Lead::query()->whereIn('id', $tradeIns->pluck('lead_id')->filter())->pluck('lot_customer_id', 'id');
+        $book = LotCustomer::query()->whereIn('id', $bookIds->filter())->pluck('ulid', 'id');
+
+        return $tradeIns->map(fn (TradeIn $t) => [
+            'ulid' => $t->ulid,
+            'label' => $t->title().' · '.Name::short($t->customer->name).' · '.$t->estimate(),
+            'customer' => $book[$bookIds[$t->lead_id] ?? 0] ?? null,
+            'value' => $t->estimate_low !== null ? intdiv($t->estimate_low, 100) : null,
+        ])->values()->all();
     }
 
     /** @return array<string, list<array{value: string, label: string}>> */

@@ -64,6 +64,7 @@ class OrderController extends Controller
 
         return Inertia::render('Dealer/Manager/OrderCreate', [
             'stock' => Presenter::stock(),
+            'tradeIns' => Presenter::tradeIns(),
             'vehicle' => $request->string('vehicle')->toString() ?: null,
             'customer' => $customer ? Presenter::customer($customer) : null,
             'customers' => LotCustomer::query()->orderByDesc('last_seen_at')->limit(300)->get()

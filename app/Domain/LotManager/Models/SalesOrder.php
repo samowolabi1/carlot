@@ -28,7 +28,9 @@ use Illuminate\Support\Carbon;
  * @property int $list_price
  * @property int $agreed_price
  * @property int $discount
+ * @property int|null $trade_in_id
  * @property int $trade_in_value
+ * @property int|null $reservation_id
  * @property int $deposit_required
  * @property int $total_paid
  * @property int $balance
@@ -47,7 +49,7 @@ class SalesOrder extends Model
 
     protected $fillable = [
         'lot_id', 'order_no', 'lot_customer_id', 'vehicle_id', 'staff_id', 'list_price', 'agreed_price', 'discount',
-        'trade_in_value', 'deposit_required', 'total_paid', 'balance', 'currency', 'payment_plan', 'status', 'notes', 'client_uuid',
+        'trade_in_id', 'trade_in_value', 'reservation_id', 'deposit_required', 'total_paid', 'balance', 'currency', 'payment_plan', 'status', 'notes', 'client_uuid',
     ];
 
     protected $hidden = ['id', 'lot_id', 'lot_customer_id', 'vehicle_id', 'staff_id'];

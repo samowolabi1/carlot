@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Icon from '@/components/Icon.vue';
 import InputError from '@/components/InputError.vue';
-import type { Customer, CustomerRef, StockCar } from '@/components/manager/types';
+import type { Customer, CustomerRef, StockCar, TradeInOption } from '@/components/manager/types';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
 import { formatNaira, parseAmount } from '@/lib/format';
@@ -9,7 +9,7 @@ import { uuid } from '@/lib/offlineStore';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
-const props = defineProps<{ stock: StockCar[]; vehicle: string | null; customer: Customer | null; customers: CustomerRef[] }>();
+const props = defineProps<{ stock: StockCar[]; tradeIns: TradeInOption[]; vehicle: string | null; customer: Customer | null; customers: CustomerRef[] }>();
 
 const { currentLot } = useShared();
 const lot = computed(() => currentLot.value!);
@@ -26,6 +26,8 @@ const form = useForm({
     consent_whatsapp: false,
     agreed_price: '',
     discount: '',
+    trade_in: '',
+    trade_in_value: '',
     deposit_required: '',
     notes: '',
     client_uuid: uuid(),
@@ -42,15 +44,33 @@ const customerMatches = computed(() => {
 });
 
 watch(car, (c) => {
-    if (c?.price) form.agreed_price = formatNaira(c.price);
+    // A reserved car is sold to the buyer who paid the deposit, at the reserved price.
+    if (c?.reservation) {
+        form.agreed_price = formatNaira(c.reservation.price);
+        if (c.reservation.customer) {
+            mode.value = 'existing';
+            form.customer = c.reservation.customer;
+        }
+    } else if (c?.price) {
+        form.agreed_price = formatNaira(c.price);
+    }
 }, { immediate: true });
 
-const total = computed(() => Math.max(0, (parseAmount(form.agreed_price) ?? 0) - (parseAmount(form.discount) ?? 0)));
+// The chosen customer's trade-ins first.
+const tradeInOptions = computed(() => [...props.tradeIns].sort((a, b) => Number(b.customer === form.customer) - Number(a.customer === form.customer)));
+watch(() => form.trade_in, (ulid) => {
+    const t = props.tradeIns.find((x) => x.ulid === ulid);
+    form.trade_in_value = t?.value ? formatNaira(t.value) : '';
+});
+
+const total = computed(() => Math.max(0, (parseAmount(form.agreed_price) ?? 0) - (parseAmount(form.discount) ?? 0) - (parseAmount(form.trade_in_value) ?? 0)));
 
 function submit() {
     form.transform((data) => ({
         ...data,
         customer: mode.value === 'existing' ? data.customer : null,
+        trade_in: data.trade_in || null,
+        trade_in_value: data.trade_in ? data.trade_in_value : null,
         name: mode.value === 'new' ? data.name : null,
         phone: mode.value === 'new' ? data.phone : null,
     })).post(route('dealer.manager.orders.store', lot.value.slug));
@@ -76,6 +96,9 @@ function submit() {
                     </select>
                     <InputError :message="form.errors.vehicle" />
                 </label>
+                <p v-if="car?.reservation" class="rounded-xl bg-cream px-3 py-2.5 text-[14px] text-clay-dark">
+                    Reserved by <strong>{{ car.reservation.by }}</strong>. Their {{ car.reservation.deposit }} deposit is added to the order as a payment.
+                </p>
                 <p v-if="orderable.length === 0" class="text-[14px] text-muted">
                     Only cars listed on LotLink can be ordered.
                     <Link :href="route('dealer.vehicles.index', lot.slug)">List a car from your stock</Link>.
@@ -136,7 +159,18 @@ function submit() {
                     Customer pays <strong class="font-display text-[18px] text-forest">{{ formatNaira(total) }}</strong>
                     <span v-if="car?.price && total !== car.price" class="text-muted"> (listed at {{ car.price_label }})</span>
                 </p>
-                <p class="text-[13px] text-muted">Trade-ins and instalment plans arrive with Offers and Lot Manager Pro.</p>
+                <div v-if="tradeIns.length" class="grid gap-3 sm:grid-cols-3">
+                    <label class="field-label sm:col-span-2">
+                        Trade-in
+                        <select v-model="form.trade_in" class="field">
+                            <option value="">No trade-in</option>
+                            <option v-for="t in tradeInOptions" :key="t.ulid" :value="t.ulid">{{ t.label }}</option>
+                        </select>
+                        <InputError :message="form.errors.trade_in" />
+                    </label>
+                    <label v-if="form.trade_in" class="field-label">Trade-in value<input v-model="form.trade_in_value" class="field" inputmode="numeric" /><InputError :message="form.errors.trade_in_value" /></label>
+                </div>
+                <p class="text-[13px] text-muted">Instalment plans arrive with Lot Manager Pro.</p>
                 <label class="field-label">Notes<textarea v-model="form.notes" class="field h-20 py-2.5" maxlength="1000" /></label>
             </section>
 

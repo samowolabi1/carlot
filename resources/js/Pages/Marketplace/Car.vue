@@ -40,6 +40,7 @@ const props = defineProps<{
     saved: boolean;
     similar: CarCardData[];
     finance: CarFinanceData | null;
+    deals: { offers: boolean; reserve: string | null; my_offer: { status: string; text: string } | null; reserved_until: string | null } | null;
 }>();
 
 const budget = useBudget();
@@ -83,6 +84,12 @@ function message() {
     }
     router.post(route('conversations.store'), { vehicle: props.car.ulid }, { onStart: () => (starting.value = true), onFinish: () => (starting.value = false) });
 }
+
+// Guests are sent through sign-in and brought back to these pages.
+const offerHref = computed(() => route('offers.create', props.car.ulid));
+const reserveHref = computed(() => route('reservations.create', props.car.ulid));
+const tradeInHref = computed(() => route('trade-ins.create', { lot: props.lot.slug, car: props.car.ulid }));
+const canDeal = computed(() => !!props.deals && !ownLot.value);
 
 const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${props.car.price}` : ''} at ${props.lot.name}`);
 </script>
@@ -196,6 +203,23 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         {{ compare.has(car.ulid) ? '✓ Added to compare' : 'Add to compare' }}
                     </button>
                     <Link v-if="compare.ids.value.length > 1" :href="compare.href.value" class="self-start text-[14px] font-semibold">Compare {{ compare.ids.value.length }} cars</Link>
+
+                    <p v-if="deals?.reserved_until" class="card flex items-center gap-2.5 px-4 py-3 text-[14px]">
+                        <Icon name="shield" :size="20" class="shrink-0 text-forest" /> Reserved for you until {{ deals.reserved_until }}.
+                        <Link :href="route('bookings.index')" class="ml-auto shrink-0 font-semibold">Details</Link>
+                    </p>
+                    <p v-else-if="deals?.my_offer" class="card flex items-center gap-2.5 px-4 py-3 text-[14px]" :class="{ 'border-2 border-clay': deals.my_offer.status === 'countered' }">
+                        <Icon name="tag" :size="20" class="shrink-0 text-clay" /> {{ deals.my_offer.text }}
+                        <Link :href="`${route('bookings.index')}#offers`" class="ml-auto shrink-0 font-semibold">{{ deals.my_offer.status === 'countered' ? 'Answer' : 'View' }}</Link>
+                    </p>
+
+                    <!-- Design 06: Reserve with deposit · Trade in my car (and the lot's phone, on phones). -->
+                    <div v-if="canDeal && !sold" class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-semibold">
+                        <Link v-if="deals?.reserve" :href="reserveHref" class="inline-flex min-h-11 items-center">Reserve with deposit</Link>
+                        <Link :href="tradeInHref" class="inline-flex min-h-11 items-center">Trade in my car</Link>
+                        <a v-if="lot.phone && deals?.offers" :href="`tel:${lot.phone}`" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('call')">Call the lot</a>
+                        <a v-if="whatsappHref && deals?.offers" :href="whatsappHref" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('whatsapp')">WhatsApp</a>
+                    </div>
                 </div>
             </div>
 
@@ -215,6 +239,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <template v-if="!sold && !preview">
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
+                            <Link v-if="canDeal && deals?.offers" :href="offerHref" class="btn btn-outline w-full"><Icon name="tag" :size="18" /> Make an offer</Link>
                             <button v-if="!ownLot" type="button" class="btn btn-outline w-full" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Message the lot</button>
                             <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline w-full" @click="intent('whatsapp')"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
                             <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline w-full" @click="intent('call')"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
@@ -234,9 +259,12 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
 
         <!-- Phone action bar -->
         <div v-if="!sold && !preview" class="fixed inset-x-0 bottom-[76px] z-30 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-3 md:hidden">
-            <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot" @click="intent('call')"><Icon name="phone" :size="20" /></a>
-            <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="WhatsApp the lot" @click="intent('whatsapp')"><Icon name="whatsapp" :size="20" /></a>
+            <template v-if="!(canDeal && deals?.offers)">
+                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot" @click="intent('call')"><Icon name="phone" :size="20" /></a>
+                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="WhatsApp the lot" @click="intent('whatsapp')"><Icon name="whatsapp" :size="20" /></a>
+            </template>
             <button v-if="!ownLot" type="button" class="btn btn-outline h-[52px] shrink-0 rounded-[14px] px-3" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Chat</button>
+            <Link v-if="canDeal && deals?.offers" :href="offerHref" class="btn btn-outline h-[52px] shrink-0 rounded-[14px] px-3.5">Offer</Link>
             <Link :href="bookHref" class="btn btn-primary h-[52px] grow rounded-[14px] px-3 whitespace-nowrap">Book viewing</Link>
         </div>
     </CustomerLayout>

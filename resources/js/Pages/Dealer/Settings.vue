@@ -2,6 +2,7 @@
 import BookingRulesForm from '@/components/lot/BookingRulesForm.vue';
 import BrandingForm from '@/components/lot/BrandingForm.vue';
 import BusinessForm from '@/components/lot/BusinessForm.vue';
+import DealsForm, { type DealSettings } from '@/components/lot/DealsForm.vue';
 import HoursForm from '@/components/lot/HoursForm.vue';
 import LocationForm from '@/components/lot/LocationForm.vue';
 import DealerLayout from '@/layouts/DealerLayout.vue';
@@ -12,6 +13,7 @@ import { ref } from 'vue';
 defineProps<{
     lot: LotSettings;
     booking: { auto_confirm: boolean; min_notice_minutes: number; closures: { id: number; date: string; label: string; reason: string | null }[] };
+    deals: DealSettings;
 }>();
 
 const tabs = [
@@ -20,6 +22,7 @@ const tabs = [
     { key: 'location', label: 'Location' },
     { key: 'hours', label: 'Opening hours' },
     { key: 'booking', label: 'Booking rules and closures' },
+    { key: 'deals', label: 'Offers and deposits' },
 ] as const;
 
 const initial = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
@@ -60,6 +63,7 @@ function select(key: string) {
                     <LocationForm :lot="lot" />
                 </template>
                 <HoursForm v-else-if="active === 'hours'" :lot="lot" />
+                <DealsForm v-else-if="active === 'deals'" :lot-slug="lot.slug" :deals="deals" />
                 <BookingRulesForm v-else :lot-slug="lot.slug" :booking="booking" />
             </section>
         </div>

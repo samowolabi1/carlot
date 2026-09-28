@@ -30,6 +30,7 @@ export interface CurrentLot {
     role: LotRole | null;
     submitted: boolean;
     leads_badge: number;
+    deals_badge: number;
 }
 
 export interface HoursDay {

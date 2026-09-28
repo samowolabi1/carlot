@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Filament\Resources\LotResource\Pages;
+use Filament\Forms;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -64,6 +65,16 @@ class LotResource extends Resource
                     ->visible(fn (Lot $lot) => $lot->status === LotStatus::Active)
                     ->requiresConfirmation()
                     ->action(fn (Lot $lot) => $lot->update(['status' => LotStatus::Suspended])),
+                // Buyer deposits (reservations, test drives) settle to the lot through a Paystack split.
+                Tables\Actions\Action::make('payouts')
+                    ->label('Payouts')->icon('heroicon-o-banknotes')
+                    ->fillForm(fn (Lot $lot) => ['paystack_subaccount' => $lot->paystack_subaccount])
+                    ->form([
+                        Forms\Components\TextInput::make('paystack_subaccount')->label('Paystack subaccount code')
+                            ->placeholder('ACCT_xxxxxxxx')->regex('/^ACCT_[A-Za-z0-9]+$/')->maxLength(40)
+                            ->helperText('Create it in the Paystack dashboard with the lot\'s bank account. Empty: deposits settle to LotLink.'),
+                    ])
+                    ->action(fn (Lot $lot, array $data) => $lot->forceFill(['paystack_subaccount' => $data['paystack_subaccount'] ?: null])->save()),
             ]);
     }
 

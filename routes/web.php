@@ -13,6 +13,7 @@ use App\Http\Controllers\Chat\LeadIntentController;
 use App\Http\Controllers\Dealer\BillingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
+use App\Http\Controllers\Dealer\DealController;
 use App\Http\Controllers\Dealer\DealerHomeController;
 use App\Http\Controllers\Dealer\LeadController;
 use App\Http\Controllers\Dealer\Manager\CustomerController;
@@ -29,6 +30,9 @@ use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
 use App\Http\Controllers\Dealer\VinDecodeController;
+use App\Http\Controllers\Deals\OfferController;
+use App\Http\Controllers\Deals\ReservationController;
+use App\Http\Controllers\Deals\TradeInController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Marketplace\CarController;
 use App\Http\Controllers\Marketplace\CompareController;
@@ -67,6 +71,9 @@ Route::get('/lots/{lot:slug}/slots', [BookingController::class, 'slots'])->name(
 Route::get('/bookings/{appointment}', [CustomerBookingController::class, 'show'])->name('bookings.show');
 Route::get('/bookings/{appointment}/calendar.ics', [CustomerBookingController::class, 'calendar'])->name('bookings.calendar');
 Route::post('/bookings/{appointment}/cancel', [CustomerBookingController::class, 'cancel'])->middleware('throttle:10,1')->name('bookings.cancel');
+
+// Trade-in photos are private; the lot's team and the buyer get short-lived signed links.
+Route::get('/trade-ins/{tradeIn}/photos/{index}', [TradeInController::class, 'photo'])->whereNumber('index')->middleware('signed')->name('trade-ins.photo');
 
 // Order tracking (M19). Signed links on receipts and messages; no sign-in needed.
 Route::middleware(['signed', 'throttle:60,1'])->scopeBindings()->group(function () {
@@ -124,6 +131,20 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/appointments', [BookingController::class, 'store'])->middleware('throttle:10,1')->name('bookings.store');
     Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
     Route::patch('/bookings/{appointment}', [CustomerBookingController::class, 'update'])->middleware('throttle:10,1')->name('bookings.update');
+    Route::post('/bookings/{appointment}/deposit', [BookingController::class, 'deposit'])->middleware('throttle:10,1')->name('bookings.deposit');
+    Route::get('/bookings/deposit/callback', [BookingController::class, 'depositCallback'])->name('bookings.deposit.callback');
+
+    // Offers, trade-ins and reservations (M12)
+    Route::get('/car/{car}/offer', [OfferController::class, 'create'])->name('offers.create');
+    Route::post('/vehicles/{car}/offers', [OfferController::class, 'store'])->middleware('throttle:10,1')->name('offers.store');
+    Route::post('/offers/{offer}/accept', [OfferController::class, 'accept'])->middleware('throttle:10,1')->name('offers.accept');
+    Route::post('/offers/{offer}/decline', [OfferController::class, 'decline'])->middleware('throttle:10,1')->name('offers.decline');
+    Route::get('/lots/{lot:slug}/trade-in', [TradeInController::class, 'create'])->name('trade-ins.create');
+    Route::post('/lots/{lot:slug}/trade-ins', [TradeInController::class, 'store'])->middleware('throttle:5,1')->name('trade-ins.store');
+    Route::post('/trade-ins/{tradeIn}/answer', [TradeInController::class, 'answer'])->middleware('throttle:10,1')->name('trade-ins.answer');
+    Route::get('/car/{car}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
+    Route::post('/vehicles/{car}/reservations', [ReservationController::class, 'store'])->middleware('throttle:10,1')->name('reservations.store');
+    Route::get('/reservations/callback', [ReservationController::class, 'callback'])->name('reservations.callback');
 
     Route::get('/dealer', DealerHomeController::class)->name('dealer.home');
     Route::get('/dealer/start', [OnboardingController::class, 'create'])->name('dealer.onboarding.start');
@@ -188,6 +209,14 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/leads/{lead}/notes', [LeadController::class, 'note'])->name('leads.notes.store');
             Route::post('/leads/{lead}/messages', [LeadController::class, 'message'])->middleware('throttle:60,1')->name('leads.messages.store');
             Route::post('/leads/{lead}/read', [LeadController::class, 'read'])->name('leads.read');
+
+            // Offers, trade-ins and reservations (M12)
+            Route::get('/offers', [DealController::class, 'index'])->name('offers.index');
+            Route::post('/offers/{offer}/respond', [DealController::class, 'respond'])->name('offers.respond');
+            Route::patch('/trade-ins/{tradeIn}', [DealController::class, 'value'])->name('trade-ins.update');
+            Route::post('/trade-ins/{tradeIn}/ask-photos', [DealController::class, 'askForPhotos'])->middleware('throttle:10,1')->name('trade-ins.ask-photos');
+            Route::post('/reservations/{reservation}/cancel', [DealController::class, 'cancelReservation'])->name('reservations.cancel');
+            Route::put('/settings/deals', [SettingsController::class, 'updateDeals'])->name('settings.deals');
 
             // Billing and spotlight (M16, M5)
             Route::get('/billing', [BillingController::class, 'show'])->name('billing');

@@ -4,12 +4,23 @@ namespace App\Http\Controllers\Bookings;
 
 use App\Domain\Appointments\Actions\CancelAppointment;
 use App\Domain\Appointments\Actions\RescheduleAppointment;
+use App\Domain\Appointments\Actions\StartDepositCheckout;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Support\AppointmentText;
 use App\Domain\Appointments\Support\IcsCalendar;
+use App\Domain\Billing\Enums\PaymentStatus;
+use App\Domain\Billing\Models\Payment;
+use App\Domain\Deals\Enums\OfferStatus;
+use App\Domain\Deals\Enums\ReservationStatus;
+use App\Domain\Deals\Enums\TradeInStatus;
+use App\Domain\Deals\Models\Offer;
+use App\Domain\Deals\Models\Reservation;
+use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
+use App\Http\Presenters\DealsPresenter;
 use App\Http\Presenters\MarketplacePresenter;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -36,10 +47,30 @@ class CustomerBookingController extends Controller
         $lots = Lot::withTrashed()->whereIn('id', $appointments->pluck('lot_id')->unique())->get()->keyBy('id');
         $map = fn (Appointment $a) => $this->summary($a, $lots[$a->lot_id]);
 
+        $user = $request->user();
+        $offers = Offer::withoutGlobalScopes()->where('customer_id', $user->id)->where('status', '!=', OfferStatus::Withdrawn)
+            ->with(['vehicle.make', 'vehicle.model'])->latest('id')->limit(30)->get();
+        $reservations = Reservation::withoutGlobalScopes()->where('customer_id', $user->id)->where('status', '!=', ReservationStatus::Pending)
+            ->with(['vehicle.make', 'vehicle.model', 'payment'])->latest('id')->limit(30)->get();
+        $tradeIns = TradeIn::withoutGlobalScopes()->where('customer_id', $user->id)
+            ->with(['make', 'model', 'vehicle.make', 'vehicle.model'])->latest('id')->limit(30)->get();
+        $dealLots = Lot::withTrashed()->whereIn('id', $offers->pluck('lot_id')->merge($reservations->pluck('lot_id'))->merge($tradeIns->pluck('lot_id'))->unique())->get()->keyBy('id');
+
+        // Open deals first (design 19: "Offers and reservations"), closed ones under Past.
+        $openOffer = fn (Offer $o) => $o->isOpen() || ($o->status === OfferStatus::Accepted && $o->closed_at?->gt(now()->subDays(7)));
+
         return Inertia::render('Bookings/Index', [
-            'upcoming' => $appointments->filter->isUpcoming()->sortBy('starts_at')->values()->map($map),
-            'past' => $appointments->reject->isUpcoming()->values()->map($map),
-        ])->withViewData(['meta' => ['title' => 'Your bookings', 'robots' => 'noindex']]);
+            'upcoming' => $appointments->filter(fn (Appointment $a) => $a->isUpcoming() || $a->status === AppointmentStatus::AwaitingDeposit)->sortBy('starts_at')->values()->map($map),
+            'past' => $appointments->reject(fn (Appointment $a) => $a->isUpcoming() || $a->status === AppointmentStatus::AwaitingDeposit)->values()->map($map),
+            'offers' => $offers->filter($openOffer)->values()->map(fn (Offer $o) => DealsPresenter::buyerOffer($o, $dealLots[$o->lot_id])),
+            'reservations' => $reservations->filter(fn (Reservation $r) => $r->status === ReservationStatus::Active)->values()->map(fn (Reservation $r) => DealsPresenter::buyerReservation($r, $dealLots[$r->lot_id])),
+            'tradeIns' => $tradeIns->filter(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->values()->map(fn (TradeIn $t) => DealsPresenter::buyerTradeIn($t, $dealLots[$t->lot_id])),
+            'pastDeals' => collect()
+                ->merge($offers->reject($openOffer)->map(fn (Offer $o) => ['key' => "o{$o->ulid}", 'title' => 'Offer on '.$o->vehicle->title(), 'detail' => $o->money().' · '.$dealLots[$o->lot_id]->name, 'status' => $o->status->label(), 'at' => $o->created_at]))
+                ->merge($reservations->reject(fn (Reservation $r) => $r->status === ReservationStatus::Active)->map(fn (Reservation $r) => ['key' => "r{$r->ulid}", 'title' => 'Reservation: '.$r->vehicle->title(), 'detail' => $r->money().' deposit · '.$dealLots[$r->lot_id]->name.($r->payment?->refunded_at ? ' · refunded' : ''), 'status' => $r->status->label(), 'at' => $r->created_at]))
+                ->merge($tradeIns->reject(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->map(fn (TradeIn $t) => ['key' => "t{$t->ulid}", 'title' => 'Trade-in: '.$t->title(), 'detail' => ($t->estimate() ?? '').' · '.$dealLots[$t->lot_id]->name, 'status' => $t->status->label(), 'at' => $t->created_at]))
+                ->sortByDesc('at')->take(20)->values()->map(fn (array $d) => [...$d, 'at' => $d['at']?->diffForHumans()]),
+        ])->withViewData(['meta' => ['title' => 'Bookings and offers', 'robots' => 'noindex']]);
     }
 
     public function show(Request $request, Appointment $appointment): InertiaResponse
@@ -121,6 +152,28 @@ class CustomerBookingController extends Controller
             'url' => route('bookings.show', $a),
             'can_cancel' => $a->isUpcoming(),
             'cancel_reason' => $a->status === AppointmentStatus::Cancelled ? $a->cancel_reason : null,
+            'deposit' => $this->deposit($a, $lot),
         ];
+    }
+
+    /** A test drive's refundable deposit: due (with the time left to pay), paid or refunded. @return array<string, mixed>|null */
+    private function deposit(Appointment $a, Lot $lot): ?array
+    {
+        $payment = $a->deposit_payment_id ? Payment::find($a->deposit_payment_id) : null;
+
+        if ($a->status === AppointmentStatus::AwaitingDeposit) {
+            return [
+                'state' => 'due',
+                'amount' => Money::format((int) $lot->testDriveDeposit(), (string) config('lotlink.currency', 'NGN')),
+                'left' => DealsPresenter::left($a->created_at?->copy()->addMinutes(StartDepositCheckout::HOLD_MINUTES)),
+                'pay_url' => route('bookings.deposit', $a),
+            ];
+        }
+
+        if ($payment === null || ! in_array($payment->status, [PaymentStatus::Success, PaymentStatus::Refunded], true)) {
+            return null;
+        }
+
+        return ['state' => $payment->status === PaymentStatus::Refunded ? 'refunded' : 'paid', 'amount' => $payment->money(), 'left' => null, 'pay_url' => null];
     }
 }

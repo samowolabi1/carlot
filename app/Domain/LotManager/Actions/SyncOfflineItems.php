@@ -143,6 +143,7 @@ class SyncOfflineItems
             'agreed_price' => ['nullable', 'numeric', 'min:1'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'trade_in_value' => ['nullable', 'numeric', 'min:0'],
+            'trade_in' => ['nullable', 'string', 'size:26'],
             'deposit_required' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];

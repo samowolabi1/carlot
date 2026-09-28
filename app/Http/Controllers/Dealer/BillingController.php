@@ -83,7 +83,7 @@ class BillingController extends Controller
                 'self_serve' => $p->self_serve,
                 'free' => $p->isFree(),
             ]),
-            'payments' => Payment::query()->where('lot_id', $lot->id)->whereIn('status', [PaymentStatus::Success, PaymentStatus::Refunded, PaymentStatus::Failed])
+            'payments' => Payment::query()->where('lot_id', $lot->id)->whereIn('purpose', PaymentPurpose::billing())->whereIn('status', [PaymentStatus::Success, PaymentStatus::Refunded, PaymentStatus::Failed])
                 ->latest()->limit(50)->get()->map(fn (Payment $p) => [
                     'ulid' => $p->ulid,
                     'date' => $date($p->paid_at ?? $p->created_at),
@@ -121,7 +121,7 @@ class BillingController extends Controller
     /** Paystack (or the sandbox) sends the owner back here with the reference. */
     public function callback(Request $request, Lot $lot, FulfilPayment $fulfil): RedirectResponse
     {
-        $payment = Payment::where('lot_id', $lot->id)->where('reference', (string) $request->query('reference', $request->query('trxref', '')))->first();
+        $payment = Payment::where('lot_id', $lot->id)->whereIn('purpose', PaymentPurpose::billing())->where('reference', (string) $request->query('reference', $request->query('trxref', '')))->first();
 
         if ($payment === null) {
             return to_route('dealer.billing', $lot)->with('error', 'We could not find that payment.');

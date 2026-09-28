@@ -4,9 +4,13 @@ namespace App\Domain\Lots\Models;
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Models\Appointment;
+use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
 use App\Domain\Billing\Models\Subscription;
+use App\Domain\Deals\Models\Offer;
+use App\Domain\Deals\Models\Reservation;
+use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Models\Lead;
 use App\Domain\LotManager\Models\FollowUpTask;
@@ -61,6 +65,11 @@ use Illuminate\Support\Str;
  * @property int|null $plan_id
  * @property Carbon|null $featured_until
  * @property Carbon|null $followers_notified_at
+ * @property bool $accepts_offers
+ * @property int|null $reservation_deposit
+ * @property bool $reservation_refundable
+ * @property int|null $test_drive_deposit
+ * @property string|null $paystack_subaccount
  * @property-read string|null $logo_url
  * @property-read string|null $cover_url
  * @property-read LotMember $pivot
@@ -77,9 +86,10 @@ class Lot extends Model
         'owner_id', 'name', 'slug', 'tagline', 'about', 'logo_path', 'cover_path', 'brand_color',
         'phone', 'whatsapp', 'email', 'address', 'landmark', 'city', 'state', 'country',
         'latitude', 'longitude', 'timezone', 'status', 'plan_id', 'booking_auto_confirm', 'booking_min_notice_minutes',
+        'accepts_offers', 'reservation_deposit', 'reservation_refundable', 'test_drive_deposit',
     ];
 
-    protected $hidden = ['id', 'owner_id', 'plan_id', 'location'];
+    protected $hidden = ['id', 'owner_id', 'plan_id', 'location', 'paystack_subaccount'];
 
     protected function casts(): array
     {
@@ -93,6 +103,10 @@ class Lot extends Model
             'booking_min_notice_minutes' => 'integer',
             'featured_until' => 'datetime',
             'followers_notified_at' => 'datetime',
+            'accepts_offers' => 'boolean',
+            'reservation_deposit' => 'integer',
+            'reservation_refundable' => 'boolean',
+            'test_drive_deposit' => 'integer',
         ];
     }
 
@@ -167,7 +181,7 @@ class Lot extends Model
     /** What the lot has paid LotLink (plans, spotlights); {billingPayment} route bindings. @return HasMany<Payment, $this> */
     public function billingPayments(): HasMany
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class)->whereIn('purpose', PaymentPurpose::billing());
     }
 
     /** @return HasMany<Spotlight, $this> */
@@ -180,6 +194,48 @@ class Lot extends Model
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
+    }
+
+    /** @return HasMany<Offer, $this> */
+    public function offers(): HasMany
+    {
+        return $this->hasMany(Offer::class);
+    }
+
+    /** @return HasMany<TradeIn, $this> */
+    public function tradeIns(): HasMany
+    {
+        return $this->hasMany(TradeIn::class);
+    }
+
+    /** @return HasMany<Reservation, $this> */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /** A plan feature such as offers or deposits (spec: monetisation). */
+    public function planAllows(string $feature): bool
+    {
+        return (bool) ($this->plan ?? Plan::default())?->allows($feature);
+    }
+
+    /** Buyers can make offers: the lot takes them and its plan includes them. */
+    public function takesOffers(): bool
+    {
+        return $this->accepts_offers && $this->planAllows('offers');
+    }
+
+    /** The reservation deposit in minor units, or null when reservations are off. */
+    public function reservationDeposit(): ?int
+    {
+        return $this->reservation_deposit > 0 && $this->planAllows('deposits') ? $this->reservation_deposit : null;
+    }
+
+    /** The refundable test-drive deposit in minor units, or null when there is none. */
+    public function testDriveDeposit(): ?int
+    {
+        return $this->test_drive_deposit > 0 && $this->planAllows('deposits') ? $this->test_drive_deposit : null;
     }
 
     public function isFeatured(): bool

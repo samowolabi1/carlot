@@ -14,6 +14,20 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S9 (Offers and deals) ✅**
+
+| Area | What works |
+| --- | --- |
+| Offers (09) | "Offer" on negotiable cars. The offer must be between half and the full asking price. The sheet shows where it sits among similar LotLink listings. A new offer replaces the buyer's open one. The lot accepts, declines or counters, and the buyer can accept a counter ("Accept and reserve"), decline it or counter again. Anything unanswered expires after 48 hours (`offers:expire`, hourly). Every step appears in the lead's chat, and accepting moves the lead to Negotiating. |
+| Trade-ins (10) | "Trade in my car" on car and lot pages takes the make, model, year, mileage, condition, notes and up to 8 photos. Photos are re-encoded and kept private; the lot sees them through short-lived signed links. The lot sends a low–high estimate, and the buyer gets it on WhatsApp and can accept it. A valued trade-in can be added to a Lot Manager order, which reduces the balance. Booking a trade-in visit links to it. |
+| Reservations (11) | "Reserve with deposit": the buyer pays the lot's deposit on Paystack to hold the car for 24, 48 or 72 hours. The car is only held once the payment is verified. If someone else took the car while they paid, the deposit is refunded. When the hold runs out (`reservations:expire`, every 5 minutes), the car goes back on sale and the deposit is refunded unless the lot turned refunds off. A lot cancelling always refunds. Creating the order for that buyer converts the reservation, and the deposit is recorded as a Paystack payment on the order. |
+| Test-drive deposits | If the lot sets one, test drives are booked only after the refundable deposit is paid. The slot is held for 30 minutes (`appointments:release-unpaid`). It's refunded at check-in, or if either side cancels, and kept for a no-show. |
+| Dealer page (D7) | **Offers & trade-ins** in the sidebar (with a badge) has tabs for offers (Accept / Counter / Decline, with a nudge on old stock), trade-ins (estimate, "Ask for more photos") and reservations (Create order, Cancel and refund). |
+| Buyer page (19) | **Bookings and offers** lists counters to answer, accepted offers, reservations, valuations and past deals. |
+| Settings | **Settings → Offers and deposits**: take offers on/off, the reservation deposit, refund on expiry, and the test-drive deposit. Offers and deposits are Pro features (spec); on Free and Starter the settings are saved but stay off. |
+| Payouts | Deposits go through LotLink's Paystack account. To settle them to a lot, create a Paystack subaccount for its bank account and enter the code in `/admin/lots` → **Payouts**. |
+| Quality | 365 tests, including offer limits and the counter flow, expiry, private photos, reservation races and refunds, conversion into orders, deposits, the webhook path, settings and tenancy. |
+
 **Sprint S8 (Leads and chat) ✅**
 
 | Area | What works |
@@ -213,6 +227,9 @@ your `APP_URL` with a `{{1}}` suffix):
 | `lot_new_stock` | Marketing | lot, number of cars, example car | open the lot |
 | `follow_up_due` | Utility | staff name, type, customer, lot | open Today / the lead |
 | `new_message` | Utility | sender, message snippet | open the chat |
+| `offer_update` | Utility | name, car, lot, update | open bookings and offers |
+| `trade_in_update` | Utility | name, car, lot, update | open bookings and offers |
+| `reservation_update` | Utility | name, car, lot, update | open bookings and offers |
 
 Until a template is approved, messages fall back to SMS automatically.
 
@@ -275,6 +292,7 @@ app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per mod
   Finance/               Budgets and the FinanceCalculator (same formulas in resources/js/lib/finance.ts)
   Billing/               Plans, subscriptions, payments, coupons, spotlights; PaymentGateway (Paystack | sandbox)
   Leads/                 Leads, notes, conversations and chat messages; CaptureLead, SendMessage, UpdateLead
+  Deals/                 Offers, trade-ins and reservations; MakeOffer, RespondToOffer, ValueTradeIn, StartReservation
   Messaging/             SmsGateway (log, Termii)
   Support/               PhoneNumber (E.164)
 app/Http/Controllers/    Thin controllers calling Actions; Dealer/ for /dealer/{lot}

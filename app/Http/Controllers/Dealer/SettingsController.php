@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dealer;
 use App\Domain\Lots\Actions\SaveLotHours;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotClosure;
+use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dealer\LotBookingRulesRequest;
 use App\Http\Requests\Dealer\LotBrandingRequest;
@@ -35,7 +36,43 @@ class SettingsController extends Controller
                 'closures' => LotClosure::query()->where('date', '>=', now($lot->timezone)->toDateString())->orderBy('date')->get()
                     ->map(fn (LotClosure $c) => ['id' => $c->id, 'date' => $c->date->toDateString(), 'label' => $c->date->format('D j M Y'), 'reason' => $c->reason]),
             ],
+            'deals' => [
+                'accepts_offers' => $lot->accepts_offers,
+                'reservation_deposit' => $lot->reservation_deposit ? intdiv($lot->reservation_deposit, 100) : null,
+                'reservation_refundable' => $lot->reservation_refundable,
+                'test_drive_deposit' => $lot->test_drive_deposit ? intdiv($lot->test_drive_deposit, 100) : null,
+                'plan' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
+            ],
         ]);
+    }
+
+    /** Offers and deposits (TDD M12): whether buyers can make offers, and the deposit amounts. */
+    public function updateDeals(Request $request, Lot $lot): RedirectResponse
+    {
+        Gate::authorize('update', $lot);
+
+        foreach (['reservation_deposit', 'test_drive_deposit'] as $key) {
+            $request->merge([$key => preg_replace('/[^\d]/', '', (string) $request->input($key)) ?: null]);
+        }
+
+        $data = $request->validate([
+            'accepts_offers' => ['required', 'boolean'],
+            'reservation_deposit' => ['nullable', 'integer', 'min:1000', 'max:50000000'],
+            'reservation_refundable' => ['required', 'boolean'],
+            'test_drive_deposit' => ['nullable', 'integer', 'min:500', 'max:5000000'],
+        ], [
+            'reservation_deposit.min' => 'A reservation deposit starts at ₦1,000.',
+            'test_drive_deposit.min' => 'A test-drive deposit starts at ₦500.',
+        ]);
+
+        $lot->update([
+            'accepts_offers' => $data['accepts_offers'],
+            'reservation_deposit' => isset($data['reservation_deposit']) ? Money::fromMajor((int) $data['reservation_deposit']) : null,
+            'reservation_refundable' => $data['reservation_refundable'],
+            'test_drive_deposit' => isset($data['test_drive_deposit']) ? Money::fromMajor((int) $data['test_drive_deposit']) : null,
+        ]);
+
+        return back()->with('success', 'Offer and deposit settings saved.');
     }
 
     public function updateProfile(LotProfileRequest $request, Lot $lot): RedirectResponse

@@ -18,6 +18,14 @@ export interface StockCar {
     price_label: string | null;
     status: string;
     orderable: boolean;
+    reservation?: { by: string; customer: string | null; deposit: string; price: number } | null;
+}
+
+export interface TradeInOption {
+    ulid: string;
+    label: string;
+    customer: string | null;
+    value: number | null;
 }
 
 export interface CustomerRef {

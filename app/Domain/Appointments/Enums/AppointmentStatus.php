@@ -4,6 +4,7 @@ namespace App\Domain\Appointments\Enums;
 
 enum AppointmentStatus: string
 {
+    case AwaitingDeposit = 'awaiting_deposit'; // holds the slot for 30 minutes while the buyer pays (S9)
     case Pending = 'pending';
     case Confirmed = 'confirmed';
     case Completed = 'completed';
@@ -13,6 +14,7 @@ enum AppointmentStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::AwaitingDeposit => 'Deposit due',
             self::Pending => 'Waiting for lot',
             self::Confirmed => 'Confirmed',
             self::Completed => 'Completed',

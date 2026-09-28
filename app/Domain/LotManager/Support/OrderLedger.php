@@ -2,6 +2,7 @@
 
 namespace App\Domain\LotManager\Support;
 
+use App\Domain\Deals\Models\Reservation;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Support\VehicleStateMachine;
@@ -76,6 +77,11 @@ class OrderLedger
 
     private function heldByAnother(SalesOrder $order): bool
     {
+        // A paid reservation keeps the car held until it ends (TDD M12).
+        if (Reservation::activeFor($order->vehicle_id) !== null) {
+            return true;
+        }
+
         return SalesOrder::withoutGlobalScopes()
             ->where('vehicle_id', $order->vehicle_id)
             ->whereKeyNot($order->id)

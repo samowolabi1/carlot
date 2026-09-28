@@ -35,7 +35,7 @@ class SlotGenerator
 
         $booked = Appointment::withoutGlobalScopes()
             ->where('lot_id', $lot->id)
-            ->active()
+            ->holdingSlot()
             ->whereBetween('starts_at', [$firstDay->utc(), $lastDay->utc()])
             ->when($ignore, fn ($q) => $q->whereKeyNot($ignore->id))
             ->get(['starts_at'])

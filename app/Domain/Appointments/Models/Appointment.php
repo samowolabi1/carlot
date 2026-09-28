@@ -5,6 +5,7 @@ namespace App\Domain\Appointments\Models;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Enums\AppointmentType;
+use App\Domain\Billing\Models\Payment;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Concerns\BelongsToLot;
 use App\Domain\Support\StoresUtc;
@@ -38,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $reminded_24h_at
  * @property Carbon|null $reminded_2h_at
  * @property Carbon|null $escalated_at
+ * @property int|null $deposit_payment_id
  */
 class Appointment extends Model
 {
@@ -106,6 +108,23 @@ class Appointment extends Model
     public function scopeActive(Builder $query): void
     {
         $query->whereIn('status', AppointmentStatus::active());
+    }
+
+    /**
+     * Bookings that take a place in a slot: active ones, plus test drives whose deposit is
+     * being paid.
+     *
+     * @param  Builder<Appointment>  $query
+     */
+    public function scopeHoldingSlot(Builder $query): void
+    {
+        $query->whereIn('status', [...AppointmentStatus::active(), AppointmentStatus::AwaitingDeposit]);
+    }
+
+    /** @return BelongsTo<Payment, $this> */
+    public function depositPayment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class, 'deposit_payment_id');
     }
 
     public function isActive(): bool

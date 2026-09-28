@@ -44,7 +44,7 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
                 <Link :href="route('budget')" :class="row">My budget<span class="text-[13px] text-muted">{{ budgetLabel ? `Up to ${budgetLabel}` : 'Work it out' }}</span></Link>
                 <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
                 <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
-                <span :class="row" class="text-muted/60" aria-disabled="true">Offers and trade-ins<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
+                <Link :href="`${route('bookings.index')}#offers`" :class="row">Offers and trade-ins<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('following')" :class="row">Lots I follow<span class="text-[13px] text-muted">{{ counts.following || '' }}</span></Link>
             </nav>
 

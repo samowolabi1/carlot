@@ -10,7 +10,7 @@ import ShareLocation from '@/components/marketplace/ShareLocation.vue';
 export interface BookingSummary {
     ulid: string;
     type: string;
-    status: 'pending' | 'confirmed' | 'completed' | 'no_show' | 'cancelled';
+    status: 'awaiting_deposit' | 'pending' | 'confirmed' | 'completed' | 'no_show' | 'cancelled';
     status_label: string;
     when: string;
     starts_at: string;
@@ -20,6 +20,7 @@ export interface BookingSummary {
     url: string;
     can_cancel: boolean;
     cancel_reason: string | null;
+    deposit: { state: 'due' | 'paid' | 'refunded'; amount: string; left: string | null; pay_url: string | null } | null;
 }
 
 const props = defineProps<{
@@ -35,6 +36,7 @@ const cancelForm = useForm({ reason: '' });
 
 const heading = computed(() => {
     if (props.booking.status === 'cancelled') return 'Booking cancelled';
+    if (props.booking.status === 'awaiting_deposit') return 'Pay the deposit';
     if (!props.booking.upcoming) return 'Your visit';
     if (props.booking.status === 'pending') return 'Request sent';
     return props.justBooked ? "You're booked" : 'Your booking';
@@ -43,6 +45,7 @@ const heading = computed(() => {
 const intro = computed(() => {
     const b = props.booking;
     const channel = b.whatsapp_reminders ? 'WhatsApp' : 'SMS';
+    if (b.status === 'awaiting_deposit') return `Your slot is held while you pay. Pay the refundable deposit to confirm your ${b.type.toLowerCase()}.`;
     if (b.status === 'pending') return `${b.lot.name} will confirm your ${b.type.toLowerCase()} soon. We'll message you on ${channel} when they do.`;
     if (b.status === 'confirmed' && b.upcoming) return `${b.lot.name} is expecting you. We'll remind you on ${channel} 24 hours and 2 hours before.`;
     if (b.status === 'cancelled') return b.cancel_reason ? `Reason: ${b.cancel_reason}` : 'This booking was cancelled.';
@@ -64,14 +67,27 @@ function cancel() {
         <div class="mx-auto flex max-w-xl flex-col gap-[18px] px-5 py-7">
             <div
                 class="flex h-16 w-16 items-center justify-center rounded-full"
-                :class="booking.status === 'cancelled' ? 'bg-divider text-muted' : booking.status === 'pending' ? 'bg-blush text-clay-dark' : 'bg-[#DCEFE3] text-success'"
+                :class="booking.status === 'cancelled' ? 'bg-divider text-muted' : ['pending', 'awaiting_deposit'].includes(booking.status) ? 'bg-blush text-clay-dark' : 'bg-[#DCEFE3] text-success'"
             >
-                <Icon :name="booking.status === 'cancelled' ? 'close' : booking.status === 'pending' ? 'clock' : 'check'" :size="32" :stroke-width="2.4" />
+                <Icon :name="booking.status === 'cancelled' ? 'close' : ['pending', 'awaiting_deposit'].includes(booking.status) ? 'clock' : 'check'" :size="32" :stroke-width="2.4" />
             </div>
             <div class="flex flex-col gap-1.5">
                 <h1 class="text-[30px] leading-tight font-bold">{{ heading }}</h1>
                 <p v-if="intro" class="text-[15px] text-muted">{{ intro }}</p>
             </div>
+
+            <div v-if="booking.deposit?.state === 'due'" class="card flex flex-col gap-3 border-2 border-clay p-4">
+                <p class="text-[14px]">
+                    <strong>Refundable deposit: {{ booking.deposit.amount }}.</strong> You get it back when you arrive, or if you cancel before the slot.
+                    <template v-if="booking.deposit.left"> {{ booking.deposit.left }} to pay before the slot is released.</template>
+                </p>
+                <Link v-if="booking.deposit.pay_url && user" :href="booking.deposit.pay_url" method="post" as="button" class="btn btn-primary h-12 w-full">Pay {{ booking.deposit.amount }} deposit</Link>
+            </div>
+            <p v-else-if="booking.deposit" class="card flex items-center gap-2.5 px-4 py-3 text-[14px]">
+                <Icon name="shield" :size="20" class="shrink-0 text-forest" />
+                <span v-if="booking.deposit.state === 'paid'">Deposit of <strong>{{ booking.deposit.amount }}</strong> paid. It's refunded when you arrive.</span>
+                <span v-else>Your <strong>{{ booking.deposit.amount }}</strong> deposit has been refunded.</span>
+            </p>
 
             <dl class="card px-4 pt-1 pb-1.5 text-[14px]">
                 <div class="flex justify-between gap-4 py-2.5"><dt class="text-muted">When</dt><dd class="text-right font-semibold">{{ booking.when }}</dd></div>

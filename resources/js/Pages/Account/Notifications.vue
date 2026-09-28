@@ -11,6 +11,9 @@ const look: Record<string, { icon: IconName; tone: string }> = {
     lead: { icon: 'leads', tone: 'bg-blush text-clay-dark' },
     follow_up: { icon: 'phone', tone: 'bg-blush text-clay-dark' },
     billing: { icon: 'card', tone: 'bg-sand text-ink' },
+    offer: { icon: 'tag', tone: 'bg-blush text-clay-dark' },
+    trade_in: { icon: 'swap', tone: 'bg-map text-forest' },
+    reservation: { icon: 'shield', tone: 'bg-[#DCEFE3] text-[#166534]' },
     info: { icon: 'bell', tone: 'bg-sand text-ink' },
 };
 </script>

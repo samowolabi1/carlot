@@ -42,6 +42,7 @@ const paths = {
     refresh: 'M20 11a8 8 0 0 0-14.7-4M4 5v4h4M4 13a8 8 0 0 0 14.7 4M20 19v-4h-4',
     download: 'M12 4v12M7 11l5 5 5-5M4 20h16',
     chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
+    swap: 'M4 7h13l-3-3M20 17H7l3 3',
 } as const;
 
 export type IconName = keyof typeof paths;

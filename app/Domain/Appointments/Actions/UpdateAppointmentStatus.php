@@ -12,6 +12,8 @@ class UpdateAppointmentStatus
 {
     public const ACTIONS = ['confirm', 'check_in', 'no_show', 'complete'];
 
+    public function __construct(private readonly RefundDeposit $refundDeposit) {}
+
     public function run(Appointment $appointment, string $action): Appointment
     {
         $fail = fn (string $message) => throw ValidationException::withMessages(['action' => $message]);
@@ -36,6 +38,11 @@ class UpdateAppointmentStatus
 
         if ($action === 'confirm') {
             $appointment->customer->notify(new BookingNotice($appointment, BookingNotice::CONFIRMED));
+        }
+
+        // The buyer turned up, so a test-drive deposit goes back; a no-show keeps it.
+        if ($action === 'check_in') {
+            $this->refundDeposit->run($appointment);
         }
 
         return $appointment;

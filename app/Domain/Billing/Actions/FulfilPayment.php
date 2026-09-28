@@ -2,6 +2,7 @@
 
 namespace App\Domain\Billing\Actions;
 
+use App\Domain\Appointments\Actions\ConfirmDeposit;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Enums\PaymentStatus;
@@ -9,6 +10,7 @@ use App\Domain\Billing\Gateways\GatewayTransaction;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
+use App\Domain\Deals\Actions\ActivateReservation;
 use Illuminate\Support\Facades\DB;
 
 class FulfilPayment
@@ -17,6 +19,9 @@ class FulfilPayment
         private readonly PaymentGateway $gateway,
         private readonly ActivateSubscription $activate,
         private readonly ActivateSpotlight $spotlight,
+        private readonly ActivateReservation $reservation,
+        private readonly ConfirmDeposit $deposit,
+        private readonly RefundPayment $refund,
     ) {}
 
     /**
@@ -64,6 +69,9 @@ class FulfilPayment
             PaymentPurpose::Subscription => $this->activate->run($payment, $transaction),
             PaymentPurpose::Spotlight => $this->spotlight->run(Spotlight::withoutGlobalScopes()->findOrFail($payment->payable_id)),
             PaymentPurpose::Renewal => null,
+            // A car taken, or a booking released, while the buyer paid: the money goes back.
+            PaymentPurpose::Reservation => $this->reservation->run($payment) ?: $this->refund->run($payment),
+            PaymentPurpose::Deposit => $this->deposit->run($payment) ?: $this->refund->run($payment),
         };
     }
 }

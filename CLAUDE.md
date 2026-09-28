@@ -60,7 +60,7 @@ Run all four before pushing.
 
 ## Billing and spotlight (S7)
 
-- Money a lot pays LotLink is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
+- Money paid through Paystack is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
   changes state in `FulfilPayment`, which re-verifies with the `PaymentGateway` and checks the
   amount; never mark a payment paid from a redirect or webhook body. Webhooks are stored in
   `webhook_events` (unique body hash), so each delivery is handled once.
@@ -82,6 +82,22 @@ Run all four before pushing.
 - Notifications that go by WhatsApp/SMS or email pass their channels through
   `NotificationPreferences::filter()` with their type, and add `database` with a `toArray()`
   (`kind`, `text`, `url`) so they show in the notification centre.
+
+## Offers and deals (S9)
+
+- Offers, trade-ins and reservations live in `app/Domain/Deals`. Each goes through its Action
+  (`MakeOffer`, `RespondToOffer`, `AnswerCounterOffer`, `SubmitTradeIn`, `ValueTradeIn`,
+  `StartReservation`, `ActivateReservation`, `EndReservation`). These capture a lead, post a line
+  into the lead's chat via `DealTimeline`, and notify the buyer (`DealUpdate`) or the lot (`DealAlert`).
+- Buyer deposits (reservations, test drives) are `Billing\Models\Payment` rows with `user_id` = the
+  buyer and purpose `reservation` / `deposit`. They are made by `BuyerCheckout` and only take effect in
+  `FulfilPayment` (verified). The Billing page and invoices use `PaymentPurpose::billing()` only.
+- One active reservation per car. `OrderLedger` never frees a car that has one. `CreateOrder`
+  converts it for the same buyer and records the deposit as a Paystack order payment.
+- Test drives with a deposit start as `awaiting_deposit` (holds the slot; `holdingSlot()` scope).
+  Refunds go through `RefundDeposit` (check-in, cancel); a no-show keeps it.
+- Offers and deposits are plan features (`Lot::takesOffers()`, `reservationDeposit()`,
+  `testDriveDeposit()`); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
 
 ## Multi-lot tenancy
 
@@ -156,7 +172,7 @@ rather than fake data.
 ## Sprint plan (TDD)
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
-S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ·
+S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
 S10 Lot Manager pro · S11 Location + analytics · S12 Trust + admin · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),

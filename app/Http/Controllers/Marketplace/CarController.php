@@ -9,6 +9,7 @@ use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Sharing\Support\ShareCard;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Controller;
+use App\Http\Presenters\DealsPresenter;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ class CarController extends Controller
             'preview' => $preview ? ($vehicle->status === VehicleStatus::Draft ? 'This is a draft only your team can see.' : 'Only your team can see this until the car and lot are live.') : null,
             'saved' => $user ? $user->favourites()->whereKey($vehicle->id)->exists() : false,
             'similar' => $this->similar($vehicle),
+            'deals' => $public ? DealsPresenter::forCar($vehicle, $user) : null,
             'finance' => $price ? [
                 'price' => $price,
                 'from' => FinanceCalculator::fromPrice($price),

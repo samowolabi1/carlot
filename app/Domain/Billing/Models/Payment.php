@@ -16,8 +16,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * Money a lot pays LotLink through Paystack: plans, renewals and spotlights (TDD M16).
- * Not to be confused with Lot Manager's order_payments (a buyer paying a lot).
+ * Money paid through Paystack: a lot paying LotLink for plans, renewals and spotlights (TDD M16),
+ * and buyers' reservation and test-drive deposits (M12, user_id is the buyer). Not to be
+ * confused with Lot Manager's order_payments (payments a lot records itself).
  *
  * @property int $id
  * @property string $ulid

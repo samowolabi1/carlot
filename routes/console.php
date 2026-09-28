@@ -27,3 +27,8 @@ Schedule::command('followers:notify')->everyThirtyMinutes()->withoutOverlapping(
 // Leads and chat (TDD M11)
 Schedule::command('leads:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('chat:notify-unread')->everyFiveMinutes()->withoutOverlapping();
+
+// Offers, trade-ins and reservations (TDD M12)
+Schedule::command('offers:expire')->hourly()->withoutOverlapping();
+Schedule::command('reservations:expire')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('appointments:release-unpaid')->everyFiveMinutes()->withoutOverlapping();

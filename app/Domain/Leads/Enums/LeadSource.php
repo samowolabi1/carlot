@@ -12,9 +12,9 @@ enum LeadSource: string
     case WhatsApp = 'whatsapp';
     case Booking = 'booking';
     case Call = 'call';
-    case Offer = 'offer';          // S9
-    case TradeIn = 'trade_in';     // S9
-    case Reservation = 'reservation'; // S9
+    case Offer = 'offer';
+    case TradeIn = 'trade_in';
+    case Reservation = 'reservation';
 
     public function label(): string
     {

@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class CancelAppointment
 {
-    public function __construct(private readonly NotifyLot $notifyLot) {}
+    public function __construct(private readonly NotifyLot $notifyLot, private readonly RefundDeposit $refundDeposit) {}
 
     public function run(Appointment $appointment, ?User $by, ?string $reason = null): Appointment
     {
@@ -25,7 +25,9 @@ class CancelAppointment
             'cancel_reason' => $reason,
         ])->save();
 
-        // Deposit refunds arrive with test-drive deposits (S9).
+        // Cancelling before the slot (by either side) returns a test-drive deposit.
+        $this->refundDeposit->run($appointment, $by);
+
         if ($by !== null && $by->id === $appointment->customer_id) {
             $this->notifyLot->run($appointment, 'cancelled');
         } else {

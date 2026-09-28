@@ -18,8 +18,11 @@ class RefundPayment
 {
     public function __construct(private readonly PaymentGateway $gateway) {}
 
-    /** Admin refunds through Paystack's Refund API; a refunded spotlight stops. */
-    public function run(Payment $payment, User $admin): Payment
+    /**
+     * Refunds through Paystack's Refund API: by an admin, or by the system for buyer deposits
+     * (a reservation that ends, a test-drive deposit after the visit). A refunded spotlight stops.
+     */
+    public function run(Payment $payment, ?User $by = null): Payment
     {
         if ($payment->status !== PaymentStatus::Success) {
             throw ValidationException::withMessages(['payment' => 'Only a paid payment can be refunded.']);
@@ -36,7 +39,7 @@ class RefundPayment
             }
         }
 
-        AuditLog::record('billing.refunded', $payment, ['amount' => $payment->amount, 'reference' => $payment->reference], $admin, $payment->lot_id);
+        AuditLog::record('billing.refunded', $payment, ['amount' => $payment->amount, 'reference' => $payment->reference], $by, $payment->lot_id);
 
         return $payment;
     }

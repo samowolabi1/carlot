@@ -38,12 +38,12 @@ class CalendarController extends Controller
 
         $week = $load(Appointment::query()
             ->whereBetween('starts_at', [$weekStart->utc(), $weekEnd->utc()])
-            ->where('status', '!=', AppointmentStatus::Cancelled)
+            ->whereNotIn('status', [AppointmentStatus::Cancelled, AppointmentStatus::AwaitingDeposit])
             ->orderBy('starts_at'));
 
         $todayList = $load(Appointment::query()
             ->whereBetween('starts_at', [$today->utc(), $today->addDay()->utc()])
-            ->where('status', '!=', AppointmentStatus::Cancelled)
+            ->whereNotIn('status', [AppointmentStatus::Cancelled, AppointmentStatus::AwaitingDeposit])
             ->orderBy('starts_at'));
 
         $pending = $load(Appointment::query()->where('status', AppointmentStatus::Pending)->where('starts_at', '>', now())->orderBy('starts_at'));

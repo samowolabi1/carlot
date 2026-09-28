@@ -14,6 +14,7 @@ final class NotificationPreferences
     public const TYPES = [
         'messages' => ['Chat messages', 'all'],
         'bookings' => ['Bookings and reminders', 'all'],
+        'offers' => ['Offers, trade-ins and reservations', 'all'],
         'new_stock' => ['New cars from lots I follow', 'buyers'],
         'leads' => ['New leads and follow-ups', 'dealers'],
         'billing' => ['Billing and plan', 'dealers'],

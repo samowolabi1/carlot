@@ -9,6 +9,8 @@ use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Notifications\BookingNotice;
 use App\Domain\Appointments\Support\AppointmentText;
 use App\Domain\Appointments\Support\SlotGenerator;
+use App\Domain\Deals\Enums\TradeInStatus;
+use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Actions\CaptureLead;
 use App\Domain\Leads\Actions\SendMessage;
@@ -53,7 +55,7 @@ class BookAppointment
             $duplicate = Appointment::withoutGlobalScopes()
                 ->where('lot_id', $lot->id)
                 ->where('customer_id', $customer->id)
-                ->active()
+                ->holdingSlot()
                 ->where('starts_at', $slot['starts_at'])
                 ->exists();
 
@@ -62,6 +64,8 @@ class BookAppointment
             }
 
             $auto = $lot->booking_auto_confirm;
+            // A test drive at a lot that asks for a deposit waits for the payment first.
+            $deposit = $data['type'] === AppointmentType::TestDrive->value && $lot->testDriveDeposit() !== null;
 
             return Appointment::withoutGlobalScopes()->create([
                 'lot_id' => $lot->id,
@@ -70,22 +74,37 @@ class BookAppointment
                 'type' => AppointmentType::from($data['type']),
                 'starts_at' => $slot['starts_at'],
                 'ends_at' => $slot['starts_at']->addMinutes($slot['minutes']),
-                'status' => $auto ? AppointmentStatus::Confirmed : AppointmentStatus::Pending,
-                'confirmed_at' => $auto ? now() : null,
+                'status' => $deposit ? AppointmentStatus::AwaitingDeposit : ($auto ? AppointmentStatus::Confirmed : AppointmentStatus::Pending),
+                'confirmed_at' => $auto && ! $deposit ? now() : null,
                 'notes' => $data['notes'] ?? null,
                 'whatsapp_reminders' => $data['whatsapp_reminders'] ?? true,
             ]);
         });
 
+        if ($appointment->status !== AppointmentStatus::AwaitingDeposit) {
+            $this->announce($appointment, $lot, $customer, $vehicle);
+        }
+
+        return $appointment;
+    }
+
+    /** The lead, the chat line and the messages, once the booking stands (after any deposit). */
+    public function announce(Appointment $appointment, Lot $lot, User $customer, ?Vehicle $vehicle): void
+    {
         // Every booking creates or updates a lead (TDD M7), and shows in its chat if there is one.
         $lead = $this->captureLead->run($lot, $customer, LeadSource::Booking, $vehicle);
         if ($conversation = $lead->conversation()->first()) {
             $this->sendMessage->run($conversation, null, Message::SYSTEM, AppointmentText::what($appointment).' booked · '.AppointmentText::when($appointment, $lot));
         }
 
+        // A trade-in valuation visit is linked to the buyer's latest trade-in at this lot (TDD M12).
+        if ($appointment->type === AppointmentType::TradeIn) {
+            TradeIn::withoutGlobalScopes()->where('lot_id', $lot->id)->where('customer_id', $customer->id)->whereNull('appointment_id')
+                ->whereIn('status', [TradeInStatus::Submitted, TradeInStatus::Valued, TradeInStatus::Accepted])->latest('id')->first()
+                ?->forceFill(['appointment_id' => $appointment->id])->save();
+        }
+
         $customer->notify(new BookingNotice($appointment, BookingNotice::RECEIVED));
         $this->notifyLot->run($appointment, $appointment->status === AppointmentStatus::Confirmed ? 'new' : 'needs_confirmation');
-
-        return $appointment;
     }
 }
