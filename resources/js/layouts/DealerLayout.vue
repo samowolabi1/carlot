@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FlashMessage from '@/components/FlashMessage.vue';
+import SupportViewBar from '@/components/SupportViewBar.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
 import { useOfflineQueue } from '@/composables/useOfflineQueue';
@@ -10,6 +11,7 @@ import { computed, ref } from 'vue';
 
 const { currentLot, lots, unread } = useShared();
 const page = usePage();
+const supportView = computed(() => !!page.props.impersonating);
 const menuOpen = ref(false);
 const switcherOpen = ref(false);
 
@@ -53,13 +55,14 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
 </script>
 
 <template>
+    <SupportViewBar />
     <div class="flex min-h-dvh bg-ivory">
         <div v-if="menuOpen" class="fixed inset-0 z-30 bg-ink/40 lg:hidden" @click="menuOpen = false" />
 
         <nav
             aria-label="Dealer"
-            class="fixed inset-y-0 left-0 z-40 flex w-[248px] shrink-0 -translate-x-full flex-col gap-5 overflow-y-auto bg-forest px-3.5 py-5 text-mist transition lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0"
-            :class="{ 'translate-x-0': menuOpen }"
+            class="fixed bottom-0 left-0 z-40 flex w-[248px] shrink-0 -translate-x-full flex-col gap-5 overflow-y-auto bg-forest px-3.5 py-5 text-mist transition lg:sticky lg:translate-x-0"
+            :class="[{ 'translate-x-0': menuOpen }, supportView ? 'top-11 lg:top-11 lg:h-[calc(100dvh-2.75rem)]' : 'top-0 lg:top-0 lg:h-dvh']"
         >
             <div class="px-2.5"><Logo inverse size="sm" /></div>
 

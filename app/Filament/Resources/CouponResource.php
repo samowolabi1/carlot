@@ -6,6 +6,7 @@ use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Models\Coupon;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Lots\Models\Lot;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\CouponResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action as FormAction;
@@ -26,11 +27,15 @@ use Illuminate\Support\Str;
  */
 class CouponResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Coupon::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
 
     protected static ?string $navigationGroup = 'Billing';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

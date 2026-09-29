@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domain\Accounts\Actions\SendOtp;
 use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
+use App\Domain\Admin\Impersonation;
 use App\Domain\Push\Models\PushSubscription;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
@@ -16,6 +17,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
  * Sign in or sign up with a one-time code. People pick how: their WhatsApp number or their email
@@ -135,8 +137,13 @@ class OtpLoginController extends Controller
         return back()->with('success', $used === 'sms' ? 'We sent a new code by SMS.' : 'We sent you a new code on WhatsApp.');
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, Impersonation $impersonation): SymfonyResponse
     {
+        // An admin using "Log in as" signs out of the dealer's account, not their own: back to the admin panel.
+        if (Impersonation::active() && $impersonation->stop() !== null) {
+            return Inertia::location(url('/admin'));
+        }
+
         // This device stops getting the account's pushes (the page also unsubscribes the browser).
         if ($endpoint = $request->session()->get('push_endpoint')) {
             PushSubscription::query()->where('endpoint_hash', PushSubscription::hash((string) $endpoint))->delete();

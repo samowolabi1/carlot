@@ -3,11 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\ModerateReview;
 use App\Domain\Trust\Enums\ReportStatus;
 use App\Domain\Trust\Enums\ReviewStatus;
-use App\Domain\Trust\Models\Report;
 use App\Domain\Trust\Models\Review;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\ReviewResource\Pages;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -20,6 +21,8 @@ use Illuminate\Support\Str;
 /** All reviews; reported ones wait here, hidden, until an admin restores or removes them. */
 class ReviewResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Review::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
@@ -32,9 +35,7 @@ class ReviewResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Report::where('status', ReportStatus::Open)->where('reportable_type', Review::class)->distinct()->count('reportable_id');
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('reviews');
     }
 
     public static function getEloquentQuery(): Builder

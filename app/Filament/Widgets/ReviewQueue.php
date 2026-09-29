@@ -2,13 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Domain\Admin\PlatformMetrics;
-use App\Domain\Advertising\Enums\AdStatus;
-use App\Domain\Advertising\Models\AdCampaign;
-use App\Domain\Helpdesk\Enums\TicketStatus;
-use App\Domain\Helpdesk\Models\SupportTicket;
+use App\Domain\Admin\AdminCounters;
 use App\Filament\Resources\AdCampaignResource;
 use App\Filament\Resources\FraudSignalResource;
+use App\Filament\Resources\LotResource;
 use App\Filament\Resources\LotVerificationResource;
 use App\Filament\Resources\ReportResource;
 use App\Filament\Resources\ReviewResource;
@@ -25,21 +22,28 @@ class ReviewQueue extends StatsOverviewWidget
 
     protected ?string $heading = 'Review queue';
 
+    /** Seven counts: four across. */
+    protected function getColumns(): int
+    {
+        return 4;
+    }
+
     protected function getStats(): array
     {
-        $q = PlatformMetrics::queue();
+        $q = AdminCounters::all();
         $stat = fn (string $label, int $count, string $url) => Stat::make($label, (string) $count)
             ->color($count > 0 ? 'warning' : 'success')
             ->description($count > 0 ? 'Needs a look' : 'All clear')
             ->url($url);
 
         return [
+            $stat('Lots to approve', $q['lots_waiting'], LotResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending'], 'submitted_at' => ['value' => '1']]])),
             $stat('Lots to verify', $q['verifications'], LotVerificationResource::getUrl()),
             $stat('Flagged listings', $q['signals'], FraudSignalResource::getUrl()),
             $stat('Reports', $q['reports'], ReportResource::getUrl()),
             $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl()),
-            $stat('Adverts to check', AdCampaign::withoutGlobalScopes()->where('status', AdStatus::InReview)->count(), AdCampaignResource::getUrl()),
-            $stat('Support tickets', SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->count(), SupportTicketResource::getUrl()),
+            $stat('Adverts to check', $q['adverts'], AdCampaignResource::getUrl()),
+            $stat('Support tickets', $q['tickets'], SupportTicketResource::getUrl()),
         ];
     }
 }

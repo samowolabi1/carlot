@@ -55,7 +55,9 @@ With S14 every sprint in the TDD plan is built. Still open, by choice: Redis/Hor
 | Lots in every state | Lots pick their state from Nigeria's 36 states and the FCT (`config('lotlink.regions')`, swappable per market); map pins and free text like "Lagos State" or "Abuja" are matched to the list. Buyers can filter search by state (both search engines), saved searches keep it, and admins filter lots by state. |
 | Admin onboarding | `/admin` → Lots → **Onboard a lot**: owner's name and how they'll sign in (WhatsApp number or email), lot name, state, area, address, buyers' phone, plan, and optionally approve it on the spot. It creates (or reuses) the owner's account and the lot, records who onboarded it (filter "Onboarded by LotLink"), audit-logs it, and welcomes the owner by email or WhatsApp (`lot_welcome` template) with how to sign in. |
 | Admin settings | **Settings → Finance rates**: the affordability share, interest rate, default deposit and loan length, the loan lengths buyers can pick, and the cost-of-ownership figures (insurance, papers, fuel price, distance, fuel economy by engine size, servicing by car age), with a live preview. Saved rates apply at once to "What can I afford?", "From ₦X/mo" and the running-costs card; **Reset to defaults** goes back to `config/lotlink.php`. **Settings → Message templates**: every WhatsApp/SMS message the app sends. Per message: which approved Meta template and language to use (so a newly approved version can replace the old one), the SMS wording with placeholders (`{1}`, `{2}`… for the variables, `{link}` for the button's URL; checked before saving, with a preview and SMS length), on/off (sign-in codes and staff invitations stay on), and **Send a test**. Every change is audit-logged. |
-| Admin (A1) | The dashboard shows the review queue (lots to verify, flagged listings, reports, reported reviews) and platform metrics for the last 30 days (active lots, live listings, new users, bookings, recorded sales, MRR, churn). Admins approve or reject verifications, hide or approve listings, message the lots involved, restore or remove reviews, close reports, browse every listing and the audit log, mark users as inspectors, and **Log in as** a user for support (both ends go in the audit log; a banner shows "Back to admin"). |
+| Admin (A1) | The dashboard shows the review queue (lots to verify, flagged listings, reports, reported reviews) and platform metrics for the last 30 days (active lots, live listings, new users, bookings, recorded sales, MRR, churn). Admins approve or reject verifications, hide or approve listings, message the lots involved, restore or remove reviews, close reports, browse every listing and the audit log, mark users as inspectors, and **Log in as** a user for support. |
+| Admin layout | The menu runs from what needs doing to setup: **Review queue** (lots to verify, flagged listings, reports, reviews, adverts), **Marketplace** (lots, listings, users), **Support**, **Engagement**, **Billing**, then **Catalogue**, **Settings** and **System** (audit log), collapsed. The dashboard starts with the review queue (including lots waiting for approval) and the 30-day platform figures (refreshed every 5 minutes). **Ctrl/⌘ K** searches lots (name, slug, city, owner's phone/email), users (name, email, phone) and support tickets. Pages switch without a full reload, and menu counters are worked out once every 30 seconds instead of on every click. A lot's page has **Public page** and **Log in as owner**; on the lots list, less common actions are under **More**. |
+| Log in as (support) | From a lot's page, the lots list (**More**) or the users list. A bar at the top of every page shows who you're logged in as with **Back to admin**; **Sign out** also takes you back to the admin (it never signs the admin out). Everything done meanwhile is in the audit log under the user *and* "Done by {admin} (support)" (filter "Done through Log in as"); the start and end are logged too. Admins can't log in as other admins or closed accounts. |
 | Quality | 432 tests, including verification files and decisions, the checklist score and PDF, independent reports, review invites, editing and replies, the 3-review rule, report limits and auto-hold, every fraud signal, the admin queue actions, impersonation, and tenancy checks for verifications, inspections and reviews. |
 
 Not in S12: admin 2FA (still deferred), admin-editable finance rates and message templates (they stay in `config/lotlink.php` and Meta), and automatic CAC lookups (no registry API yet).
@@ -248,6 +250,12 @@ cd carlot
 3. Laragon serves the app at **http://carlot.test** (Menu → Apache/Nginx → Reload if it doesn't
    appear). For hot reload while coding, run `npm run dev`.
 
+**If the admin (or the site) feels slow in Laragon**: PHP on Windows is several times slower without OPcache,
+which Laragon leaves off. Menu → PHP → php.ini, set `opcache.enable=1` and `opcache.memory_consumption=256`
+(and `zend_extension=opcache` if it's commented out), then Menu → Apache → Reload. When you're not editing
+code, `php artisan optimize` and `php artisan filament:optimize` cache config, routes, views and the admin's
+components; run `php artisan optimize:clear` and `php artisan filament:optimize-clear` before changing code again.
+
 ### Trying it out
 
 - **Add a car**: Dealer dashboard → Stock → Add car. Try VIN `4T1B11HK8JU654821` (a 2018 Toyota Camry SE).
@@ -339,7 +347,9 @@ same variables and button, then enter its name in `/admin` → Message templates
 4. Caddy in front with on-demand TLS: `on_demand_tls { ask https://your-domain/internal/domains/allowed }`.
 5. Sign in to `/admin`, set up two-step sign-in, change the seeded admin password.
 6. Cron `* * * * * php artisan schedule:run` and a queue worker (`php artisan queue:work --queue=critical,notifications,media,default`).
-7. Run `k6 run -e BASE_URL=https://staging… loadtest/marketplace.js` against staging and read `docs/security-review.md`.
+7. On every deploy: `php artisan optimize` and `php artisan filament:optimize` (config, routes, views, admin components
+   and icons), with OPcache on in PHP-FPM.
+8. Run `k6 run -e BASE_URL=https://staging… loadtest/marketplace.js` against staging and read `docs/security-review.md`.
 
 Until a template is approved, messages fall back to SMS automatically.
 

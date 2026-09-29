@@ -107,12 +107,17 @@ class EngagementSettings extends Page implements HasForms
         $this->form->fill(EngagementRules::current());
     }
 
+    /** @var array<string, array{sent: int, opened: int}>|null all rules' 30-day figures, in one query */
+    private static ?array $stats = null;
+
     /** "Last 30 days: 42 sent, 17 opened (40%)." */
     private static function stats(string $rule): string
     {
-        $sent = EngagementMessage::query()->where('rule', $rule)->where('sent_at', '>=', now()->subDays(30));
-        $total = (clone $sent)->count();
-        $opened = (clone $sent)->whereNotNull('clicked_at')->count();
+        self::$stats ??= EngagementMessage::query()->whereNotNull('rule')->where('sent_at', '>=', now()->subDays(30))
+            ->groupBy('rule')->selectRaw('rule, count(*) as sent, count(clicked_at) as opened')->get()
+            ->mapWithKeys(fn ($row) => [(string) $row->getAttribute('rule') => ['sent' => (int) $row->getAttribute('sent'), 'opened' => (int) $row->getAttribute('opened')]])->all();
+        $total = self::$stats[$rule]['sent'] ?? 0;
+        $opened = self::$stats[$rule]['opened'] ?? 0;
 
         return $total === 0 ? 'None sent in the last 30 days.' : "Last 30 days: {$total} sent, {$opened} opened (".round(100 * $opened / $total).'%).';
     }

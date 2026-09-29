@@ -7,11 +7,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -34,15 +34,31 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Stone,
             ])
             ->font('DM Sans')
+            // What needs doing first, then the platform, people, money, and setup at the bottom (collapsed).
+            ->navigationGroups([
+                NavigationGroup::make('Review queue'),
+                NavigationGroup::make('Marketplace'),
+                NavigationGroup::make('Support'),
+                NavigationGroup::make('Engagement'),
+                NavigationGroup::make('Billing'),
+                NavigationGroup::make('Catalogue')->collapsed(),
+                NavigationGroup::make('Settings')->collapsed(),
+                NavigationGroup::make('System')->collapsed(),
+            ])
+            // Moving between admin pages swaps only the content (no full reload). Links that leave the admin
+            // open in a new tab, and "Log in as" returns a plain redirect, which always loads the whole page.
+            ->spa()
+            ->sidebarCollapsibleOnDesktop()
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchDebounce('400ms')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-            ])
+            // The default "Welcome / Sign out" card is left out: sign out is in the user menu.
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

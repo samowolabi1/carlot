@@ -10,6 +10,7 @@ use App\Domain\Engagement\Support\BroadcastAudience;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Regions;
 use App\Filament\Resources\BroadcastResource\Pages;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use Carbon\CarbonImmutable;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -29,6 +30,8 @@ use Illuminate\Validation\ValidationException;
  */
 class BroadcastResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Broadcast::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';

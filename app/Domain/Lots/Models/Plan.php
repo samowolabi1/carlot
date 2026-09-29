@@ -2,7 +2,9 @@
 
 namespace App\Domain\Lots\Models;
 
+use App\Domain\Billing\Models\Subscription;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -62,6 +64,12 @@ class Plan extends Model
     public static function default(): ?self
     {
         return static::where('code', config('lotlink.default_plan'))->first();
+    }
+
+    /** @return HasMany<Subscription, $this> */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
     }
 
     /** The recurring plan at a payment provider, if one was made there. */

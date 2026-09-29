@@ -7,6 +7,7 @@ use App\Domain\Billing\Actions\RefundPayment;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Payment;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\PaymentResource\Pages;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -18,11 +19,15 @@ use Throwable;
 /** What lots have paid LotLink, with refunds through the provider that took each payment (TDD M17). */
 class PaymentResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Payment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
     protected static ?string $navigationGroup = 'Billing';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordRouteKeyName = 'ulid';
 

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Admin\AdminCounters;
+use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Advertising\Support\AdvertPricing;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Policies\AppointmentPolicy;
@@ -11,7 +13,9 @@ use App\Domain\Finance\Partners\FinancePartner;
 use App\Domain\Finance\Partners\HttpFinancePartner;
 use App\Domain\Finance\Partners\LogFinancePartner;
 use App\Domain\Finance\Support\FinanceRates;
+use App\Domain\Helpdesk\Models\SupportTicket;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Inventory\Models\VehicleModel;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
 use App\Domain\Inventory\Support\VinDecoder;
@@ -41,6 +45,9 @@ use App\Domain\Push\Gateways\WebPushGateway;
 use App\Domain\Social\Gateways\LogSocialPublisher;
 use App\Domain\Social\Gateways\MetaSocialPublisher;
 use App\Domain\Social\Gateways\SocialPublisher;
+use App\Domain\Trust\Models\FraudSignal;
+use App\Domain\Trust\Models\LotVerification;
+use App\Domain\Trust\Models\Report;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -116,6 +123,12 @@ class AppServiceProvider extends ServiceProvider
             FinanceRates::apply();
             AdvertPricing::apply();
         });
+
+        // The admin menu badges and review queue (AdminCounters) refresh as soon as a queue changes.
+        foreach ([Lot::class, LotVerification::class, FraudSignal::class, Report::class, AdCampaign::class, SupportTicket::class, VehicleModel::class] as $model) {
+            $model::saved(fn () => AdminCounters::forget());
+            $model::deleted(fn () => AdminCounters::forget());
+        }
 
         Gate::policy(Lot::class, LotPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);

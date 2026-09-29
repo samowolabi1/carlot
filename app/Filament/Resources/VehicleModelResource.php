@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Inventory\Enums\BodyType;
 use App\Domain\Inventory\Models\VehicleModel;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\VehicleModelResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,19 +20,21 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class VehicleModelResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = VehicleModel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
 
     protected static ?string $navigationGroup = 'Catalogue';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'model';
 
     public static function getNavigationBadge(): ?string
     {
-        $pending = VehicleModel::whereNull('approved_at')->count();
-
-        return $pending > 0 ? (string) $pending : null;
+        return AdminCounters::badge('models');
     }
 
     public static function form(Form $form): Form

@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Advertising\Actions\ReviewAdCampaign;
 use App\Domain\Advertising\Enums\AdPlacement;
 use App\Domain\Advertising\Enums\AdStatus;
 use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Inventory\Models\Make;
 use App\Filament\Resources\AdCampaignResource\Pages;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -22,6 +24,8 @@ use Throwable;
 /** Adverts lots paid for: check each before it runs (approve, or reject and refund), and take down if needed. */
 class AdCampaignResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = AdCampaign::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
@@ -36,9 +40,7 @@ class AdCampaignResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = AdCampaign::withoutGlobalScopes()->where('status', AdStatus::InReview)->count();
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('adverts');
     }
 
     public static function getEloquentQuery(): Builder

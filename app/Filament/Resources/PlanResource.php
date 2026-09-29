@@ -6,9 +6,9 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Billing\Actions\ChangePlanPrice;
 use App\Domain\Billing\Enums\SubscriptionStatus;
 use App\Domain\Billing\Gateways\PaymentGateways;
-use App\Domain\Billing\Models\Subscription;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Money;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\PlanResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -23,11 +24,15 @@ use Throwable;
 /** Plans and prices (TDD M17). Prices are typed in naira and stored in kobo. */
 class PlanResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Plan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     protected static ?string $navigationGroup = 'Billing';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -52,12 +57,14 @@ class PlanResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount(['subscriptions as paying_count' => fn (Builder $q) => $q->withoutGlobalScopes()->whereIn('status', [SubscriptionStatus::Active, SubscriptionStatus::PastDue])]))
             ->defaultSort('sort')
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('price')->formatStateUsing(fn (int $state) => Money::format($state)),
                 Tables\Columns\TextColumn::make('paying')->label('Paying lots')
-                    ->state(fn (Plan $record) => Subscription::withoutGlobalScopes()->where('plan_id', $record->id)->whereIn('status', [SubscriptionStatus::Active, SubscriptionStatus::PastDue])->count()),
+                    // Counted with the table's query (withCount); a plan loaded some other way counts on its own.
+                    ->state(fn (Plan $record) => (int) ($record->getAttribute('paying_count') ?? $record->subscriptions()->withoutGlobalScopes()->whereIn('status', [SubscriptionStatus::Active, SubscriptionStatus::PastDue])->count())),
                 Tables\Columns\TextColumn::make('listing_limit')->placeholder('Unlimited'),
                 Tables\Columns\TextColumn::make('staff_limit')->placeholder('Unlimited'),
                 Tables\Columns\TextColumn::make('provider_plan_code')->label('Paystack')->placeholder('—'),

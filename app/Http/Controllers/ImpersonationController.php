@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Admin\Impersonation;
-use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 /** Back to the admin panel after "Log in as" (TDD M17). */
 class ImpersonationController extends Controller
 {
-    public function destroy(Impersonation $impersonation): RedirectResponse
+    /**
+     * A full page load, not an Inertia visit: /admin isn't an Inertia page, and following the
+     * redirect inside Inertia showed the admin panel in a pop-up over the dealer's page.
+     */
+    public function destroy(Impersonation $impersonation): Response
     {
-        return $impersonation->stop() ? redirect('/admin') : redirect()->route('home');
+        return Inertia::location($impersonation->stop() ? url('/admin') : route('home'));
     }
 }

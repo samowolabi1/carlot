@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Models\Message;
 use App\Domain\Lots\Models\Lot;
@@ -12,6 +13,7 @@ use App\Domain\Trust\Enums\ReportReason;
 use App\Domain\Trust\Enums\ReportStatus;
 use App\Domain\Trust\Models\Report;
 use App\Domain\Trust\Models\Review;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\ReportResource\Pages;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -19,12 +21,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 /** Reports on listings, lots and chat messages (TDD M14). Reported reviews are in ReviewResource. */
 class ReportResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Report::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
@@ -35,14 +41,19 @@ class ReportResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Report::where('status', ReportStatus::Open)->where('reportable_type', '!=', Review::class)->count();
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('reports');
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('reportable_type', '!=', Review::class)->with(['reporter', 'lot', 'reportable']);
+        // Reported cars need their make and model for the title (loading them one by one failed with
+        // lazy loading off, and was a query per row otherwise).
+        return parent::getEloquentQuery()->where('reportable_type', '!=', Review::class)->with(['reporter', 'lot'])
+            ->with(['reportable' => function (Relation $morph): void {
+                if ($morph instanceof MorphTo) {
+                    $morph->morphWith([Vehicle::class => ['make', 'model']]);
+                }
+            }]);
     }
 
     public static function canCreate(): bool

@@ -30,7 +30,9 @@ class PaymentSettings extends Page implements HasForms
 
     protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?string $navigationLabel = 'Payments';
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $navigationLabel = 'Payment provider';
 
     protected static ?string $title = 'Payment provider';
 

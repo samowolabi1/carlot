@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FlashMessage from '@/components/FlashMessage.vue';
+import SupportViewBar from '@/components/SupportViewBar.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
 import { useShared } from '@/composables/useShared';
@@ -18,6 +19,7 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
 </script>
 
 <template>
+    <SupportViewBar />
     <div class="min-h-dvh pb-24 md:pb-0">
         <header v-if="!bare" class="md:border-b md:border-line md:bg-white">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 pb-2 md:py-4">

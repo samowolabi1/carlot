@@ -3,11 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\ModerateListing;
 use App\Domain\Trust\Enums\FraudSignalType;
 use App\Domain\Trust\Enums\SignalStatus;
 use App\Domain\Trust\Models\FraudSignal;
 use App\Domain\Trust\Notifications\ModerationNotice;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\FraudSignalResource\Pages;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -20,6 +22,8 @@ use Illuminate\Support\Facades\Auth;
 /** Flagged listings (design A1): duplicate VIN or photo, very low price, new-lot bursts. */
 class FraudSignalResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = FraudSignal::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
@@ -32,9 +36,7 @@ class FraudSignalResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = FraudSignal::where('status', SignalStatus::Open)->distinct()->count('vehicle_id');
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('signals');
     }
 
     public static function getEloquentQuery(): Builder

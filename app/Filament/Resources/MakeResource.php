@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Inventory\Models\Make;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\MakeResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -14,11 +15,15 @@ use Illuminate\Support\Str;
 
 class MakeResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Make::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
     protected static ?string $navigationGroup = 'Catalogue';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

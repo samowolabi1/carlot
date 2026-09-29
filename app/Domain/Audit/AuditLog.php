@@ -3,6 +3,7 @@
 namespace App\Domain\Audit;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\Impersonation;
 use App\Domain\Lots\Models\Lot;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Who changed prices, statuses, staff or payments, and when (TDD: Security).
  *
  * @property int $id
- * @property int|null $user_id
+ * @property int|null $user_id the account that did it
+ * @property int|null $impersonator_id the admin who was using that account through "Log in as", if any
  * @property int|null $lot_id
  * @property string $action
  * @property string|null $subject_type
@@ -23,7 +25,7 @@ class AuditLog extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['user_id', 'lot_id', 'action', 'subject_type', 'subject_id', 'changes', 'ip'];
+    protected $fillable = ['user_id', 'impersonator_id', 'lot_id', 'action', 'subject_type', 'subject_id', 'changes', 'ip'];
 
     protected function casts(): array
     {
@@ -34,6 +36,12 @@ class AuditLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function impersonator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'impersonator_id');
     }
 
     /** @return BelongsTo<Lot, $this> */
@@ -47,6 +55,9 @@ class AuditLog extends Model
     {
         return self::create([
             'user_id' => ($user ?? auth()->user())?->getKey(),
+            // During "Log in as", the admin behind it (so support actions are never mistaken for the dealer's own).
+            // (Queued jobs and commands have no session, so nothing is picked up there.)
+            'impersonator_id' => request()->hasSession() ? request()->session()->get(Impersonation::SESSION_KEY) : null,
             'lot_id' => $lotId ?? $subject?->getAttribute('lot_id'),
             'action' => $action,
             'subject_type' => $subject ? $subject::class : null,

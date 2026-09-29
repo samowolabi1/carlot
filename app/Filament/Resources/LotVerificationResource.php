@@ -3,9 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\DecideLotVerification;
 use App\Domain\Trust\Enums\VerificationStatus;
 use App\Domain\Trust\Models\LotVerification;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\LotVerificationResource\Pages;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -19,6 +21,8 @@ use Throwable;
 /** Lots to verify (design A1): the CAC certificate and frontage photo; approve or reject with a note. */
 class LotVerificationResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = LotVerification::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
@@ -33,9 +37,7 @@ class LotVerificationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = LotVerification::withoutGlobalScopes()->where('status', VerificationStatus::Submitted)->count();
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('verifications');
     }
 
     public static function getEloquentQuery(): Builder

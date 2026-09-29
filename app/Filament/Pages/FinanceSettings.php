@@ -29,6 +29,8 @@ class FinanceSettings extends Page implements HasForms
 
     protected static ?string $navigationGroup = 'Settings';
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationLabel = 'Finance rates';
 
     protected static ?string $title = 'Finance rates';

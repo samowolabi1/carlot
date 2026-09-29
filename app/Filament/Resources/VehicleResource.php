@@ -6,6 +6,7 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Trust\Actions\ModerateListing;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\VehicleResource\Pages;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -19,9 +20,15 @@ use Illuminate\Support\Facades\Auth;
 /** Every listing across lots (TDD M17 moderation): hide one, or put a held one back on sale. */
 class VehicleResource extends Resource
 {
+    use AdminsOnly;
+
     protected static ?string $model = Vehicle::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
+
+    protected static ?string $navigationGroup = 'Marketplace';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationLabel = 'Listings';
 

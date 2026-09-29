@@ -29,6 +29,8 @@ class AdvertPriceSettings extends Page implements HasForms
 
     protected static ?string $navigationGroup = 'Settings';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Advert prices';
 
     protected static ?string $title = 'Advert prices';

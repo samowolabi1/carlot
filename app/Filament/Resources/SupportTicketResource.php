@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminCounters;
 use App\Domain\Helpdesk\Actions\ChangeTicketStatus;
 use App\Domain\Helpdesk\Enums\TicketCategory;
 use App\Domain\Helpdesk\Enums\TicketPriority;
 use App\Domain\Helpdesk\Enums\TicketStatus;
 use App\Domain\Helpdesk\Models\SupportTicket;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\SupportTicketResource\Pages;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -20,11 +22,23 @@ use Illuminate\Support\Facades\Auth;
 /** Support desk: tickets from lots. Reply, add internal notes, assign, and set status on the ticket page. */
 class SupportTicketResource extends Resource
 {
+    use AdminsOnly;
+
+    // Global search (Ctrl/⌘ K): a ticket by reference or subject.
+
+    /** @return list<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference', 'subject'];
+    }
+
     protected static ?string $model = SupportTicket::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-lifebuoy';
 
     protected static ?string $navigationGroup = 'Support';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Support tickets';
 
@@ -34,14 +48,12 @@ class SupportTicketResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->count();
-
-        return $count > 0 ? (string) $count : null;
+        return AdminCounters::badge('tickets');
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->where('priority', TicketPriority::Urgent)->exists() ? 'danger' : 'warning';
+        return AdminCounters::all()['urgent_tickets'] ? 'danger' : 'warning';
     }
 
     public static function getEloquentQuery(): Builder

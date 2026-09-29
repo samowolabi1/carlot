@@ -57,7 +57,7 @@ it('lets an admin log in as a lot owner for support, and switch back, with both 
 
     $this->post(route('impersonation.stop'))->assertRedirect('/admin');
     expect(auth()->id())->toBe($this->admin->id)
-        ->and(AuditLog::where('action', 'like', 'admin.impersonation_%')->pluck('action')->all())->toBe(['admin.impersonation_started', 'admin.impersonation_ended']);
+        ->and(AuditLog::where('action', 'like', 'admin.impersonation_%')->orderBy('id')->pluck('action')->all())->toBe(['admin.impersonation_started', 'admin.impersonation_ended']);
 
     // Not into another admin, and never without being an admin.
     expect(fn () => app(Impersonation::class)->start($this->admin, User::factory()->admin()->create()))->toThrow(ValidationException::class);

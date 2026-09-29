@@ -6,6 +6,7 @@ use App\Domain\Admin\PlatformMetrics;
 use App\Domain\Support\Money;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
 
 /** Platform metrics (TDD M17) over the last 30 days. */
 class PlatformStats extends StatsOverviewWidget
@@ -16,9 +17,12 @@ class PlatformStats extends StatsOverviewWidget
 
     protected ?string $heading = 'Platform, last 30 days';
 
+    protected ?string $description = 'Updated every 5 minutes.';
+
     protected function getStats(): array
     {
-        $m = PlatformMetrics::summary();
+        // Thirty-day figures don't need to be to the second: worked out at most every 5 minutes.
+        $m = Cache::remember('admin:platform-summary', now()->addMinutes(5), fn () => PlatformMetrics::summary());
 
         return [
             Stat::make('Active lots', number_format($m['active_lots'])),

@@ -88,7 +88,13 @@ Run all four before pushing.
   can't be published; only `ModerateListing` (admin) clears them. Fraud signals come from `DetectFraudSignals`
   (on publish and price drops) and never hide anything themselves.
 - Filament closures are injected by parameter name: use `$query`, `$record`, `$state`, `$search`.
-- "Log in as" goes through `Impersonation` (audit-logged); never log in as another user any other way.
+- Every admin resource uses `Concerns\AdminsOnly`: authorisation by admin role (never the dealer-side model policies, which
+  gave admins 403s and a membership query per row) and record URLs built from the resource's `$recordRouteKeyName`.
+  Put new admin pages in one of the panel's navigation groups (order set in `AdminPanelProvider`). Menu badges and the review
+  queue read `AdminCounters` (30-second cache, cleared when a queued model changes); don't add per-page count queries.
+- "Log in as" goes through `Impersonation` (audit-logged); never log in as another user any other way. While it's on, every
+  `AuditLog` row gets `impersonator_id`; "Back to admin" and Sign out end it with a full page load (`Inertia::location`),
+  and it clears the panel's `password_hash_*` session key on both switches. The bar is `components/SupportViewBar.vue` (in every layout).
 
 ## SEO and growth (S13)
 

@@ -5,19 +5,43 @@ namespace App\Filament\Resources;
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Admin\Impersonation;
+use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\UserResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
+    use AdminsOnly;
+
+    // Global search (Ctrl/⌘ K): a person by name, email or phone.
+    protected static ?string $recordTitleAttribute = 'name';
+
+    /** @return list<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'phone'];
+    }
+
+    /** @return array<string, string> */
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        /** @var User $record */
+        return array_filter(['Phone' => (string) $record->phone, 'Email' => (string) $record->email, 'Role' => ucfirst($record->role->value)]);
+    }
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $navigationGroup = 'Marketplace';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordRouteKeyName = 'ulid';
 
@@ -60,7 +84,7 @@ class UserResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('impersonate')->label('Log in as')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
                     ->visible(fn (User $u) => ! $u->isAdmin())
-                    ->requiresConfirmation()->modalDescription('You will see LotLink as this user. Everything you do is recorded as you, in the audit log.')
+                    ->requiresConfirmation()->modalDescription('You will see LotLink as this user. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
                     ->action(function (User $u) {
                         /** @var User $admin */
                         $admin = Auth::user();
