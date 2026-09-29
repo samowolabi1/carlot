@@ -16,6 +16,7 @@ final class NotificationPreferences
         'bookings' => ['Bookings and reminders', 'all'],
         'offers' => ['Offers, trade-ins and reservations', 'all'],
         'new_stock' => ['New cars from lots I follow', 'buyers'],
+        'alerts' => ['Price drops and saved-search matches', 'buyers'],
         'leads' => ['New leads and follow-ups', 'dealers'],
         'billing' => ['Billing and plan', 'dealers'],
         'summary' => ['Daily summary', 'dealers'],

@@ -6,6 +6,7 @@ import { toQuery, type FilterOptions, type Filters } from '@/components/marketpl
 import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
 import { useLocation } from '@/composables/useLocation';
+import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { shortNaira } from '@/lib/finance';
 import { formatNaira } from '@/lib/format';
@@ -19,7 +20,22 @@ const props = defineProps<{
     activeFilters: number;
     options: FilterOptions;
     sponsored: CarCardData[];
+    landing: { heading: string; intro: string; related: { label: string; url: string; count: number }[]; url: string } | null;
+    savedSearch: string | null;
 }>();
+
+const { user } = useShared();
+// "Save search" (TDD M4): the filters in the URL, without the buyer's location.
+const canSave = computed(() => !!props.filters.q || props.activeFilters - (props.filters.radius ? 1 : 0) > 0);
+const saving = ref(false);
+function saveSearch() {
+    if (!user.value) {
+        router.visit(route('login'));
+        return;
+    }
+    const { lat: _lat, lng: _lng, radius: _radius, sort: _sort, ...rest } = props.filters;
+    router.post(route('saved-searches.store'), { filters: toQuery(rest) as Record<string, string> }, { preserveScroll: true, onStart: () => (saving.value = true), onFinish: () => (saving.value = false) });
+}
 
 const q = ref(props.filters.q ?? '');
 const sheetOpen = ref(false);
@@ -77,7 +93,7 @@ const heading = computed(() => {
 </script>
 
 <template>
-    <Head :title="filters.q ? `${filters.q} for sale` : 'Cars for sale'" />
+    <Head :title="landing ? landing.heading : filters.q ? `${filters.q} for sale` : 'Cars for sale'" />
     <CustomerLayout active="search">
         <div class="border-b border-line bg-white">
             <div class="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-4">
@@ -111,8 +127,18 @@ const heading = computed(() => {
             </aside>
 
             <div class="flex min-w-0 grow flex-col gap-3">
+                <!-- SEO landing pages (TDD M18): a real heading and intro, and narrower pages. -->
+                <header v-if="landing" class="flex flex-col gap-2">
+                    <h1 class="text-[26px] leading-tight font-bold md:text-[32px]">{{ landing.heading }}</h1>
+                    <p class="max-w-3xl text-[15px] text-[#4A4D53]">{{ landing.intro }}</p>
+                    <nav v-if="landing.related.length" aria-label="Related searches" class="-mr-5 flex gap-2 overflow-x-auto pr-5 pb-1">
+                        <Link v-for="r in landing.related" :key="r.url" :href="r.url" class="flex h-9 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-[13px] font-semibold text-ink no-underline ring-1 ring-line">
+                            {{ r.label }} <span class="font-normal text-muted">{{ r.count }}</span>
+                        </Link>
+                    </nav>
+                </header>
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                    <h1 class="font-sans text-[15px] text-muted"><strong class="text-ink">{{ heading }}</strong></h1>
+                    <component :is="landing ? 'h2' : 'h1'" class="font-sans text-[15px] text-muted"><strong class="text-ink">{{ heading }}</strong></component>
                     <div class="flex flex-wrap items-center gap-2">
                         <button
                             v-if="budget.maxPrice.value !== null && !budgetApplied"
@@ -131,6 +157,16 @@ const heading = computed(() => {
                             @click="nearMe"
                         >
                             <Icon name="locate" :size="16" /> {{ locating ? 'Finding you…' : 'Near me' }}
+                        </button>
+                        <button
+                            v-if="canSave"
+                            type="button"
+                            class="flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold"
+                            :class="savedSearch ? 'border-forest bg-forest text-white' : 'border-clay bg-white text-clay'"
+                            :disabled="saving || !!savedSearch"
+                            @click="saveSearch"
+                        >
+                            <Icon :name="savedSearch ? 'check' : 'bell'" :size="15" :stroke-width="2" /> {{ savedSearch ? 'Search saved' : 'Save search' }}
                         </button>
                         <label class="flex items-center gap-1.5 text-[13px]">
                             <span class="text-muted">Sort</span>

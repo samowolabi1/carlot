@@ -16,6 +16,12 @@ const look: Record<string, { icon: IconName; tone: string }> = {
     reservation: { icon: 'shield', tone: 'bg-[#DCEFE3] text-[#166534]' },
     location: { icon: 'navigate', tone: 'bg-[#E0ECF8] text-[#1E3A8A]' },
     summary: { icon: 'chart', tone: 'bg-sand text-ink' },
+    review: { icon: 'star', tone: 'bg-blush text-clay-dark' },
+    verification: { icon: 'shield', tone: 'bg-map text-forest' },
+    moderation: { icon: 'flag', tone: 'bg-[#FDECEC] text-danger' },
+    price_drop: { icon: 'tag', tone: 'bg-[#DCEFE3] text-[#166534]' },
+    alert: { icon: 'search', tone: 'bg-map text-forest' },
+    import: { icon: 'upload', tone: 'bg-sand text-ink' },
     info: { icon: 'bell', tone: 'bg-sand text-ink' },
 };
 </script>

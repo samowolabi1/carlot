@@ -10,6 +10,7 @@ use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use App\Domain\Marketplace\Support\SavedSearches;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\Request;
@@ -22,6 +23,22 @@ class SearchController extends Controller
     public function __invoke(Request $request, VehicleSearch $search): Response
     {
         $criteria = SearchCriteria::fromRequest($request);
+
+        return self::render($request, $search, $criteria, [], [
+            'title' => self::title($criteria),
+            'description' => 'Browse cars for sale at car lots near you on LotLink: compare prices, check what you can afford and get directions to the lot.',
+            'robots' => $request->hasAny(['page', 'lat', 'sort']) ? 'noindex, follow' : null,
+        ]);
+    }
+
+    /**
+     * The search page, also used by the SEO landing pages with their own heading and meta.
+     *
+     * @param  array<string, mixed>  $extra
+     * @param  array<string, mixed>  $meta
+     */
+    public static function render(Request $request, VehicleSearch $search, SearchCriteria $criteria, array $extra, array $meta): Response
+    {
         $results = $search->search($criteria);
         $from = $criteria->hasLocation() ? ['lat' => (float) $criteria->lat, 'lng' => (float) $criteria->lng] : null;
         $savedIds = $request->user()?->favourites()->pluck('vehicles.id')->all() ?? [];
@@ -34,11 +51,10 @@ class SearchController extends Controller
             'filters' => $criteria->toArray(),
             'activeFilters' => $criteria->activeFilterCount(),
             'options' => self::filterOptions(),
-        ])->withViewData(['meta' => [
-            'title' => self::title($criteria),
-            'description' => 'Browse cars for sale at car lots near you on LotLink: compare prices, check what you can afford and get directions to the lot.',
-            'robots' => $request->hasAny(['page', 'lat', 'sort']) ? 'noindex, follow' : null,
-        ]]);
+            'landing' => null,
+            'savedSearch' => $request->user() ? SavedSearches::matching($request->user(), $criteria) : null,
+            ...$extra,
+        ])->withViewData(['meta' => $meta]);
     }
 
     /** Filter choices. Makes are limited to those with cars on the marketplace. */

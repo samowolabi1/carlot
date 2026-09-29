@@ -43,6 +43,15 @@ class DatabaseVehicleSearch implements VehicleSearch
         return $query->inRandomOrder()->limit($limit)->get();
     }
 
+    /** Whether one car matches the filters (saved-search alerts; the database is the reference). */
+    public function matches(SearchCriteria $criteria, Vehicle $vehicle): bool
+    {
+        $query = Vehicle::query()->marketplace()->join('lots', 'lots.id', '=', 'vehicles.lot_id')->where('vehicles.id', $vehicle->id);
+        $this->applyFilters($query, $criteria);
+
+        return $query->exists();
+    }
+
     /** @param Builder<Vehicle> $query */
     private function applyFilters(Builder $query, SearchCriteria $c): void
     {

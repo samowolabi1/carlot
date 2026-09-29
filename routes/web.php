@@ -28,6 +28,7 @@ use App\Http\Controllers\Dealer\Manager\SyncController;
 use App\Http\Controllers\Dealer\Manager\TaskController;
 use App\Http\Controllers\Dealer\Manager\TodayController;
 use App\Http\Controllers\Dealer\Manager\WalkInController;
+use App\Http\Controllers\Dealer\MiniSiteController;
 use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\ReferralController;
 use App\Http\Controllers\Dealer\ReviewController as DealerReviewController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleCostController;
+use App\Http\Controllers\Dealer\VehicleImportController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
 use App\Http\Controllers\Dealer\VerificationController;
 use App\Http\Controllers\Dealer\VinDecodeController;
@@ -50,8 +52,11 @@ use App\Http\Controllers\Marketplace\CompareController;
 use App\Http\Controllers\Marketplace\FavouriteController;
 use App\Http\Controllers\Marketplace\FollowController;
 use App\Http\Controllers\Marketplace\HomeController;
+use App\Http\Controllers\Marketplace\LandingController;
 use App\Http\Controllers\Marketplace\LotSiteController;
+use App\Http\Controllers\Marketplace\SavedSearchController;
 use App\Http\Controllers\Marketplace\SearchController;
+use App\Http\Controllers\Marketplace\SeoController;
 use App\Http\Controllers\Orders\OrderTrackingController;
 use App\Http\Controllers\Sharing\ShareController;
 use App\Http\Controllers\Trust\IndependentInspectionController;
@@ -64,6 +69,10 @@ use Illuminate\Support\Facades\Route;
 // Marketplace (M4) and lot mini-sites (M6)
 Route::get('/', HomeController::class)->name('home');
 Route::get('/cars', SearchController::class)->middleware('throttle:120,1')->name('cars.index');
+// SEO landing pages (M18): /cars/{city}, /cars/{make}/{model?}/{city?}
+Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(['first' => '[a-z0-9-]+', 'second' => '[a-z0-9-]+', 'third' => '[a-z0-9-]+'])->middleware('throttle:120,1')->name('cars.landing');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
@@ -123,6 +132,9 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/saved', [FavouriteController::class, 'index'])->name('saved');
+    Route::post('/saved-searches', [SavedSearchController::class, 'store'])->middleware('throttle:20,1')->name('saved-searches.store');
+    Route::patch('/saved-searches/{savedSearch}', [SavedSearchController::class, 'update'])->name('saved-searches.update');
+    Route::delete('/saved-searches/{savedSearch}', [SavedSearchController::class, 'destroy'])->name('saved-searches.destroy');
     Route::get('/account', AccountController::class)->name('account');
     Route::get('/following', [FollowController::class, 'index'])->name('following');
 
@@ -224,6 +236,9 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
             Route::get('/vehicles/create', [VehicleController::class, 'create'])->name('vehicles.create');
             Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
+            Route::get('/vehicles/import', [VehicleImportController::class, 'index'])->name('vehicles.import');
+            Route::get('/vehicles/import/template', [VehicleImportController::class, 'template'])->name('vehicles.import.template');
+            Route::post('/vehicles/import', [VehicleImportController::class, 'store'])->middleware('throttle:10,1')->name('vehicles.import.store');
             Route::post('/vehicles/decode-vin', VinDecodeController::class)->middleware('throttle:30,1')->name('vehicles.decode-vin');
             Route::get('/vehicles/{vehicle}/edit/{step}', [VehicleController::class, 'edit'])->name('vehicles.edit');
             Route::put('/vehicles/{vehicle}/identity', [VehicleController::class, 'updateIdentity'])->name('vehicles.identity');
@@ -253,6 +268,11 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::delete('/vehicles/{vehicle}/costs/{cost}', [VehicleCostController::class, 'destroy'])->name('vehicles.costs.destroy');
             Route::get('/vehicles/{vehicle}/costs/{cost}/receipt', [VehicleCostController::class, 'receipt'])->name('vehicles.costs.receipt');
             Route::get('/referrals', ReferralController::class)->name('referrals');
+
+            // Mini-site and QR printables (M6)
+            Route::get('/mini-site', [MiniSiteController::class, 'show'])->name('minisite');
+            Route::get('/qr/poster', [MiniSiteController::class, 'poster'])->middleware('throttle:20,1')->name('qr.poster');
+            Route::get('/qr/stickers', [MiniSiteController::class, 'stickers'])->middleware('throttle:10,1')->name('qr.stickers');
 
             // Trust (M14): inspection reports and replies to reviews
             Route::get('/vehicles/{vehicle}/inspection', [InspectionController::class, 'create'])->name('vehicles.inspection');

@@ -26,7 +26,7 @@ const nav: NavItem[] = [
     { label: 'Offers & trade-ins', icon: 'tag', route: 'dealer.offers.index', match: 'dealer.offers.*', badge: () => currentLot.value?.deals_badge ?? 0 },
     { label: 'Analytics', icon: 'chart', route: 'dealer.analytics', managers: true },
     { label: 'Reviews', icon: 'star', route: 'dealer.reviews' },
-    { label: 'Mini-site & QR', icon: 'qr' },
+    { label: 'Mini-site & QR', icon: 'qr', route: 'dealer.minisite' },
     { label: 'Staff', icon: 'user', route: 'dealer.staff' },
     { label: 'Billing', icon: 'card', route: 'dealer.billing' },
     { label: 'Settings', icon: 'settings', route: 'dealer.settings' },

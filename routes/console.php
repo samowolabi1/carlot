@@ -44,3 +44,6 @@ Schedule::command('location:end-expired')->everyMinute()->withoutOverlapping();
 
 // Trust (TDD M14)
 Schedule::command('reviews:invite')->everyFifteenMinutes()->withoutOverlapping();
+
+// SEO (TDD M18)
+Schedule::command('sitemap:generate')->dailyAt('03:00')->withoutOverlapping();

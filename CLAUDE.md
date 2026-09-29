@@ -81,6 +81,17 @@ Run all four before pushing.
 - Filament closures are injected by parameter name: use `$query`, `$record`, `$state`, `$search`.
 - "Log in as" goes through `Impersonation` (audit-logged); never log in as another user any other way.
 
+## SEO and growth (S13)
+
+- Landing pages resolve through `Seo\Landing` (make slug first, else a live lot's city) and render the search
+  page via `SearchController::render()`; pages without stock are `noindex`. Keep titles/intros data-driven.
+- Structured data only from `Seo\StructuredData` (printed with `encode()`, which escapes `<`/`>`); pass it as
+  `meta['jsonld']`. Never put dealer-only fields in it.
+- Saved searches store `SavedSearches::filters()` (no lat/lng/radius: buyer location is never stored).
+  `SendPriceAlerts` runs on first publish and on price drops; matching uses `DatabaseVehicleSearch::matches()`.
+- Every printed QR goes through `CreateShareLink` with platform `qr` (`Printables`). PDFs use DejaVu with font subsetting.
+- Bulk import: `ImportVehicles` creates drafts only through the add-car Actions; plan feature `bulk_import` (Enterprise).
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -209,7 +220,7 @@ rather than fake data.
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO · S14 Integrations.
+S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
 Redis/Horizon (the database queue for now).

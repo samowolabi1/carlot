@@ -8,6 +8,7 @@ use App\Domain\Inventory\Events\VehiclePublished;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Support\VehicleStateMachine;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Marketplace\Jobs\SendPriceAlerts;
 use App\Domain\Sharing\Jobs\RenderShareCard;
 use App\Domain\Trust\Jobs\DetectFraudSignals;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,8 @@ class PublishVehicle
 
             if ($firstPublish) {
                 DB::afterCommit(fn () => VehiclePublished::dispatch($vehicle));
+                // Saved-search alerts (TDD M4).
+                DB::afterCommit(fn () => SendPriceAlerts::dispatch($vehicle->id));
             }
 
             // Duplicate VIN or photo, very low price, new-lot bursts (TDD M14): for an admin to check.

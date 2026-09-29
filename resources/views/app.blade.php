@@ -34,6 +34,9 @@
                 <meta name="twitter:card" content="summary">
             @endif
             <meta name="twitter:title" content="{{ $meta['title'] }}">
+            @if (! empty($meta['jsonld']))
+                <script type="application/ld+json">{!! \App\Domain\Seo\StructuredData::encode($meta['jsonld']) !!}</script>
+            @endif
         @endisset
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

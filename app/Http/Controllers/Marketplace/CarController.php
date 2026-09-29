@@ -7,6 +7,7 @@ use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
+use App\Domain\Seo\StructuredData;
 use App\Domain\Sharing\Models\ShareLink;
 use App\Domain\Sharing\Support\ShareCard;
 use App\Http\Controllers\Account\BudgetController;
@@ -84,6 +85,7 @@ class CarController extends Controller
             'image' => $card['square'] ?? $cover?->urls()[1600] ?? null,
             'url' => url($vehicle->publicPath()),
             'type' => 'product',
+            'jsonld' => $public ? StructuredData::car($vehicle) : null,
             'robots' => $public && $vehicle->status !== VehicleStatus::Sold ? null : 'noindex',
         ]]);
     }

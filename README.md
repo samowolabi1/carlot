@@ -14,6 +14,19 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S13 (SEO and growth tools) ✅**
+
+| Area | What works |
+| --- | --- |
+| SEO landing pages | `/cars/{city}`, `/cars/{make}`, `/cars/{make}/{model}`, `/cars/{make}/{city}` and `/cars/{make}/{model}/{city}` (e.g. `/cars/toyota/camry/ikeja`): the search page with a unique title, heading and intro written from live stock (count, lots, price range), links to narrower pages, a canonical URL, and `noindex` when there is no stock. |
+| Structured data | Car pages carry schema.org `Car` + `Offer` (price, currency, availability, seller); lot pages carry `AutoDealer` (address, map point, opening hours, rating once shown). No full VIN or dealer-only data. |
+| Sitemap | `sitemap:generate` (nightly at 03:00) writes the home and search pages, landing pages with stock, live lots and marketplace cars; served at `/sitemap.xml`. `/robots.txt` points to it in production and blocks everything elsewhere, so test sites stay out of Google. |
+| Saved searches (12) | **Save search** on any search with filters. Saved → Searches lists them with the alert channel (WhatsApp, email or in-app). When a matching car is published, or a car drops into the search, the buyer hears about it, at most once per search every 6 hours. Distance and "near me" aren't saved: we don't keep buyers' locations. Saved now has Cars · Searches · Lots tabs. |
+| Price-drop alerts | Buyers who saved a car are told when its price drops ("now ₦14,200,000, ₦300,000 less"). The lot's own team is never alerted about its own cars. Both alerts follow the new "Price drops and saved-search matches" notification setting. |
+| Mini-site and QR | **Mini-site & QR** in the sidebar: the lot's link with copy and WhatsApp share, branding, a live preview, an A4 or A3 gate poster PDF, and a sheet of windscreen stickers (one QR per car on the lot). Every QR is a tracked share link, so scans show in Analytics as "QR code". Custom domains show as Enterprise · Soon. |
+| Bulk import | Stock → **Bulk import** (Enterprise, as in the spec; owners and managers): download the .xlsx template, fill in up to 500 cars, upload .xlsx or .csv. Each good row becomes a draft through the add-car steps (labels like "Tokunbo", "Automatic" and "₦12,500,000" are understood); bad rows are listed with what to fix; a VIN already in stock is skipped. |
+| Quality | 447 tests, including every landing-page shape, 404s and noindex, JSON-LD content and escaping, the sitemap, saved-search matching, the 6-hour limit, alert channels, price drops, poster and sticker PDFs with tracked QR links, and imports with bad rows, duplicates, plan and role gating. |
+
 **Sprint S12 (Trust and admin) ✅**
 
 | Area | What works |
@@ -233,6 +246,9 @@ cd carlot
 - **Install the app**: the service worker only runs over HTTPS or on `localhost`/`127.0.0.1`,
   and only with the built files (`npm run build`), not `npm run dev`. On `http://carlot.test`
   the site works normally without it; enable SSL in Laragon to try installing on a phone.
+- **SEO and alerts**: try `/cars/toyota`, `/cars/lekki` or `/sitemap.xml`. Save a search on `/cars`,
+  then lower a matching car's price in the dealer dashboard to see the alert in
+  `storage/logs/laravel.log`. Bulk import needs the Enterprise plan: in `/admin` → Lots, use **Set plan** on the lot.
 - **Trust**: `php artisan db:seed --class=DemoTrustSeeder` (after DemoMarketplaceSeeder) adds 3 reviews
   and an inspection at Demo Lot Ikeja, and an independent inspector: sign in as `08000000200`
   and open any car to add a signed report. Verification files and inspection PDFs are stored
@@ -274,6 +290,8 @@ your `APP_URL` with a `{{1}}` suffix):
 | `instalment_reminder` | Utility | name, amount, car, lot, due date | track order |
 | `daily_summary` | Utility | lot, date, walk-ins, new orders, money received, balances due, overdue instalments | open the report |
 | `review_invite` | Utility | lot, what (visit type and car) | leave a review |
+| `saved_search_match` | Marketing | search name, car, price, lot | see the car |
+| `price_drop` | Marketing | car, new price, amount off, lot | see the car |
 
 Until a template is approved, messages fall back to SMS automatically.
 

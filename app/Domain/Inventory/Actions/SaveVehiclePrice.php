@@ -5,6 +5,7 @@ namespace App\Domain\Inventory\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Inventory\Events\VehiclePriceDropped;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Marketplace\Jobs\SendPriceAlerts;
 use App\Domain\Sharing\Jobs\RenderShareCard;
 use App\Domain\Trust\Jobs\DetectFraudSignals;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,8 @@ class SaveVehiclePrice
             if ($vehicle->listed_at !== null && $old !== null && $price < $old) {
                 DB::afterCommit(fn () => VehiclePriceDropped::dispatch($vehicle, $old, $price));
                 DB::afterCommit(fn () => DetectFraudSignals::dispatch($vehicle->id));
+                // Price-drop alerts to buyers who saved it, and saved searches it now fits (TDD M4).
+                DB::afterCommit(fn () => SendPriceAlerts::dispatch($vehicle->id, $old));
             }
 
             return $vehicle;

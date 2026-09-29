@@ -7,6 +7,7 @@ use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use App\Domain\Seo\StructuredData;
 use App\Domain\Trust\Models\Review;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
@@ -42,6 +43,7 @@ class LotSiteController extends Controller
             'image' => $lot->cover_url ?? $lot->logo_url,
             'url' => route('lots.show', $lot),
             'robots' => $preview ? 'noindex' : null,
+            'jsonld' => $preview ? null : StructuredData::lot($lot),
         ]]);
     }
 }

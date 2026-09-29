@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Marketplace;
 use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Marketplace\Models\SavedSearch;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
@@ -34,7 +35,22 @@ class FavouriteController extends Controller
                 ];
             });
 
-        return Inertia::render('Marketplace/Saved', ['cars' => $cars])
+        $user = $request->user();
+
+        return Inertia::render('Marketplace/Saved', [
+            'cars' => $cars,
+            'searches' => SavedSearch::where('user_id', $user->id)->latest()->get()->map(fn (SavedSearch $s) => [
+                'ulid' => $s->ulid,
+                'name' => $s->name,
+                'url' => $s->url(),
+                'channel' => $s->channel,
+                'last_alert' => $s->last_notified_at?->diffForHumans(),
+            ]),
+            'channels' => collect(SavedSearch::CHANNELS)->map(fn (string $label, string $value) => ['value' => $value, 'label' => $label])->values(),
+            'lots' => $user->followedLots()->where('status', 'active')->get()
+                ->map(fn ($lot) => collect(MarketplacePresenter::lot($lot))->only(['slug', 'url', 'name', 'initials', 'logo_url', 'city', 'verified', 'brand_color'])->all()),
+            'hasEmail' => filled($user->email),
+        ])
             ->withViewData(['meta' => ['title' => 'Saved cars', 'robots' => 'noindex']]);
     }
 

@@ -4,8 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Admin\Impersonation;
+use App\Domain\Audit\AuditLog;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\Plan;
 use App\Domain\Trust\Actions\DecideLotVerification;
 use App\Filament\Resources\LotResource\Pages;
 use Filament\Forms;
@@ -79,6 +81,17 @@ class LotResource extends Resource
                     ->action(function (Lot $lot, array $data): void {
                         app(DecideLotVerification::class)->revoke($lot, self::admin(), $data['reason']);
                         Notification::make()->title('Verified badge removed')->success()->send();
+                    }),
+                // Enterprise isn't self-serve: admins put a lot on it (or any plan) here.
+                Tables\Actions\Action::make('plan')->label('Set plan')->icon('heroicon-o-rectangle-stack')->color('gray')
+                    ->fillForm(fn (Lot $lot) => ['plan_id' => $lot->plan_id])
+                    ->form([Forms\Components\Select::make('plan_id')->label('Plan')->options(fn () => Plan::orderBy('sort')->pluck('name', 'id'))->required()
+                        ->helperText('Changes what the lot can use straight away. Billing stays as it is in Payments.')])
+                    ->action(function (Lot $lot, array $data): void {
+                        $from = $lot->plan?->code;
+                        $lot->forceFill(['plan_id' => (int) $data['plan_id']])->save();
+                        AuditLog::record('admin.plan_set', $lot, ['from' => $from, 'to' => $lot->fresh()->plan?->code], self::admin(), $lot->id);
+                        Notification::make()->title('Plan updated')->success()->send();
                     }),
                 // Support (TDD M17): see the dashboard as the owner does; logged in the audit log.
                 Tables\Actions\Action::make('impersonate')->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')

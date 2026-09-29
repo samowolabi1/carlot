@@ -75,3 +75,11 @@ it('registers independent inspectors from the user page', function () {
     expect($user->fresh())->isInspector()->toBeTrue()->inspector_company->toBe('AutoCheck NG')
         ->and(AuditLog::where('action', 'admin.inspector_added')->exists())->toBeTrue();
 });
+
+it('lets admins put a lot on any plan, such as Enterprise', function () {
+    $this->actingAs($this->admin);
+    Livewire::test(ListLots::class)->callTableAction('plan', $this->lot, ['plan_id' => Plan::where('code', 'enterprise')->value('id')]);
+
+    expect($this->lot->fresh()->planAllows('bulk_import'))->toBeTrue()
+        ->and(AuditLog::where('action', 'admin.plan_set')->sole()->changes['to'])->toBe('enterprise');
+});

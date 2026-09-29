@@ -100,7 +100,7 @@ function editHref(row: Row) {
                 <span class="text-[14px] text-muted">{{ counts.all }} {{ counts.all === 1 ? 'car' : 'cars' }} · {{ live }} live on the marketplace</span>
             </div>
             <div class="flex gap-2.5">
-                <span class="btn btn-outline h-11 cursor-not-allowed px-4 text-[14px] opacity-50" aria-disabled="true" title="Coming in a later update">Bulk import</span>
+                <Link v-if="canManage" :href="route('dealer.vehicles.import', lot.slug)" class="btn btn-outline h-11 px-4 text-[14px]"><Icon name="upload" :size="16" /> Bulk import</Link>
                 <Link :href="route('dealer.vehicles.create', lot.slug)" class="btn btn-primary h-11 px-4 text-[14px]">
                     <Icon name="plus" :size="16" :stroke-width="2.4" /> Add car
                 </Link>
