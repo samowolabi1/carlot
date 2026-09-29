@@ -153,6 +153,8 @@ Run all four before pushing.
   `AdImage`, a `Payment` with purpose `advert`); `FulfilPayment` calls `SubmitAdCampaign` (in review); admins use
   `ReviewAdCampaign` (approve schedules it, reject refunds, remove takes down). Serve only through `AdServer`; count views and
   clicks only through `AdController` (`ads.seen`/`ads.click`, once per visit, no bots or lot staff). Never run an advert unreviewed.
+  Prices and slots (banners and spotlights) are config defaults overlaid by `AdvertPricing` (/admin → Advert prices), like
+  `FinanceRates`: keep reading them through `AdSchedule` / `SpotlightPricing` / `AdPlacement::slots()`.
 
 ## Leads and chat (S8)
 

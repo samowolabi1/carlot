@@ -84,7 +84,8 @@ return [
     ],
 
     // Adverts lots buy from LotLink (placeholder prices in whole naira). Every advert is checked by
-    // an admin before it runs; "slots" is how many can run at once.
+    // an admin before it runs; "slots" is how many can run at once. These (and the spotlight prices
+    // above) are defaults: admins change them in /admin → Advert prices (AdvertPricing).
     'adverts' => [
         'home_banner' => ['slots' => (int) env('ADS_HOME_SLOTS', 5), 'prices' => [7 => 40000, 14 => 75000, 30 => 140000]],
         'search_banner' => ['slots' => (int) env('ADS_SEARCH_SLOTS', 6), 'prices' => [7 => 20000, 14 => 36000, 30 => 65000]],

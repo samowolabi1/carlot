@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Domain\Advertising\Support\AdvertPricing;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Policies\AppointmentPolicy;
 use App\Domain\Billing\Gateways\PaymentGateway;
@@ -105,9 +106,13 @@ class AppServiceProvider extends ServiceProvider
 
         Notification::extend('phone', fn ($app) => $app->make(PhoneChannel::class));
 
-        // Finance rates an admin changed in /admin; re-read before each job so long-running workers keep up.
+        // Finance rates and advert prices an admin changed in /admin; re-read before each job so long-running workers keep up.
         FinanceRates::apply();
-        Queue::before(fn () => FinanceRates::apply());
+        AdvertPricing::apply();
+        Queue::before(function (): void {
+            FinanceRates::apply();
+            AdvertPricing::apply();
+        });
 
         Gate::policy(Lot::class, LotPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
