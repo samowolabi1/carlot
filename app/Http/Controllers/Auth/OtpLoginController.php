@@ -44,7 +44,7 @@ class OtpLoginController extends Controller
                 throw ValidationException::withMessages(['email' => $e->getMessage()]);
             }
 
-            $request->session()->put(['otp_method' => 'email', 'otp_to' => $email, 'otp_channel' => 'email']);
+            $request->session()->put(['otp_method' => 'email', 'otp_to' => $email, 'otp_channel' => 'email', 'otp_remember' => $request->boolean('remember')]);
 
             return redirect()->route('login.verify');
         }
@@ -58,7 +58,7 @@ class OtpLoginController extends Controller
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
         }
 
-        $request->session()->put(['otp_method' => 'whatsapp', 'otp_to' => $phone, 'otp_channel' => $channel]);
+        $request->session()->put(['otp_method' => 'whatsapp', 'otp_to' => $phone, 'otp_channel' => $channel, 'otp_remember' => $request->boolean('remember')]);
 
         return redirect()->route('login.verify');
     }
@@ -100,8 +100,9 @@ class OtpLoginController extends Controller
             throw ValidationException::withMessages(['code' => $e->getMessage()]);
         }
 
-        Auth::login($user, remember: true);
-        $request->session()->forget(['otp_to', 'otp_method', 'otp_channel']);
+        // "Keep me signed in for a week" ticked on the sign-in page: a remember cookie (auth.guards.web.remember).
+        Auth::login($user, remember: (bool) $request->session()->get('otp_remember', false));
+        $request->session()->forget(['otp_to', 'otp_method', 'otp_channel', 'otp_remember']);
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'));

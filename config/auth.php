@@ -41,6 +41,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // "Keep me signed in for a week" (sign-in page and the admin's "Remember me"): minutes the remember cookie lasts.
+            'remember' => (int) env('AUTH_REMEMBER_MINUTES', 7 * 24 * 60),
         ],
     ],
 

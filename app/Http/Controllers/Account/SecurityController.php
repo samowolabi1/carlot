@@ -7,6 +7,7 @@ use App\Domain\Accounts\Actions\SignInWithGoogle;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,7 +42,7 @@ class SecurityController extends Controller
 
         $first = $user->password === null;
         $setPassword->run($user, $data['password'], $data['current_password'] ?? null);
-        Auth::login($user, remember: true); // keep this device signed in with the new remember token
+        $this->staySignedIn($request);
 
         return back()->with('success', $first ? 'Password added. You can now sign in with it too.' : 'Password changed.');
     }
@@ -51,9 +52,20 @@ class SecurityController extends Controller
         $data = $request->validate(['current_password' => ['required', 'string', 'max:200']]);
 
         $setPassword->remove($request->user(), $data['current_password']);
-        Auth::login($request->user(), remember: true);
+        $this->staySignedIn($request);
 
         return back()->with('success', 'Password removed. Sign in with a one-time code.');
+    }
+
+    /**
+     * The password change gave the account a new remember token (signing out other devices); if this
+     * device was kept signed in, give it a fresh cookie so it stays that way.
+     */
+    private function staySignedIn(Request $request): void
+    {
+        /** @var SessionGuard $guard */
+        $guard = Auth::guard('web');
+        Auth::login($request->user(), remember: $request->cookies->has($guard->getRecallerName()));
     }
 
     public function disconnectGoogle(Request $request, SignInWithGoogle $google): RedirectResponse

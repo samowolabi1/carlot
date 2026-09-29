@@ -4,7 +4,7 @@ import Icon from '@/components/Icon.vue';
 import InputError from '@/components/InputError.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 
 const props = defineProps<{ method: 'whatsapp' | 'email' | 'password'; google: boolean }>();
 
@@ -14,6 +14,9 @@ const mode = ref<'code' | 'password'>(props.method === 'password' ? 'password' :
 const form = useForm({ method: props.method === 'email' ? 'email' : 'whatsapp', phone: '', email: '' });
 const passwordForm = useForm({ login: '', password: '' });
 const showPassword = ref(false);
+// "Keep me signed in for a week": a remember cookie that lasts 7 days. Off: signed out after 2 hours without using LotLink.
+const remember = ref(true);
+const googleHref = computed(() => route('login.google', remember.value ? { remember: 1 } : {}));
 const phoneInput = ref<HTMLInputElement | null>(null);
 const emailInput = ref<HTMLInputElement | null>(null);
 const loginInput = ref<HTMLInputElement | null>(null);
@@ -30,11 +33,11 @@ function useMode(next: 'code' | 'password') {
 }
 
 function submit() {
-    form.post(route('login.send'));
+    form.transform((data) => ({ ...data, remember: remember.value })).post(route('login.send'));
 }
 
 function submitPassword() {
-    passwordForm.post(route('login.password'), { onFinish: () => passwordForm.reset('password') });
+    passwordForm.transform((data) => ({ ...data, remember: remember.value })).post(route('login.password'), { onFinish: () => passwordForm.reset('password') });
 }
 </script>
 
@@ -48,7 +51,7 @@ function submitPassword() {
         </div>
 
         <template v-if="google">
-            <a :href="route('login.google')" class="btn btn-outline flex items-center justify-center gap-3 bg-white no-underline">
+            <a :href="googleHref" class="btn btn-outline flex items-center justify-center gap-3 bg-white no-underline">
                 <GoogleLogo />
                 Continue with Google
             </a>
@@ -90,6 +93,10 @@ function submitPassword() {
                     <span class="font-normal text-muted">Check your inbox (and spam folder) for the code.</span>
                     <InputError :message="form.errors.email" />
                 </label>
+                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-[14px]">
+                    <input v-model="remember" type="checkbox" class="h-5 w-5 shrink-0 accent-forest" />
+                    Keep me signed in for a week
+                </label>
                 <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ form.processing ? 'Sending…' : 'Send code' }}</button>
             </form>
             <button type="button" class="flex min-h-11 items-center justify-center gap-2 text-[15px] font-semibold text-forest hover:text-clay" @click="useMode('password')">
@@ -120,6 +127,10 @@ function submitPassword() {
                         </button>
                     </span>
                     <InputError :message="passwordForm.errors.password" />
+                </label>
+                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-[14px]">
+                    <input v-model="remember" type="checkbox" class="h-5 w-5 shrink-0 accent-forest" />
+                    Keep me signed in for a week
                 </label>
                 <button type="submit" class="btn btn-primary" :disabled="passwordForm.processing">{{ passwordForm.processing ? 'Signing in…' : 'Sign in' }}</button>
             </form>

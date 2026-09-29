@@ -38,6 +38,8 @@ Run all four before pushing.
   (`SendOtp::toEmail` / `VerifyOtp::forEmail`) always work and create accounts. Optional extras: a password (`SetPassword`,
   `LogInWithPassword` by email or phone; never creates accounts) and Google (`SignInWithGoogle` via Socialite; links by
   email only when Google verified it). Every sign-in path calls `User::reopenForSignIn()`. Admins must keep a password.
+  Every sign-in path passes the "Keep me signed in for a week" choice to `Auth::login($user, $remember)` (cookie length:
+  `auth.guards.web.remember`); never hard-code `remember: true`.
 - **States**: lots' `state` is one of `config('lotlink.regions')` (36 states + FCT); normalise input with `Regions::normalize()`.
   Admins create lots for owners with `OnboardLot`.
 

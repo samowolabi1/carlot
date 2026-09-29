@@ -28,7 +28,7 @@ class GoogleController extends Controller
     {
         abort_unless(self::enabled(), 404);
 
-        $request->session()->put('google_connect', Auth::check());
+        $request->session()->put(['google_connect' => Auth::check(), 'google_remember' => $request->boolean('remember')]);
 
         return Socialite::driver('google')->redirect();
     }
@@ -38,6 +38,7 @@ class GoogleController extends Controller
         abort_unless(self::enabled(), 404);
 
         $connecting = (bool) $request->session()->pull('google_connect', false) && Auth::check();
+        $remember = (bool) $request->session()->pull('google_remember', false);
         $back = $connecting ? route('account.security') : route('login');
 
         if ($request->filled('error')) {
@@ -62,7 +63,7 @@ class GoogleController extends Controller
             return redirect()->route('account.security')->with('success', 'Google is connected. You can use it to sign in.');
         }
 
-        Auth::login($user, remember: true);
+        Auth::login($user, $remember);
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'));

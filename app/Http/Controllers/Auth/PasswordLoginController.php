@@ -21,6 +21,7 @@ class PasswordLoginController extends Controller
         $data = $request->validate([
             'login' => ['required', 'string', 'max:190'],
             'password' => ['required', 'string', 'max:200'],
+            'remember' => ['boolean'],
         ]);
 
         // Five tries a minute per account and address, on top of the route's per-IP limit.
@@ -37,7 +38,7 @@ class PasswordLoginController extends Controller
         }
 
         RateLimiter::clear($key);
-        Auth::login($user, remember: true);
+        Auth::login($user, remember: $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'));
