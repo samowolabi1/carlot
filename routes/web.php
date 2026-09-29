@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\PasswordLoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\ProfileNameController;
 use App\Http\Controllers\Billing\SandboxCheckoutController;
 use App\Http\Controllers\Bookings\BookingController;
@@ -144,6 +145,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/auth/resend', [OtpLoginController::class, 'resend'])->middleware('throttle:otp')->name('login.resend');
     Route::post('/auth/password', [PasswordLoginController::class, 'store'])->middleware('throttle:20,1')->name('login.password');
 });
+
+// Forgot password: an emailed reset link. Not guest-only, so signed-in people who forgot their current password can use it too.
+Route::get('/forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'store'])->middleware('throttle:6,1')->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.store');
 
 // Continue with Google: signs in (or up) when signed out, links Google to the account when signed in.
 Route::middleware('throttle:20,1')->group(function () {

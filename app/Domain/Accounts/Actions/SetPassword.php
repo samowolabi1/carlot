@@ -30,6 +30,15 @@ class SetPassword
         $user->notify(new SignInChanged($first ? 'a password was added to your account' : 'your password was changed'));
     }
 
+    /** From an emailed reset link (the person proved they own the email): no current password needed. */
+    public function reset(User $user, string $password): void
+    {
+        $user->forceFill(['password' => $password, 'password_changed_at' => now(), 'remember_token' => Str::random(60)])->save();
+
+        AuditLog::record('account.password_reset', $user, [], $user);
+        $user->notify(new SignInChanged('your password was reset from the emailed link'));
+    }
+
     /** Back to codes (and Google) only. Admins keep theirs: the admin panel signs in with a password. */
     public function remove(User $user, ?string $current): void
     {

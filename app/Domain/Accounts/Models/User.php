@@ -3,6 +3,7 @@
 namespace App\Domain\Accounts\Models;
 
 use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Accounts\Notifications\ResetPasswordLink;
 use App\Domain\Finance\Models\Budget;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotRole;
@@ -141,6 +142,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         $this->deletion_requested_at = null;
 
         return true;
+    }
+
+    /** "Forgot your password?" link, in LotLink's words and with our reset page. */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPasswordLink($token));
     }
 
     public function isAdmin(): bool

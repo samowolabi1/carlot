@@ -113,7 +113,10 @@ function submitPassword() {
                     <InputError :message="passwordForm.errors.login" />
                 </label>
                 <label class="field-label">
-                    Password
+                    <span class="flex items-center justify-between">
+                        Password
+                        <Link :href="route('password.request', passwordForm.login.includes('@') ? { email: passwordForm.login.trim() } : {})" class="-my-2 flex min-h-11 items-center text-[14px] font-semibold text-forest hover:text-clay">Forgot password?</Link>
+                    </span>
                     <span class="relative flex">
                         <input v-model="passwordForm.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required class="field pr-12" />
                         <button
@@ -134,7 +137,7 @@ function submitPassword() {
                 </label>
                 <button type="submit" class="btn btn-primary" :disabled="passwordForm.processing">{{ passwordForm.processing ? 'Signing in…' : 'Sign in' }}</button>
             </form>
-            <p class="text-center text-[13px] text-muted">Forgot it, or never set one? Sign in with a code, then set a new password in Account → Sign-in and security.</p>
+            <p class="text-center text-[13px] text-muted">Never set a password? Sign in with a code, then add one in Account → Sign-in and security.</p>
             <button type="button" class="flex min-h-11 items-center justify-center gap-2 text-[15px] font-semibold text-forest hover:text-clay" @click="useMode('code')">
                 <Icon name="chat" :size="18" />
                 Get a one-time code instead

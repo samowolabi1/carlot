@@ -87,6 +87,7 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
                         Current password
                         <input v-model="form.current_password" :type="show ? 'text' : 'password'" autocomplete="current-password" required class="field" />
                         <InputError :message="form.errors.current_password" />
+                        <Link v-if="email" :href="route('password.request', { email })" class="self-start text-[13px] font-semibold text-forest hover:text-clay">Forgot it? Reset it by email</Link>
                     </label>
                     <label class="field-label">
                         New password
