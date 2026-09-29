@@ -80,6 +80,15 @@ class PaystackGateway implements PaymentGateway
         return (string) $data['plan_code'];
     }
 
+    public function updatePlan(string $code, int $amount, bool $existing): void
+    {
+        try {
+            $this->http()->put('/plan/'.rawurlencode($code), ['amount' => $amount, 'update_existing_subscriptions' => $existing])->throw();
+        } catch (RequestException $e) {
+            throw new RuntimeException('Paystack: '.($e->response->json('message') ?? $e->getMessage()), previous: $e);
+        }
+    }
+
     /**
      * @param  array<string, mixed>  $body
      * @return array<string, mixed>

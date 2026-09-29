@@ -31,4 +31,10 @@ interface PaymentGateway
 
     /** Creates a recurring plan at the provider; returns its code. */
     public function createPlan(string $name, int $amount, string $interval): string;
+
+    /**
+     * Changes a recurring plan's amount at the provider (minor units). $existing: current
+     * subscribers pay it from their next renewal too; otherwise only new subscribers do.
+     */
+    public function updatePlan(string $code, int $amount, bool $existing): void;
 }

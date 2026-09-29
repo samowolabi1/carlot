@@ -82,4 +82,17 @@ class FakePaymentGateway implements PaymentGateway
     {
         return 'PLN_test';
     }
+
+    /** @var list<array{code: string, amount: int, existing: bool}> */
+    public array $updatedPlans = [];
+
+    public bool $failPlanUpdate = false;
+
+    public function updatePlan(string $code, int $amount, bool $existing): void
+    {
+        if ($this->failPlanUpdate) {
+            throw new \RuntimeException('Paystack: plan not found');
+        }
+        $this->updatedPlans[] = ['code' => $code, 'amount' => $amount, 'existing' => $existing];
+    }
 }

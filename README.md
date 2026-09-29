@@ -127,7 +127,7 @@ Deferred: offers, trade-ins and reservations as lead sources (S9), the inspectio
 | Plan limits | Listings (Free 10, Starter 50), staff (1/3/10) and open orders (Free 10) are enforced. Share-card images come with Starter and up. |
 | Quality | 305 tests (also on MySQL), including webhook signature and idempotency, verification and amount checks, trial, grace and downgrade, the free spotlight allowance, sponsored search on both engines, and follower batching. |
 
-Prices are placeholders (Starter ₦15,000, Pro ₦45,000 a month; spotlights from ₦5,000). Set real ones in `/admin/plans` and `config/lotlink.php` after talking to your first lots. Deferred: test-drive and reservation deposits (S9), web push (S8 notification centre), admin-editable spotlight prices (S12).
+Prices are placeholders (Starter ₦15,000, Pro ₦45,000 a month; spotlights from ₦5,000). Set real ones in `/admin/plans` → **Change price** (updates the Paystack plan too; choose whether current subscribers keep their price or pay the new one from their next renewal, in which case they're told) and in `/admin` → Advert prices, after talking to your first lots.
 
 **Sprint S6 (Sharing and budgeting, MVP launch) ✅**
 

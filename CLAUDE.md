@@ -139,6 +139,8 @@ Run all four before pushing.
   changes state in `FulfilPayment`, which re-verifies with the `PaymentGateway` and checks the
   amount; never mark a payment paid from a redirect or webhook body. Webhooks are stored in
   `webhook_events` (unique body hash), so each delivery is handled once.
+- Plan prices change only through `ChangePlanPrice` (updates the Paystack plan first, then the plan; optionally notifies
+  current subscribers). Never edit `plans.price` directly, or Paystack and LotLink will disagree and checkouts fail.
 - `lots.plan_id` is the effective plan used by limits; `subscriptions` says how it's paid for.
   Downgrades go through `DowngradeToFree` (hides extra cars via the state machine, never deletes).
 - Spotlights set `vehicles.spotlight_until` / `lots.featured_until` via `ActivateSpotlight`; use

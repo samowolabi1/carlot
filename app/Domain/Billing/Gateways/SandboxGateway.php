@@ -61,4 +61,7 @@ class SandboxGateway implements PaymentGateway
     {
         throw new RuntimeException('The sandbox has no plans to create. Set PAYMENT_DRIVER=paystack.');
     }
+
+    /** Nothing to update: the sandbox charges whatever LotLink asks for. */
+    public function updatePlan(string $code, int $amount, bool $existing): void {}
 }
