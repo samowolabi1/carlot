@@ -52,6 +52,8 @@ With S14 every sprint in the TDD plan is built. Still open, by choice: Sanctum A
 | Fraud signals | When a car is published or its price drops: the same VIN on another lot, a cover photo matching another lot's (a perceptual hash, so re-saved copies still match), a price under 40% of the pricing-guide median, or a lot under 30 days old publishing more than 30 cars in a day. Signals go to the admin queue; nothing is hidden automatically. |
 | Support desk | **Help & support** in the dealer sidebar (any team member): open a ticket with a topic, urgency, optional car and a screenshot or PDF; follow the conversation with LotLink; mark it solved or reopen it. A badge shows unread replies, and replies also arrive as a notification and email. In `/admin` → **Support tickets** (badge = tickets needing a reply, also on the dashboard queue): filter by status, priority, topic or "assigned to me"; open a ticket to reply (then wait for the lot, resolve or close), add internal notes the lot never sees, assign it and change priority. Lots see admins as "Ada, LotLink Support". Status, priority and assignment changes are audit-logged. |
 | Advertise | **Advertise** in the dealer sidebar (owners and managers) lists every paid promotion: **Homepage banner** (a rotating banner at the top of the home page, up to 5 lots at once), **Search banner** (among search results and on city/make pages, optionally aimed at a make, body type or city; aimed banners win when they fit the search), plus links to car spotlights and featured lots. A banner has a headline, a short line, a button, and opens the lot page or one car; the image is uploaded (cropped to 1600×600 or 1200×300 and re-encoded as WebP) or taken from the car's photo, with a live preview. Pick 7, 14 or 30 days and a start date (up to 60 days ahead); full slots suggest the next free start. It's paid to LotLink like a spotlight, then **checked by an admin** (`/admin` → Adverts, badge and dashboard queue): approve (runs from the date asked, or from approval so no days are lost), reject (refunded in full, with a note), or take down. Views (once on screen) and clicks are counted once per visit, not for bots or the lot's own staff, and shown with the click rate. Prices and slots are in `config/lotlink.php` (`adverts`). |
+| Lots in every state | Lots pick their state from Nigeria's 36 states and the FCT (`config('lotlink.regions')`, swappable per market); map pins and free text like "Lagos State" or "Abuja" are matched to the list. Buyers can filter search by state (both search engines), saved searches keep it, and admins filter lots by state. |
+| Admin onboarding | `/admin` → Lots → **Onboard a lot**: owner's name and how they'll sign in (WhatsApp number or email), lot name, state, area, address, buyers' phone, plan, and optionally approve it on the spot. It creates (or reuses) the owner's account and the lot, records who onboarded it (filter "Onboarded by LotLink"), audit-logs it, and welcomes the owner by email or WhatsApp (`lot_welcome` template) with how to sign in. |
 | Admin settings | **Settings → Finance rates**: the affordability share, interest rate, default deposit and loan length, the loan lengths buyers can pick, and the cost-of-ownership figures (insurance, papers, fuel price, distance, fuel economy by engine size, servicing by car age), with a live preview. Saved rates apply at once to "What can I afford?", "From ₦X/mo" and the running-costs card; **Reset to defaults** goes back to `config/lotlink.php`. **Settings → Message templates**: every WhatsApp/SMS message the app sends. Per message: which approved Meta template and language to use (so a newly approved version can replace the old one), the SMS wording with placeholders (`{1}`, `{2}`… for the variables, `{link}` for the button's URL; checked before saving, with a preview and SMS length), on/off (sign-in codes and staff invitations stay on), and **Send a test**. Every change is audit-logged. |
 | Admin (A1) | The dashboard shows the review queue (lots to verify, flagged listings, reports, reported reviews) and platform metrics for the last 30 days (active lots, live listings, new users, bookings, recorded sales, MRR, churn). Admins approve or reject verifications, hide or approve listings, message the lots involved, restore or remove reviews, close reports, browse every listing and the audit log, mark users as inspectors, and **Log in as** a user for support (both ends go in the audit log; a banner shows "Back to admin"). |
 | Quality | 432 tests, including verification files and decisions, the checklist score and PDF, independent reports, review invites, editing and replies, the 3-review rule, report limits and auto-hold, every fraud signal, the admin queue actions, impersonation, and tenancy checks for verifications, inspections and reviews. |
@@ -206,7 +208,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 
 | Area | What works |
 | --- | --- |
-| Accounts (M1) | Phone OTP sign-in (6 digits, 5-min expiry, 5 attempts, 3 sends per 15 min), E.164 normalisation, customer / staff / admin roles |
+| Accounts (M1) | One-time-code sign-in and sign-up (6 digits, 5-min expiry, 5 attempts, 3 sends per 15 min). People pick **WhatsApp number** or **email address**: WhatsApp codes don't fall back to paid SMS unless `OTP_SMS_FALLBACK=true`, and email codes are free. Email-only accounts have no phone; lots' customer books match them by email. E.164 normalisation, customer / staff / admin roles |
 | Lots (M2) | Six-step onboarding: business details → logo and cover → map pin (GPS + Google Maps) → opening hours and booking rules → invite staff → submit for approval |
 | Staff | Invite by phone (SMS) or email, 7-day links, owner / manager / sales roles, plan seat limits, change role, remove |
 | Tenancy | `/dealer/{lot}` routes check membership; `BelongsToLot` scopes lot-owned models to the current lot |
@@ -246,8 +248,9 @@ cd carlot
 - **Add a car**: Dealer dashboard → Stock → Add car. Try VIN `4T1B11HK8JU654821` (a 2018 Toyota Camry SE).
   Photos are processed straight away because `.env.example` uses `QUEUE_CONNECTION=sync`.
 
-- **Sign in** at `/login` with any Nigerian mobile number. With `SMS_DRIVER=log` the code is
-  written to `storage/logs/laravel.log` (search for "Your LotLink code").
+- **Sign in** at `/login` with a WhatsApp number or an email address. With `WHATSAPP_DRIVER=log` the WhatsApp
+  code is written to `storage/logs/laravel.log` (search for "login_code"); with `MAIL_MAILER=log` the email code is
+  in the same log (search for "Your LotLink code").
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
 - **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password`. Change these in `.env`
   (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) before seeding anywhere public.
@@ -291,6 +294,7 @@ same variables and button, then enter its name in `/admin` → Message templates
 | --- | --- | --- | --- |
 | `login_code` | Authentication | code | copy code |
 | `staff_invitation` | Utility | lot name, role | invitation link |
+| `lot_welcome` | Utility | owner name, lot name | sign in |
 | `booking_confirmed` | Utility | name, what, lot, when | manage booking |
 | `booking_pending` | Utility | name, what, lot, when | manage booking |
 | `appointment_reminder` | Utility | what, lot, when, directions | manage booking |

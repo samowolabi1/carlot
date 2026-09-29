@@ -79,6 +79,7 @@ export interface SharedProps {
     currentLot: CurrentLot | null;
     budget: number | null;
     unread: { notifications: number; messages: number } | null;
+    regions?: { value: string; label: string }[];
     flash: { success: string | null; error: string | null };
     errors: Record<string, string>;
 }

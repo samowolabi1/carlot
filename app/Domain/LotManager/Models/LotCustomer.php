@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
  * @property int $lot_id
  * @property int|null $user_id
  * @property string $name
- * @property string $phone
+ * @property string|null $phone null only for marketplace buyers who signed up by email
  * @property string|null $email
  * @property string|null $address
  * @property CustomerSource $source
@@ -64,7 +64,7 @@ class LotCustomer extends Model
         return 'ulid';
     }
 
-    public function routeNotificationForPhone(): string
+    public function routeNotificationForPhone(): ?string
     {
         return $this->phone;
     }

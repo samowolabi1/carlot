@@ -23,6 +23,7 @@ export interface Filters {
     year_max: number | null;
     mileage_max: number | null;
     city: string | null;
+    state: string | null;
     lat: number | null;
     lng: number | null;
     radius: number | null;

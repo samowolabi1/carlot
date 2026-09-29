@@ -80,6 +80,7 @@ class DatabaseVehicleSearch implements VehicleSearch
             ->when($c->yearMax, fn (Builder $q) => $q->where('vehicles.year', '<=', $c->yearMax))
             ->when($c->mileageMax, fn (Builder $q) => $q->where('vehicles.mileage_km', '<=', $c->mileageMax))
             ->when($c->city, fn (Builder $q) => $q->where('lots.city', $c->city))
+            ->when($c->state, fn (Builder $q) => $q->where('lots.state', $c->state))
             ->when($c->lotId, fn (Builder $q) => $q->where('vehicles.lot_id', $c->lotId));
 
         if ($c->hasLocation() && $c->radiusKm !== null) {

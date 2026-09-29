@@ -295,6 +295,7 @@ class Vehicle extends Model
             'lot_name' => $this->lot->name,
             'lot_id' => $this->lot_id,
             'city' => $this->lot->city,
+            'state' => $this->lot->state,
             'make_id' => $this->make_id,
             'vehicle_model_id' => $this->vehicle_model_id,
             'body_type' => $this->body_type?->value,

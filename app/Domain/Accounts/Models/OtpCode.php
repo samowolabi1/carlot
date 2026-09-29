@@ -8,7 +8,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $phone
+ * @property string|null $phone
+ * @property string|null $email
  * @property string $code_hash
  * @property OtpPurpose $purpose
  * @property int $attempts
@@ -17,7 +18,7 @@ use Illuminate\Support\Carbon;
  */
 class OtpCode extends Model
 {
-    protected $fillable = ['phone', 'code_hash', 'purpose', 'attempts', 'expires_at', 'consumed_at'];
+    protected $fillable = ['phone', 'email', 'code_hash', 'purpose', 'attempts', 'expires_at', 'consumed_at'];
 
     protected $hidden = ['code_hash'];
 

@@ -166,7 +166,7 @@ class OrderController extends Controller
                 'costs_url' => route('dealer.vehicles.costs.index', [$lot, $order->vehicle]),
             ] : null,
             'methods' => array_values(array_filter(PaymentMethod::options(), fn ($o) => $o['value'] !== PaymentMethod::Paystack->value)),
-            'share' => $order->customer ? 'https://wa.me/'.ltrim($order->customer->phone, '+').'?text='.rawurlencode("Hi {$order->customer->name}, you can track your order {$order->order_no} with {$lot->name} here: {$track}") : null,
+            'share' => $order->customer?->phone ? 'https://wa.me/'.ltrim($order->customer->phone, '+').'?text='.rawurlencode("Hi {$order->customer->name}, you can track your order {$order->order_no} with {$lot->name} here: {$track}") : null,
         ]);
     }
 

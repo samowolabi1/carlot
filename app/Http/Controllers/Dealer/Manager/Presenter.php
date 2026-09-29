@@ -37,7 +37,7 @@ final class Presenter
             'name' => $c->name,
             'phone' => $c->phone,
             'phone_display' => PhoneNumber::display($c->phone),
-            'whatsapp' => ltrim($c->phone, '+'),
+            'whatsapp' => $c->phone ? ltrim($c->phone, '+') : null,
             'email' => $c->email,
             'source' => $c->source->value,
             'source_label' => $c->source->label(),
@@ -127,7 +127,7 @@ final class Presenter
                 'name' => $t->customer->name,
                 'phone' => $t->customer->phone,
                 'phone_display' => PhoneNumber::display($t->customer->phone),
-                'whatsapp' => ltrim($t->customer->phone, '+'),
+                'whatsapp' => $t->customer->phone ? ltrim($t->customer->phone, '+') : null,
             ] : null,
         ];
     }

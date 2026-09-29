@@ -22,7 +22,7 @@ class AccountController extends Controller
 
         // Orders a lot recorded for this phone number (Lot Manager links the account by phone).
         $customerIds = LotCustomer::withoutGlobalScopes()
-            ->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('phone', $user->phone))
+            ->where(fn ($q) => $q->where('user_id', $user->id)->when($user->phone, fn ($q) => $q->orWhere('phone', $user->phone)))
             ->pluck('id');
         $orders = SalesOrder::withoutGlobalScopes()->with(['vehicle.make', 'vehicle.model'])
             ->whereIn('lot_customer_id', $customerIds)
@@ -33,7 +33,8 @@ class AccountController extends Controller
             'profile' => [
                 'name' => $user->name,
                 'initials' => collect(explode(' ', (string) $user->name))->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('') ?: '?',
-                'phone' => PhoneNumber::mask($user->phone),
+                'phone' => $user->phone ? PhoneNumber::mask($user->phone) : null,
+                'email' => $user->email,
             ],
             'budget' => $user->budget ? '₦'.number_format($user->budget->max_price / 100) : null,
             'counts' => [

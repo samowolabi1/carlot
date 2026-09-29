@@ -78,7 +78,7 @@ final class SavedSearches
         $parts[] = count($c->conditions) === 1 ? strtolower(VehicleCondition::from($c->conditions[0])->label()) : null;
         $parts[] = count($c->fuels) === 1 ? strtolower(FuelType::from($c->fuels[0])->label()) : null;
         $parts[] = $c->mileageMax ? 'under '.number_format($c->mileageMax).' km' : null;
-        $parts[] = $c->city ? 'in '.$c->city : null;
+        $parts[] = $c->city ? 'in '.$c->city : ($c->state ? 'in '.($c->state === 'FCT' ? 'Abuja (FCT)' : $c->state.' State') : null);
 
         return ucfirst(mb_substr(implode(' ', array_filter($parts)), 0, 120));
     }

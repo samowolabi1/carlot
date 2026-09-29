@@ -10,20 +10,43 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
 
+/**
+ * Sign in or sign up with a one-time code. People pick how: their WhatsApp number or their email
+ * address (both quick, and neither costs them anything). New here: this creates the account.
+ */
 class OtpLoginController extends Controller
 {
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'method' => $request->query('method') === 'email' ? 'email' : 'whatsapp',
+        ]);
     }
 
     public function store(Request $request, SendOtp $sendOtp): RedirectResponse
     {
+        $method = $request->input('method') === 'email' ? 'email' : 'whatsapp';
+
+        if ($method === 'email') {
+            $email = Str::lower(trim((string) $request->validate(['email' => ['required', 'email:rfc', 'max:190']])['email']));
+
+            try {
+                $sendOtp->toEmail($email);
+            } catch (OtpException $e) {
+                throw ValidationException::withMessages(['email' => $e->getMessage()]);
+            }
+
+            $request->session()->put(['otp_method' => 'email', 'otp_to' => $email, 'otp_channel' => 'email']);
+
+            return redirect()->route('login.verify');
+        }
+
         $request->validate(['phone' => ['required', 'string', 'max:32']]);
 
         try {
@@ -33,22 +56,26 @@ class OtpLoginController extends Controller
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
         }
 
-        $request->session()->put(['otp_phone' => $phone, 'otp_channel' => $channel]);
+        $request->session()->put(['otp_method' => 'whatsapp', 'otp_to' => $phone, 'otp_channel' => $channel]);
 
         return redirect()->route('login.verify');
     }
 
     public function edit(Request $request): Response|RedirectResponse
     {
-        $phone = $request->session()->get('otp_phone');
+        $to = $request->session()->get('otp_to');
 
-        if (! $phone) {
+        if (! $to) {
             return redirect()->route('login');
         }
 
+        $email = $request->session()->get('otp_method') === 'email';
+
         return Inertia::render('Auth/Verify', [
-            'maskedPhone' => PhoneNumber::mask($phone),
-            'channel' => $request->session()->get('otp_channel', 'sms'),
+            'destination' => $email ? self::maskEmail($to) : PhoneNumber::mask($to),
+            'method' => $email ? 'email' : 'whatsapp',
+            'channel' => $request->session()->get('otp_channel', 'whatsapp'),
+            'smsAvailable' => ! $email && (bool) config('lotlink.otp.sms_fallback'),
             'resendAfter' => 30,
         ]);
     }
@@ -57,20 +84,22 @@ class OtpLoginController extends Controller
     {
         $request->validate(['code' => ['required', 'digits:'.config('lotlink.otp.length')]]);
 
-        $phone = $request->session()->get('otp_phone');
+        $to = $request->session()->get('otp_to');
 
-        if (! $phone) {
+        if (! $to) {
             return redirect()->route('login');
         }
 
         try {
-            $user = $verifyOtp->run($phone, $request->string('code'));
+            $user = $request->session()->get('otp_method') === 'email'
+                ? $verifyOtp->forEmail($to, $request->string('code'))
+                : $verifyOtp->run($to, $request->string('code'));
         } catch (OtpException $e) {
             throw ValidationException::withMessages(['code' => $e->getMessage()]);
         }
 
         Auth::login($user, remember: true);
-        $request->session()->forget('otp_phone');
+        $request->session()->forget(['otp_to', 'otp_method', 'otp_channel']);
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'));
@@ -78,16 +107,21 @@ class OtpLoginController extends Controller
 
     public function resend(Request $request, SendOtp $sendOtp): RedirectResponse
     {
-        $phone = $request->session()->get('otp_phone');
+        $to = $request->session()->get('otp_to');
 
-        if (! $phone) {
+        if (! $to) {
             return redirect()->route('login');
         }
 
-        $channel = $request->input('channel') === 'sms' ? 'sms' : null;
-
         try {
-            ['channel' => $used] = $sendOtp->run($phone, channel: $channel);
+            if ($request->session()->get('otp_method') === 'email') {
+                $sendOtp->toEmail($to);
+
+                return back()->with('success', 'We emailed you a new code.');
+            }
+
+            $channel = $request->input('channel') === 'sms' ? 'sms' : null;
+            ['channel' => $used] = $sendOtp->run($to, channel: $channel);
         } catch (OtpException $e) {
             throw ValidationException::withMessages(['code' => $e->getMessage()]);
         }
@@ -104,5 +138,14 @@ class OtpLoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    /** ada.obi@gmail.com → a•••i@gmail.com */
+    public static function maskEmail(string $email): string
+    {
+        [$name, $domain] = array_pad(explode('@', $email, 2), 2, '');
+        $shown = mb_strlen($name) <= 2 ? mb_substr($name, 0, 1).'•' : mb_substr($name, 0, 1).'•••'.mb_substr($name, -1);
+
+        return "{$shown}@{$domain}";
     }
 }

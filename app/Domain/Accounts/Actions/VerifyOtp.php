@@ -20,9 +20,25 @@ class VerifyOtp
      */
     public function run(string $phone, string $code, OtpPurpose $purpose = OtpPurpose::Login): User
     {
-        $matched = DB::transaction(function () use ($phone, $code, $purpose): bool {
+        $this->check('phone', $phone, $code, $purpose);
+
+        return $this->account('phone', $phone);
+    }
+
+    /** The same for a code sent by email: the account is found (or made) by its email address. */
+    public function forEmail(string $email, string $code, OtpPurpose $purpose = OtpPurpose::Login): User
+    {
+        $this->check('email', $email, $code, $purpose);
+
+        return $this->account('email', $email);
+    }
+
+    /** @param  'phone'|'email'  $field */
+    private function check(string $field, string $value, string $code, OtpPurpose $purpose): void
+    {
+        $matched = DB::transaction(function () use ($field, $value, $code, $purpose): bool {
             $otp = OtpCode::query()
-                ->where('phone', $phone)
+                ->where($field, $value)
                 ->where('purpose', $purpose)
                 ->whereNull('consumed_at')
                 ->latest('id')
@@ -48,8 +64,12 @@ class VerifyOtp
         if (! $matched) {
             throw OtpException::invalid();
         }
+    }
 
-        $user = User::withTrashed()->firstOrNew(['phone' => $phone]);
+    /** @param  'phone'|'email'  $field */
+    private function account(string $field, string $value): User
+    {
+        $user = User::withTrashed()->firstOrNew([$field => $value]);
 
         // Signing in again within 30 days of asking to delete the account cancels the deletion.
         if ($user->trashed() && $user->deletion_requested_at !== null && $user->anonymised_at === null) {
@@ -63,7 +83,11 @@ class VerifyOtp
             $user->role = UserRole::Customer;
         }
 
-        $user->phone_verified_at ??= now();
+        if ($field === 'phone') {
+            $user->phone_verified_at ??= now();
+        } else {
+            $user->email_verified_at ??= now();
+        }
         $user->save();
 
         return $user;

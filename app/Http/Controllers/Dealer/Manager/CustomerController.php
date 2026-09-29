@@ -68,7 +68,9 @@ class CustomerController extends Controller
         $cars = Vehicle::query()->with(['make', 'model'])->whereIn('id', $walkIns->pluck('vehicles_viewed')->flatten()->unique()->all())->get()->keyBy('id');
 
         // Marketplace bookings by the same phone number (the buyer's LotLink account).
-        $userIds = User::where('phone', $customer->phone)->pluck('id');
+        $userIds = User::query()->where(fn ($q) => $q->when($customer->phone, fn ($q) => $q->where('phone', $customer->phone))
+            ->when($customer->email, fn ($q) => $q->orWhere('email', $customer->email)))
+            ->when(! $customer->phone && ! $customer->email, fn ($q) => $q->whereRaw('1 = 0'))->pluck('id');
         $bookings = $userIds->isEmpty() ? collect() : Appointment::query()->with(['vehicle.make', 'vehicle.model'])->whereIn('customer_id', $userIds)->get();
 
         $ordersById = $orders->keyBy('id');

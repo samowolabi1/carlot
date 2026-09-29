@@ -4,7 +4,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
-const props = defineProps<{ maskedPhone: string; channel: 'whatsapp' | 'sms'; resendAfter: number }>();
+const props = defineProps<{ destination: string; method: 'whatsapp' | 'email'; channel: 'whatsapp' | 'sms' | 'email'; smsAvailable: boolean; resendAfter: number }>();
 
 const LENGTH = 6;
 const digits = ref<string[]>(Array(LENGTH).fill(''));
@@ -91,8 +91,9 @@ onBeforeUnmount(() => clearInterval(timer));
         <div class="flex flex-col gap-2">
             <h1 class="text-[30px] leading-[1.1] font-bold">Enter the code we sent you</h1>
             <p class="text-[15px] text-muted">
-                A 6-digit code went to <strong class="text-ink">{{ maskedPhone }}</strong> {{ channel === 'whatsapp' ? 'on WhatsApp' : 'by SMS' }}.
-                <Link :href="route('login')">Change number</Link>
+                A 6-digit code went to <strong class="text-ink">{{ destination }}</strong>
+                {{ channel === 'email' ? 'by email' : channel === 'whatsapp' ? 'on WhatsApp' : 'by SMS' }}.
+                <Link :href="route('login', { method })">{{ method === 'email' ? 'Change email' : 'Change number' }}</Link>
             </p>
         </div>
 
@@ -122,9 +123,11 @@ onBeforeUnmount(() => clearInterval(timer));
             <div class="flex justify-between gap-3 text-[14px]">
                 <span v-if="secondsLeft > 0" class="text-muted">Resend code in {{ countdown }}</span>
                 <button v-else type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending" @click="resend()">Send a new code</button>
-                <button v-if="channel === 'whatsapp'" type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending || secondsLeft > 0" @click="resend('sms')">
+                <button v-if="channel === 'whatsapp' && smsAvailable" type="button" class="font-semibold text-clay hover:text-clay-dark" :disabled="resending || secondsLeft > 0" @click="resend('sms')">
                     Send by SMS instead
                 </button>
+                <Link v-else-if="method === 'whatsapp'" :href="route('login', { method: 'email' })" class="font-semibold">Use email instead</Link>
+                <Link v-else :href="route('login', { method: 'whatsapp' })" class="font-semibold">Use WhatsApp instead</Link>
             </div>
 
             <button type="submit" class="btn btn-primary" :disabled="!complete || form.processing">Continue</button>

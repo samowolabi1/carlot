@@ -26,7 +26,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $ulid
  * @property string|null $name
- * @property string $phone
+ * @property string|null $phone null when the person signs in with email
  * @property string|null $email
  * @property string|null $password
  * @property string|null $two_factor_secret

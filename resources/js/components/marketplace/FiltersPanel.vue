@@ -2,6 +2,7 @@
 import InputError from '@/components/InputError.vue';
 import type { FilterOptions, Filters } from '@/components/marketplace/types';
 import { useLocation } from '@/composables/useLocation';
+import { useShared } from '@/composables/useShared';
 import { formatNaira, parseAmount } from '@/lib/format';
 import { reactive } from 'vue';
 
@@ -11,6 +12,7 @@ const emit = defineEmits<{ apply: [filters: Filters]; clear: [] }>();
 // Plain copy: edits stay local until "Show cars".
 const state = reactive<Filters>(JSON.parse(JSON.stringify(props.filters)));
 const { locate, locating, error: locationError } = useLocation();
+const { regions } = useShared();
 
 const thisYear = new Date().getFullYear();
 const years = Array.from({ length: thisYear + 1 - 1995 + 1 }, (_, i) => thisYear + 1 - i);
@@ -97,6 +99,14 @@ defineExpose({ state });
                 </label>
             </div>
         </fieldset>
+
+        <label class="flex flex-col gap-2.5 border-b border-divider py-4">
+            <span class="font-sans text-[15px] font-semibold">State</span>
+            <select v-model="state.state" class="field h-[46px]">
+                <option :value="null">Anywhere in Nigeria</option>
+                <option v-for="r in regions" :key="r.value" :value="r.value">{{ r.label }}</option>
+            </select>
+        </label>
 
         <div class="flex flex-col gap-2.5 border-b border-divider py-4">
             <h3 class="font-sans text-[15px] font-semibold">Year and mileage</h3>

@@ -166,7 +166,7 @@ class CalendarController extends Controller
             // Buyers who book have engaged with the lot, so their number is shown (TDD: Privacy).
             'phone' => $a->customer->phone,
             'phone_display' => PhoneNumber::display($a->customer->phone),
-            'whatsapp' => ltrim($a->customer->phone, '+'),
+            'whatsapp' => $a->customer->phone ? ltrim($a->customer->phone, '+') : null,
             'car' => $a->vehicle?->title(),
             'notes' => $a->notes,
             'staff' => $a->staff ? ['ulid' => $a->staff->ulid, 'name' => $a->staff->name] : null,

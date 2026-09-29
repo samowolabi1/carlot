@@ -15,6 +15,7 @@ use App\Domain\Leads\Models\Conversation;
 use App\Domain\Leads\Models\Lead;
 use App\Domain\Leads\Models\Message;
 use App\Domain\Lots\Support\CurrentLot;
+use App\Domain\Support\Regions;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -34,6 +35,8 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            // States lots can be in (all of Nigeria's), for location forms.
+            'regions' => fn () => Regions::options(),
             'auth' => [
                 'user' => $user ? [
                     'ulid' => $user->ulid,

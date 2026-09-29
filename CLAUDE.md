@@ -32,7 +32,12 @@ Run all four before pushing.
 - **Public IDs**: ULIDs (`ulid` column) in URLs; lots route by `slug`. Never expose auto-increment
   ids (models hide `id`).
 - **Phone numbers**: always E.164 via `App\Domain\Support\PhoneNumber`; mask them in dealer UI
-  until the customer engages.
+  until the customer engages. Users (and lot customers from the marketplace) may have **no phone** when they
+  signed up by email: never assume `$user->phone`; `PhoneNumber::display()/mask()` accept null.
+- **Sign-in**: one-time codes by WhatsApp (`SendOtp::run`, no SMS fallback unless `otp.sms_fallback`) or email
+  (`SendOtp::toEmail` / `VerifyOtp::forEmail`). No passwords except admins.
+- **States**: lots' `state` is one of `config('lotlink.regions')` (36 states + FCT); normalise input with `Regions::normalize()`.
+  Admins create lots for owners with `OnboardLot`.
 
 ## Lot Manager (S5)
 

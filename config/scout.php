@@ -148,7 +148,7 @@ return [
                 'searchableAttributes' => ['title', 'make', 'model', 'trim', 'lot_name', 'description'],
                 'filterableAttributes' => [
                     'status', 'price', 'year', 'mileage_km', 'make_id', 'vehicle_model_id', 'body_type',
-                    'condition', 'transmission', 'fuel', 'colour', 'city', 'lot_id', '_geo', 'spotlight_until',
+                    'condition', 'transmission', 'fuel', 'colour', 'city', 'state', 'lot_id', '_geo', 'spotlight_until',
                 ],
                 'sortableAttributes' => ['price', 'year', 'mileage_km', 'listed_at', '_geo'],
                 'rankingRules' => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],

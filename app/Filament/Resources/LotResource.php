@@ -8,6 +8,7 @@ use App\Domain\Audit\AuditLog;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\Plan;
+use App\Domain\Support\Regions;
 use App\Domain\Trust\Actions\DecideLotVerification;
 use App\Filament\Resources\LotResource\Pages;
 use Filament\Forms;
@@ -60,6 +61,8 @@ class LotResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(collect(LotStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])),
+                Tables\Filters\SelectFilter::make('state')->options(collect(Regions::options())->mapWithKeys(fn (array $r) => [$r['value'] => $r['label']]))->searchable(),
+                Tables\Filters\TernaryFilter::make('onboarded_by')->label('Onboarded by LotLink')->nullable(),
                 Tables\Filters\TernaryFilter::make('submitted_at')->label('Submitted')->nullable(),
                 Tables\Filters\TernaryFilter::make('verified_at')->label('Verified')->nullable(),
             ])

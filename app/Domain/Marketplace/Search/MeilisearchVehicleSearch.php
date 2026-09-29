@@ -57,6 +57,7 @@ class MeilisearchVehicleSearch implements VehicleSearch
         $c->yearMax && $filters[] = "year <= {$c->yearMax}";
         $c->mileageMax && $filters[] = "mileage_km <= {$c->mileageMax}";
         $c->city && $filters[] = 'city = '.json_encode($c->city);
+        $c->state && $filters[] = 'state = '.json_encode($c->state);
         $c->lotId && $filters[] = "lot_id = {$c->lotId}";
 
         if ($c->hasLocation() && $c->radiusKm !== null) {

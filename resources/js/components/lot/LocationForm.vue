@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
+import { useShared } from '@/composables/useShared';
 import MapPin, { type PlaceParts } from '@/components/lot/MapPin.vue';
 import type { LotSettings } from '@/types';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{ lot: LotSettings; onboarding?: boolean }>();
+
+const { regions } = useShared();
+
+/** Maps say "Lagos State" or "Abuja"; pick the matching state from the list. */
+function matchState(name: string): string {
+    const clean = name.replace(/\s+state$/i, '').trim().toLowerCase();
+    const alias: Record<string, string> = { abuja: 'FCT', 'federal capital territory': 'FCT', nassarawa: 'Nasarawa', 'akwa-ibom': 'Akwa Ibom' };
+    const wanted = alias[clean] ?? clean;
+    return regions.value.find((r) => r.value.toLowerCase() === wanted.toLowerCase())?.value ?? '';
+}
 
 const form = useForm({
     latitude: props.lot.latitude,
@@ -20,7 +31,7 @@ const form = useForm({
 function applyPlace(parts: PlaceParts) {
     if (!form.address && parts.address) form.address = parts.address;
     if (!form.city && parts.city) form.city = parts.city;
-    if (!form.state && parts.state) form.state = parts.state;
+    if (!form.state && parts.state) form.state = matchState(parts.state);
 }
 
 function submit() {
@@ -46,7 +57,10 @@ function submit() {
             </label>
             <label class="field-label">
                 State
-                <input v-model="form.state" class="field" required maxlength="80" placeholder="Lagos" />
+                <select v-model="form.state" class="field" required>
+                    <option value="" disabled>Choose a state</option>
+                    <option v-for="r in regions" :key="r.value" :value="r.value">{{ r.label }}</option>
+                </select>
                 <InputError :message="form.errors.state" />
             </label>
         </div>

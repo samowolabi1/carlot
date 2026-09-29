@@ -11,5 +11,6 @@ export function useShared() {
         currentLot: computed(() => page.props.currentLot),
         flash: computed(() => page.props.flash),
         unread: computed(() => page.props.unread),
+        regions: computed(() => page.props.regions ?? []),
     };
 }

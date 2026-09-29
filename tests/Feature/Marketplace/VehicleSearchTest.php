@@ -15,9 +15,9 @@ uses(MarketplaceFixtures::class);
 
 beforeEach(function () {
     // Ikeja, Lekki and Abuja lots; the buyer is in Ikeja.
-    $this->ikeja = Lot::factory()->active()->create(['name' => 'Prime Motors', 'city' => 'Ikeja', 'latitude' => 6.6018, 'longitude' => 3.3515]);
-    $this->lekki = Lot::factory()->active()->create(['name' => 'Ace Autos', 'city' => 'Lekki', 'latitude' => 6.4474, 'longitude' => 3.4723]);
-    $this->abuja = Lot::factory()->active()->create(['name' => 'Capital Cars', 'city' => 'Abuja', 'latitude' => 9.0765, 'longitude' => 7.3986]);
+    $this->ikeja = Lot::factory()->active()->create(['name' => 'Prime Motors', 'city' => 'Ikeja', 'state' => 'Lagos', 'latitude' => 6.6018, 'longitude' => 3.3515]);
+    $this->lekki = Lot::factory()->active()->create(['name' => 'Ace Autos', 'city' => 'Lekki', 'state' => 'Lagos', 'latitude' => 6.4474, 'longitude' => 3.4723]);
+    $this->abuja = Lot::factory()->active()->create(['name' => 'Capital Cars', 'city' => 'Abuja', 'state' => 'FCT', 'latitude' => 9.0765, 'longitude' => 7.3986]);
     $this->pending = Lot::factory()->create(['name' => 'Not Yet Motors']);
 });
 
@@ -62,7 +62,10 @@ it('filters by make, body type, transmission and ranges', function (string $engi
         ->and(run(['priceMin' => 1_000_000_000, 'priceMax' => 1_300_000_000]))->toBe(['Camry'])
         ->and(run(['yearMin' => 2017, 'sort' => 'year_desc']))->toBe(['Camry', 'RAV4'])
         ->and(run(['mileageMax' => 65_000]))->toBe(['Camry'])
-        ->and(run(['lotId' => $this->lekki->id]))->toBe(['RAV4']);
+        ->and(run(['lotId' => $this->lekki->id]))->toBe(['RAV4'])
+        ->and(run(['state' => 'Lagos']))->toEqualCanonicalizing(['Camry', 'RAV4'])
+        ->and(run(['state' => 'FCT']))->toBe(['Accord'])
+        ->and(run(['state' => 'Kano']))->toBe([]);
 })->with('engines');
 
 it('matches words in the make, model and lot name', function (string $engine) {

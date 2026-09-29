@@ -115,19 +115,26 @@ it('logs out', function () {
     $this->assertGuest();
 });
 
-it('falls back to SMS when WhatsApp fails', function () {
+it('never falls back to paid SMS unless it is switched on', function () {
     $this->whatsapp->failing = true;
 
-    requestCode();
+    $this->post(route('login.send'), ['phone' => '0803 123 4412'])->assertSessionHasErrors(['phone' => 'We couldn\'t reach that number on WhatsApp. Check the number, or sign in with your email instead.']);
+    expect($this->sms->sent)->toBe([]);
 
+    config(['lotlink.otp.sms_fallback' => true]);
+    requestCode();
     expect($this->sms->lastCodeFor(PHONE))->not->toBeNull();
     $this->get(route('login.verify'))->assertInertia(fn ($page) => $page->where('channel', 'sms'));
 });
 
-it('sends the code by SMS when asked', function () {
+it('sends the code by SMS when asked, only if SMS is switched on', function () {
     requestCode();
-    $this->get(route('login.verify'))->assertInertia(fn ($page) => $page->where('channel', 'whatsapp'));
+    $this->get(route('login.verify'))->assertInertia(fn ($page) => $page->where('channel', 'whatsapp')->where('smsAvailable', false));
+    $this->post(route('login.resend'), ['channel' => 'sms'])->assertSessionHasErrors('code');
+    expect($this->sms->sent)->toBe([]);
 
+    config(['lotlink.otp.sms_fallback' => true]);
+    $this->travel(1)->minute();
     $this->post(route('login.resend'), ['channel' => 'sms']);
 
     $code = $this->sms->lastCodeFor(PHONE);

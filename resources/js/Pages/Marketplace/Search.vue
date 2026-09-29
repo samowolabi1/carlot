@@ -83,11 +83,12 @@ const chips = computed(() => {
     f.condition.forEach((c) => out.push({ label: label(props.options.conditions, c), remove: { condition: f.condition.filter((x) => x !== c) } }));
     f.fuel.forEach((c) => out.push({ label: label(props.options.fuels, c), remove: { fuel: f.fuel.filter((x) => x !== c) } }));
     if (f.year_min || f.year_max) out.push({ label: `${f.year_min ?? 'Any'}–${f.year_max ?? 'now'}`, remove: { year_min: null, year_max: null } });
+    if (f.state) out.push({ label: f.state === 'FCT' ? 'FCT (Abuja)' : `${f.state} State`, remove: { state: null } });
     if (f.mileage_max) out.push({ label: `≤${f.mileage_max.toLocaleString('en-NG')} km`, remove: { mileage_max: null } });
     return out;
 });
 
-const empty: Partial<Filters> = { make: [], body: [], condition: [], fuel: [], transmission: null, price_min: null, price_max: null, year_min: null, year_max: null, mileage_max: null, radius: null, model: null, city: null };
+const empty: Partial<Filters> = { make: [], body: [], condition: [], fuel: [], transmission: null, price_min: null, price_max: null, year_min: null, year_max: null, mileage_max: null, radius: null, model: null, city: null, state: null };
 
 const heading = computed(() => {
     const n = props.results.total;

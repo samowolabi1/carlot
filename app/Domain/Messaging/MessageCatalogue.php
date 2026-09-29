@@ -25,6 +25,7 @@ final class MessageCatalogue
     public const TEMPLATES = [
         'login_code' => ['label' => 'Sign-in code', 'category' => 'Authentication', 'variables' => ['code'], 'link' => null, 'required' => true],
         'staff_invitation' => ['label' => 'Staff invitation', 'category' => 'Utility', 'variables' => ['lot name', 'role'], 'link' => 'invitation link', 'required' => true],
+        'lot_welcome' => ['label' => 'Welcome to a lot an admin signed up', 'category' => 'Utility', 'variables' => ['owner name', 'lot name'], 'link' => 'sign in'],
         'booking_confirmed' => ['label' => 'Booking confirmed', 'category' => 'Utility', 'variables' => ['name', 'what', 'lot', 'when'], 'link' => 'manage booking'],
         'booking_pending' => ['label' => 'Booking waiting for the lot', 'category' => 'Utility', 'variables' => ['name', 'what', 'lot', 'when'], 'link' => 'manage booking'],
         'appointment_reminder' => ['label' => 'Visit reminder', 'category' => 'Utility', 'variables' => ['what', 'lot', 'when', 'directions'], 'link' => 'manage booking'],

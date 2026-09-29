@@ -79,6 +79,7 @@ use Illuminate\Support\Str;
  * @property bool $reservation_refundable
  * @property int|null $test_drive_deposit no longer used: LotLink takes no buyer deposits
  * @property string|null $paystack_subaccount
+ * @property int|null $onboarded_by the admin who signed the lot up, if one did
  * @property string|null $referral_code
  * @property Carbon|null $daily_summary_sent_on
  * @property-read string|null $logo_url

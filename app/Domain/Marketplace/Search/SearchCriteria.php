@@ -6,6 +6,7 @@ use App\Domain\Inventory\Enums\BodyType;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
+use App\Domain\Support\Regions;
 use Illuminate\Http\Request;
 
 /**
@@ -40,6 +41,7 @@ final class SearchCriteria
         public readonly ?int $yearMax = null,
         public readonly ?int $mileageMax = null,
         public readonly ?string $city = null,
+        public readonly ?string $state = null,
         public readonly ?int $lotId = null,
         public readonly ?float $lat = null,
         public readonly ?float $lng = null,
@@ -85,6 +87,7 @@ final class SearchCriteria
             yearMax: $int('year_max'),
             mileageMax: $int('mileage_max'),
             city: filled($request->input('city')) ? mb_substr((string) $request->input('city'), 0, 80) : null,
+            state: Regions::normalize(is_string($request->input('state')) ? $request->input('state') : null),
             lotId: $lotId,
             lat: $hasLocation ? $lat : null,
             lng: $hasLocation ? $lng : null,
@@ -116,6 +119,7 @@ final class SearchCriteria
             'year_max' => $this->yearMax,
             'mileage_max' => $this->mileageMax,
             'city' => $this->city,
+            'state' => $this->state,
             'lat' => $this->lat,
             'lng' => $this->lng,
             'radius' => $this->radiusKm,
@@ -128,7 +132,7 @@ final class SearchCriteria
     {
         return count(array_filter([
             $this->makeIds, $this->modelId, $this->bodyTypes, $this->conditions, $this->transmission, $this->fuels,
-            $this->priceMin || $this->priceMax, $this->yearMin || $this->yearMax, $this->mileageMax, $this->city, $this->radiusKm,
+            $this->priceMin || $this->priceMax, $this->yearMin || $this->yearMax, $this->mileageMax, $this->city, $this->state, $this->radiusKm,
         ]));
     }
 }

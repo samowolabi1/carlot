@@ -20,14 +20,24 @@ return [
     // browsers upload directly with pre-signed URLs; otherwise through the app.
     'upload_disk' => env('LOTLINK_UPLOAD_DISK', 'local'),
 
+    // States lots can be in (Nigeria: 36 states and the FCT). Swap the list per market.
+    'regions' => [
+        'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta',
+        'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi',
+        'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto',
+        'Taraba', 'Yobe', 'Zamfara',
+    ],
+
     'otp' => [
         'length' => 6,
         'ttl_minutes' => 5,
         'max_attempts' => 5,
         'max_sends' => 3,
         'send_window_minutes' => 15,
-        // whatsapp (falls back to SMS) or sms
+        // People sign in with a WhatsApp number or an email address. whatsapp (default) or sms.
         'channel' => env('OTP_CHANNEL', 'whatsapp'),
+        // Off: a WhatsApp code never falls back to (paid) SMS; the person can use email instead.
+        'sms_fallback' => (bool) env('OTP_SMS_FALLBACK', false),
     ],
 
     // log (writes to storage/logs) or termii.

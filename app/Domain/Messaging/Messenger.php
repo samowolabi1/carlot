@@ -17,7 +17,7 @@ class Messenger
     ) {}
 
     /** @return 'whatsapp'|'sms'|'off' the channel that delivered it ('off' when an admin switched the message off) */
-    public function send(string $to, Message $message, bool $preferWhatsApp = true): string
+    public function send(string $to, Message $message, bool $preferWhatsApp = true, bool $smsFallback = true): string
     {
         $message = MessageCatalogue::apply($message);
 
@@ -31,6 +31,9 @@ class Messenger
 
                 return 'whatsapp';
             } catch (Throwable $e) {
+                if (! $smsFallback) {
+                    throw $e; // the caller chose WhatsApp only (e.g. sign-in codes, to avoid SMS fees)
+                }
                 Log::warning("WhatsApp to {$to} failed, sending SMS instead: {$e->getMessage()}");
             }
         }
