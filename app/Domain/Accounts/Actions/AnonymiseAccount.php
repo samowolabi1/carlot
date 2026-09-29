@@ -23,6 +23,7 @@ class AnonymiseAccount
             $user->budget()->delete();
             $user->notifications()->delete();
             $user->tokens()->delete();
+            $user->pushSubscriptions()->delete();
             SavedSearch::where('user_id', $user->id)->delete();
             FinanceApplication::where('user_id', $user->id)->get()->each(fn (FinanceApplication $a) => $a->forceFill(['applicant' => []])->save());
             LotCustomer::withoutGlobalScopes()->where('user_id', $user->id)->update(['user_id' => null]);

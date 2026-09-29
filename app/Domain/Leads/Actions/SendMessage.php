@@ -8,6 +8,8 @@ use App\Domain\Leads\Events\MessageSent;
 use App\Domain\Leads\Models\Conversation;
 use App\Domain\Leads\Models\Lead;
 use App\Domain\Leads\Models\Message;
+use App\Domain\Lots\Models\Lot;
+use App\Domain\Push\Notifications\ChatMessagePush;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -59,8 +61,38 @@ class SendMessage
         });
 
         broadcast(new MessageSent($message->load('sender'), $conversation))->toOthers();
+        $this->push($conversation, $message);
 
         return $message;
+    }
+
+    /**
+     * A push to the other side's devices straight away (buyer ↔ the assigned salesperson, else the
+     * owner). System lines ("Test drive booked") aren't pushed: their own notifications cover them.
+     */
+    private function push(Conversation $conversation, Message $message): void
+    {
+        if (! in_array($message->side, [Message::CUSTOMER, Message::LOT], true)) {
+            return;
+        }
+
+        $lead = Lead::withoutGlobalScopes()->with(['customer', 'assignee'])->find($conversation->lead_id);
+        $lot = $lead ? Lot::withoutGlobalScopes()->with('owner')->find($lead->lot_id) : null;
+        if ($lead === null || $lot === null) {
+            return;
+        }
+
+        $snippet = Str::limit($message->body ?: 'Sent a photo', 120);
+        if ($message->side === Message::CUSTOMER) {
+            // A brand-new lead's opening message is already in the "New lead" alert.
+            if ($lead->created_at?->gt(now()->subMinute()) && $conversation->messages()->count() === 1) {
+                return;
+            }
+            $to = $lead->assignee ?? $lot->owner;
+            $to?->notify(new ChatMessagePush($lead->customer->name ?? 'A buyer', $snippet, route('dealer.leads.show', [$lot->slug, $lead->ulid]), $conversation->ulid));
+        } else {
+            $lead->customer?->notify(new ChatMessagePush($lot->name, $snippet, route('conversations.show', $conversation), $conversation->ulid));
+        }
     }
 
     private function storePhoto(Conversation $conversation, UploadedFile $photo): string

@@ -26,7 +26,7 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 | Load test | `loadtest/marketplace.js` (k6) ramps 100 buyers through home, search, landing pages, cars, lots and slots with the TDD's thresholds; `loadtest/smoke.mjs` is a quick check without k6. Results: see `loadtest/README.md`. |
 | Quality | 460 tests, including OAuth state checks, encrypted tokens, one post per car, failure and retry, DNS verification and the TLS ask endpoint, consent and signed finance webhooks, CSP nonces, the RFC 6238 test vector, the admin 2FA flow, and account deletion and restore. |
 
-With S14 every sprint in the TDD plan is built. Still open, by choice: Sanctum API endpoints (no mobile app yet), Redis/Horizon (the database queue is enough for launch), admin-editable finance rates and message templates, web push, and automatic CAC lookups.
+With S14 every sprint in the TDD plan is built. Still open, by choice: Sanctum API endpoints (no mobile app yet), Redis/Horizon (the database queue is enough for launch), and automatic CAC lookups. Admin-editable finance rates and message templates and web push have since been added.
 
 **Sprint S13 (SEO and growth tools) ✅**
 
@@ -107,7 +107,8 @@ Not in S12: admin 2FA (still deferred), admin-editable finance rates and message
 | Buyer chat (15) | "Chat" on car pages and "Message the lot" on lot pages open a thread with the lot, with quick replies, photos and read markers. Guests sign in and land back in the thread. "Messages" in Account lists their chats. |
 | Real time | With Laravel Reverb running, messages and typing arrive instantly. Without it, chat checks for new messages every 4 seconds, so everything works on Laragon as is. |
 | Alerts | If a message is still unread after 10 minutes, the other side gets one WhatsApp message (SMS fallback) (`chat:notify-unread`, every 5 minutes). Due follow-ups go to the assigned rep, or else the owner (`leads:follow-up-reminders`, every 15 minutes). |
-| Notification centre (20) | The bell in the header and dealer sidebar opens every notification (leads, bookings, new stock, billing, follow-ups). **Account → Notifications** turns WhatsApp/SMS and email on or off per type. Sign-in codes and receipts are always sent. |
+| Notification centre (20) | The bell in the header and dealer sidebar opens every notification (leads, bookings, new stock, billing, follow-ups). **Account → Notifications** turns WhatsApp/SMS, email and push on or off per type. Sign-in codes and receipts are always sent. |
+| Push notifications | **Notification settings → Push notifications on this device → Turn on** (the notification centre offers it too). Every notification that goes by WhatsApp/email/in-app can also arrive as a phone or desktop push (title by kind, the notification text, tap opens its page), and chat messages are pushed the moment they're sent (the WhatsApp reminder still follows after 10 minutes unread; a new lead's first message comes as the "New lead" push only). Per-type switches, a device list with **Remove**, **Send a test**, and signing out stops that device. Works in Chrome, Edge, Firefox and Samsung Internet on Android and desktop, and Safari on Mac; on iPhone (iOS 16.4+) only after **Add to Home Screen**. Needs HTTPS and VAPID keys (`php artisan push:vapid`). Pushes are end-to-end encrypted to each browser; devices the push service reports gone are deleted. |
 | Quality | 330 tests (also on MySQL), including dedupe, chat permissions and channel auth, unread counts and alerts, board filters, assignment rules, follow-up reminders, closing leads on delivery, notification preferences and lead tenancy. |
 
 Deferred: offers, trade-ins and reservations as lead sources (S9), the inspection report preset (S12), web push (later), and response-time analytics (S11).
@@ -255,6 +256,11 @@ cd carlot
   OAuth client (Google Cloud console → APIs & Services → Credentials → OAuth client ID, type "Web application"),
   add `http://carlot.test/auth/google/callback` (your `APP_URL` + `/auth/google/callback`) as an authorised redirect
   URI, and put the ID and secret in `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`. Without them the button is hidden.
+- **Push notifications**: run `php artisan push:vapid` once (writes `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` to `.env`),
+  then `php artisan config:clear`. Browsers only allow push over HTTPS (or `localhost`), so in Laragon turn on SSL
+  (Menu → Apache → SSL → Enabled) and use `https://carlot.test`, with `npm run build` (the service worker only runs in
+  a production build). Never regenerate the keys once people use push: every device would have to turn it on again.
+  Optional but faster: enable PHP's `gmp` extension (Laragon: Menu → PHP → Extensions → gmp; servers: `php8.3-gmp`).
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
 - **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password`. Change these in `.env`
   (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) before seeding anywhere public.

@@ -72,4 +72,11 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    // Web push (browser notifications). Keys from `php artisan push:vapid`; without them pushes are only logged.
+    'webpush' => [
+        'subject' => env('VAPID_SUBJECT', 'mailto:support@lotlink.ng'),
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+    ],
+
 ];

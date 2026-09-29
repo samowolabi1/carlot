@@ -56,3 +56,12 @@ before the Filament panel. On by default in production (`ADMIN_2FA`).
 - Filament admin has no CSP (see above).
 - Duplicate-photo detection compares against other lots' covers of the same make in PHP; fine for
   launch volumes, worth moving to a dedicated index past ~100k listings.
+
+## Web push (added later)
+
+- Subscriptions are per user and per browser (`push_subscriptions`, unique endpoint hash). An endpoint seen again moves to
+  whoever is signed in; signing out deletes the device's subscription and the service worker unsubscribes the browser.
+- Only `https` endpoints are accepted. Payloads are encrypted to the browser's keys (RFC 8291) and signed with our VAPID key;
+  they carry the same text and link as the in-app notification, never costs, bank details or codes.
+- Devices can be removed from Notification settings; account deletion and anonymisation delete them. Expired endpoints
+  (404/410 from the push service) are deleted automatically — `PushNotificationsTest`.

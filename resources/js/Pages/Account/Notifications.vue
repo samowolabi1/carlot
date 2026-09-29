@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import Icon, { type IconName } from '@/components/Icon.vue';
+import { usePush } from '@/composables/usePush';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps<{ items: { id: string; kind: string; text: string; url: string | null; when: string | null; new: boolean }[] }>();
+const props = defineProps<{ items: { id: string; kind: string; text: string; url: string | null; when: string | null; new: boolean }[]; pushKey: string | null }>();
+
+// Offer push once the browser can do it and it's off here.
+const push = usePush(props.pushKey);
 
 const look: Record<string, { icon: IconName; tone: string }> = {
     booking: { icon: 'calendar', tone: 'bg-[#E0ECF8] text-[#1E3A8A]' },
@@ -35,6 +39,15 @@ const look: Record<string, { icon: IconName; tone: string }> = {
                 <h1 class="text-[22px] font-bold">Notifications</h1>
                 <Link :href="route('notifications.settings')" class="flex h-11 items-center text-[14px] font-semibold">Settings</Link>
             </div>
+            <Link
+                v-if="push.state.value === 'off'"
+                :href="route('notifications.settings')"
+                class="mx-5 mb-3 flex items-center gap-3 rounded-2xl bg-forest p-4 text-white no-underline hover:text-white"
+            >
+                <Icon name="bell" :size="22" class="shrink-0" />
+                <span class="flex grow flex-col"><span class="text-[15px] font-semibold">Get these on your phone</span><span class="text-[13px] text-mist">Turn on push notifications: instant, free, even when LotLink is closed.</span></span>
+                <Icon name="chevronRight" :size="20" class="shrink-0" />
+            </Link>
             <p v-if="items.length === 0" class="mx-5 card px-5 py-10 text-center text-[15px] text-muted">Nothing yet. Booking updates, new cars from lots you follow and more show up here.</p>
             <ul v-else class="border-t border-divider">
                 <li v-for="n in items" :key="n.id">

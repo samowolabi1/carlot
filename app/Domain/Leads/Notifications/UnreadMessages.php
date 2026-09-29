@@ -29,7 +29,8 @@ class UnreadMessages extends Notification implements ShouldQueue
     /** @return list<string> */
     public function via(object $notifiable): array
     {
-        return NotificationPreferences::filter($notifiable, 'messages', ['phone']);
+        // Push went out when the message was sent (ChatMessagePush); this is the WhatsApp follow-up.
+        return array_values(array_diff(NotificationPreferences::filter($notifiable, 'messages', ['phone']), ['push']));
     }
 
     public function toPhone(object $notifiable): Message

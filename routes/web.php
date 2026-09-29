@@ -4,6 +4,7 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AccountDeletionController;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Account\NotificationController;
+use App\Http\Controllers\Account\PushSubscriptionController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -192,6 +193,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/settings', [NotificationController::class, 'settings'])->name('notifications.settings');
     Route::put('/notifications/settings', [NotificationController::class, 'update'])->name('notifications.update');
+    Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:20,1')->name('push.store');
+    Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push.destroy');
+    Route::delete('/push-subscriptions/{device}', [PushSubscriptionController::class, 'forget'])->where('device', '[a-f0-9]{64}')->name('push.forget');
+    Route::post('/push-subscriptions/test', [PushSubscriptionController::class, 'test'])->middleware('throttle:5,1')->name('push.test');
 
     // Chat (M11). Poll is used by both sides when Reverb isn't running.
     Route::get('/messages', [ConversationController::class, 'index'])->name('conversations.index');

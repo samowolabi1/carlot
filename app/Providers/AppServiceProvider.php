@@ -35,6 +35,10 @@ use App\Domain\Messaging\MetaWhatsAppGateway;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\TermiiSmsGateway;
 use App\Domain\Messaging\WhatsAppGateway;
+use App\Domain\Push\Channels\PushChannel;
+use App\Domain\Push\Gateways\LogPushGateway;
+use App\Domain\Push\Gateways\PushGateway;
+use App\Domain\Push\Gateways\WebPushGateway;
 use App\Domain\Social\Gateways\LogSocialPublisher;
 use App\Domain\Social\Gateways\MetaSocialPublisher;
 use App\Domain\Social\Gateways\SocialPublisher;
@@ -73,6 +77,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(DnsLookup::class, SystemDnsLookup::class);
 
+        $this->app->bind(PushGateway::class, fn () => filled(config('services.webpush.public_key')) && filled(config('services.webpush.private_key'))
+            ? new WebPushGateway((string) config('services.webpush.subject'), (string) config('services.webpush.public_key'), (string) config('services.webpush.private_key'))
+            : new LogPushGateway);
+
         $this->app->bind(FinancePartner::class, fn () => config('lotlink.finance_partner.driver') === 'http'
             ? new HttpFinancePartner((string) config('lotlink.finance_partner.code'), (string) config('lotlink.finance_partner.name'), (string) config('lotlink.finance_partner.url'), (string) config('lotlink.finance_partner.key'))
             : new LogFinancePartner);
@@ -105,6 +113,7 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
 
         Notification::extend('phone', fn ($app) => $app->make(PhoneChannel::class));
+        Notification::extend('push', fn ($app) => $app->make(PushChannel::class));
 
         // Finance rates and advert prices an admin changed in /admin; re-read before each job so long-running workers keep up.
         FinanceRates::apply();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domain\Accounts\Actions\SendOtp;
 use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
+use App\Domain\Push\Models\PushSubscription;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -136,6 +137,10 @@ class OtpLoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        // This device stops getting the account's pushes (the page also unsubscribes the browser).
+        if ($endpoint = $request->session()->get('push_endpoint')) {
+            PushSubscription::query()->where('endpoint_hash', PushSubscription::hash((string) $endpoint))->delete();
+        }
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

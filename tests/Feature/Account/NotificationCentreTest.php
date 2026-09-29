@@ -49,8 +49,8 @@ it('saves preferences and stops WhatsApp/SMS for that type only', function () {
         'preferences' => ['new_stock' => ['phone' => false, 'mail' => true]],
     ])->assertSessionHasNoErrors();
 
-    expect(NotificationPreferences::for($this->buyer->fresh())['new_stock'])->toBe(['phone' => false, 'mail' => true])
-        ->and(NotificationPreferences::for($this->buyer->fresh())['bookings'])->toBe(['phone' => true, 'mail' => true]);
+    expect(NotificationPreferences::for($this->buyer->fresh())['new_stock'])->toBe(['phone' => false, 'mail' => true, 'push' => true])
+        ->and(NotificationPreferences::for($this->buyer->fresh())['bookings'])->toBe(['phone' => true, 'mail' => true, 'push' => true]);
 
     Notification::fake();
     $this->buyer->refresh()->notify(new NewStockAtLot($this->lot, 2, '2018 Toyota Camry'));

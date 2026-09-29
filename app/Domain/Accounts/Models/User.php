@@ -9,6 +9,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotMember;
+use App\Domain\Push\Models\PushSubscription;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
@@ -16,6 +17,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -117,6 +119,12 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function followedLots(): BelongsToMany
     {
         return $this->belongsToMany(Lot::class, 'lot_followers')->withTimestamps();
+    }
+
+    /** @return HasMany<PushSubscription, $this> devices with push notifications on */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
     }
 
     /** @return HasOne<Budget, $this> */

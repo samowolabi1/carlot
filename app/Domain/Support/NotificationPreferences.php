@@ -6,7 +6,9 @@ use App\Domain\Accounts\Models\User;
 
 /**
  * Per-user choices of how to hear about each kind of notification (TDD M18: Notification
- * centre). In-app is always on; WhatsApp/SMS ("phone") and email can be turned off.
+ * centre). In-app is always on; WhatsApp/SMS ("phone"), email and push can be turned off.
+ * Push is added here for everyone who turned it on for a device, so every notification that
+ * goes through `filter()` can also arrive as a push (`PushChannel`).
  */
 final class NotificationPreferences
 {
@@ -24,7 +26,7 @@ final class NotificationPreferences
         'reviews' => ['Reviews of visits', 'all'],
     ];
 
-    public const OPTIONAL = ['phone', 'mail'];
+    public const OPTIONAL = ['phone', 'mail', 'push'];
 
     /**
      * The channels to use, with the user's opt-outs removed.
@@ -40,10 +42,14 @@ final class NotificationPreferences
 
         $prefs = $notifiable->notification_preferences[$type] ?? [];
 
+        if (! in_array('push', $channels, true) && $notifiable->pushSubscriptions()->exists()) {
+            $channels[] = 'push';
+        }
+
         return array_values(array_filter($channels, fn (string $channel) => ! in_array($channel, self::OPTIONAL, true) || ($prefs[$channel] ?? true)));
     }
 
-    /** @return array<string, array{phone: bool, mail: bool}> */
+    /** @return array<string, array{phone: bool, mail: bool, push: bool}> */
     public static function for(User $user): array
     {
         $saved = $user->notification_preferences ?? [];
@@ -51,6 +57,7 @@ final class NotificationPreferences
         return collect(self::TYPES)->mapWithKeys(fn ($meta, string $type) => [$type => [
             'phone' => (bool) ($saved[$type]['phone'] ?? true),
             'mail' => (bool) ($saved[$type]['mail'] ?? true),
+            'push' => (bool) ($saved[$type]['push'] ?? true),
         ]])->all();
     }
 }

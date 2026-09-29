@@ -7,8 +7,9 @@
  *   can reopen them with no signal and keep recording walk-ins and payments (the offline
  *   queue in IndexedDB sends them later). Anything else falls back to /offline.html.
  * - Nothing that changes data (POST, PUT, ...) and no JSON is ever cached.
+ * - Push notifications (Web Push): shows them, and a tap opens (or focuses) the page they're about.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = `lotlink-shell-${VERSION}`;
 const ASSETS = `lotlink-assets-${VERSION}`;
 const PAGES = `lotlink-pages-${VERSION}`;
@@ -32,11 +33,52 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Signing out clears saved dealer pages, which hold customer details.
+// Signing out clears saved dealer pages, which hold customer details, and stops this device's pushes.
 self.addEventListener('message', (event) => {
     if (event.data === 'clear-private') {
-        event.waitUntil(caches.delete(PAGES));
+        event.waitUntil(
+            Promise.all([
+                caches.delete(PAGES),
+                self.registration.pushManager.getSubscription().then((subscription) => subscription && subscription.unsubscribe()),
+            ]),
+        );
     }
+});
+
+self.addEventListener('push', (event) => {
+    let data = {};
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch {
+        data = { body: event.data ? event.data.text() : '' };
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'LotLink', {
+            body: data.body || '',
+            icon: '/icons/icon-192.png',
+            badge: '/icons/badge-72.png',
+            tag: data.tag || undefined,
+            renotify: Boolean(data.tag),
+            data: { url: data.url || '/' },
+        }),
+    );
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const target = new URL(event.notification.data?.url || '/', self.location.origin);
+    if (target.origin !== self.location.origin) return;
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const open = windows.find((client) => new URL(client.url).origin === self.location.origin);
+            if (open) {
+                return open.focus().then((client) => (client && 'navigate' in client ? client.navigate(target.href) : undefined));
+            }
+            return self.clients.openWindow(target.href);
+        }),
+    );
 });
 
 const isManagerPage = (url) => /^\/dealer\/[^/]+\/manager\//.test(url.pathname);

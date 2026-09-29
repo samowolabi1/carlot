@@ -173,6 +173,11 @@ Run all four before pushing.
 - Notifications that go by WhatsApp/SMS or email pass their channels through
   `NotificationPreferences::filter()` with their type, and add `database` with a `toArray()`
   (`kind`, `text`, `url`) so they show in the notification centre.
+- Web push lives in `app/Domain/Push`. `filter()` adds the `push` channel for people with a device (`PushSubscription`,
+  saved by `SavePushSubscription`) unless that type's push is off; `PushChannel` sends `toPush()` or else the `toArray()`
+  through `PushGateway` (webpush with VAPID keys from `push:vapid` | log; tests use `$this->push`). Chat is pushed on send
+  (`ChatMessagePush` from `SendMessage`); `UnreadMessages` drops `push`. Sign-out deletes that device's subscription.
+  `public/sw.js` shows pushes and opens their URL on tap.
 
 ## Offers and deals (S9)
 
@@ -274,5 +279,4 @@ S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments 
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
 S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
-Still deferred: Sanctum API endpoints (the package is installed), Redis/Horizon (the database queue for now),
-web push.
+Still deferred: Sanctum API endpoints (the package is installed), Redis/Horizon (the database queue for now).

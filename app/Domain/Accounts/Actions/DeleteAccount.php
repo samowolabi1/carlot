@@ -27,6 +27,7 @@ class DeleteAccount
 
         $user->forceFill(['deletion_requested_at' => now()])->save();
         $user->tokens()->delete();
+        $user->pushSubscriptions()->delete();
         $user->delete();
     }
 }
