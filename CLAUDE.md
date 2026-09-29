@@ -198,6 +198,15 @@ Run all four before pushing.
 - Offers and reservations are plan features (`Lot::takesOffers()`, `reservationDeposit()`, which also needs a bank
   account); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
 
+## Mobile API
+
+- `/api/v1` (`routes/api.php`, `app/Http/Controllers/Api/V1`), Sanctum bearer tokens (`sanctum.expiration`, 90 days). Documented in
+  `docs/api.md`; keep it in step. Controllers call the same Actions as the web (`SaveCar`, `StartConversation`, `SendMessage`,
+  `BookAppointment`, `UpdateLead`, `LogInWithPassword::attempt()`…) and shape output with `MarketplacePresenter` / `ApiPresenter` /
+  `LeadPresenter` / `VehicleResource`: never `toArray()`, internal ids, costs or profit. Dealer routes use `lot.member` + `scopeBindings()`
+  like the web, and every new one needs a tenancy test (`tests/Feature/Api`). `api/*` always renders JSON errors.
+- Conversation `messages()` is ordered oldest first: use `reorder()` before asking for the latest.
+
 ## Multi-lot tenancy
 
 - Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
@@ -279,4 +288,4 @@ S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments 
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
 S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
-Still deferred: Sanctum API endpoints (the package is installed), Redis/Horizon (the database queue for now).
+Still deferred: Redis/Horizon (the database queue for now).

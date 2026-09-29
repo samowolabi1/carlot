@@ -50,7 +50,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Mobile app tokens last 90 days from sign-in (SANCTUM_TOKEN_DAYS); `sanctum:prune-expired` clears old ones daily.
+    'expiration' => (int) env('SANCTUM_TOKEN_DAYS', 90) * 24 * 60,
 
     /*
     |--------------------------------------------------------------------------

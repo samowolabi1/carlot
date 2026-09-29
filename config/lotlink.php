@@ -48,6 +48,10 @@ return [
 
     'browse_rate_limit' => (int) env('BROWSE_RATE_LIMIT', 120),
 
+    // Mobile API (/api/v1) requests per minute, per signed-in user or address.
+
+    'api_rate_limit' => (int) env('API_RATE_LIMIT', 120),
+
     // Content Security Policy (TDD Security). On by default in production; `npm run dev` needs it off.
     'csp' => (bool) env('LOTLINK_CSP', env('APP_ENV') === 'production'),
 

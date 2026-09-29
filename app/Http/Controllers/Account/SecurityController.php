@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Account;
 
 use App\Domain\Accounts\Actions\SetPassword;
 use App\Domain\Accounts\Actions\SignInWithGoogle;
+use App\Domain\Audit\AuditLog;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /** Account → Sign-in and security: WhatsApp/email codes (always on), an optional password, Google. */
 class SecurityController extends Controller
@@ -29,6 +31,13 @@ class SecurityController extends Controller
             'passwordChanged' => $user->password_changed_at?->timezone(config('lotlink.timezone', 'Africa/Lagos'))->format('j M Y'),
             'google' => ['enabled' => GoogleController::enabled(), 'connected' => $user->google_id !== null],
             'isAdmin' => $user->isAdmin(),
+            // Phones signed in to the LotLink app (API tokens).
+            'apps' => $user->tokens()->latest()->get()->map(fn (PersonalAccessToken $t) => [
+                'id' => $t->getKey(),
+                'name' => $t->name,
+                'last_used' => $t->last_used_at?->diffForHumans() ?? 'Not used yet',
+                'since' => $t->created_at?->timezone((string) config('lotlink.timezone'))->format('j M Y'),
+            ])->values(),
         ])->withViewData(['meta' => ['title' => 'Sign-in and security', 'robots' => 'noindex']]);
     }
 
@@ -66,6 +75,15 @@ class SecurityController extends Controller
         /** @var SessionGuard $guard */
         $guard = Auth::guard('web');
         Auth::login($request->user(), remember: $request->cookies->has($guard->getRecallerName()));
+    }
+
+    /** Sign the app out on one phone. */
+    public function revokeApp(Request $request, int $token): RedirectResponse
+    {
+        $request->user()->tokens()->whereKey($token)->delete();
+        AuditLog::record('account.app_signed_out', $request->user(), [], $request->user());
+
+        return back()->with('success', 'That phone is signed out of the app.');
     }
 
     public function disconnectGoogle(Request $request, SignInWithGoogle $google): RedirectResponse

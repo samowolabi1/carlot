@@ -52,7 +52,10 @@ before the Filament panel. On by default in production (`ADMIN_2FA`).
 - Back up the database and the private disk daily; test a restore.
 
 ### Known limits (accepted for launch)
-- Sanctum API endpoints are not exposed yet, so there are no API tokens to scope.
+- Sanctum API (`/api/v1`, added later): bearer tokens expire after 90 days and are pruned daily; people can revoke them per phone; a password
+  reset and account deletion revoke all. Dealer endpoints reuse `lot.member` and scoped bindings (tenancy tests in `tests/Feature/Api`);
+  output goes through presenters (no ids, costs or unmasked buyer numbers). Sign-in shares the OTP limits and the password lockout; API
+  requests are limited per user (`API_RATE_LIMIT`).
 - Filament admin has no CSP (see above).
 - Duplicate-photo detection compares against other lots' covers of the same make in PHP; fine for
   launch volumes, worth moving to a dedicated index past ~100k listings.

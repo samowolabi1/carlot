@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Marketplace;
 
-use App\Domain\Analytics\Support\Tracker;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Marketplace\Actions\SaveCar;
 use App\Domain\Marketplace\Models\SavedSearch;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
@@ -54,43 +54,25 @@ class FavouriteController extends Controller
             ->withViewData(['meta' => ['title' => 'Saved cars', 'robots' => 'noindex']]);
     }
 
-    public function store(Request $request, string $vehicle): RedirectResponse
+    public function store(Request $request, string $vehicle, SaveCar $save): RedirectResponse
     {
-        $this->save($request, $vehicle);
+        $save->run($request->user(), $vehicle);
 
         return back();
     }
 
     /** Guests tapping the heart come back here after signing in, so the save isn't lost. */
-    public function remember(Request $request, string $vehicle): RedirectResponse
+    public function remember(Request $request, string $vehicle, SaveCar $save): RedirectResponse
     {
-        $car = $this->save($request, $vehicle);
+        $car = $save->run($request->user(), $vehicle);
 
         return redirect($car->publicPath())->with('success', 'Saved. Find it any time under Saved.');
     }
 
-    public function destroy(Request $request, string $vehicle): RedirectResponse
+    public function destroy(Request $request, string $vehicle, SaveCar $save): RedirectResponse
     {
-        $request->user()->favourites()->detach($this->find($vehicle, onMarketplace: false)->id);
+        $save->remove($request->user(), $vehicle);
 
         return back();
-    }
-
-    private function save(Request $request, string $ulid): Vehicle
-    {
-        $car = $this->find($ulid, onMarketplace: true);
-        $changes = $request->user()->favourites()->syncWithoutDetaching([$car->id => ['saved_price' => $car->price]]);
-        if ($changes['attached'] !== []) {
-            Tracker::record('save', $car->lot_id, $car->id);
-        }
-
-        return $car;
-    }
-
-    private function find(string $ulid, bool $onMarketplace): Vehicle
-    {
-        $query = $onMarketplace ? Vehicle::query()->marketplace() : Vehicle::query()->withoutGlobalScope('lot');
-
-        return $query->where('vehicles.ulid', strtolower($ulid))->firstOrFail();
     }
 }

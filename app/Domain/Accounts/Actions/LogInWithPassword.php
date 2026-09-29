@@ -5,6 +5,7 @@ namespace App\Domain\Accounts\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Support\PhoneNumber;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
@@ -20,6 +21,32 @@ class LogInWithPassword
 
     /** A hash to check against when there is no account, so both cases take about as long. */
     private const DUMMY = '$2y$12$YcTK92SyFzDqNAX.TyUiEev0gfMl3o7tD9LMWLQWyFnTWPfYQ.C3u';
+
+    public const ATTEMPTS = 5;
+
+    /**
+     * Five tries a minute per account and address (web form and API alike).
+     *
+     * @param  string|null  $ip  the caller's address, for the lockout
+     */
+    public function attempt(string $login, string $password, ?string $ip): User
+    {
+        $key = 'password-login:'.sha1(Str::lower(trim($login))).'|'.$ip;
+        if (RateLimiter::tooManyAttempts($key, self::ATTEMPTS)) {
+            throw ValidationException::withMessages(['login' => 'Too many tries. Wait '.RateLimiter::availableIn($key).' seconds, or sign in with a code.']);
+        }
+
+        try {
+            $user = $this->run($login, $password);
+        } catch (ValidationException $e) {
+            RateLimiter::hit($key, 60);
+            throw $e;
+        }
+
+        RateLimiter::clear($key);
+
+        return $user;
+    }
 
     public function run(string $login, string $password): User
     {

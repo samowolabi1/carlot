@@ -187,6 +187,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/password', [SecurityController::class, 'updatePassword'])->middleware('throttle:10,1')->name('account.password');
     Route::delete('/account/password', [SecurityController::class, 'destroyPassword'])->middleware('throttle:10,1')->name('account.password.destroy');
     Route::delete('/account/google', [SecurityController::class, 'disconnectGoogle'])->name('account.google.destroy');
+    Route::delete('/account/apps/{token}', [SecurityController::class, 'revokeApp'])->whereNumber('token')->name('account.apps.destroy');
     Route::get('/following', [FollowController::class, 'index'])->name('following');
 
     // Notification centre (M18)

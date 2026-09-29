@@ -34,6 +34,8 @@ class SetPassword
     public function reset(User $user, string $password): void
     {
         $user->forceFill(['password' => $password, 'password_changed_at' => now(), 'remember_token' => Str::random(60)])->save();
+        // Someone else may have had the old password: sign the mobile app out everywhere too.
+        $user->tokens()->delete();
 
         AuditLog::record('account.password_reset', $user, [], $user);
         $user->notify(new SignInChanged('your password was reset from the emailed link'));

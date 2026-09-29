@@ -35,7 +35,7 @@ class ConversationController extends Controller
         return Inertia::render('Chat/Index', [
             'conversations' => $leads->map(function (Lead $lead) use ($lots) {
                 $conversation = $lead->conversation;
-                $last = $conversation?->messages()->latest('id')->first();
+                $last = $conversation?->messages()->reorder('id', 'desc')->first();
                 $lot = $lots[$lead->lot_id];
 
                 return [

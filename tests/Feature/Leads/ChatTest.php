@@ -221,3 +221,13 @@ it('authorises the private realtime channels', function () {
     $auth($this->buyer, "private-user.{$this->buyer->id}")->assertOk();
     $auth($this->buyer, "private-user.{$this->owner->id}")->assertForbidden();
 });
+
+it('lists each chat by its latest message and shows the thread oldest first', function () {
+    $conversation = ($this->start)(['body' => 'First']);
+    $this->actingAs($this->buyer)->post(route('conversations.reply', $conversation), ['body' => 'Second']);
+    $this->actingAs($this->buyer)->post(route('conversations.reply', $conversation), ['body' => 'Third']);
+
+    $this->get(route('conversations.index'))->assertInertia(fn (Assert $page) => $page->where('conversations.0.last', 'Third'));
+    $this->get(route('conversations.show', $conversation))->assertInertia(fn (Assert $page) => $page
+        ->where('messages.0.body', 'First')->where('messages.2.body', 'Third'));
+});

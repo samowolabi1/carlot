@@ -13,6 +13,7 @@ const props = defineProps<{
     passwordChanged: string | null;
     google: { enabled: boolean; connected: boolean };
     isAdmin: boolean;
+    apps: { id: number; name: string; last_used: string; since: string | null }[];
 }>();
 
 const editing = ref(false);
@@ -132,6 +133,18 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
                     </span>
                     <button v-if="google.connected" type="button" class="btn btn-outline h-11 shrink-0 px-4 text-[14px]" @click="disconnectGoogle">Disconnect</button>
                     <a v-else :href="route('login.google')" class="btn btn-outline h-11 shrink-0 px-4 text-[14px] no-underline">Connect</a>
+                </div>
+            </section>
+
+            <section v-if="apps.length" class="card overflow-hidden" aria-labelledby="apps-heading">
+                <h2 id="apps-heading" class="border-b border-divider px-4 py-3 font-sans text-[15px] font-bold">Signed in to the LotLink app</h2>
+                <div v-for="a in apps" :key="a.id" :class="row">
+                    <Icon name="phone" :size="20" class="shrink-0 text-muted" />
+                    <span class="flex min-w-0 grow flex-col">
+                        <span class="truncate text-[15px]">{{ a.name }}</span>
+                        <span class="text-[13px] text-muted">Since {{ a.since }} · last used {{ a.last_used }}</span>
+                    </span>
+                    <button type="button" class="h-11 shrink-0 px-2 text-[14px] font-semibold text-danger" @click="router.delete(route('account.apps.destroy', a.id), { preserveScroll: true })">Sign out</button>
                 </div>
             </section>
 

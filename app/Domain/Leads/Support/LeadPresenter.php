@@ -93,7 +93,7 @@ final class LeadPresenter
             return [];
         }
 
-        return $conversation->messages()->with('sender')->latest('id')->limit(200)->get()->reverse()->values()
+        return $conversation->messages()->with('sender')->reorder('id', 'desc')->limit(200)->get()->reverse()->values()
             ->map(fn (Message $m) => $m->present($tz))->all();
     }
 }
