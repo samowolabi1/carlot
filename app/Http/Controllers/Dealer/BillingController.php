@@ -10,7 +10,7 @@ use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Billing\Enums\SpotlightPlacement;
 use App\Domain\Billing\Enums\SubscriptionStatus;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
 use App\Domain\Billing\Support\SpotlightPricing;
@@ -60,7 +60,9 @@ class BillingController extends Controller
                 'ends' => $subscription?->cancel_at_period_end ? $date($subscription->current_period_end) : null,
                 'grace_ends' => $date($subscription?->grace_ends_at),
                 'card' => $subscription?->card_last4 ? ucfirst((string) $subscription->card_brand).' ending '.$subscription->card_last4 : null,
-                'can_update_card' => $subscription?->provider_ref !== null,
+                // Paystack has a hosted card page; with Flutterwave the owner pays again with the new card.
+                'can_update_card' => $subscription?->provider_ref !== null && $subscription->provider !== 'flutterwave',
+                'paid_with' => PaymentGateways::PROVIDERS[$subscription->provider ?? ''] ?? null,
                 'coupon' => $subscription?->coupon()->value('code'),
             ],
             'usage' => [
@@ -106,7 +108,9 @@ class BillingController extends Controller
                 'manage' => $request->user()->can('manageBilling', $lot),
                 'spotlight' => $request->user()->can('buySpotlight', $lot),
             ],
-            'sandbox' => app(PaymentGateway::class)->name() === 'sandbox',
+            'sandbox' => ! PaymentGateways::live(),
+            // Where new payments go ("Opening Flutterwave…").
+            'checkoutWith' => PaymentGateways::PROVIDERS[PaymentGateways::activeProvider()],
         ]);
     }
 
@@ -121,7 +125,7 @@ class BillingController extends Controller
     /** Paystack (or the sandbox) sends the owner back here with the reference. */
     public function callback(Request $request, Lot $lot, FulfilPayment $fulfil): RedirectResponse
     {
-        $payment = Payment::where('lot_id', $lot->id)->whereIn('purpose', PaymentPurpose::billing())->where('reference', (string) $request->query('reference', $request->query('trxref', '')))->first();
+        $payment = Payment::where('lot_id', $lot->id)->whereIn('purpose', PaymentPurpose::billing())->where('reference', (string) ($request->query('reference') ?? $request->query('trxref') ?? $request->query('tx_ref', '')))->first();
 
         if ($payment === null) {
             return to_route('dealer.billing', $lot)->with('error', 'We could not find that payment.');
@@ -169,12 +173,12 @@ class BillingController extends Controller
         return back()->with('success', "Code applied: {$subscription->plan()->value('name')} free until ".$subscription->trial_ends_at?->setTimezone($lot->timezone)->format('j M Y').'.');
     }
 
-    /** Paystack's page for changing the saved card. */
-    public function card(Lot $lot, PaymentGateway $gateway): SymfonyResponse
+    /** The provider's page for changing the saved card (Paystack has one). */
+    public function card(Lot $lot, PaymentGateways $gateways): SymfonyResponse
     {
         Gate::authorize('manageBilling', $lot);
-        $code = $lot->subscription()->value('provider_ref');
-        $link = $code ? $gateway->manageLink($code) : null;
+        $subscription = $lot->subscription()->first();
+        $link = $subscription?->provider_ref ? $gateways->for($subscription->provider)->manageLink($subscription->provider_ref) : null;
 
         return $link ? Inertia::location($link) : back()->with('error', 'There is no card to update yet.');
     }

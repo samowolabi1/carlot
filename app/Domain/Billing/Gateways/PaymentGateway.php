@@ -5,8 +5,8 @@ namespace App\Domain\Billing\Gateways;
 use App\Domain\Billing\Models\Payment;
 
 /**
- * The payment provider behind LotLink's own charges (TDD M16): Paystack in Nigeria; the
- * interface lets Stripe take over in other markets. Amounts are in minor units.
+ * A payment provider behind LotLink's own charges (TDD M16): Paystack or Flutterwave in Nigeria
+ * (the admin picks one; `PaymentGateways`), and room for Stripe in other markets. Amounts are in minor units.
  */
 interface PaymentGateway
 {
@@ -35,6 +35,15 @@ interface PaymentGateway
     /**
      * Changes a recurring plan's amount at the provider (minor units). $existing: current
      * subscribers pay it from their next renewal too; otherwise only new subscribers do.
+     * Returns the plan code new subscribers use from now on (Flutterwave makes a new plan).
      */
-    public function updatePlan(string $code, int $amount, bool $existing): void;
+    public function updatePlan(string $code, int $amount, bool $existing): string;
+
+    /**
+     * The provider's subscription for a verified plan payment, if it must be looked up now
+     * (Paystack sends it by webhook instead, so returns null).
+     *
+     * @return array{ref: string, token: string}|null
+     */
+    public function subscriptionFor(GatewayTransaction $transaction, ?string $planCode): ?array;
 }

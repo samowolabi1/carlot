@@ -58,6 +58,14 @@ return [
         'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
     ],
 
+    // Flutterwave (v3 API). The secret hash is the one set under Settings → Webhooks in the Flutterwave dashboard.
+    'flutterwave' => [
+        'public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
+        'secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
+        'secret_hash' => env('FLUTTERWAVE_SECRET_HASH'),
+        'base_url' => env('FLUTTERWAVE_BASE_URL', 'https://api.flutterwave.com/v3'),
+    ],
+
     // Facebook/Instagram auto-post (SOCIAL_DRIVER=meta)
     'meta' => [
         'app_id' => env('META_APP_ID'),

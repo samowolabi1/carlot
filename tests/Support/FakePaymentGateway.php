@@ -6,10 +6,21 @@ use App\Domain\Billing\Gateways\GatewayTransaction;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Models\Payment;
 
-/** Paystack stand-in for tests: payments succeed at the asked amount unless told otherwise. */
+/** Paystack (or Flutterwave) stand-in for tests: payments succeed at the asked amount unless told otherwise. */
 class FakePaymentGateway implements PaymentGateway
 {
     public const SECRET = 'sk_test_fake';
+
+    /** Flutterwave's webhook secret hash in tests. */
+    public const HASH = 'flw_test_hash';
+
+    /** @var list<array{name: string, amount: int}> */
+    public array $createdPlans = [];
+
+    /** @var array{ref: string, token: string}|null what subscriptionFor() finds */
+    public ?array $subscription = null;
+
+    public function __construct(private readonly string $provider = 'paystack') {}
 
     /** @var list<array{reference: string, email: string, plan: ?string, callback: string}> */
     public array $checkouts = [];
@@ -25,14 +36,14 @@ class FakePaymentGateway implements PaymentGateway
 
     public function name(): string
     {
-        return 'paystack';
+        return $this->provider;
     }
 
     public function checkout(Payment $payment, string $email, string $callbackUrl, ?string $planCode = null): string
     {
         $this->checkouts[] = ['reference' => $payment->reference, 'email' => $email, 'plan' => $planCode, 'callback' => $callbackUrl];
 
-        return 'https://checkout.paystack.test/'.$payment->reference;
+        return "https://checkout.{$this->provider}.test/".$payment->reference;
     }
 
     public function verify(string $reference): GatewayTransaction
@@ -60,6 +71,10 @@ class FakePaymentGateway implements PaymentGateway
 
     public function validWebhook(string $payload, ?string $signature): bool
     {
+        if ($this->provider === 'flutterwave') {
+            return $signature !== null && hash_equals(self::HASH, $signature);
+        }
+
         return $signature !== null && hash_equals(hash_hmac('sha512', $payload, self::SECRET), $signature);
     }
 
@@ -80,7 +95,9 @@ class FakePaymentGateway implements PaymentGateway
 
     public function createPlan(string $name, int $amount, string $interval): string
     {
-        return 'PLN_test';
+        $this->createdPlans[] = ['name' => $name, 'amount' => $amount];
+
+        return $this->provider === 'flutterwave' ? (string) (9000 + count($this->createdPlans)) : 'PLN_test';
     }
 
     /** @var list<array{code: string, amount: int, existing: bool}> */
@@ -88,11 +105,27 @@ class FakePaymentGateway implements PaymentGateway
 
     public bool $failPlanUpdate = false;
 
-    public function updatePlan(string $code, int $amount, bool $existing): void
+    public function updatePlan(string $code, int $amount, bool $existing): string
     {
         if ($this->failPlanUpdate) {
             throw new \RuntimeException('Paystack: plan not found');
         }
         $this->updatedPlans[] = ['code' => $code, 'amount' => $amount, 'existing' => $existing];
+
+        if ($this->provider === 'flutterwave') {
+            // Like Flutterwave: no repricing, a new plan for new subscribers.
+            if ($existing) {
+                throw new \RuntimeException('Flutterwave can\'t change the price for current subscribers.');
+            }
+
+            return $this->createPlan('LotLink plan', $amount, 'monthly');
+        }
+
+        return $code;
+    }
+
+    public function subscriptionFor(GatewayTransaction $transaction, ?string $planCode): ?array
+    {
+        return $this->subscription;
     }
 }

@@ -5,14 +5,14 @@ namespace App\Domain\Billing\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\SubscriptionStatus;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Lots\Models\Lot;
 use Illuminate\Validation\ValidationException;
 
 class CancelSubscription
 {
-    public function __construct(private readonly PaymentGateway $gateway, private readonly DowngradeToFree $downgrade) {}
+    public function __construct(private readonly PaymentGateways $gateways, private readonly DowngradeToFree $downgrade) {}
 
     /**
      * Choosing the Free plan. A paid plan keeps running to the end of the month already
@@ -25,7 +25,7 @@ class CancelSubscription
 
         if ($subscription->status === SubscriptionStatus::Active) {
             if ($subscription->provider_ref && $subscription->provider_token) {
-                $this->gateway->cancelSubscription($subscription->provider_ref, $subscription->provider_token);
+                $this->gateways->for($subscription->provider)->cancelSubscription($subscription->provider_ref, $subscription->provider_token);
             }
             $subscription->forceFill(['cancel_at_period_end' => now()])->save();
             AuditLog::record('billing.cancelled', $lot, ['ends' => $subscription->current_period_end?->toIso8601String()], $user, $lot->id);

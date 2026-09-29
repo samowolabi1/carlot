@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Billing\Actions\RefundPayment;
 use App\Domain\Billing\Enums\PaymentStatus;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Payment;
 use App\Filament\Resources\PaymentResource\Pages;
 use Filament\Notifications\Notification;
@@ -14,7 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-/** What lots have paid LotLink, with refunds through Paystack (TDD M17). */
+/** What lots have paid LotLink, with refunds through the provider that took each payment (TDD M17). */
 class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
@@ -57,7 +58,7 @@ class PaymentResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('refund')->icon('heroicon-o-arrow-uturn-left')->color('danger')
                     ->visible(fn (Payment $p) => $p->status === PaymentStatus::Success)
-                    ->requiresConfirmation()->modalDescription('Refunds the full amount through Paystack. A spotlight stops straight away.')
+                    ->requiresConfirmation()->modalDescription(fn (Payment $record) => 'Refunds the full amount through '.(PaymentGateways::PROVIDERS[$record->provider] ?? 'the provider').'. A spotlight stops straight away.')
                     ->action(function (Payment $payment, RefundPayment $refund): void {
                         try {
                             /** @var User $admin */

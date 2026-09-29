@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $current_period_end
  * @property Carbon|null $grace_ends_at
  * @property Carbon|null $cancel_at_period_end
+ * @property string|null $provider which provider bills renewals: paystack or flutterwave (null until paid)
  * @property string|null $provider_ref
  * @property string|null $provider_token
  * @property string|null $customer_code
@@ -36,7 +37,7 @@ class Subscription extends Model
 
     protected $fillable = [
         'lot_id', 'plan_id', 'status', 'trial_ends_at', 'current_period_end', 'grace_ends_at', 'cancel_at_period_end',
-        'provider_ref', 'provider_token', 'customer_code', 'card_brand', 'card_last4', 'coupon_id', 'trial_reminded_at',
+        'provider', 'provider_ref', 'provider_token', 'customer_code', 'card_brand', 'card_last4', 'coupon_id', 'trial_reminded_at',
     ];
 
     protected $hidden = ['id', 'lot_id', 'plan_id', 'provider_token', 'coupon_id'];

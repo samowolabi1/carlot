@@ -68,3 +68,11 @@ before the Filament panel. On by default in production (`ADMIN_2FA`).
   they carry the same text and link as the in-app notification, never costs, bank details or codes.
 - Devices can be removed from Notification settings; account deletion and anonymisation delete them. Expired endpoints
   (404/410 from the push service) are deleted automatically — `PushNotificationsTest`.
+
+## Flutterwave (added later)
+
+- `/webhooks/flutterwave` accepts only the dashboard's secret hash in `verif-hash` (constant-time compare). That's a shared
+  secret, not a body signature, so the handler never trusts the body: our payments go through `FulfilPayment` (re-verified,
+  amount checked) and renewals are verified with `GET /transactions/verify_by_reference` before being recorded.
+- Deliveries are stored with a unique body hash (handled once). Existing payments are verified, refunded and cancelled only with
+  the provider that took them — `FlutterwaveTest`, `FlutterwaveGatewayTest`.

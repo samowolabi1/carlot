@@ -80,13 +80,21 @@ class PaystackGateway implements PaymentGateway
         return (string) $data['plan_code'];
     }
 
-    public function updatePlan(string $code, int $amount, bool $existing): void
+    public function updatePlan(string $code, int $amount, bool $existing): string
     {
         try {
             $this->http()->put('/plan/'.rawurlencode($code), ['amount' => $amount, 'update_existing_subscriptions' => $existing])->throw();
         } catch (RequestException $e) {
             throw new RuntimeException('Paystack: '.($e->response->json('message') ?? $e->getMessage()), previous: $e);
         }
+
+        return $code;
+    }
+
+    /** Paystack sends the subscription in its subscription.create webhook. */
+    public function subscriptionFor(GatewayTransaction $transaction, ?string $planCode): ?array
+    {
+        return null;
     }
 
     /**

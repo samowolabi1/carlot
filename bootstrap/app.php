@@ -34,8 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->api(append: [TouchLastSeen::class]);
 
-        // Paystack can't send a CSRF token; the webhook checks its signature instead.
-        $middleware->validateCsrfTokens(except: ['webhooks/paystack', 'webhooks/finance']);
+        // Payment providers can't send a CSRF token; the webhooks check their signature or secret hash instead.
+        $middleware->validateCsrfTokens(except: ['webhooks/paystack', 'webhooks/flutterwave', 'webhooks/finance']);
 
         $middleware->alias([
             'lot.member' => SetCurrentLot::class,

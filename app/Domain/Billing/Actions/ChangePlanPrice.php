@@ -5,7 +5,7 @@ namespace App\Domain\Billing\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\SubscriptionStatus;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Billing\Notifications\BillingNotice;
 use App\Domain\Lots\Enums\LotRole;
@@ -17,13 +17,15 @@ use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
- * An admin changes a plan's monthly price. Paystack is updated first (its plan is what renews
- * cards), so LotLink and Paystack never disagree about what a new subscriber pays. Current
- * subscribers either keep their price or pay the new one from their next renewal, and are told.
+ * An admin changes a plan's monthly price. Each provider with the plan (Paystack, Flutterwave) is
+ * updated first (its plan is what renews cards), so LotLink and the providers never disagree about
+ * what a new subscriber pays. Current subscribers either keep their price or pay the new one from
+ * their next renewal, and are told. Flutterwave can't reprice a plan, so it gets a new plan for new
+ * subscribers, and "everyone" is refused while it bills anyone on this plan.
  */
 class ChangePlanPrice
 {
-    public function __construct(private readonly PaymentGateway $gateway) {}
+    public function __construct(private readonly PaymentGateways $gateways) {}
 
     /** @return int how many paying lots were told about the change */
     public function run(Plan $plan, int $naira, bool $existingSubscribers, User $admin): int
@@ -41,20 +43,38 @@ class ChangePlanPrice
             return 0;
         }
 
-        if ($plan->provider_plan_code !== null) {
+        $codes = [];
+        foreach (PaymentGateways::PROVIDERS as $provider => $label) {
+            $code = $plan->codeFor($provider);
+            if ($code === null) {
+                continue;
+            }
+            // Only matters where that provider actually bills someone on this plan.
+            $existing = $existingSubscribers && ($provider === 'paystack' || $this->billed($plan, $provider));
             try {
-                $this->gateway->updatePlan($plan->provider_plan_code, $new, $existingSubscribers);
+                $codes[$provider] = $this->gateways->for($provider)->updatePlan($code, $new, $existing);
             } catch (Throwable $e) {
-                throw ValidationException::withMessages(['price' => "Paystack didn't accept the change, so nothing was changed: {$e->getMessage()}"]);
+                throw ValidationException::withMessages(['price' => "{$label} didn't accept the change, so nothing was changed: {$e->getMessage()}"]);
             }
         }
 
         $plan->update(['price' => $new]);
+        foreach ($codes as $provider => $code) {
+            if ($code !== $plan->codeFor($provider)) {
+                $plan->setCodeFor($provider, $code);
+            }
+        }
         AuditLog::record('admin.plan_price_changed', $plan, [
             'before' => $old, 'after' => $new, 'existing_subscribers' => $existingSubscribers,
         ], $admin);
 
         return $existingSubscribers ? $this->tell($plan, $old, $new) : 0;
+    }
+
+    private function billed(Plan $plan, string $provider): bool
+    {
+        return Subscription::withoutGlobalScopes()->where('plan_id', $plan->id)->where('provider', $provider)
+            ->whereIn('status', [SubscriptionStatus::Active, SubscriptionStatus::PastDue])->exists();
     }
 
     /** Paying lots on this plan hear about it before their next renewal. */

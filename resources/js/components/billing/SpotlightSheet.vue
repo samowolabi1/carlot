@@ -81,7 +81,7 @@ function submit() {
 
             <InputError :message="error" />
             <button type="submit" class="btn btn-primary" :disabled="busy || options.length === 0">
-                {{ busy ? 'Opening Paystack…' : useFree && canUseFree ? 'Start free spotlight' : `Pay ${formatNaira(price)}` }}
+                {{ busy ? 'Opening checkout…' : useFree && canUseFree ? 'Start free spotlight' : `Pay ${formatNaira(price)}` }}
             </button>
         </form>
     </div>

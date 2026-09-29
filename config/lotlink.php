@@ -76,7 +76,10 @@ return [
     // Billing (TDD M16). "sandbox" fakes the Paystack checkout so plans and spotlights can be
     // tried locally without keys; "paystack" is the real thing (keys in config/services.php).
     'billing' => [
+        // sandbox (test checkout page) or live (real providers). "paystack" is kept as a synonym for live.
         'driver' => env('PAYMENT_DRIVER', 'sandbox'),
+        // The provider new payments use until an admin picks one in /admin → Settings → Payments.
+        'provider' => env('PAYMENT_PROVIDER', 'paystack'),
         'trial_days' => 14,
         'grace_days' => 7,
         'free_plan' => 'free',

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Webhooks;
 
-use App\Domain\Billing\Actions\HandlePaystackEvent;
+use App\Domain\Billing\Actions\HandleFlutterwaveEvent;
 use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\WebhookEvent;
 use App\Http\Controllers\Controller;
@@ -12,19 +12,16 @@ use Illuminate\Http\Response;
 use Throwable;
 
 /**
- * POST /webhooks/paystack (TDD M16): checks x-paystack-signature against the raw body,
- * stores the event, and handles each delivery once. Paystack retries anything that
- * doesn't get a 200, so errors after storing are logged and still answered 200.
+ * POST /webhooks/flutterwave: checks the verif-hash header, stores the event, handles each delivery
+ * once. Flutterwave retries anything that doesn't get a 200, so errors after storing still answer 200.
  */
-class PaystackWebhookController extends Controller
+class FlutterwaveWebhookController extends Controller
 {
-    public function __invoke(Request $request, PaymentGateways $gateways, HandlePaystackEvent $handle): Response
+    public function __invoke(Request $request, PaymentGateways $gateways, HandleFlutterwaveEvent $handle): Response
     {
         $payload = $request->getContent();
-        // Always Paystack's key, whichever provider new payments use now (renewals keep coming).
-        $gateway = $gateways->for('paystack');
 
-        if (! $gateway->validWebhook($payload, $request->header('x-paystack-signature'))) {
+        if (! $gateways->for('flutterwave')->validWebhook($payload, $request->header('verif-hash'))) {
             return response('Invalid signature', 401);
         }
 
@@ -35,7 +32,7 @@ class PaystackWebhookController extends Controller
 
         try {
             $event = WebhookEvent::create([
-                'provider' => 'paystack',
+                'provider' => 'flutterwave',
                 'event' => (string) $body['event'],
                 'hash' => hash('sha256', $payload),
                 'payload' => $body,

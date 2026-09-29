@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\URL;
 use RuntimeException;
 
 /**
- * A stand-in for Paystack while developing: checkout is a LotLink page with "Pay" and
+ * A stand-in for Paystack and Flutterwave while developing: checkout is a LotLink page with "Pay" and
  * "Decline" buttons, and verification reads what was chosen there. It goes through the
  * same fulfilment code as real payments. Never used in production.
  */
@@ -59,9 +59,17 @@ class SandboxGateway implements PaymentGateway
 
     public function createPlan(string $name, int $amount, string $interval): string
     {
-        throw new RuntimeException('The sandbox has no plans to create. Set PAYMENT_DRIVER=paystack.');
+        throw new RuntimeException('The sandbox has no plans to create. Set PAYMENT_DRIVER=live and the provider\'s keys.');
     }
 
     /** Nothing to update: the sandbox charges whatever LotLink asks for. */
-    public function updatePlan(string $code, int $amount, bool $existing): void {}
+    public function updatePlan(string $code, int $amount, bool $existing): string
+    {
+        return $code;
+    }
+
+    public function subscriptionFor(GatewayTransaction $transaction, ?string $planCode): ?array
+    {
+        return null;
+    }
 }

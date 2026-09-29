@@ -9,7 +9,7 @@ use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Billing\Enums\SpotlightPlacement;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
 use App\Domain\Inventory\Models\Vehicle;
@@ -18,10 +18,10 @@ use Illuminate\Validation\ValidationException;
 
 class RefundPayment
 {
-    public function __construct(private readonly PaymentGateway $gateway) {}
+    public function __construct(private readonly PaymentGateways $gateways) {}
 
     /**
-     * Refunds through Paystack's Refund API: by an admin, or by the system for buyer deposits
+     * Refunds through the provider that took the payment (Paystack or Flutterwave): by an admin, or by the system for buyer deposits
      * (a reservation that ends, a test-drive deposit after the visit). A refunded spotlight stops.
      */
     public function run(Payment $payment, ?User $by = null): Payment
@@ -30,7 +30,7 @@ class RefundPayment
             throw ValidationException::withMessages(['payment' => 'Only a paid payment can be refunded.']);
         }
 
-        $this->gateway->refund($payment->reference, $payment->amount);
+        $this->gateways->for($payment->provider)->refund($payment->reference, $payment->amount);
         $payment->forceFill(['status' => PaymentStatus::Refunded, 'refunded_at' => now()])->save();
 
         // A refunded advert stops: one in review counts as rejected, a running one as removed.

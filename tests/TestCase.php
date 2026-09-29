@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\WhatsAppGateway;
 use App\Domain\Push\Gateways\PushGateway;
@@ -20,7 +20,10 @@ abstract class TestCase extends BaseTestCase
 
     protected FakeWhatsAppGateway $whatsapp;
 
+    /** The Paystack fake (the default provider). */
     protected FakePaymentGateway $payments;
+
+    protected FakePaymentGateway $flutterwave;
 
     protected FakePushGateway $push;
 
@@ -42,8 +45,13 @@ abstract class TestCase extends BaseTestCase
         $this->app->instance(SmsGateway::class, $this->sms);
         $this->whatsapp = new FakeWhatsAppGateway;
         $this->app->instance(WhatsAppGateway::class, $this->whatsapp);
-        $this->payments = new FakePaymentGateway;
-        $this->app->instance(PaymentGateway::class, $this->payments);
+        // One fake per provider; PaymentGateway resolves to whichever the admin chose (Paystack by default).
+        $this->payments = new FakePaymentGateway('paystack');
+        $this->flutterwave = new FakePaymentGateway('flutterwave');
+        $this->app->instance('payments.paystack', $this->payments);
+        $this->app->instance('payments.sandbox', $this->payments);
+        $this->app->instance('payments.flutterwave', $this->flutterwave);
+        PaymentGateways::flush();
         $this->push = new FakePushGateway;
         $this->app->instance(PushGateway::class, $this->push);
 

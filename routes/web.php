@@ -80,6 +80,7 @@ use App\Http\Controllers\Trust\InspectionReportController;
 use App\Http\Controllers\Trust\ReportController as ContentReportController;
 use App\Http\Controllers\Trust\ReviewController;
 use App\Http\Controllers\Webhooks\FinanceWebhookController;
+use App\Http\Controllers\Webhooks\FlutterwaveWebhookController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -100,6 +101,7 @@ Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
 // Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
 Route::post('/webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
+Route::post('/webhooks/flutterwave', FlutterwaveWebhookController::class)->name('webhooks.flutterwave');
 Route::post('/webhooks/finance', FinanceWebhookController::class)->middleware('throttle:60,1')->name('webhooks.finance');
 
 // Local stand-in for Paystack's checkout (PAYMENT_DRIVER=sandbox).

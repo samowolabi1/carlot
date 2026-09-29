@@ -9,7 +9,7 @@ use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Billing\Gateways\GatewayTransaction;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
 use App\Domain\Deals\Enums\ReservationStatus;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 class FulfilPayment
 {
     public function __construct(
-        private readonly PaymentGateway $gateway,
+        private readonly PaymentGateways $gateways,
         private readonly ActivateSubscription $activate,
         private readonly ActivateSpotlight $spotlight,
         private readonly ConfirmDeposit $deposit,
@@ -37,7 +37,8 @@ class FulfilPayment
             return $payment;
         }
 
-        $transaction = $this->gateway->verify($payment->reference);
+        // Asked of the provider that took it, whichever one new payments use now.
+        $transaction = $this->gateways->for($payment->provider)->verify($payment->reference);
 
         return DB::transaction(function () use ($payment, $transaction): Payment {
             $locked = Payment::lockForUpdate()->findOrFail($payment->id);

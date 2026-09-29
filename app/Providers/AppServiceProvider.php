@@ -6,8 +6,7 @@ use App\Domain\Advertising\Support\AdvertPricing;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Policies\AppointmentPolicy;
 use App\Domain\Billing\Gateways\PaymentGateway;
-use App\Domain\Billing\Gateways\PaystackGateway;
-use App\Domain\Billing\Gateways\SandboxGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Finance\Partners\FinancePartner;
 use App\Domain\Finance\Partners\HttpFinancePartner;
 use App\Domain\Finance\Partners\LogFinancePartner;
@@ -96,16 +95,11 @@ class AppServiceProvider extends ServiceProvider
             default => new LogSmsGateway,
         });
 
-        $this->app->bind(PaymentGateway::class, function () {
-            if (config('lotlink.billing.driver') === 'paystack') {
-                return new PaystackGateway((string) config('services.paystack.secret_key'), (string) config('services.paystack.base_url'));
-            }
-
-            // The sandbox never takes real money, so it is refused in production.
-            abort_if(app()->isProduction(), 500, 'PAYMENT_DRIVER must be paystack in production.');
-
-            return new SandboxGateway;
-        });
+        // Each provider by name (`payments.paystack`, …); PaymentGateway itself is the one new payments use.
+        foreach (['paystack', 'flutterwave', 'sandbox'] as $provider) {
+            $this->app->bind("payments.{$provider}", fn () => PaymentGateways::make($provider));
+        }
+        $this->app->bind(PaymentGateway::class, fn ($app) => $app->make(PaymentGateways::class)->active());
     }
 
     public function boot(): void

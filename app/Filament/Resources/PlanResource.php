@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Billing\Actions\ChangePlanPrice;
 use App\Domain\Billing\Enums\SubscriptionStatus;
-use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Money;
@@ -33,16 +33,18 @@ class PlanResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('name')->required()->maxLength(40),
-            // Changed only with "Change price" on the list, which also updates Paystack and tells subscribers.
+            // Changed only with "Change price" on the list, which also updates the providers and tells subscribers.
             Forms\Components\TextInput::make('price')->label('Price a month (₦)')->disabled()->dehydrated(false)
                 ->formatStateUsing(fn (?int $state) => $state !== null ? number_format(intdiv($state, 100)) : '0')
-                ->helperText('Use "Change price" on the plans list: it updates Paystack and lets you choose who pays the new price.'),
+                ->helperText('Use "Change price" on the plans list: it updates Paystack and Flutterwave and lets you choose who pays the new price.'),
             Forms\Components\TextInput::make('listing_limit')->numeric()->minValue(1)->helperText('Empty for unlimited'),
             Forms\Components\TextInput::make('staff_limit')->numeric()->minValue(1)->helperText('Empty for unlimited'),
             Forms\Components\TextInput::make('free_spotlights')->numeric()->minValue(0)->required()->label('Free car spotlights a month'),
             Forms\Components\Toggle::make('self_serve')->label('Owners can buy it in the app')->helperText('Off shows "Talk to us"'),
             Forms\Components\TextInput::make('provider_plan_code')->label('Paystack plan code')->placeholder('PLN_...')
-                ->helperText('Makes the plan renew monthly. Use "Create on Paystack" on the list to make one.'),
+                ->helperText('Makes the plan renew monthly with Paystack. Use "Create on Paystack" on the list to make one.'),
+            Forms\Components\TextInput::make('flutterwave_plan_id')->label('Flutterwave payment plan id')->placeholder('123456')
+                ->helperText('Makes the plan renew monthly with Flutterwave. Use "Create on Flutterwave" on the list.'),
             Forms\Components\KeyValue::make('features')->helperText('e.g. open_orders = 10, share_cards = 0/1'),
         ]);
     }
@@ -59,6 +61,7 @@ class PlanResource extends Resource
                 Tables\Columns\TextColumn::make('listing_limit')->placeholder('Unlimited'),
                 Tables\Columns\TextColumn::make('staff_limit')->placeholder('Unlimited'),
                 Tables\Columns\TextColumn::make('provider_plan_code')->label('Paystack')->placeholder('—'),
+                Tables\Columns\TextColumn::make('flutterwave_plan_id')->label('Flutterwave')->placeholder('—'),
                 Tables\Columns\IconColumn::make('self_serve')->boolean(),
             ])
             ->actions([
@@ -66,7 +69,7 @@ class PlanResource extends Resource
                 Tables\Actions\Action::make('price')->label('Change price')->icon('heroicon-o-banknotes')->color('gray')
                     ->visible(fn (Plan $record) => ! $record->isFree())
                     ->modalHeading(fn (Plan $record) => "Change the {$record->name} price")
-                    ->modalDescription(fn (Plan $record) => 'Now '.Money::format($record->price).' a month.'.($record->provider_plan_code ? ' Paystack is updated too, so cards renew at the right amount.' : ''))
+                    ->modalDescription(fn (Plan $record) => 'Now '.Money::format($record->price).' a month.'.($record->provider_plan_code || $record->flutterwave_plan_id ? ' The payment providers are updated too, so cards renew at the right amount (Flutterwave only for new subscribers).' : ''))
                     ->fillForm(fn (Plan $record) => ['price' => intdiv($record->price, 100), 'who' => 'new'])
                     ->form([
                         Forms\Components\TextInput::make('price')->label('New price a month')->prefix('₦')->numeric()->integer()->minValue(100)->maxValue(100_000_000)->required(),
@@ -90,17 +93,18 @@ class PlanResource extends Resource
                             ->body($data['who'] === 'all' ? "{$told} paying ".str('lot')->plural($told).' told about the change.' : 'Current subscribers keep their price.')
                             ->success()->send();
                     }),
-                Tables\Actions\Action::make('paystack')->label('Create on Paystack')->icon('heroicon-o-arrow-up-tray')
-                    ->visible(fn (Plan $plan) => $plan->provider_plan_code === null && $plan->price > 0 && $plan->self_serve)
+                ...collect(PaymentGateways::PROVIDERS)->map(fn (string $label, string $provider) => Tables\Actions\Action::make("create_{$provider}")
+                    ->label("Create on {$label}")->icon('heroicon-o-arrow-up-tray')->color('gray')
+                    ->visible(fn (Plan $plan) => $plan->codeFor($provider) === null && $plan->price > 0 && $plan->self_serve && PaymentGateways::configured($provider))
                     ->requiresConfirmation()
-                    ->action(function (Plan $plan, PaymentGateway $gateway): void {
+                    ->action(function (Plan $plan, PaymentGateways $gateways) use ($label, $provider): void {
                         try {
-                            $plan->update(['provider_plan_code' => $gateway->createPlan("LotLink {$plan->name}", $plan->price, $plan->interval)]);
-                            Notification::make()->title('Plan created on Paystack')->success()->send();
+                            $plan->setCodeFor($provider, $gateways->for($provider)->createPlan("LotLink {$plan->name}", $plan->price, $plan->interval));
+                            Notification::make()->title("Plan created on {$label}")->success()->send();
                         } catch (Throwable $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
                         }
-                    }),
+                    }))->values()->all(),
             ]);
     }
 

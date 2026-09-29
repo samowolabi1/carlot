@@ -17,8 +17,8 @@ class StartCheckout
     public function __construct(private readonly PaymentGateway $gateway) {}
 
     /**
-     * Sends the owner to pay for a plan. With a Paystack plan code the card is saved and
-     * charged each month; the plan only changes once the payment is verified (FulfilPayment).
+     * Sends the owner to pay for a plan through the provider an admin chose. With that provider's
+     * plan code the card is saved and charged each month; the plan only changes once the payment is verified (FulfilPayment).
      */
     public function run(Lot $lot, User $user, Plan $plan): string
     {
@@ -42,6 +42,6 @@ class StartCheckout
             'meta' => ['plan_id' => $plan->id],
         ]);
 
-        return $this->gateway->checkout($payment, BillingEmail::for($lot), route('dealer.billing.callback', $lot), $plan->provider_plan_code);
+        return $this->gateway->checkout($payment, BillingEmail::for($lot), route('dealer.billing.callback', $lot), $plan->codeFor($this->gateway->name()));
     }
 }

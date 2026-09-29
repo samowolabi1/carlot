@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LotLink: a multi-dealer car lot platform for Nigeria first (NGN, Paystack, WhatsApp), configurable
+LotLink: a multi-dealer car lot platform for Nigeria first (NGN, Paystack/Flutterwave, WhatsApp), configurable
 for the UK later. Three faces: customer marketplace, dealer dashboard (with Lot Manager for walk-ins),
 and a per-lot mini-site. The Product Spec, Technical Design Document (TDD) and "LotLink — MVP
 Screens" design canvas are the source of truth; build what they say, sprint by sprint.
@@ -139,18 +139,22 @@ Run all four before pushing.
 
 ## Billing and spotlight (S7)
 
-- Money paid through Paystack is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
-  changes state in `FulfilPayment`, which re-verifies with the `PaymentGateway` and checks the
+- Money paid through Paystack or Flutterwave is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
+  changes state in `FulfilPayment`, which re-verifies with the provider that took it and checks the
   amount; never mark a payment paid from a redirect or webhook body. Webhooks are stored in
   `webhook_events` (unique body hash), so each delivery is handled once.
-- Plan prices change only through `ChangePlanPrice` (updates the Paystack plan first, then the plan; optionally notifies
-  current subscribers). Never edit `plans.price` directly, or Paystack and LotLink will disagree and checkouts fail.
+- Providers: `PaymentGateways` (`for($payment->provider)` / `for($subscription->provider)` for anything existing; the injected
+  `PaymentGateway` is the admin's choice for new payments, /admin → Settings → Payments). Never use the injected gateway to
+  verify, refund or cancel an existing record. Renewals are recorded only through `RecordRenewal` (both webhooks); Flutterwave
+  charges are always verified with its API (its webhook only has a shared hash). Plans: `Plan::codeFor($provider)`.
+- Plan prices change only through `ChangePlanPrice` (updates each provider's plan first, then the plan; optionally notifies
+  current subscribers). Never edit `plans.price` directly, or the providers and LotLink will disagree and checkouts fail.
 - `lots.plan_id` is the effective plan used by limits; `subscriptions` says how it's paid for.
   Downgrades go through `DowngradeToFree` (hides extra cars via the state machine, never deletes).
 - Spotlights set `vehicles.spotlight_until` / `lots.featured_until` via `ActivateSpotlight`; use
   `save()` on vehicles so search re-indexes. Sponsored results come from `VehicleSearch::sponsored()`
   (both engines).
-- Tests bind `Tests\Support\FakePaymentGateway` (`$this->payments`); never call Paystack.
+- Tests bind `Tests\Support\FakePaymentGateway` (`$this->payments` for Paystack, `$this->flutterwave`); never call a real provider.
 
 ## Adverts
 

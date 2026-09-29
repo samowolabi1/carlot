@@ -122,7 +122,8 @@ Deferred: offers, trade-ins and reservations as lead sources (S9), the inspectio
 | --- | --- |
 | Plans and trials (M16) | Every new lot starts a 14-day Starter trial. Existing lots started theirs when this sprint's migration ran. The owner gets a WhatsApp reminder 3 days before the end. When a trial ends unpaid, or a renewal doesn't arrive, the lot gets 7 days of grace. After that it moves to Free: cars above Free's 10-car limit are **hidden, not deleted** (the newest and spotlighted stay live, reserved cars always stay). Choosing Free on a paid plan keeps it until the paid month ends. |
 | Paystack | Checkout goes to Paystack with the plan's Paystack code, so the card is charged monthly. Every payment is verified with Paystack's API before anything changes, and the amount must match. The webhook (`/webhooks/paystack`) checks the HMAC SHA-512 signature, stores each event and handles it once. It covers first payments, renewals, the subscription code, failed renewals (past due and grace) and cancellations. Admins refund from `/admin/payments`. |
-| Sandbox | Without Paystack keys (`PAYMENT_DRIVER=sandbox`, the default locally) payments go to a LotLink test page with "Pay" and "Decline" buttons, and then through the same verification code. It is refused in production. |
+| Paystack or Flutterwave | **Admin → Settings → Payments** chooses which provider takes new payments (plans, spotlights, adverts); a provider can only be chosen once its keys are set. Each payment and subscription stays with the provider that took it: verification, refunds, card updates (Paystack's hosted page), cancelling and renewals always go back to it, so switching strands nobody. Plans can have a Paystack plan code and a Flutterwave payment plan id (**Create on Paystack / Flutterwave** in Plans); **Change price** updates both (Flutterwave can't reprice, so it gets a new plan for new subscribers, and "everyone" is refused while Flutterwave bills anyone on that plan). Flutterwave's webhooks (`/webhooks/flutterwave`, `verif-hash`) only carry a shared secret, so every charge, renewals included, is verified with its API first. |
+| Sandbox | Without provider keys (`PAYMENT_DRIVER=sandbox`, the default locally) payments go to a LotLink test page with "Pay" and "Decline" buttons, and then through the same verification code. It is refused in production. |
 | Billing page (D11) | Current plan, trial days left, card, this month's usage (listings, staff, free spotlights), the four plans with choose/switch, a coupon box, featuring the lot, running spotlights, and payments with PDF invoices. Only the owner can change the plan; managers can view it. |
 | Coupons | `LAUNCH3` (seeded, 20 uses) gives 90 days free on Starter, per the spec's launch offer. In `/admin/coupons` admins create codes (or generate one), change the plan, free days, limit and expiry, pause/resume, see which lots used a code, and delete unused ones. Changes apply to future redemptions only; every change is in the audit log. |
 | Spotlight (M5) | Stock → **Spotlight** on a live car: 7, 14 or 30 days. The car shows in a "Sponsored" row (at most 3) above matching search results, in both search engines, and in the home page's Spotlight carousel. Pro includes 2 free 7-day spotlights a month. Buying more adds days to the end. The hourly `spotlights:expire` ends them. |
@@ -331,7 +332,7 @@ same variables and button, then enter its name in `/admin` → Message templates
 ### Going live checklist
 
 1. `APP_ENV=production`, `APP_DEBUG=false`, a real `APP_URL` on HTTPS, `TRUSTED_PROXIES` for your proxy.
-2. `PAYMENT_DRIVER=paystack`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
+2. `PAYMENT_DRIVER=live`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
 3. Optional integrations: `SOCIAL_DRIVER=meta` with `META_APP_ID`/`META_APP_SECRET` (redirect URL
    `https://your-domain/dealer/social/callback`); `FINANCE_PARTNER_DRIVER=http` with the partner's URL, key and
    `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`).
@@ -351,11 +352,17 @@ Chat works without this: it polls every 4 seconds. For instant messages:
 2. Run `npm run build` again so the browser picks up the `VITE_REVERB_*` values.
 3. Keep `php artisan reverb:start` running in a terminal (in production, under Supervisor behind your web server's WebSocket proxy with `REVERB_SCHEME=https`).
 
-### Paystack in production
+### Paystack and Flutterwave in production
 
-1. Set `PAYMENT_DRIVER=paystack`, `PAYSTACK_PUBLIC_KEY` and `PAYSTACK_SECRET_KEY`.
-2. In `/admin/plans`, set real prices, then press "Create on Paystack" on each paid plan so it renews monthly.
-3. In the Paystack dashboard, set the webhook URL to `https://your-domain/webhooks/paystack`.
+Set up one or both, then choose which takes new payments in `/admin` → Settings → Payments (existing subscriptions stay
+with the provider they started on).
+
+1. Set `PAYMENT_DRIVER=live`, plus `PAYSTACK_PUBLIC_KEY` / `PAYSTACK_SECRET_KEY` and/or `FLUTTERWAVE_PUBLIC_KEY` /
+   `FLUTTERWAVE_SECRET_KEY` / `FLUTTERWAVE_SECRET_HASH`.
+2. In `/admin/plans`, set real prices, then press "Create on Paystack" and/or "Create on Flutterwave" on each paid plan so it renews monthly.
+3. Webhooks: in the Paystack dashboard set `https://your-domain/webhooks/paystack`. In the Flutterwave dashboard → Settings →
+   Webhooks set `https://your-domain/webhooks/flutterwave`, turn on failed-payment and subscription events, and set a secret
+   hash (the same value as `FLUTTERWAVE_SECRET_HASH`).
 4. Keep the scheduler running: `subscriptions:enforce-limits` runs daily at 02:00, `spotlights:expire` hourly, and `followers:notify` every 30 minutes.
 
 ### Search in production (Meilisearch)

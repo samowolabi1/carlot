@@ -17,5 +17,7 @@ final class GatewayTransaction
         public readonly ?string $cardBrand = null,
         public readonly ?string $cardLast4 = null,
         public readonly ?string $message = null,
+        public readonly ?string $customerEmail = null,
+        public readonly ?string $providerId = null,
     ) {}
 }

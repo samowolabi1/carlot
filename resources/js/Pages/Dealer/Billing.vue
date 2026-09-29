@@ -32,6 +32,7 @@ const props = defineProps<{
         grace_ends: string | null;
         card: string | null;
         can_update_card: boolean;
+        paid_with: string | null;
         coupon: string | null;
     };
     usage: Record<'listings' | 'staff' | 'spotlights', { used: number; limit: number | null }>;
@@ -41,6 +42,7 @@ const props = defineProps<{
     featured: { options: { days: number; price: number }[]; until: string | null };
     can: { manage: boolean; spotlight: boolean };
     sandbox: boolean;
+    checkoutWith: string;
 }>();
 
 const { currentLot } = useShared();
@@ -80,12 +82,12 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
         <div>
             <h1 class="text-[30px] font-bold">Billing</h1>
             <span class="text-[14px] text-muted">
-                Paid with Paystack<template v-if="subscription.card"> · {{ subscription.card }}</template>
+                <template v-if="subscription.paid_with">Paid with {{ subscription.paid_with }}</template><template v-else>Pay by card, bank transfer or USSD</template><template v-if="subscription.card"> · {{ subscription.card }}</template>
             </span>
         </div>
 
         <p v-if="sandbox" class="rounded-xl border border-apricot bg-cream px-4 py-3 text-[14px] text-clay-dark" role="note">
-            <strong>Test mode.</strong> Payments go to a test checkout, not Paystack. Set PAYMENT_DRIVER=paystack and your Paystack keys to take real payments.
+            <strong>Test mode.</strong> Payments go to a test checkout, not {{ checkoutWith }}. Set PAYMENT_DRIVER=live and the provider's keys to take real payments.
         </p>
         <p v-if="subscription.status === 'past_due'" class="rounded-xl border border-danger/30 bg-[#FDECEC] px-4 py-3 text-[14px] text-danger" role="alert">
             <strong>{{ subscription.trial_ends ? 'Your free trial has ended.' : 'Your last payment did not go through.' }}</strong>
@@ -143,7 +145,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                             :disabled="busy !== null || (plan.free && subscription.status === 'cancelled') || (plan.free && !!subscription.ends)"
                             @click="choose(plan)"
                         >
-                            {{ busy === plan.code ? 'Opening Paystack…' : plan.free ? 'Move to Free' : subscription.status === 'active' ? `Switch to ${plan.name}` : `Choose ${plan.name}` }}
+                            {{ busy === plan.code ? `Opening ${checkoutWith}…` : plan.free ? 'Move to Free' : subscription.status === 'active' ? `Switch to ${plan.name}` : `Choose ${plan.name}` }}
                         </button>
                         <a v-else href="mailto:hello@lotlink.app?subject=Enterprise%20plan" class="btn btn-outline mt-2 h-11 text-[14px]">Talk to us</a>
                     </template>
@@ -154,7 +156,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                         :disabled="busy !== null"
                         @click="choose(plan)"
                     >
-                        {{ busy === plan.code ? 'Opening Paystack…' : `Pay for ${plan.name}` }}
+                        {{ busy === plan.code ? `Opening ${checkoutWith}…` : `Pay for ${plan.name}` }}
                     </button>
                 </div>
             </div>
@@ -183,7 +185,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                         <input v-model="featuredDays" type="radio" name="featured-days" :value="o.days" class="sr-only" />{{ o.days }} days · {{ formatNaira(o.price) }}
                     </label>
                 </div>
-                <button type="button" class="btn btn-primary h-11 self-start text-[14px]" :disabled="busy !== null" @click="buyFeatured">{{ busy === 'featured' ? 'Opening Paystack…' : 'Pay and feature my lot' }}</button>
+                <button type="button" class="btn btn-primary h-11 self-start text-[14px]" :disabled="busy !== null" @click="buyFeatured">{{ busy === 'featured' ? `Opening ${checkoutWith}…` : 'Pay and feature my lot' }}</button>
             </section>
         </div>
 
