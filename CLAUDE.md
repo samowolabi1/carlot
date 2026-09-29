@@ -105,6 +105,14 @@ Run all four before pushing.
 - Account deletion: `DeleteAccount` (soft delete, 30-day grace, sign-in restores) then `AnonymiseAccount`.
 - See `docs/security-review.md` and `loadtest/` (k6) before changing auth, headers or hot paths.
 
+## Support desk
+
+- Lots' tickets to LotLink live in `app/Domain/Helpdesk` (`SupportTicket` is lot-owned; `SupportMessage` hangs off it).
+  Open with `OpenTicket`, add messages only with `ReplyToTicket::fromLot()` / `fromAdmin()` (internal notes never
+  reach the lot), change status/assignee with `ChangeTicketStatus` (audit-logged). Dealer routes bind `{supportTicket}`
+  through `Lot::supportTickets()`. Attachments use the private `local` disk behind signed `support.attachment` links.
+- Admins show to lots as "{first name}, LotLink Support". Unread = `lot_read_at` / `admin_read_at` cleared by the other side's reply.
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -114,7 +122,9 @@ Run all four before pushing.
   unless they test them.
 - Budget maths lives in `FinanceCalculator` (PHP) and `resources/js/lib/finance.ts`; change both
   together and keep `tests/Unit/FinanceCalculatorTest.php` matching the design. The server
-  recomputes `max_price`; never trust the browser's. Rates are in `config('lotlink.finance')`.
+  recomputes `max_price`; never trust the browser's. Rates are in `config('lotlink.finance')`: the
+  file holds defaults and `FinanceRates::apply()` lays the admin's overrides (/admin → Finance rates,
+  `platform_settings`) over it at boot and before each queued job, so keep reading config.
 - The service worker (`public/sw.js`) caches only built assets and Lot Manager pages; bump its
   `VERSION` when changing caching rules.
 
@@ -213,7 +223,9 @@ Run all four before pushing.
 - `Appointment::fromDateTime()` stores dates as UTC; keep it that way for any new date column.
 - Messages to buyers and lots use `App\Domain\Messaging\Message` (a Meta template name plus SMS
   text) via the `phone` notification channel or `Messenger`: WhatsApp first, SMS fallback. New
-  business-initiated WhatsApp messages need a new approved template (list in README).
+  business-initiated WhatsApp messages need a new approved template (list in README) and an entry in
+  `MessageCatalogue::TEMPLATES`. `Messenger` runs every message through `MessageCatalogue::apply()`
+  (admin's template version, language, SMS wording with {1}…/{link}, on/off), so never call the gateways directly.
 - Links in messages are signed routes so they work without signing in.
 - Scheduler: `appointments:remind`, `appointments:mark-no-shows`, `appointments:escalate-pending`.
 
@@ -239,4 +251,4 @@ S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Lead
 S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
 Still deferred: Sanctum API endpoints (the package is installed), Redis/Horizon (the database queue for now),
-admin-editable finance rates and message templates, web push.
+web push.

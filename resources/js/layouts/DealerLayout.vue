@@ -141,6 +141,15 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                     <Icon name="bell" :size="18" />Notifications
                     <span v-if="unread?.notifications" class="ml-auto rounded-full bg-clay px-2 py-0.5 text-[11px] font-bold text-white">{{ unread.notifications }}</span>
                 </Link>
+                <Link
+                    :href="route('dealer.support.index', lot.slug)"
+                    class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] no-underline"
+                    :class="route().current('dealer.support.*') ? 'bg-forest-700 font-semibold text-white' : 'text-mist hover:text-white'"
+                    :aria-current="route().current('dealer.support.*') ? 'page' : undefined"
+                >
+                    <Icon name="lifebuoy" :size="18" />Help & support
+                    <span v-if="lot.support_badge" class="ml-auto rounded-full bg-clay px-2 py-0.5 text-[11px] font-bold text-white">{{ lot.support_badge }}</span>
+                </Link>
                 <Link :href="route('home')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
                     <Icon name="home" :size="18" />Marketplace
                 </Link>
@@ -173,7 +182,10 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
 
             <div v-if="showPendingBanner" class="border-b border-apricot bg-cream px-5 py-3 text-[14px] text-clay-dark lg:px-8">
                 <strong>{{ lot.status_label }}.</strong>
-                <template v-if="lot.status === 'suspended'"> Your lot is hidden from buyers. Contact LotLink support.</template>
+                <template v-if="lot.status === 'suspended'">
+                    Your lot is hidden from buyers.
+                    <Link :href="route('dealer.support.index', lot.slug)" class="font-semibold">Contact LotLink support</Link>
+                </template>
                 <template v-else-if="lot.submitted"> We are reviewing your lot. You can keep setting up while you wait.</template>
                 <template v-else>
                     Finish setting up and submit your lot so buyers can find it.

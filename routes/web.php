@@ -39,6 +39,8 @@ use App\Http\Controllers\Dealer\SettingsController;
 use App\Http\Controllers\Dealer\SocialController;
 use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
+use App\Http\Controllers\Dealer\SupportAttachmentController;
+use App\Http\Controllers\Dealer\SupportController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleCostController;
 use App\Http\Controllers\Dealer\VehicleImportController;
@@ -116,6 +118,8 @@ Route::post('/appointments/{appointment}/review', [ReviewController::class, 'sto
 // Trust (M14): CAC files for the owner and admins (signed), inspection reports for anyone.
 Route::get('/verifications/{verification}/{file}', [VerificationController::class, 'file'])->whereIn('file', ['certificate', 'frontage'])->middleware('signed')->name('verifications.file');
 Route::get('/inspections/{inspection}/report.pdf', InspectionReportController::class)->middleware('throttle:30,1')->name('inspections.pdf');
+// Support ticket attachments: signed, and only for the lot's staff or admins.
+Route::get('/support/attachments/{message}', SupportAttachmentController::class)->middleware(['auth', 'signed'])->name('support.attachment');
 
 // Order tracking (M19). Signed links on receipts and messages; no sign-in needed.
 Route::middleware(['signed', 'throttle:60,1'])->scopeBindings()->group(function () {
@@ -313,6 +317,13 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::get('/reviews', [DealerReviewController::class, 'index'])->name('reviews');
             Route::post('/reviews/{review}/reply', [DealerReviewController::class, 'reply'])->name('reviews.reply');
             Route::get('/analytics', AnalyticsController::class)->name('analytics');
+
+            // Support desk: tickets with LotLink
+            Route::get('/support', [SupportController::class, 'index'])->name('support.index');
+            Route::post('/support', [SupportController::class, 'store'])->middleware('throttle:10,60')->name('support.store');
+            Route::get('/support/{supportTicket}', [SupportController::class, 'show'])->name('support.show');
+            Route::post('/support/{supportTicket}/messages', [SupportController::class, 'reply'])->middleware('throttle:30,1')->name('support.reply');
+            Route::patch('/support/{supportTicket}/status', [SupportController::class, 'status'])->name('support.status');
 
             // Offers, trade-ins and reservations (M12)
             Route::get('/offers', [DealController::class, 'index'])->name('offers.index');

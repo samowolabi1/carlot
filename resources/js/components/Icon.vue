@@ -59,6 +59,9 @@ const paths = {
     rotateRight: 'M20 5v5h-5M19.5 10A8 8 0 1 0 18 17',
     trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
     move: 'M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3',
+    lifebuoy: 'M12 3a9 9 0 1 1 0 18a9 9 0 0 1 0-18M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6',
+    paperclip: 'M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8',
+    send: 'M4 12l16-8-6 16-3-7zM11 13l9-9',
 } as const;
 
 export type IconName = keyof typeof paths;

@@ -10,6 +10,7 @@ use App\Domain\Billing\Gateways\SandboxGateway;
 use App\Domain\Finance\Partners\FinancePartner;
 use App\Domain\Finance\Partners\HttpFinancePartner;
 use App\Domain\Finance\Partners\LogFinancePartner;
+use App\Domain\Finance\Support\FinanceRates;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
@@ -41,6 +42,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -102,6 +104,10 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
 
         Notification::extend('phone', fn ($app) => $app->make(PhoneChannel::class));
+
+        // Finance rates an admin changed in /admin; re-read before each job so long-running workers keep up.
+        FinanceRates::apply();
+        Queue::before(fn () => FinanceRates::apply());
 
         Gate::policy(Lot::class, LotPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);

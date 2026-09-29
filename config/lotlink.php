@@ -77,8 +77,8 @@ return [
     'share_cards' => (bool) env('LOTLINK_SHARE_CARDS', true),
 
     // Budget tools (TDD M10). Estimates shown to buyers, never loan offers. Amounts in whole
-    // naira. Admin-editable settings arrive with the admin tools (S12); until then change
-    // them here or through the matching env values.
+    // naira. These are the defaults: admins can override them in /admin → Finance rates
+    // (stored in platform_settings and laid over this array by FinanceRates::apply()).
     'finance' => [
         // Share of (income - commitments) that may go to a car loan.
         'affordability_ratio' => (float) env('FINANCE_AFFORDABILITY_RATIO', 0.35),

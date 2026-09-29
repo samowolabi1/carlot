@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Messaging\MessageCatalogue;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,6 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([PlanSeeder::class, CouponSeeder::class, VehicleCatalogueSeeder::class]);
+        MessageCatalogue::sync();
 
         // Platform admin for the Filament panel at /admin.
         User::updateOrCreate(

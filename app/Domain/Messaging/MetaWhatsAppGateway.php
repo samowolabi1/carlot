@@ -35,7 +35,7 @@ class MetaWhatsAppGateway implements WhatsAppGateway
                 'type' => 'template',
                 'template' => [
                     'name' => $message->template,
-                    'language' => ['code' => $this->language],
+                    'language' => ['code' => $message->language ?? $this->language],
                     'components' => $components,
                 ],
             ])

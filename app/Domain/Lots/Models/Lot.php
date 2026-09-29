@@ -11,6 +11,7 @@ use App\Domain\Billing\Models\Subscription;
 use App\Domain\Deals\Models\Offer;
 use App\Domain\Deals\Models\Reservation;
 use App\Domain\Deals\Models\TradeIn;
+use App\Domain\Helpdesk\Models\SupportTicket;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Models\Lead;
 use App\Domain\LotManager\Models\FollowUpTask;
@@ -317,6 +318,16 @@ class Lot extends Model
             ->using(LotMember::class)
             ->withPivot(['role', 'accepted_at', 'invited_by'])
             ->withTimestamps();
+    }
+
+    /**
+     * Support tickets the lot opened with LotLink (also the scoped binding for `{supportTicket}`).
+     *
+     * @return HasMany<SupportTicket, $this>
+     */
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
     }
 
     /** @return HasMany<LotHour, $this> */
