@@ -40,13 +40,30 @@ type DealerTradeIn = {
     high: number | null;
     lead_url: string | null;
 };
-type DealerReservation = { ulid: string; car: string; image: Image; buyer: string; deposit: string; price: string; until: string | null; left: string | null; order_url: string };
+type DealerReservation = {
+    ulid: string;
+    status: 'pending' | 'active' | 'refund';
+    reference: string | null;
+    hours: number;
+    buyer_sent: string | null;
+    pay_by: string | null;
+    end_reason: string | null;
+    car: string;
+    image: Image;
+    buyer: string;
+    deposit: string;
+    price: string;
+    until: string | null;
+    left: string | null;
+    order_url: string;
+};
 
 const props = defineProps<{
     tab: 'offers' | 'trade-ins' | 'reservations';
     takesOffers: boolean;
     planAllows: { offers: boolean; deposits: boolean };
     reservationsOn: boolean;
+    hasBank: boolean;
     offers: DealerOffer[];
     tradeIns: DealerTradeIn[];
     reservations: DealerReservation[];
@@ -117,8 +134,25 @@ function askForPhotos(t: DealerTradeIn) {
 }
 
 function cancelReservation(r: DealerReservation) {
-    const reason = prompt(`Cancel ${r.buyer}'s reservation and refund the ${r.deposit} deposit? Say why (the buyer sees this).`);
+    const reason = prompt(`Cancel ${r.buyer}'s reservation? You'll refund the ${r.deposit} deposit from your account. Say why (the buyer sees this).`);
     if (reason) router.post(route('dealer.reservations.cancel', [lot.value.slug, r.ulid]), { reason }, { preserveScroll: true });
+}
+
+function confirmReservation(r: DealerReservation) {
+    if (confirm(`Has ${r.deposit} from ${r.buyer} (reference ${r.reference}) reached your account? The car will be held for ${r.hours} hours.`)) {
+        router.post(route('dealer.reservations.confirm', [lot.value.slug, r.ulid]), {}, { preserveScroll: true });
+    }
+}
+
+function declineReservation(r: DealerReservation) {
+    const reason = prompt(`Decline ${r.buyer}'s request? Say why (the buyer sees this).`, 'Car no longer available');
+    if (reason) router.post(route('dealer.reservations.decline', [lot.value.slug, r.ulid]), { reason }, { preserveScroll: true });
+}
+
+function markRefunded(r: DealerReservation) {
+    if (confirm(`Have you sent the ${r.deposit} deposit back to ${r.buyer}?`)) {
+        router.post(route('dealer.reservations.refunded', [lot.value.slug, r.ulid]), {}, { preserveScroll: true });
+    }
 }
 
 const btn = 'inline-flex h-10 items-center justify-center rounded-[10px] border border-line-strong bg-white px-3.5 text-[13px] font-semibold text-ink';
@@ -133,7 +167,7 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                 <h1 class="text-[30px] font-bold">Offers and trade-ins</h1>
                 <p class="text-[14px] text-muted">Reply within 48 hours or offers expire automatically</p>
             </div>
-            <Link :href="`${route('dealer.settings', lot.slug)}#deals`" class="text-[14px] font-semibold">Offer and deposit settings</Link>
+            <Link :href="`${route('dealer.settings', lot.slug)}#deals`" class="text-[14px] font-semibold">Offer and reservation settings</Link>
         </div>
 
         <p v-if="actionError" role="alert" class="rounded-xl bg-[#FDECEC] px-4 py-3 text-[14px] text-danger">{{ actionError }}</p>
@@ -258,24 +292,41 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
             <p v-if="!planAllows.deposits" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark">
                 Reservations with a deposit are part of the Pro plan. <Link :href="route('dealer.billing', lot.slug)" class="font-semibold">Upgrade</Link> to take them.
             </p>
+            <p v-else-if="!hasBank" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark">
+                Buyers pay reservation deposits straight to your bank account.
+                <Link :href="`${route('dealer.settings', lot.slug)}#bank`" class="font-semibold">Add your bank details</Link> to take reservations.
+            </p>
             <p v-else-if="!reservationsOn" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark">
                 Buyers can't reserve online yet. <Link :href="`${route('dealer.settings', lot.slug)}#deals`" class="font-semibold">Set a reservation deposit</Link> to turn it on.
             </p>
-            <p v-if="reservations.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">No cars are reserved right now.</p>
+            <p v-if="reservations.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">No reservation requests or reserved cars right now.</p>
             <article v-for="r in reservations" :key="r.ulid" class="card flex flex-col gap-3 p-4 md:flex-row md:items-center md:gap-5">
                 <img v-if="r.image" :src="r.image.src" alt="" class="h-[62px] w-[84px] shrink-0 rounded-[10px] object-cover" />
                 <span v-else class="flex h-[62px] w-[84px] shrink-0 items-center justify-center rounded-[10px] bg-sand"><CarGlyph :width="52" /></span>
-                <div class="flex min-w-0 flex-col gap-0.5 md:w-[240px]">
-                    <span class="truncate text-[15px] font-semibold">{{ r.car }}</span>
-                    <span class="text-[12px] text-muted">{{ r.buyer }} · until {{ r.until }}<template v-if="r.left"> ({{ r.left }})</template></span>
+                <div class="flex min-w-0 flex-col gap-0.5 md:w-[260px]">
+                    <span class="flex flex-wrap items-center gap-2">
+                        <span class="truncate text-[15px] font-semibold">{{ r.car }}</span>
+                        <span v-if="r.status === 'pending'" class="rounded-lg bg-blush px-2 py-0.5 text-[11px] font-semibold text-clay-dark">{{ r.buyer_sent ? 'Buyer says paid' : 'Awaiting transfer' }}</span>
+                        <span v-else-if="r.status === 'refund'" class="rounded-lg bg-[#FDECEC] px-2 py-0.5 text-[11px] font-semibold text-danger">Refund due</span>
+                    </span>
+                    <span v-if="r.status === 'pending'" class="text-[12px] text-muted">{{ r.buyer }} · ref <strong class="text-ink">{{ r.reference }}</strong><template v-if="r.buyer_sent"> · sent {{ r.buyer_sent }}</template> · lapses {{ r.pay_by }}</span>
+                    <span v-else-if="r.status === 'refund'" class="text-[12px] text-muted">{{ r.buyer }} · {{ r.end_reason }}</span>
+                    <span v-else class="text-[12px] text-muted">{{ r.buyer }} · until {{ r.until }}<template v-if="r.left"> ({{ r.left }})</template></span>
                 </div>
                 <div class="flex gap-5">
-                    <div class="flex flex-col"><span class="text-[12px] text-muted">Deposit paid</span><span class="text-[15px] font-semibold">{{ r.deposit }}</span></div>
+                    <div class="flex flex-col"><span class="text-[12px] text-muted">{{ r.status === 'active' ? 'Deposit received' : 'Deposit' }}</span><span class="text-[15px] font-semibold">{{ r.deposit }}</span></div>
                     <div class="flex flex-col"><span class="text-[12px] text-muted">Price</span><span class="text-[15px] font-semibold">{{ r.price }}</span></div>
                 </div>
                 <div class="flex flex-wrap gap-2 md:ml-auto">
-                    <Link :href="r.order_url" :class="btnDark"><Icon name="receipt" :size="16" class="mr-1.5" />Create order</Link>
-                    <button type="button" :class="btn" @click="cancelReservation(r)">Cancel and refund</button>
+                    <template v-if="r.status === 'pending'">
+                        <button type="button" :class="btnDark" @click="confirmReservation(r)"><Icon name="check" :size="16" class="mr-1.5" />Deposit received</button>
+                        <button type="button" :class="btn" @click="declineReservation(r)">Decline</button>
+                    </template>
+                    <template v-else-if="r.status === 'active'">
+                        <Link :href="r.order_url" :class="btnDark"><Icon name="receipt" :size="16" class="mr-1.5" />Create order</Link>
+                        <button type="button" :class="btn" @click="cancelReservation(r)">Cancel</button>
+                    </template>
+                    <button v-else type="button" :class="btnDark" @click="markRefunded(r)">Mark refunded</button>
                 </div>
             </article>
         </section>

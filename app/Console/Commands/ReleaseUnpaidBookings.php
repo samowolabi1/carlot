@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Domain\Appointments\Actions\StartDepositCheckout;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use Illuminate\Console\Command;
@@ -18,7 +17,7 @@ class ReleaseUnpaidBookings extends Command
     {
         $count = Appointment::withoutGlobalScopes()
             ->where('status', AppointmentStatus::AwaitingDeposit)
-            ->where('created_at', '<=', now()->subMinutes(StartDepositCheckout::HOLD_MINUTES))
+            ->where('created_at', '<=', now()->subMinutes(30))
             ->update(['status' => AppointmentStatus::Cancelled, 'cancelled_at' => now(), 'cancel_reason' => 'Deposit not paid']);
 
         $this->info("Released {$count} unpaid bookings.");

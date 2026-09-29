@@ -54,4 +54,10 @@ class LotPolicy
     {
         return $user->hasLotRole($lot, LotRole::Owner);
     }
+
+    /** The bank accounts customers pay into: only the owner changes them (everyone can share them). */
+    public function manageBankAccounts(User $user, Lot $lot): bool
+    {
+        return $user->hasLotRole($lot, LotRole::Owner);
+    }
 }

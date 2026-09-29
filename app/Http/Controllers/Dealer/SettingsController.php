@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Lots\Actions\SaveLotHours;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Lots\Models\LotClosure;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
@@ -40,38 +41,44 @@ class SettingsController extends Controller
                 'accepts_offers' => $lot->accepts_offers,
                 'reservation_deposit' => $lot->reservation_deposit ? intdiv($lot->reservation_deposit, 100) : null,
                 'reservation_refundable' => $lot->reservation_refundable,
-                'test_drive_deposit' => $lot->test_drive_deposit ? intdiv($lot->test_drive_deposit, 100) : null,
                 'plan' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
             ],
             'verification' => VerificationController::present($lot, Gate::allows('submit', $lot)),
             'social' => SocialController::present($lot),
+            'bank' => [
+                'accounts' => $lot->bankAccounts()->get()->map(fn (LotBankAccount $a) => $a->present()),
+                'can_edit' => Gate::allows('manageBankAccounts', $lot),
+                'banks' => LotBankAccount::BANKS,
+                'max' => LotBankAccount::MAX,
+            ],
         ]);
     }
 
-    /** Offers and deposits (TDD M12): whether buyers can make offers, and the deposit amounts. */
+    /** Offers and reservations (TDD M12): whether buyers can make offers, and the reservation deposit they pay the lot directly. */
     public function updateDeals(Request $request, Lot $lot): RedirectResponse
     {
         Gate::authorize('update', $lot);
 
-        foreach (['reservation_deposit', 'test_drive_deposit'] as $key) {
-            $request->merge([$key => preg_replace('/[^\d]/', '', (string) $request->input($key)) ?: null]);
-        }
+        $request->merge(['reservation_deposit' => preg_replace('/[^\d]/', '', (string) $request->input('reservation_deposit')) ?: null]);
 
         $data = $request->validate([
             'accepts_offers' => ['required', 'boolean'],
             'reservation_deposit' => ['nullable', 'integer', 'min:1000', 'max:50000000'],
             'reservation_refundable' => ['required', 'boolean'],
-            'test_drive_deposit' => ['nullable', 'integer', 'min:500', 'max:5000000'],
         ], [
             'reservation_deposit.min' => 'A reservation deposit starts at ₦1,000.',
-            'test_drive_deposit.min' => 'A test-drive deposit starts at ₦500.',
         ]);
+
+        // Buyers pay the lot directly, so reservations need somewhere to pay.
+        if (isset($data['reservation_deposit']) && ! $lot->bankAccounts()->exists()) {
+            return back()->withErrors(['reservation_deposit' => 'Add your bank details first so buyers know where to send the deposit.']);
+        }
 
         $lot->update([
             'accepts_offers' => $data['accepts_offers'],
             'reservation_deposit' => isset($data['reservation_deposit']) ? Money::fromMajor((int) $data['reservation_deposit']) : null,
             'reservation_refundable' => $data['reservation_refundable'],
-            'test_drive_deposit' => isset($data['test_drive_deposit']) ? Money::fromMajor((int) $data['test_drive_deposit']) : null,
+            'test_drive_deposit' => null, // LotLink doesn't take test-drive deposits: the lot is paid directly
         ]);
 
         return back()->with('success', 'Offer and deposit settings saved.');

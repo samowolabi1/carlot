@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use App\Domain\Admin\Impersonation;
 use App\Domain\Deals\Enums\OfferStatus;
+use App\Domain\Deals\Enums\ReservationStatus;
 use App\Domain\Deals\Enums\TradeInStatus;
 use App\Domain\Deals\Models\Offer;
+use App\Domain\Deals\Models\Reservation;
 use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Helpdesk\Models\SupportTicket;
 use App\Domain\Leads\Enums\LeadStage;
@@ -74,9 +76,10 @@ class HandleInertiaRequests extends Middleware
                     // Leads badge: new leads plus leads with unread chat messages.
                     'leads_badge' => Lead::query()->where('stage', LeadStage::New)->count()
                         + Conversation::query()->unreadFor(Message::LOT)->whereIn('lead_id', Lead::query()->where('stage', '!=', LeadStage::New)->select('id'))->count(),
-                    // Offers & trade-ins badge: offers and trade-ins waiting for the lot.
+                    // Offers & trade-ins badge: offers, trade-ins and reservation requests waiting for the lot.
                     'deals_badge' => Offer::query()->where('status', OfferStatus::Pending)->count()
-                        + TradeIn::query()->where('status', TradeInStatus::Submitted)->count(),
+                        + TradeIn::query()->where('status', TradeInStatus::Submitted)->count()
+                        + Reservation::query()->where('status', ReservationStatus::Pending)->count(),
                     // Support badge: tickets where LotLink replied and the lot hasn't read it yet.
                     'support_badge' => SupportTicket::query()->unreadByLot()->count(),
                 ];

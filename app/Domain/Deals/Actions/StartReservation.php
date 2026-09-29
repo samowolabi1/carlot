@@ -3,36 +3,39 @@
 namespace App\Domain\Deals\Actions;
 
 use App\Domain\Accounts\Models\User;
-use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Deals\Enums\OfferStatus;
 use App\Domain\Deals\Enums\ReservationStatus;
 use App\Domain\Deals\Models\Offer;
 use App\Domain\Deals\Models\Reservation;
-use App\Domain\Deals\Support\BuyerCheckout;
+use App\Domain\Deals\Notifications\DealAlert;
+use App\Domain\Deals\Support\DealLinks;
+use App\Domain\Deals\Support\DealTimeline;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Actions\CaptureLead;
 use App\Domain\Leads\Enums\LeadSource;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
+use App\Domain\Support\Name;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class StartReservation
 {
-    public function __construct(private readonly CaptureLead $capture, private readonly BuyerCheckout $checkout) {}
+    public function __construct(private readonly CaptureLead $capture, private readonly DealTimeline $timeline) {}
 
     /**
-     * "Pay and reserve" (design 11): records the hold as pending and sends the buyer to pay.
-     * The car is only held once the payment is verified (ActivateReservation).
-     *
-     * @return array{reservation: Reservation, url: string}
+     * "Reserve this car" (design 11): records the request and shows the buyer the lot's bank
+     * details. The buyer transfers the deposit to the lot, never to LotLink; the car is only held
+     * once the lot confirms the money arrived (ActivateReservation). Asking again returns the same request.
      */
-    public function run(User $customer, Vehicle $vehicle, int $hours, ?string $channel = null): array
+    public function run(User $customer, Vehicle $vehicle, int $hours): Reservation
     {
         $lot = Lot::findOrFail($vehicle->lot_id);
         $deposit = $lot->reservationDeposit();
 
-        if ($deposit === null) {
-            throw ValidationException::withMessages(['hours' => "{$lot->name} doesn't take reservations online."]);
+        if ($deposit === null || LotBankAccount::preferredFor($lot->id) === null) {
+            throw ValidationException::withMessages(['hours' => "{$lot->name} doesn't take reservations on LotLink."]);
         }
 
         if ($customer->hasLotRole($lot)) {
@@ -45,6 +48,12 @@ class StartReservation
 
         if ($vehicle->status !== VehicleStatus::Available || Reservation::activeFor($vehicle->id) !== null) {
             throw ValidationException::withMessages(['hours' => 'Someone has just reserved this car.']);
+        }
+
+        $open = Reservation::withoutGlobalScopes()->where('vehicle_id', $vehicle->id)->where('customer_id', $customer->id)
+            ->where('status', ReservationStatus::Pending)->first();
+        if ($open !== null) {
+            return $open;
         }
 
         // An accepted offer sets the price the deposit counts towards.
@@ -63,12 +72,16 @@ class StartReservation
             'price' => $offer?->agreedAmount() ?? (int) $vehicle->price,
             'currency' => $vehicle->currency,
             'hours' => $hours,
+            'pay_by' => now()->addHours(Reservation::PAY_WITHIN_HOURS),
             'status' => ReservationStatus::Pending,
         ]);
 
-        $payment = $this->checkout->payment($reservation, $customer, $lot, PaymentPurpose::Reservation, $deposit, $vehicle->currency, "Reservation: {$vehicle->title()}", $channel);
-        $reservation->forceFill(['payment_id' => $payment->id])->save();
+        $who = Name::short($customer->name);
+        $this->timeline->post($lead, "Asked to reserve for {$hours} hours · paying {$reservation->money()} by transfer, reference {$reservation->reference}");
+        Notification::send($lot->members()->get(), new DealAlert('reservation',
+            "{$who} wants to reserve the {$vehicle->title()} and is sending {$reservation->money()} to your account (reference {$reservation->reference}). Confirm it when the money lands.",
+            DealLinks::lot($lot, 'reservations')));
 
-        return ['reservation' => $reservation, 'url' => $this->checkout->url($payment, $customer, route('reservations.callback'))];
+        return $reservation;
     }
 }

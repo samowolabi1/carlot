@@ -69,7 +69,7 @@ function setStage(stage: string) {
     update({ stage });
 }
 
-function preset(kind: 'location' | 'similar') {
+function preset(kind: 'location' | 'similar' | 'bank') {
     router.post(route('dealer.leads.messages.store', [lot.value.slug, props.lead.ulid]), { preset: kind }, {
         preserveScroll: true,
         onError: (errors) => (error.value = Object.values(errors)[0] ?? 'Could not send.'),
@@ -111,6 +111,7 @@ const whatsapp = computed(() =>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('location')">Send lot location</button>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('similar')">Suggest similar cars</button>
+                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('bank')">Send bank details</button>
                         <span class="flex h-9 items-center gap-1.5 rounded-full border border-dashed border-line-strong px-3 text-[13px] text-muted/70" aria-disabled="true">Send inspection report <span class="text-[10px] font-semibold uppercase">Soon</span></span>
                     </div>
                     <ChatComposer

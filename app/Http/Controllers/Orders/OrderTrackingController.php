@@ -11,6 +11,7 @@ use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Support\OrderLinks;
 use App\Domain\LotManager\Support\ReceiptPdf;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response as HttpResponse;
@@ -81,6 +82,8 @@ class OrderTrackingController extends Controller
                 'directions' => $lot->directionsUrl(),
                 'url' => route('lots.show', $lot->slug),
             ],
+            // Pay the lot directly: LotLink never takes payment for cars.
+            'bank' => $order->isOpen() && $order->balance > 0 ? LotBankAccount::preferredFor($lot->id)?->present() : null,
             'poweredBy' => OrderLinks::poweredBy('order_tracking', $lot->slug),
         ]);
     }

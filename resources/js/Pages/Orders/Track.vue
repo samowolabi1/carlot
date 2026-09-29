@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BankDetailsCard, { type BankDetails } from '@/components/BankDetailsCard.vue';
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
@@ -37,6 +38,7 @@ defineProps<{
     next: { due: string; amount: string; overdue: boolean } | null;
     documents: { name: string; status: string; status_label: string }[];
     poweredBy: string;
+    bank: BankDetails | null;
 }>();
 </script>
 
@@ -96,6 +98,13 @@ defineProps<{
                     </li>
                 </ul>
             </section>
+
+            <BankDetailsCard v-if="bank" :account="bank" :amount="order.balance" :reference="order.order_no" :title="`Pay ${lot.name}`">
+                <p class="flex gap-2 text-[13px] text-muted">
+                    <Icon name="shield" :size="16" class="mt-0.5 shrink-0 text-forest" />
+                    You pay {{ lot.name }} directly; LotLink never takes payment for cars. Only pay into the account shown here or on your receipt, and ask the lot for a receipt.
+                </p>
+            </BankDetailsCard>
 
             <section v-if="instalments.length" class="card p-4" aria-labelledby="plan-heading">
                 <h2 id="plan-heading" class="mb-2 font-sans text-[16px] font-bold">Instalment plan</h2>

@@ -19,7 +19,7 @@ type BuyerOffer = {
     can_reserve: boolean;
     book_url: string;
 };
-type BuyerReservation = { ulid: string; car: string; car_url: string; lot: string; deposit: string; price: string; until: string | null; left: string | null; book_url: string };
+type BuyerReservation = { ulid: string; status: string; car: string; car_url: string; lot: string; deposit: string; price: string; until: string | null; left: string | null; book_url: string; pay_url: string | null };
 type BuyerTradeIn = { ulid: string; status: 'submitted' | 'valued'; title: string; lot: string; towards: string | null; estimate: string | null; note: string | null; photos: number; book_url: string };
 type PastDeal = { key: string; title: string; detail: string; status: string; at: string | null };
 
@@ -85,14 +85,20 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
                 Make an offer, reserve a car or get a trade-in valuation from any car page.
             </p>
 
-            <article v-for="r in reservations" :key="r.ulid" class="card flex flex-col gap-2 p-3.5">
+            <article v-for="r in reservations" :key="r.ulid" class="card flex flex-col gap-2 p-3.5" :class="{ 'border-2 border-clay': r.status === 'pending' }">
                 <div class="flex items-start justify-between gap-3">
-                    <Link :href="r.car_url" class="text-[15px] font-semibold text-ink no-underline">Reserved: {{ r.car }}</Link>
+                    <Link :href="r.car_url" class="text-[15px] font-semibold text-ink no-underline">{{ r.status === 'pending' ? 'Reservation requested' : 'Reserved' }}: {{ r.car }}</Link>
                     <span v-if="r.left" class="shrink-0 text-[12px] font-semibold text-clay-dark">{{ r.left }}</span>
                 </div>
-                <span class="text-[14px] text-[#4A4D53]">{{ r.deposit }} deposit paid · held until {{ r.until }} · {{ r.lot }}</span>
-                <span class="text-[13px] text-muted">The deposit counts towards {{ r.price }} when you buy.</span>
-                <div class="flex gap-2"><Link :href="r.book_url" :class="smPrimary">Book a visit</Link></div>
+                <span v-if="r.status === 'pending'" class="text-[14px] text-[#4A4D53]">Transfer the {{ r.deposit }} deposit to {{ r.lot }}. The car is held once they confirm it.</span>
+                <template v-else>
+                    <span class="text-[14px] text-[#4A4D53]">{{ r.deposit }} deposit paid · held until {{ r.until }} · {{ r.lot }}</span>
+                    <span class="text-[13px] text-muted">The deposit counts towards {{ r.price }} when you buy.</span>
+                </template>
+                <div class="flex gap-2">
+                    <Link v-if="r.pay_url" :href="r.pay_url" :class="smPrimary">Payment details</Link>
+                    <Link v-else :href="r.book_url" :class="smPrimary">Book a visit</Link>
+                </div>
             </article>
 
             <article v-for="o in offers" :key="o.ulid" class="card flex flex-col gap-2 p-3.5" :class="{ 'border-2 border-clay': o.status === 'countered' }">

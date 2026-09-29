@@ -159,15 +159,18 @@ Run all four before pushing.
   (`MakeOffer`, `RespondToOffer`, `AnswerCounterOffer`, `SubmitTradeIn`, `ValueTradeIn`,
   `StartReservation`, `ActivateReservation`, `EndReservation`). These capture a lead, post a line
   into the lead's chat via `DealTimeline`, and notify the buyer (`DealUpdate`) or the lot (`DealAlert`).
-- Buyer deposits (reservations, test drives) are `Billing\Models\Payment` rows with `user_id` = the
-  buyer and purpose `reservation` / `deposit`. They are made by `BuyerCheckout` and only take effect in
-  `FulfilPayment` (verified). The Billing page and invoices use `PaymentPurpose::billing()` only.
-- One active reservation per car. `OrderLedger` never frees a car that has one. `CreateOrder`
-  converts it for the same buyer and records the deposit as a Paystack order payment.
-- Test drives with a deposit start as `awaiting_deposit` (holds the slot; `holdingSlot()` scope).
-  Refunds go through `RefundDeposit` (check-in, cancel); a no-show keeps it.
-- Offers and deposits are plan features (`Lot::takesOffers()`, `reservationDeposit()`,
-  `testDriveDeposit()`); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
+- **LotLink never receives money for car transactions.** Buyers pay the lot directly (transfer, cash, POS). The only
+  payments to LotLink are the lot's own: subscriptions/renewals, spotlights and featured-lot promotions (`PaymentPurpose::billing()`).
+  Never add a buyer checkout; `PaymentPurpose::Reservation`/`Deposit` exist only for legacy payments in `FulfilPayment`.
+- Bank details: `LotBankAccount` (owner-managed via `SaveBankAccount`: audit-logged, owner and managers notified). Share them with
+  `shareText()` / `components/BankDetailsCard.vue` (orders, order tracking, chat preset, reservation page).
+- Reservations: `StartReservation` records a pending request (reference `RES-…`, `pay_by` 12h); the buyer transfers to the lot;
+  owners/managers confirm with `ActivateReservation` (holds the car, lapses rival requests). `ReservationDeposits` records
+  buyer-sent, decline, lapse and refunded; the lot refunds from its own account (`refund_due`). One active reservation per car;
+  `OrderLedger` never frees a car that has one. `CreateOrder` converts it for the same buyer and records the deposit as a transfer.
+- No test-drive deposits: bookings are confirmed or pending, never `awaiting_deposit` (kept only for old rows).
+- Offers and reservations are plan features (`Lot::takesOffers()`, `reservationDeposit()`, which also needs a bank
+  account); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
 
 ## Multi-lot tenancy
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Dealer;
 
+use App\Domain\Deals\Actions\ActivateReservation;
 use App\Domain\Deals\Actions\EndReservation;
+use App\Domain\Deals\Actions\ReservationDeposits;
 use App\Domain\Deals\Actions\RespondToOffer;
 use App\Domain\Deals\Actions\ValueTradeIn;
 use App\Domain\Deals\Enums\OfferStatus;
@@ -49,14 +51,20 @@ class DealController extends Controller
             ->with(['make', 'model', 'customer', 'vehicle.make', 'vehicle.model', 'lead'])
             ->orderByRaw("case status when 'submitted' then 0 else 1 end")->latest('id')->get();
 
-        $reservations = Reservation::query()->where('status', ReservationStatus::Active)
-            ->with(['vehicle.make', 'vehicle.model', 'vehicle.cover', 'customer'])->orderBy('expires_at')->get();
+        // Requests waiting for the buyer's transfer, cars on hold, and deposits the lot still owes back.
+        $reservations = Reservation::query()
+            ->where(fn ($q) => $q->whereIn('status', [ReservationStatus::Pending, ReservationStatus::Active])
+                ->orWhere(fn ($q) => $q->where('refund_due', true)->whereNull('refunded_at')))
+            ->with(['vehicle.make', 'vehicle.model', 'vehicle.cover', 'customer'])
+            ->orderByRaw("case status when 'pending' then 0 when 'active' then 1 else 2 end")->orderBy('expires_at')->orderBy('pay_by')
+            ->get();
 
         return Inertia::render('Dealer/Deals', [
             'tab' => $tab,
             'takesOffers' => $lot->takesOffers(),
             'planAllows' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
             'reservationsOn' => $lot->reservationDeposit() !== null,
+            'hasBank' => $lot->bankAccounts()->exists(),
             'offers' => $offers->map(function (Offer $o) use ($leadCounts, $lot) {
                 $v = $o->vehicle;
                 $days = $v->daysListed();
@@ -99,6 +107,12 @@ class DealController extends Controller
             ]),
             'reservations' => $reservations->map(fn (Reservation $r) => [
                 'ulid' => $r->ulid,
+                'status' => $r->refund_due && ! in_array($r->status, [ReservationStatus::Pending, ReservationStatus::Active], true) ? 'refund' : $r->status->value,
+                'reference' => $r->reference,
+                'hours' => $r->hours,
+                'buyer_sent' => $r->buyer_paid_at?->copy()->setTimezone($tz)->format('D j M, g:ia'),
+                'pay_by' => $r->pay_by?->copy()->setTimezone($tz)->format('D j M, g:ia'),
+                'end_reason' => $r->end_reason,
                 'car' => $r->vehicle->title(),
                 'image' => MarketplacePresenter::image($r->vehicle->cover),
                 'buyer' => Name::short($r->customer->name),
@@ -111,7 +125,7 @@ class DealController extends Controller
             'counts' => [
                 'offers' => $offers->where('status', OfferStatus::Pending)->count(),
                 'tradeIns' => $tradeIns->where('status', TradeInStatus::Submitted)->count(),
-                'reservations' => $reservations->count(),
+                'reservations' => $reservations->where('status', ReservationStatus::Pending)->count(),
             ],
         ]);
     }
@@ -166,6 +180,32 @@ class DealController extends Controller
 
         $end->run($reservation, ReservationStatus::Cancelled, $reason, $request->user());
 
-        return back()->with('success', 'Reservation cancelled and the deposit refunded. The car is back on sale.');
+        return back()->with('success', 'Reservation cancelled and the car is back on sale. Refund the deposit from your account, then mark it refunded here.');
+    }
+
+    /** The buyer's transfer reached the lot's account: hold the car. Owners and managers. */
+    public function confirmReservation(Request $request, Lot $lot, Reservation $reservation, ActivateReservation $activate): RedirectResponse
+    {
+        abort_unless($request->user()->hasLotRole($lot, LotRole::Owner, LotRole::Manager), 403);
+        $activate->run($reservation, $request->user());
+
+        return back()->with('success', 'Deposit confirmed. The car is reserved and the buyer has been told.');
+    }
+
+    public function declineReservation(Request $request, Lot $lot, Reservation $reservation, ReservationDeposits $deposits): RedirectResponse
+    {
+        abort_unless($request->user()->hasLotRole($lot, LotRole::Owner, LotRole::Manager), 403);
+        $reason = $request->validate(['reason' => ['required', 'string', 'max:120']])['reason'];
+        $deposits->decline($reservation, $request->user(), $reason);
+
+        return back()->with('success', 'Request declined. The buyer has been told.');
+    }
+
+    public function refundedReservation(Request $request, Lot $lot, Reservation $reservation, ReservationDeposits $deposits): RedirectResponse
+    {
+        abort_unless($request->user()->hasLotRole($lot, LotRole::Owner, LotRole::Manager), 403);
+        $deposits->refunded($reservation, $request->user());
+
+        return back()->with('success', 'Marked as refunded. The buyer has been told.');
     }
 }

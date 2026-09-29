@@ -101,16 +101,6 @@ class LotResource extends Resource
 
                         return redirect()->route('dealer.dashboard', $lot);
                     }),
-                // Buyer deposits (reservations, test drives) settle to the lot through a Paystack split.
-                Tables\Actions\Action::make('payouts')
-                    ->label('Payouts')->icon('heroicon-o-banknotes')
-                    ->fillForm(fn (Lot $lot) => ['paystack_subaccount' => $lot->paystack_subaccount])
-                    ->form([
-                        Forms\Components\TextInput::make('paystack_subaccount')->label('Paystack subaccount code')
-                            ->placeholder('ACCT_xxxxxxxx')->regex('/^ACCT_[A-Za-z0-9]+$/')->maxLength(40)
-                            ->helperText('Create it in the Paystack dashboard with the lot\'s bank account. Empty: deposits settle to LotLink.'),
-                    ])
-                    ->action(fn (Lot $lot, array $data) => $lot->forceFill(['paystack_subaccount' => $data['paystack_subaccount'] ?: null])->save()),
             ]);
     }
 

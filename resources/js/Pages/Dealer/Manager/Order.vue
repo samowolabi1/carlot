@@ -3,6 +3,7 @@ import Icon from '@/components/Icon.vue';
 import InputError from '@/components/InputError.vue';
 import { statusBadge, type Customer, type Option, type OrderRow } from '@/components/manager/types';
 import { submitOrQueue, useOfflineQueue } from '@/composables/useOfflineQueue';
+import BankDetailsCard, { type BankDetails } from '@/components/BankDetailsCard.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
 import { formatNaira } from '@/lib/format';
@@ -70,6 +71,8 @@ const props = defineProps<{
     profit: { revenue: string; costs: string; profit: string; margin: number | null; negative: boolean; costs_url: string } | null;
     methods: Option[];
     share: string | null;
+    bank: { account: BankDetails; share_text: string; amount: string } | null;
+    bankMissing: boolean;
 }>();
 
 const { currentLot } = useShared();
@@ -390,6 +393,21 @@ async function copyLink() {
                         <button type="submit" class="btn btn-dark h-11 text-[14px]" :disabled="status.processing">Hand over with balance</button>
                     </form>
                 </section>
+
+                <BankDetailsCard
+                    v-if="bank"
+                    :account="bank.account"
+                    :amount="bank.amount"
+                    :reference="order.order_no"
+                    :share-text="bank.share_text"
+                    :whatsapp="customer?.whatsapp ?? null"
+                    title="Share bank details"
+                >
+                    <p class="text-[13px] text-muted">The customer pays your account directly. Record the payment above when it lands.</p>
+                </BankDetailsCard>
+                <p v-else-if="bankMissing && order.open" class="card p-4 text-[14px] text-muted">
+                    Add your bank details in <Link :href="`${route('dealer.settings', lot.slug)}#bank`" class="font-semibold">Settings</Link> to send them to customers from here.
+                </p>
 
                 <section class="card flex flex-col gap-3 p-5" aria-labelledby="share-heading">
                     <h2 id="share-heading" class="font-sans text-[16px] font-bold">Customer tracking link</h2>

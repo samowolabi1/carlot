@@ -13,6 +13,7 @@ use App\Http\Controllers\Bookings\CustomerBookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\LeadIntentController;
 use App\Http\Controllers\Dealer\AnalyticsController;
+use App\Http\Controllers\Dealer\BankAccountController;
 use App\Http\Controllers\Dealer\BillingController;
 use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
@@ -191,8 +192,6 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/appointments', [BookingController::class, 'store'])->middleware('throttle:10,1')->name('bookings.store');
     Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
     Route::patch('/bookings/{appointment}', [CustomerBookingController::class, 'update'])->middleware('throttle:10,1')->name('bookings.update');
-    Route::post('/bookings/{appointment}/deposit', [BookingController::class, 'deposit'])->middleware('throttle:10,1')->name('bookings.deposit');
-    Route::get('/bookings/deposit/callback', [BookingController::class, 'depositCallback'])->name('bookings.deposit.callback');
 
     // Live location for a booking (M8)
     Route::post('/appointments/{appointment}/location', [LocationSessionController::class, 'start'])->middleware('throttle:10,1')->name('location.start');
@@ -215,7 +214,8 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/car/{car}/finance', [FinanceController::class, 'create'])->name('finance.create');
     Route::post('/vehicles/{car}/finance', [FinanceController::class, 'store'])->middleware('throttle:5,60')->name('finance.store');
-    Route::get('/reservations/callback', [ReservationController::class, 'callback'])->name('reservations.callback');
+    Route::get('/reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
+    Route::post('/reservations/{reservation}/sent', [ReservationController::class, 'sent'])->middleware('throttle:10,1')->name('reservations.sent');
 
     // Independent inspections by registered inspectors (M14)
     Route::get('/inspect/{car}', [IndependentInspectionController::class, 'create'])->name('inspector.create');
@@ -331,7 +331,14 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::patch('/trade-ins/{tradeIn}', [DealController::class, 'value'])->name('trade-ins.update');
             Route::post('/trade-ins/{tradeIn}/ask-photos', [DealController::class, 'askForPhotos'])->middleware('throttle:10,1')->name('trade-ins.ask-photos');
             Route::post('/reservations/{reservation}/cancel', [DealController::class, 'cancelReservation'])->name('reservations.cancel');
+            Route::post('/reservations/{reservation}/confirm', [DealController::class, 'confirmReservation'])->name('reservations.confirm');
+            Route::post('/reservations/{reservation}/decline', [DealController::class, 'declineReservation'])->name('reservations.decline');
+            Route::post('/reservations/{reservation}/refunded', [DealController::class, 'refundedReservation'])->name('reservations.refunded');
             Route::put('/settings/deals', [SettingsController::class, 'updateDeals'])->name('settings.deals');
+            // Bank details customers pay into (the lot is paid directly, never through LotLink)
+            Route::post('/bank-accounts', [BankAccountController::class, 'store'])->middleware('throttle:20,60')->name('bank-accounts.store');
+            Route::put('/bank-accounts/{bankAccount}', [BankAccountController::class, 'update'])->middleware('throttle:20,60')->name('bank-accounts.update');
+            Route::delete('/bank-accounts/{bankAccount}', [BankAccountController::class, 'destroy'])->name('bank-accounts.destroy');
 
             // Billing and spotlight (M16, M5)
             Route::get('/billing', [BillingController::class, 'show'])->name('billing');

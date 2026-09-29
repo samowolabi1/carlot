@@ -15,6 +15,7 @@ use App\Domain\Leads\Models\Message;
 use App\Domain\Leads\Support\LeadPresenter;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Lots\Models\LotMember;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
@@ -133,12 +134,12 @@ class LeadController extends Controller
         return back()->with('success', 'Note added.');
     }
 
-    /** The lot's reply, or a quick action: send the lot's location, or suggest similar cars. */
+    /** The lot's reply, or a quick action: send the lot's location, its bank details, or similar cars. */
     public function message(Request $request, Lot $lot, Lead $lead, SendMessage $send): RedirectResponse
     {
         $data = $request->validate([
             'body' => ['required_without_all:preset,photo', 'nullable', 'string', 'max:2000'],
-            'preset' => ['nullable', 'in:location,similar'],
+            'preset' => ['nullable', 'in:location,similar,bank'],
             'photo' => ['nullable', 'image', 'max:8192'],
         ]);
 
@@ -147,6 +148,9 @@ class LeadController extends Controller
                 ? "Here's how to find us: {$lot->name}".($lot->address ? ", {$lot->address}" : '').'. Directions: '.$lot->directionsUrl()
                 : abort(422, 'Set your lot location in Settings first.'),
             'similar' => $this->similar($lot, $lead),
+            // Buyers pay the lot directly (LotLink never takes car payments).
+            'bank' => LotBankAccount::preferredFor($lot->id)?->shareText($lot->name)
+                ?? throw ValidationException::withMessages(['preset' => 'Add your bank details in Settings first.']),
             default => (string) ($data['body'] ?? ''),
         };
 

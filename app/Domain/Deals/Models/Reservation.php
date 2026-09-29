@@ -13,9 +13,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
- * A paid hold on a car for 24, 48 or 72 hours (TDD M12). One active reservation per car; the
+ * A hold on a car for 24, 48 or 72 hours (TDD M12). The buyer transfers the deposit straight to
+ * the lot's bank account (LotLink never holds it) quoting `reference`; the hold starts when the
+ * lot confirms the money arrived (`ActivateReservation`). One active reservation per car; the
  * car shows as Reserved. A sale converts it and the deposit counts towards the price.
  *
  * @property int $id
@@ -25,11 +28,17 @@ use Illuminate\Support\Carbon;
  * @property int $customer_id
  * @property int|null $lead_id
  * @property int|null $offer_id
- * @property int|null $payment_id
+ * @property int|null $payment_id only for deposits paid online before LotLink stopped taking buyer payments
+ * @property string|null $reference
  * @property int $amount
  * @property int $price
  * @property string $currency
  * @property int $hours
+ * @property Carbon|null $pay_by
+ * @property Carbon|null $buyer_paid_at
+ * @property int|null $confirmed_by
+ * @property bool $refund_due
+ * @property Carbon|null $refunded_at
  * @property ReservationStatus $status
  * @property Carbon|null $activated_at
  * @property Carbon|null $expires_at
@@ -44,9 +53,19 @@ class Reservation extends Model
 
     public const HOURS = [24, 48, 72];
 
-    protected $fillable = ['lot_id', 'vehicle_id', 'customer_id', 'lead_id', 'offer_id', 'payment_id', 'amount', 'price', 'currency', 'hours', 'status', 'activated_at', 'expires_at', 'ended_at', 'end_reason', 'sales_order_id'];
+    /** A request lapses if the lot hasn't confirmed the transfer within this many hours. */
+    public const PAY_WITHIN_HOURS = 12;
 
-    protected $hidden = ['id', 'lot_id', 'vehicle_id', 'customer_id', 'lead_id', 'offer_id', 'payment_id', 'sales_order_id'];
+    protected $fillable = ['lot_id', 'vehicle_id', 'customer_id', 'lead_id', 'offer_id', 'payment_id', 'amount', 'price', 'currency', 'hours', 'status', 'reference', 'pay_by', 'buyer_paid_at', 'confirmed_by', 'refund_due', 'refunded_at', 'activated_at', 'expires_at', 'ended_at', 'end_reason', 'sales_order_id'];
+
+    protected $hidden = ['id', 'lot_id', 'vehicle_id', 'customer_id', 'lead_id', 'offer_id', 'payment_id', 'sales_order_id', 'confirmed_by'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reservation $reservation): void {
+            $reservation->reference ??= self::newReference();
+        });
+    }
 
     protected function casts(): array
     {
@@ -55,6 +74,10 @@ class Reservation extends Model
             'amount' => 'integer',
             'price' => 'integer',
             'hours' => 'integer',
+            'pay_by' => 'datetime',
+            'buyer_paid_at' => 'datetime',
+            'refund_due' => 'boolean',
+            'refunded_at' => 'datetime',
             'activated_at' => 'datetime',
             'expires_at' => 'datetime',
             'ended_at' => 'datetime',
@@ -98,6 +121,15 @@ class Reservation extends Model
     public function money(?int $amount = null): string
     {
         return (string) Money::format($amount ?? $this->amount, $this->currency);
+    }
+
+    private static function newReference(): string
+    {
+        do {
+            $reference = 'RES-'.Str::upper(Str::random(6));
+        } while (self::withoutGlobalScopes()->where('reference', $reference)->exists());
+
+        return $reference;
     }
 
     /** The active hold on a car, if any. */

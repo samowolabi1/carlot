@@ -20,6 +20,7 @@ use App\Domain\LotManager\Support\OrderLinks;
 use App\Domain\LotManager\Support\Profit;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
@@ -117,6 +118,13 @@ class OrderController extends Controller
                 ...Presenter::payment($p, $lot->timezone, $order),
                 'receipt_url' => route('dealer.manager.orders.receipt', [$lot, $order, $p]),
             ]),
+            // The customer pays the lot directly (LotLink never takes car payments): send them the details.
+            'bank' => $order->isOpen() && $order->balance > 0 && ($account = LotBankAccount::preferredFor($lot->id)) ? [
+                'account' => $account->present(),
+                'share_text' => $account->shareText($lot->name, $order->money(max(0, $order->balance)), $order->order_no),
+                'amount' => $order->money(max(0, $order->balance)),
+            ] : null,
+            'bankMissing' => ! $lot->bankAccounts()->exists(),
             'steps' => collect([OrderStatus::Draft, OrderStatus::DepositPaid, OrderStatus::FullyPaid, OrderStatus::PapersReady, OrderStatus::Delivered])
                 ->map(fn (OrderStatus $s) => ['value' => $s->value, 'label' => $s->label(), 'done' => $order->status !== OrderStatus::Cancelled && $order->status->rank() >= $s->rank() && ($s !== OrderStatus::FullyPaid || $order->balance <= 0)]),
             'can' => [

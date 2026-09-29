@@ -28,8 +28,6 @@ class PaystackGateway implements PaymentGateway
             'reference' => $payment->reference,
             'callback_url' => $callbackUrl,
             'plan' => $planCode,
-            // Buyer deposits settle to the lot's Paystack subaccount when it has one.
-            'subaccount' => $payment->meta['subaccount'] ?? null,
             'channels' => $payment->meta['channels'] ?? null,
             'metadata' => ['payment' => $payment->ulid, 'purpose' => $payment->purpose->value],
         ], fn ($v) => $v !== null));

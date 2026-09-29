@@ -10,7 +10,8 @@ use App\Domain\Billing\Gateways\GatewayTransaction;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Models\Payment;
 use App\Domain\Billing\Models\Spotlight;
-use App\Domain\Deals\Actions\ActivateReservation;
+use App\Domain\Deals\Enums\ReservationStatus;
+use App\Domain\Deals\Models\Reservation;
 use Illuminate\Support\Facades\DB;
 
 class FulfilPayment
@@ -19,7 +20,6 @@ class FulfilPayment
         private readonly PaymentGateway $gateway,
         private readonly ActivateSubscription $activate,
         private readonly ActivateSpotlight $spotlight,
-        private readonly ActivateReservation $reservation,
         private readonly ConfirmDeposit $deposit,
         private readonly RefundPayment $refund,
     ) {}
@@ -69,9 +69,18 @@ class FulfilPayment
             PaymentPurpose::Subscription => $this->activate->run($payment, $transaction),
             PaymentPurpose::Spotlight => $this->spotlight->run(Spotlight::withoutGlobalScopes()->findOrFail($payment->payable_id)),
             PaymentPurpose::Renewal => null,
-            // A car taken, or a booking released, while the buyer paid: the money goes back.
-            PaymentPurpose::Reservation => $this->reservation->run($payment) ?: $this->refund->run($payment),
+            // Buyer checkouts started before LotLink stopped taking payments for cars. A reservation
+            // is now paid to the lot directly, so an old one is closed and the money goes back;
+            // a test-drive deposit still confirms its booking (or goes back if the slot was released).
+            PaymentPurpose::Reservation => $this->closeLegacyReservation($payment),
             PaymentPurpose::Deposit => $this->deposit->run($payment) ?: $this->refund->run($payment),
         };
+    }
+
+    private function closeLegacyReservation(Payment $payment): void
+    {
+        Reservation::withoutGlobalScopes()->whereKey($payment->payable_id)->where('status', ReservationStatus::Pending)
+            ->update(['status' => ReservationStatus::Failed, 'ended_at' => now(), 'end_reason' => 'Paid online after LotLink stopped taking payments; refunded']);
+        $this->refund->run($payment);
     }
 }

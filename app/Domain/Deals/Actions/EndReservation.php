@@ -32,21 +32,23 @@ class EndReservation
 
     /**
      * Expiry (reservations:expire) or the lot cancelling: the car goes back on sale unless an
-     * order holds it, and the deposit is refunded when the lot's policy says so (a lot
-     * cancelling always refunds).
+     * order holds it. The deposit is owed back when the lot's policy says so (a lot cancelling
+     * always owes it); the lot refunds from its own account and records it. Only deposits paid
+     * online before LotLink stopped taking buyer payments are refunded through the gateway.
      */
     public function run(Reservation $reservation, ReservationStatus $end, string $reason, ?User $by = null): Reservation
     {
         $refund = $end === ReservationStatus::Cancelled || Lot::findOrFail($reservation->lot_id)->reservation_refundable;
 
-        $reservation = DB::transaction(function () use ($reservation, $end, $reason, $by): Reservation {
+        $reservation = DB::transaction(function () use ($reservation, $end, $reason, $by, $refund): Reservation {
             $locked = Reservation::withoutGlobalScopes()->lockForUpdate()->findOrFail($reservation->id);
 
             if ($locked->status !== ReservationStatus::Active) {
                 throw ValidationException::withMessages(['reservation' => 'This reservation has already ended.']);
             }
 
-            $locked->forceFill(['status' => $end, 'ended_at' => now(), 'end_reason' => $reason])->save();
+            $legacy = $locked->payment_id !== null && Payment::find($locked->payment_id)?->status === PaymentStatus::Success;
+            $locked->forceFill(['status' => $end, 'ended_at' => now(), 'end_reason' => $reason, 'refund_due' => $refund && ! $legacy])->save();
 
             $vehicle = Vehicle::withoutGlobalScopes()->lockForUpdate()->find($locked->vehicle_id);
             $heldByOrder = SalesOrder::withoutGlobalScopes()->where('vehicle_id', $locked->vehicle_id)
@@ -62,20 +64,21 @@ class EndReservation
         });
 
         $payment = $reservation->payment_id ? Payment::find($reservation->payment_id) : null;
-        $refunded = $refund && $payment?->status === PaymentStatus::Success;
-        if ($refunded) {
+        $legacyRefund = $refund && $payment?->status === PaymentStatus::Success;
+        if ($legacyRefund) {
             $this->refund->run($payment, $by);
         }
+        $refunded = $legacyRefund || $reservation->refund_due;
 
         $lot = Lot::findOrFail($reservation->lot_id);
         $car = $reservation->vehicle->title();
         $money = $reservation->money();
         $update = match ($end) {
-            ReservationStatus::Expired => 'Your reservation has ended and the car is back on sale.'.($refunded ? " Your {$money} deposit is being refunded." : " The {$money} deposit is kept, as the lot's terms say."),
-            default => "{$lot->name} cancelled your reservation ({$reason}). Your {$money} deposit is being refunded.",
+            ReservationStatus::Expired => 'Your reservation has ended and the car is back on sale.'.($refunded ? " {$lot->name} will refund your {$money} deposit." : " The {$money} deposit is kept, as the lot's terms say."),
+            default => "{$lot->name} cancelled your reservation ({$reason}). They will refund your {$money} deposit.",
         };
 
-        $this->timeline->post(Lead::withoutGlobalScopes()->find($reservation->lead_id), ($end === ReservationStatus::Expired ? 'Reservation expired' : "Reservation cancelled: {$reason}").($refunded ? " · {$money} refunded" : ''));
+        $this->timeline->post(Lead::withoutGlobalScopes()->find($reservation->lead_id), ($end === ReservationStatus::Expired ? 'Reservation expired' : "Reservation cancelled: {$reason}").($refunded ? " · {$money} to refund" : ''));
         $reservation->customer->notify(new DealUpdate('reservation', $car, $lot->name, $update, DealLinks::buyer()));
 
         return $reservation;

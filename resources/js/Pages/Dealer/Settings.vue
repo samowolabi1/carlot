@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BankForm, { type BankState } from '@/components/lot/BankForm.vue';
 import BookingRulesForm from '@/components/lot/BookingRulesForm.vue';
 import BrandingForm from '@/components/lot/BrandingForm.vue';
 import BusinessForm from '@/components/lot/BusinessForm.vue';
@@ -18,6 +19,7 @@ defineProps<{
     deals: DealSettings;
     verification: VerificationState;
     social: SocialState;
+    bank: BankState;
 }>();
 
 const tabs = [
@@ -26,7 +28,8 @@ const tabs = [
     { key: 'location', label: 'Location' },
     { key: 'hours', label: 'Opening hours' },
     { key: 'booking', label: 'Booking rules and closures' },
-    { key: 'deals', label: 'Offers and deposits' },
+    { key: 'bank', label: 'Bank details' },
+    { key: 'deals', label: 'Offers and reservations' },
     { key: 'verification', label: 'Verification' },
     { key: 'social', label: 'Social media' },
 ] as const;
@@ -69,7 +72,8 @@ function select(key: string) {
                     <LocationForm :lot="lot" />
                 </template>
                 <HoursForm v-else-if="active === 'hours'" :lot="lot" />
-                <DealsForm v-else-if="active === 'deals'" :lot-slug="lot.slug" :deals="deals" />
+                <BankForm v-else-if="active === 'bank'" :lot-slug="lot.slug" :bank="bank" />
+                <DealsForm v-else-if="active === 'deals'" :lot-slug="lot.slug" :deals="deals" :has-bank="bank.accounts.length > 0" />
                 <SocialForm v-else-if="active === 'social'" :lot-slug="lot.slug" :social="social" />
                 <template v-else-if="active === 'verification'">
                     <h2 class="mb-3 font-sans text-[16px] font-bold">Verified lot</h2>

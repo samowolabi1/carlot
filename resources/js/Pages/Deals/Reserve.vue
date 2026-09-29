@@ -12,16 +12,11 @@ const props = defineProps<{
     deposit: string;
     agreed: string | null;
     hours: number[];
-    until: Record<string, string>;
+    payWithin: number;
     refundable: boolean;
 }>();
 
-const form = useForm({ hours: 48, channel: 'card' });
-const channels = [
-    { value: 'card', label: 'Card' },
-    { value: 'transfer', label: 'Bank transfer' },
-    { value: 'ussd', label: 'USSD' },
-];
+const form = useForm({ hours: 48 });
 
 const goBack = () => window.history.back();
 const submit = () => form.post(route('reservations.store', props.car.ulid));
@@ -69,29 +64,29 @@ const submit = () => form.post(route('reservations.store', props.car.ulid));
                 </div>
                 <ul class="flex list-disc flex-col gap-1 pl-[18px] text-[13px] text-[#4A4D53]">
                     <li>Counts towards the price when you buy</li>
-                    <li v-if="refundable">Refunded if you don't buy by the end of the hold, or if the lot cancels</li>
-                    <li v-else>Fully refunded if the lot cancels or the car isn't as described. Kept if the hold ends without a sale</li>
-                    <li>Held until {{ until[form.hours] }}. Other buyers see "Reserved"</li>
+                    <li v-if="refundable">{{ lot.name }} refunds it if you don't buy by the end of the hold, or if they cancel</li>
+                    <li v-else>{{ lot.name }} refunds it if they cancel or the car isn't as described. Kept if the hold ends without a sale</li>
+                    <li>Held for {{ form.hours }} hours from when {{ lot.name }} confirms your payment. Other buyers see "Reserved"</li>
                 </ul>
             </div>
 
-            <fieldset class="flex flex-col gap-2">
-                <legend class="mb-2 text-[15px] font-semibold">Pay with</legend>
-                <label
-                    v-for="c in channels"
-                    :key="c.value"
-                    class="flex h-14 cursor-pointer items-center gap-2.5 rounded-xl bg-white px-3.5 text-[15px]"
-                    :class="form.channel === c.value ? 'border-2 border-clay bg-cream font-semibold' : 'border border-line'"
-                >
-                    <input v-model="form.channel" type="radio" name="channel" :value="c.value" class="accent-clay" />{{ c.label }}
-                </label>
-            </fieldset>
+            <div class="card flex flex-col gap-2 p-4">
+                <span class="text-[15px] font-semibold">How it works</span>
+                <ol class="flex list-decimal flex-col gap-1 pl-[18px] text-[13px] text-[#4A4D53]">
+                    <li>Ask to reserve. You'll see {{ lot.name }}'s bank details and a payment reference.</li>
+                    <li>Transfer the deposit from your bank app within {{ payWithin }} hours.</li>
+                    <li>{{ lot.name }} confirms it arrived, and the car is held for you.</li>
+                </ol>
+                <p class="flex gap-2 rounded-xl bg-map px-3 py-2 text-[13px] text-forest">
+                    <Icon name="shield" :size="18" class="shrink-0" /> You pay {{ lot.name }} directly. LotLink never takes payment for cars.
+                </p>
+            </div>
         </div>
 
         <div class="fixed inset-x-0 bottom-[76px] z-30 border-t border-line bg-white md:bottom-0">
             <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-3 md:pb-6">
-                <button type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing" @click="submit">Pay {{ deposit }} and reserve</button>
-                <span class="text-center text-[12px] text-muted">Secured by Paystack</span>
+                <button type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing" @click="submit">Ask to reserve · {{ deposit }} deposit</button>
+                <span class="text-center text-[12px] text-muted">Nothing is charged here. You'll get the lot's bank details next.</span>
             </div>
         </div>
     </CustomerLayout>

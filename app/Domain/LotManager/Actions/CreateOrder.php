@@ -126,13 +126,14 @@ class CreateOrder
             return $this->find($lot, (string) ($data['client_uuid'] ?? '')) ?? throw $e;
         }
 
-        // The reservation deposit counts towards the price, as a Paystack payment on the order.
+        // The reservation deposit counts towards the price: the buyer transferred it to the lot
+        // (or, for reservations from before that, paid it online).
         if ($order->wasRecentlyCreated && $order->reservation_id !== null && $order->balance > 0) {
             $reservation = Reservation::withoutGlobalScopes()->findOrFail($order->reservation_id);
             $this->payments->run($order, $staff, [
                 'amount' => min($reservation->amount, max(0, $order->balance)),
-                'method' => PaymentMethod::Paystack->value,
-                'reference' => $reservation->payment?->reference,
+                'method' => ($reservation->payment_id !== null ? PaymentMethod::Paystack : PaymentMethod::Transfer)->value,
+                'reference' => $reservation->payment_id !== null ? $reservation->payment->reference : $reservation->reference,
                 'paid_at' => $reservation->activated_at?->toIso8601String(),
             ]);
             $order->refresh();

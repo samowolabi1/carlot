@@ -16,12 +16,8 @@ const props = defineProps<{
     types: { value: string; label: string }[];
     days: Day[];
     reschedule: { ulid: string; type: string; starts_at: string } | null;
-    deposit: string | null;
     defaultType: string;
 }>();
-
-// Test drives at some lots take a refundable deposit, paid on Paystack before the booking stands.
-const needsDeposit = computed(() => !props.reschedule && form.type === 'test_drive' && !!props.deposit);
 
 const bookable = (d: Day) => !d.closed && d.slots.some((s) => s.available);
 const firstOpen = props.days.findIndex(bookable);
@@ -143,13 +139,6 @@ function submit() {
                     Anything the lot should know? <span class="font-normal text-muted">(optional)</span>
                     <textarea v-model="form.notes" rows="2" maxlength="500" class="field h-auto py-3" placeholder="e.g. I'd like to bring my mechanic" />
                 </label>
-                <p v-if="needsDeposit" class="card flex gap-2.5 px-3.5 py-3 text-[14px]">
-                    <Icon name="shield" :size="20" class="shrink-0 text-forest" />
-                    <span>
-                        <strong>{{ lot.name }} asks for a refundable {{ deposit }} deposit for test drives.</strong>
-                        You get it back when you arrive, or if you cancel before your slot. It's only kept if you don't turn up.
-                    </span>
-                </p>
                 <label class="card flex items-center gap-2.5 px-3.5 py-3 text-[14px]">
                     <input v-model="form.whatsapp_reminders" type="checkbox" class="h-[18px] w-[18px] accent-forest" />
                     Remind me on WhatsApp (otherwise by SMS)
@@ -160,8 +149,7 @@ function submit() {
         <div class="fixed inset-x-0 bottom-[76px] z-30 border-t border-line bg-white md:bottom-0">
             <div class="mx-auto max-w-xl px-5 pt-3 pb-3 md:pb-6">
                 <button type="button" class="btn btn-primary h-[54px] w-full rounded-[14px] text-[16px]" :disabled="!form.starts_at || form.processing" @click="submit">
-                    <template v-if="summary && needsDeposit">Pay {{ deposit }} deposit · {{ summary }}</template>
-                    <template v-else-if="summary">{{ reschedule ? 'Move to' : `Book ${typeLabel.toLowerCase()}` }} · {{ summary }}</template>
+                    <template v-if="summary">{{ reschedule ? 'Move to' : `Book ${typeLabel.toLowerCase()}` }} · {{ summary }}</template>
                     <template v-else>Pick a time</template>
                 </button>
             </div>

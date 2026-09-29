@@ -45,7 +45,7 @@ const props = defineProps<{
     similar: CarCardData[];
     finance: CarFinanceData | null;
     inspector: boolean;
-    deals: { offers: boolean; reserve: string | null; my_offer: { status: string; text: string } | null; reserved_until: string | null } | null;
+    deals: { offers: boolean; reserve: string | null; my_offer: { status: string; text: string } | null; reserved_until: string | null; reservation_request: string | null } | null;
 }>();
 
 const budget = useBudget();
@@ -253,6 +253,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Icon name="shield" :size="20" class="shrink-0 text-forest" /> Reserved for you until {{ deals.reserved_until }}.
                         <Link :href="route('bookings.index')" class="ml-auto shrink-0 font-semibold">Details</Link>
                     </p>
+                    <p v-else-if="deals?.reservation_request" class="card flex items-center gap-2.5 border-2 border-clay px-4 py-3 text-[14px]">
+                        <Icon name="card" :size="20" class="shrink-0 text-clay" /> You asked to reserve this car. Pay the lot's deposit to hold it.
+                        <Link :href="deals.reservation_request" class="ml-auto shrink-0 font-semibold">Payment details</Link>
+                    </p>
                     <p v-else-if="deals?.my_offer" class="card flex items-center gap-2.5 px-4 py-3 text-[14px]" :class="{ 'border-2 border-clay': deals.my_offer.status === 'countered' }">
                         <Icon name="tag" :size="20" class="shrink-0 text-clay" /> {{ deals.my_offer.text }}
                         <Link :href="`${route('bookings.index')}#offers`" class="ml-auto shrink-0 font-semibold">{{ deals.my_offer.status === 'countered' ? 'Answer' : 'View' }}</Link>
@@ -260,7 +264,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
 
                     <!-- Design 06: Reserve with deposit · Trade in my car (and the lot's phone, on phones). -->
                     <div v-if="canDeal && !sold" class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-semibold">
-                        <Link v-if="deals?.reserve" :href="reserveHref" class="inline-flex min-h-11 items-center">Reserve with deposit</Link>
+                        <Link v-if="deals?.reserve && !deals.reservation_request" :href="reserveHref" class="inline-flex min-h-11 items-center">Reserve with deposit</Link>
                         <Link :href="tradeInHref" class="inline-flex min-h-11 items-center">Trade in my car</Link>
                         <a v-if="lot.phone && deals?.offers" :href="`tel:${lot.phone}`" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('call')">Call the lot</a>
                         <a v-if="whatsappHref && deals?.offers" :href="whatsappHref" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('whatsapp')">WhatsApp</a>

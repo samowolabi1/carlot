@@ -77,7 +77,7 @@ use Illuminate\Support\Str;
  * @property bool $accepts_offers
  * @property int|null $reservation_deposit
  * @property bool $reservation_refundable
- * @property int|null $test_drive_deposit
+ * @property int|null $test_drive_deposit no longer used: LotLink takes no buyer deposits
  * @property string|null $paystack_subaccount
  * @property string|null $referral_code
  * @property Carbon|null $daily_summary_sent_on
@@ -297,13 +297,8 @@ class Lot extends Model
     /** The reservation deposit in minor units, or null when reservations are off. */
     public function reservationDeposit(): ?int
     {
-        return $this->reservation_deposit > 0 && $this->planAllows('deposits') ? $this->reservation_deposit : null;
-    }
-
-    /** The refundable test-drive deposit in minor units, or null when there is none. */
-    public function testDriveDeposit(): ?int
-    {
-        return $this->test_drive_deposit > 0 && $this->planAllows('deposits') ? $this->test_drive_deposit : null;
+        // Buyers pay the lot directly, so there must be an account to pay into.
+        return $this->reservation_deposit > 0 && $this->planAllows('deposits') && $this->bankAccounts()->exists() ? $this->reservation_deposit : null;
     }
 
     public function isFeatured(): bool
@@ -318,6 +313,16 @@ class Lot extends Model
             ->using(LotMember::class)
             ->withPivot(['role', 'accepted_at', 'invited_by'])
             ->withTimestamps();
+    }
+
+    /**
+     * Bank accounts customers pay into (the lot is paid directly; LotLink never holds car money).
+     *
+     * @return HasMany<LotBankAccount, $this>
+     */
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(LotBankAccount::class)->orderByDesc('is_default')->orderBy('id');
     }
 
     /**

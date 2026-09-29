@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Bookings;
 
 use App\Domain\Appointments\Actions\CancelAppointment;
 use App\Domain\Appointments\Actions\RescheduleAppointment;
-use App\Domain\Appointments\Actions\StartDepositCheckout;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Support\AppointmentText;
@@ -20,7 +19,6 @@ use App\Domain\Deals\Models\TradeIn;
 use App\Domain\Location\Actions\StartLocationSession;
 use App\Domain\Location\Models\LocationSession;
 use App\Domain\Lots\Models\Lot;
-use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\DealsPresenter;
 use App\Http\Presenters\MarketplacePresenter;
@@ -69,11 +67,11 @@ class CustomerBookingController extends Controller
             'upcoming' => $appointments->filter(fn (Appointment $a) => $a->isUpcoming() || $a->status === AppointmentStatus::AwaitingDeposit)->sortBy('starts_at')->values()->map($map),
             'past' => $appointments->reject(fn (Appointment $a) => $a->isUpcoming() || $a->status === AppointmentStatus::AwaitingDeposit)->values()->map($map),
             'offers' => $offers->filter($openOffer)->values()->map(fn (Offer $o) => DealsPresenter::buyerOffer($o, $dealLots[$o->lot_id])),
-            'reservations' => $reservations->filter(fn (Reservation $r) => $r->status === ReservationStatus::Active)->values()->map(fn (Reservation $r) => DealsPresenter::buyerReservation($r, $dealLots[$r->lot_id])),
+            'reservations' => $reservations->filter(fn (Reservation $r) => in_array($r->status, [ReservationStatus::Pending, ReservationStatus::Active], true))->values()->map(fn (Reservation $r) => DealsPresenter::buyerReservation($r, $dealLots[$r->lot_id])),
             'tradeIns' => $tradeIns->filter(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->values()->map(fn (TradeIn $t) => DealsPresenter::buyerTradeIn($t, $dealLots[$t->lot_id])),
             'pastDeals' => collect()
                 ->merge($offers->reject($openOffer)->map(fn (Offer $o) => ['key' => "o{$o->ulid}", 'title' => 'Offer on '.$o->vehicle->title(), 'detail' => $o->money().' · '.$dealLots[$o->lot_id]->name, 'status' => $o->status->label(), 'at' => $o->created_at]))
-                ->merge($reservations->reject(fn (Reservation $r) => $r->status === ReservationStatus::Active)->map(fn (Reservation $r) => ['key' => "r{$r->ulid}", 'title' => 'Reservation: '.$r->vehicle->title(), 'detail' => $r->money().' deposit · '.$dealLots[$r->lot_id]->name.($r->payment?->refunded_at ? ' · refunded' : ''), 'status' => $r->status->label(), 'at' => $r->created_at]))
+                ->merge($reservations->reject(fn (Reservation $r) => in_array($r->status, [ReservationStatus::Pending, ReservationStatus::Active], true))->map(fn (Reservation $r) => ['key' => "r{$r->ulid}", 'title' => 'Reservation: '.$r->vehicle->title(), 'detail' => $r->money().' deposit · '.$dealLots[$r->lot_id]->name.($r->payment?->refunded_at || $r->refunded_at ? ' · refunded' : ($r->refund_due ? ' · refund due from the lot' : '')), 'status' => $r->status->label(), 'at' => $r->created_at]))
                 ->merge($tradeIns->reject(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->map(fn (TradeIn $t) => ['key' => "t{$t->ulid}", 'title' => 'Trade-in: '.$t->title(), 'detail' => ($t->estimate() ?? '').' · '.$dealLots[$t->lot_id]->name, 'status' => $t->status->label(), 'at' => $t->created_at]))
                 ->sortByDesc('at')->take(20)->values()->map(fn (array $d) => [...$d, 'at' => $d['at']?->diffForHumans()]),
         ])->withViewData(['meta' => ['title' => 'Bookings and offers', 'robots' => 'noindex']]);
@@ -173,19 +171,10 @@ class CustomerBookingController extends Controller
         ];
     }
 
-    /** A test drive's refundable deposit: due (with the time left to pay), paid or refunded. @return array<string, mixed>|null */
+    /** A deposit paid online before LotLink stopped taking buyer payments: paid or refunded. @return array<string, mixed>|null */
     private function deposit(Appointment $a, Lot $lot): ?array
     {
         $payment = $a->deposit_payment_id ? Payment::find($a->deposit_payment_id) : null;
-
-        if ($a->status === AppointmentStatus::AwaitingDeposit) {
-            return [
-                'state' => 'due',
-                'amount' => Money::format((int) $lot->testDriveDeposit(), (string) config('lotlink.currency', 'NGN')),
-                'left' => DealsPresenter::left($a->created_at?->copy()->addMinutes(StartDepositCheckout::HOLD_MINUTES)),
-                'pay_url' => route('bookings.deposit', $a),
-            ];
-        }
 
         if ($payment === null || ! in_array($payment->status, [PaymentStatus::Success, PaymentStatus::Refunded], true)) {
             return null;

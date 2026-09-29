@@ -33,6 +33,8 @@ final class DealsPresenter
             ->whereIn('status', [...OfferStatus::open(), OfferStatus::Accepted])->latest('id')->first() : null;
         $reservation = $user ? Reservation::withoutGlobalScopes()->where('vehicle_id', $vehicle->id)->where('customer_id', $user->id)
             ->where('status', ReservationStatus::Active)->first() : null;
+        $request = $user && $reservation === null ? Reservation::withoutGlobalScopes()->where('vehicle_id', $vehicle->id)->where('customer_id', $user->id)
+            ->where('status', ReservationStatus::Pending)->first() : null;
 
         return [
             'offers' => $available && $vehicle->negotiable && $vehicle->price > 0 && $lot->takesOffers(),
@@ -46,6 +48,8 @@ final class DealsPresenter
                 },
             ] : null,
             'reserved_until' => $reservation?->expires_at?->copy()->setTimezone($lot->timezone)->format('D j M, g:ia'),
+            // A request waiting for the buyer's transfer: back to the lot's bank details.
+            'reservation_request' => $request ? route('reservations.show', $request) : null,
         ];
     }
 
@@ -124,7 +128,8 @@ final class DealsPresenter
             'until' => $r->expires_at?->copy()->setTimezone($lot->timezone)->format('D j M, g:ia'),
             'left' => $r->status === ReservationStatus::Active ? self::left($r->expires_at) : null,
             'end_reason' => $r->end_reason,
-            'refunded' => $r->payment?->refunded_at !== null,
+            'refunded' => $r->payment?->refunded_at !== null || $r->refunded_at !== null,
+            'pay_url' => $r->status === ReservationStatus::Pending ? route('reservations.show', $r) : null,
             'book_url' => route('bookings.create', ['lot' => $lot->slug, 'car' => $r->vehicle->ulid]),
         ];
     }

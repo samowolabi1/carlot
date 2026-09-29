@@ -14,7 +14,7 @@ checks keep running in CI.
 | Security headers | Fixed | **New** `SecurityHeaders` middleware: CSP with per-request nonces, HSTS, `X-Frame-Options: DENY` (mini-site embeddable), `nosniff`, `Referrer-Policy`, `Permissions-Policy`. |
 | Cookies and HTTPS | Fixed | Session cookie `secure` by default in production; `TRUSTED_PROXIES` so HTTPS is detected behind Caddy/Cloudflare. HttpOnly and SameSite=Lax already set. |
 | Uploads | OK | Size and MIME checked; photos re-encoded to WebP (drops EXIF GPS and embedded payloads); private files (CAC documents, trade-in photos, receipts, inspection PDFs, imports) on the private `local` disk behind signed, short-lived links. |
-| Payments | OK | Paystack signature check, server-side re-verification, idempotent webhooks, amounts from the database. |
+| Payments | OK | LotLink takes no buyer money for cars (buyers pay lots directly), so only lots' own payments (subscriptions, spotlights, promotions) go through Paystack: signature check, server-side re-verification, idempotent webhooks, amounts from the database. Lots' bank details are owner-only, audit-logged, and every change is notified to the owner and managers — `BankAccountTest`. |
 | Webhooks | OK | Paystack (HMAC-SHA512) and finance partner (HMAC-SHA256, `hash_equals`) refuse unsigned calls — `FinanceTest`. |
 | Injection | OK | No user input reaches raw SQL: every `selectRaw`/`orderByRaw` uses constants; the distance maths casts to float and formats with `%F`. Form Requests / `validate()` everywhere; no `$request->all()` into models. |
 | XSS | OK | Vue escapes output; the only `v-html` is Laravel's own pagination labels. JSON-LD is printed through `StructuredData::encode()` with `JSON_HEX_TAG` — `SeoTest`. PDFs escape through Blade. |

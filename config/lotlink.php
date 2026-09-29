@@ -98,6 +98,10 @@ return [
         'servicing' => [3 => 250000, 8 => 400000, 99 => 600000],
     ],
 
+    // Account numbers lots share with customers (Nigeria: 10-digit NUBAN). LotLink never takes
+    // payments for cars; buyers pay the lot's account directly.
+    'bank_account_pattern' => env('BANK_ACCOUNT_PATTERN', '/^\d{10}$/'),
+
     'maps' => [
         'browser_key' => env('GOOGLE_MAPS_BROWSER_KEY'),
     ],

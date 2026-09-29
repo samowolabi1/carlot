@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Deals;
 
-use App\Domain\Billing\Actions\FulfilPayment;
-use App\Domain\Billing\Enums\PaymentPurpose;
-use App\Domain\Billing\Enums\PaymentStatus;
-use App\Domain\Billing\Models\Payment;
+use App\Domain\Deals\Actions\ReservationDeposits;
 use App\Domain\Deals\Actions\StartReservation;
 use App\Domain\Deals\Enums\OfferStatus;
+use App\Domain\Deals\Enums\ReservationStatus;
 use App\Domain\Deals\Models\Offer;
 use App\Domain\Deals\Models\Reservation;
+use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\DealsPresenter;
@@ -19,9 +19,11 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-/** "Reserve with deposit" (design 11) and the Paystack callback. */
+/**
+ * "Reserve this car" (design 11). The buyer pays the lot's own bank account; LotLink never
+ * handles the money. The lot confirms the transfer and the car is held from then.
+ */
 class ReservationController extends Controller
 {
     public function create(Request $request, string $car): Response
@@ -40,40 +42,52 @@ class ReservationController extends Controller
             'deposit' => Money::format($deposit, $vehicle->currency),
             'agreed' => $offer ? $offer->money((int) $offer->agreedAmount()) : null,
             'hours' => Reservation::HOURS,
-            // "Held until Wed 30 Sep, 2:00pm" for each choice, in the lot's time.
-            'until' => collect(Reservation::HOURS)->mapWithKeys(fn (int $h) => [$h => now()->addHours($h)->setTimezone($lot->timezone)->format('D j M, g:ia')]),
+            'payWithin' => Reservation::PAY_WITHIN_HOURS,
             'refundable' => $lot->reservation_refundable,
         ])->withViewData(['meta' => ['title' => 'Reserve — '.$vehicle->title(), 'robots' => 'noindex']]);
     }
 
-    public function store(Request $request, string $car, StartReservation $start): HttpResponse
+    public function store(Request $request, string $car, StartReservation $start): RedirectResponse
     {
-        $data = $request->validate([
-            'hours' => ['required', 'integer', Rule::in(Reservation::HOURS)],
-            'channel' => ['nullable', 'in:card,transfer,ussd'],
-        ]);
+        $data = $request->validate(['hours' => ['required', 'integer', Rule::in(Reservation::HOURS)]]);
 
-        $result = $start->run($request->user(), DealsPresenter::car($car), (int) $data['hours'], $data['channel'] ?? null);
+        $reservation = $start->run($request->user(), DealsPresenter::car($car), (int) $data['hours']);
 
-        return Inertia::location($result['url']);
+        return redirect()->route('reservations.show', $reservation);
     }
 
-    public function callback(Request $request, FulfilPayment $fulfil): RedirectResponse
+    /** How to pay: the lot's bank details, the amount and the reference, then where things stand. */
+    public function show(Request $request, Reservation $reservation): Response
     {
-        $payment = Payment::where('user_id', $request->user()->id)->where('purpose', PaymentPurpose::Reservation)
-            ->where('reference', (string) $request->query('reference', $request->query('trxref', '')))->first();
+        abort_unless($reservation->customer_id === $request->user()->id, 404);
 
-        if ($payment === null) {
-            return redirect(route('bookings.index').'#offers')->with('error', 'We could not find that payment.');
-        }
+        $lot = Lot::withTrashed()->findOrFail($reservation->lot_id);
+        $account = $reservation->status === ReservationStatus::Pending ? LotBankAccount::preferredFor($lot->id) : null;
+        $tz = $lot->timezone;
 
-        $payment = $fulfil->run($payment);
+        return Inertia::render('Deals/ReservationPay', [
+            'reservation' => [
+                ...DealsPresenter::buyerReservation($reservation, $lot),
+                'reference' => $reservation->reference,
+                'hours' => $reservation->hours,
+                'pay_by' => $reservation->pay_by?->copy()->setTimezone($tz)->format('D j M, g:ia'),
+                'sent' => $reservation->buyer_paid_at !== null,
+                'refund_due' => $reservation->refund_due && $reservation->refunded_at === null,
+            ],
+            'account' => $account?->present(),
+            'lot' => [
+                'name' => $lot->name,
+                'phone' => $lot->phone,
+                'whatsapp' => $lot->whatsapp ? ltrim($lot->whatsapp, '+') : null,
+            ],
+        ])->withViewData(['meta' => ['title' => 'Reservation', 'robots' => 'noindex']]);
+    }
 
-        return redirect(route('bookings.index').'#offers')->with(...match ($payment->status) {
-            PaymentStatus::Success => ['success', 'Paid. The car is reserved for you.'],
-            PaymentStatus::Refunded => ['error', 'Someone else took the car while you paid. Your deposit is being refunded.'],
-            PaymentStatus::Pending => ['success', 'We are waiting for Paystack to confirm the payment.'],
-            default => ['error', 'The payment did not go through. You have not been charged.'],
-        });
+    public function sent(Request $request, Reservation $reservation, ReservationDeposits $deposits): RedirectResponse
+    {
+        abort_unless($reservation->customer_id === $request->user()->id, 404);
+        $deposits->sent($reservation, $request->user());
+
+        return back()->with('success', 'Thanks. We\'ve told the lot to check their account and confirm.');
     }
 }

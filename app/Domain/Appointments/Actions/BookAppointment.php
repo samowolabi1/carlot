@@ -64,9 +64,8 @@ class BookAppointment
                 throw ValidationException::withMessages(['starts_at' => 'You already have a booking at this time.']);
             }
 
+            // LotLink takes no deposits: a booking is confirmed or waits for the lot, nothing else.
             $auto = $lot->booking_auto_confirm;
-            // A test drive at a lot that asks for a deposit waits for the payment first.
-            $deposit = $data['type'] === AppointmentType::TestDrive->value && $lot->testDriveDeposit() !== null;
 
             return Appointment::withoutGlobalScopes()->create([
                 'lot_id' => $lot->id,
@@ -75,21 +74,19 @@ class BookAppointment
                 'type' => AppointmentType::from($data['type']),
                 'starts_at' => $slot['starts_at'],
                 'ends_at' => $slot['starts_at']->addMinutes($slot['minutes']),
-                'status' => $deposit ? AppointmentStatus::AwaitingDeposit : ($auto ? AppointmentStatus::Confirmed : AppointmentStatus::Pending),
-                'confirmed_at' => $auto && ! $deposit ? now() : null,
+                'status' => $auto ? AppointmentStatus::Confirmed : AppointmentStatus::Pending,
+                'confirmed_at' => $auto ? now() : null,
                 'notes' => $data['notes'] ?? null,
                 'whatsapp_reminders' => $data['whatsapp_reminders'] ?? true,
             ]);
         });
 
-        if ($appointment->status !== AppointmentStatus::AwaitingDeposit) {
-            $this->announce($appointment, $lot, $customer, $vehicle);
-        }
+        $this->announce($appointment, $lot, $customer, $vehicle);
 
         return $appointment;
     }
 
-    /** The lead, the chat line and the messages, once the booking stands (after any deposit). */
+    /** The lead, the chat line and the messages, once the booking stands. */
     public function announce(Appointment $appointment, Lot $lot, User $customer, ?Vehicle $vehicle): void
     {
         Tracker::record('booking', $lot->id, $vehicle?->id, $appointment->type->value);
