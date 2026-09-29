@@ -5,6 +5,7 @@ namespace App\Domain\Billing\Models;
 use App\Domain\Lots\Models\Plan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -18,14 +19,19 @@ use Illuminate\Support\Carbon;
  * @property int|null $max_redemptions
  * @property int $redeemed
  * @property Carbon|null $expires_at
+ * @property bool $active paused codes can't be redeemed
+ * @property string|null $note what it's for (admins only)
  */
 class Coupon extends Model
 {
-    protected $fillable = ['code', 'plan_id', 'trial_days', 'max_redemptions', 'redeemed', 'expires_at'];
+    protected $fillable = ['code', 'plan_id', 'trial_days', 'max_redemptions', 'redeemed', 'expires_at', 'active', 'note'];
+
+    /** Letters, digits and dashes, so codes are easy to read out and type. */
+    public const PATTERN = '/^[A-Z0-9][A-Z0-9-]{2,31}$/';
 
     protected function casts(): array
     {
-        return ['trial_days' => 'integer', 'max_redemptions' => 'integer', 'redeemed' => 'integer', 'expires_at' => 'datetime'];
+        return ['trial_days' => 'integer', 'max_redemptions' => 'integer', 'redeemed' => 'integer', 'expires_at' => 'datetime', 'active' => 'boolean'];
     }
 
     protected static function booted(): void
@@ -39,9 +45,27 @@ class Coupon extends Model
         return $this->belongsTo(Plan::class);
     }
 
+    /** @return HasMany<Subscription, $this> the lots that redeemed it */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->withoutGlobalScopes();
+    }
+
+    /** active, paused, expired or used_up */
+    public function state(): string
+    {
+        return match (true) {
+            ! $this->active => 'paused',
+            $this->expires_at !== null && ! $this->expires_at->isFuture() => 'expired',
+            $this->max_redemptions !== null && $this->redeemed >= $this->max_redemptions => 'used_up',
+            default => 'active',
+        };
+    }
+
     public function isUsable(): bool
     {
-        return ($this->expires_at === null || $this->expires_at->isFuture())
+        return $this->active
+            && ($this->expires_at === null || $this->expires_at->isFuture())
             && ($this->max_redemptions === null || $this->redeemed < $this->max_redemptions);
     }
 }
