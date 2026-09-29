@@ -24,6 +24,8 @@ final class NotificationPreferences
         'billing' => ['Billing and plan', 'dealers'],
         'summary' => ['Daily summary', 'dealers'],
         'reviews' => ['Reviews of visits', 'all'],
+        'nudges' => ['Reminders to keep your lot busy', 'dealers'],
+        'news' => ['LotLink news, tips and offers', 'dealers'],
     ];
 
     public const OPTIONAL = ['phone', 'mail', 'push'];

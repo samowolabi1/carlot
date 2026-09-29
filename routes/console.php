@@ -14,6 +14,8 @@ Schedule::command('appointments:remind')->everyFiveMinutes()->withoutOverlapping
 Schedule::command('appointments:mark-no-shows')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('appointments:escalate-pending')->hourly()->withoutOverlapping();
 Schedule::command('otp:prune')->daily();
+Schedule::command('engagement:run')->hourly()->withoutOverlapping();
+Schedule::command('engagement:send-broadcasts')->everyMinute()->withoutOverlapping();
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 
 // Lot Manager (TDD M19)

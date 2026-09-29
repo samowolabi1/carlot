@@ -57,6 +57,7 @@ use App\Http\Controllers\Dealer\VinDecodeController;
 use App\Http\Controllers\Deals\OfferController;
 use App\Http\Controllers\Deals\ReservationController;
 use App\Http\Controllers\Deals\TradeInController;
+use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
@@ -160,6 +161,10 @@ Route::middleware('throttle:20,1')->group(function () {
 });
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+
+// Links in LotLink's messages to lots: click tracking, and the email unsubscribe link (signed, no sign-in).
+Route::get('/e/{message}', [EngagementController::class, 'click'])->middleware('throttle:60,1')->name('engagement.click');
+Route::get('/e/unsubscribe/{user:ulid}/{type}', [EngagementController::class, 'unsubscribe'])->middleware(['signed', 'throttle:20,1'])->name('engagement.unsubscribe');
 
 // Admin two-step sign-in (TDD M1), before the Filament panel opens.
 Route::middleware(['auth', 'throttle:30,1'])->prefix('/admin-2fa')->name('admin.2fa.')->group(function () {

@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureProfileComplete;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetCurrentLot;
+use App\Http\Middleware\TouchLastSeen;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -29,7 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
             SecurityHeaders::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            TouchLastSeen::class,
         ]);
+        $middleware->api(append: [TouchLastSeen::class]);
 
         // Paystack can't send a CSRF token; the webhook checks its signature instead.
         $middleware->validateCsrfTokens(except: ['webhooks/paystack', 'webhooks/finance']);

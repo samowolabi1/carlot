@@ -198,6 +198,16 @@ Run all four before pushing.
 - Offers and reservations are plan features (`Lot::takesOffers()`, `reservationDeposit()`, which also needs a bank
   account); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
 
+## Engagement (lots)
+
+- `app/Domain/Engagement`. Admin broadcasts (`Broadcast`, Filament `BroadcastResource`): audience from `BroadcastAudience` (one message per
+  person), sent only through `SendBroadcast` (queued `DeliverBroadcast`, idempotent; scheduled ones by `engagement:send-broadcasts`).
+  Automated emails: rules and defaults in `EngagementRules::RULES`, admin overrides in `platform_settings` (/admin → Automated emails),
+  run hourly by `RunEngagementRules` (`engagement:run`) at each lot's local send hour, with per-lot cooldowns.
+- Every message is an `EngagementMessage` (cooldown record and click tracking via `/e/{ulid}`) delivered by `EngagementNotice`
+  (types `news` / `nudges` in `NotificationPreferences`; emails carry a signed unsubscribe link). Add new rules there, never ad-hoc mailers.
+- `users.last_seen_at` is kept by `TouchLastSeen` (web + API, 15-minute granularity, not while impersonating).
+
 ## Mobile API
 
 - `/api/v1` (`routes/api.php`, `app/Http/Controllers/Api/V1`), Sanctum bearer tokens (`sanctum.expiration`, 90 days). Documented in

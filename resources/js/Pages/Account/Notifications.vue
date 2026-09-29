@@ -26,6 +26,8 @@ const look: Record<string, { icon: IconName; tone: string }> = {
     price_drop: { icon: 'tag', tone: 'bg-[#DCEFE3] text-[#166534]' },
     alert: { icon: 'search', tone: 'bg-map text-forest' },
     import: { icon: 'upload', tone: 'bg-sand text-ink' },
+    news: { icon: 'megaphone', tone: 'bg-blush text-clay-dark' },
+    nudge: { icon: 'bell', tone: 'bg-map text-forest' },
     support: { icon: 'lifebuoy', tone: 'bg-[#E0ECF8] text-[#1E3A8A]' },
     info: { icon: 'bell', tone: 'bg-sand text-ink' },
 };

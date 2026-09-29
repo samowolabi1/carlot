@@ -44,6 +44,7 @@ final class MessageCatalogue
         'daily_summary' => ['label' => 'Daily summary (to the lot)', 'category' => 'Utility', 'variables' => ['lot', 'date', 'walk-ins', 'new orders', 'money received', 'balances due', 'overdue instalments'], 'link' => 'open the report'],
         'review_invite' => ['label' => 'Review invitation', 'category' => 'Utility', 'variables' => ['lot', 'what (visit type and car)'], 'link' => 'leave a review'],
         'saved_search_match' => ['label' => 'Saved search match', 'category' => 'Marketing', 'variables' => ['search name', 'car', 'price', 'lot'], 'link' => 'see the car'],
+        'lot_announcement' => ['label' => 'LotLink announcement (to lots)', 'category' => 'Marketing', 'variables' => ['owner name', 'title'], 'link' => 'read more'],
         'price_drop' => ['label' => 'Price drop on a saved car', 'category' => 'Marketing', 'variables' => ['car', 'new price', 'amount off', 'lot'], 'link' => 'see the car'],
     ];
 

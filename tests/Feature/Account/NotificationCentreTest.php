@@ -41,7 +41,7 @@ it('shows buyers and dealers their own notification settings', function () {
             ->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'new_stock', 'alerts', 'finance', 'reviews']));
 
     $this->actingAs($this->owner)->get(route('notifications.settings'))
-        ->assertInertia(fn (Assert $page) => $page->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'leads', 'billing', 'summary', 'reviews']));
+        ->assertInertia(fn (Assert $page) => $page->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'leads', 'billing', 'summary', 'reviews', 'nudges', 'news']));
 });
 
 it('saves preferences and stops WhatsApp/SMS for that type only', function () {
