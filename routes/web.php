@@ -4,8 +4,11 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AccountDeletionController;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Account\NotificationController;
+use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Admin\TwoFactorController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\OtpLoginController;
+use App\Http\Controllers\Auth\PasswordLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
 use App\Http\Controllers\Billing\SandboxCheckoutController;
 use App\Http\Controllers\Bookings\BookingController;
@@ -139,6 +142,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/verify', [OtpLoginController::class, 'edit'])->name('login.verify');
     Route::post('/auth/verify', [OtpLoginController::class, 'update'])->middleware('throttle:otp')->name('login.check');
     Route::post('/auth/resend', [OtpLoginController::class, 'resend'])->middleware('throttle:otp')->name('login.resend');
+    Route::post('/auth/password', [PasswordLoginController::class, 'store'])->middleware('throttle:20,1')->name('login.password');
+});
+
+// Continue with Google: signs in (or up) when signed out, links Google to the account when signed in.
+Route::middleware('throttle:20,1')->group(function () {
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('login.google');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('login.google.callback');
 });
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
@@ -165,6 +175,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/saved-searches/{savedSearch}', [SavedSearchController::class, 'destroy'])->name('saved-searches.destroy');
     Route::get('/account', AccountController::class)->name('account');
     Route::delete('/account', [AccountDeletionController::class, 'destroy'])->middleware('throttle:5,1')->name('account.destroy');
+    Route::get('/account/security', [SecurityController::class, 'show'])->name('account.security');
+    Route::put('/account/password', [SecurityController::class, 'updatePassword'])->middleware('throttle:10,1')->name('account.password');
+    Route::delete('/account/password', [SecurityController::class, 'destroyPassword'])->middleware('throttle:10,1')->name('account.password.destroy');
+    Route::delete('/account/google', [SecurityController::class, 'disconnectGoogle'])->name('account.google.destroy');
     Route::get('/following', [FollowController::class, 'index'])->name('following');
 
     // Notification centre (M18)

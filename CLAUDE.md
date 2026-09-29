@@ -35,7 +35,9 @@ Run all four before pushing.
   until the customer engages. Users (and lot customers from the marketplace) may have **no phone** when they
   signed up by email: never assume `$user->phone`; `PhoneNumber::display()/mask()` accept null.
 - **Sign-in**: one-time codes by WhatsApp (`SendOtp::run`, no SMS fallback unless `otp.sms_fallback`) or email
-  (`SendOtp::toEmail` / `VerifyOtp::forEmail`). No passwords except admins.
+  (`SendOtp::toEmail` / `VerifyOtp::forEmail`) always work and create accounts. Optional extras: a password (`SetPassword`,
+  `LogInWithPassword` by email or phone; never creates accounts) and Google (`SignInWithGoogle` via Socialite; links by
+  email only when Google verified it). Every sign-in path calls `User::reopenForSignIn()`. Admins must keep a password.
 - **States**: lots' `state` is one of `config('lotlink.regions')` (36 states + FCT); normalise input with `Regions::normalize()`.
   Admins create lots for owners with `OnboardLot`.
 

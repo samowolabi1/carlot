@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import GoogleLogo from '@/components/GoogleLogo.vue';
 import Icon from '@/components/Icon.vue';
 import InputError from '@/components/InputError.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 
-const props = defineProps<{ method: 'whatsapp' | 'email' }>();
+const props = defineProps<{ method: 'whatsapp' | 'email' | 'password'; google: boolean }>();
 
-const form = useForm({ method: props.method, phone: '', email: '' });
+// A one-time code (WhatsApp or email) is the default and also creates accounts; a password only
+// works for accounts that added one in Account → Sign-in and security.
+const mode = ref<'code' | 'password'>(props.method === 'password' ? 'password' : 'code');
+const form = useForm({ method: props.method === 'email' ? 'email' : 'whatsapp', phone: '', email: '' });
+const passwordForm = useForm({ login: '', password: '' });
+const showPassword = ref(false);
 const phoneInput = ref<HTMLInputElement | null>(null);
 const emailInput = ref<HTMLInputElement | null>(null);
+const loginInput = ref<HTMLInputElement | null>(null);
 
 function choose(method: 'whatsapp' | 'email') {
     form.method = method;
@@ -17,8 +24,17 @@ function choose(method: 'whatsapp' | 'email') {
     nextTick(() => (method === 'email' ? emailInput : phoneInput).value?.focus());
 }
 
+function useMode(next: 'code' | 'password') {
+    mode.value = next;
+    nextTick(() => (next === 'password' ? loginInput : form.method === 'email' ? emailInput : phoneInput).value?.focus());
+}
+
 function submit() {
     form.post(route('login.send'));
+}
+
+function submitPassword() {
+    passwordForm.post(route('login.password'), { onFinish: () => passwordForm.reset('password') });
 }
 </script>
 
@@ -27,43 +43,92 @@ function submit() {
     <AuthLayout>
         <div class="flex flex-col gap-2">
             <h1 class="text-[30px] leading-[1.1] font-bold">Sign in or create an account</h1>
-            <p class="text-[15px] text-muted">We'll send you a 6-digit code. No password to remember. New here? This creates your account.</p>
+            <p v-if="mode === 'code'" class="text-[15px] text-muted">We'll send you a 6-digit code. New here? This creates your account.</p>
+            <p v-else class="text-[15px] text-muted">For accounts that added a password.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 rounded-2xl bg-sand p-1" role="radiogroup" aria-label="Get your code by">
-            <button
-                v-for="m in (['whatsapp', 'email'] as const)"
-                :key="m"
-                type="button"
-                role="radio"
-                :aria-checked="form.method === m"
-                class="flex h-12 items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition"
-                :class="form.method === m ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
-                @click="choose(m)"
-            >
-                <Icon :name="m === 'whatsapp' ? 'whatsapp' : 'chat'" :size="18" :class="m === 'whatsapp' && form.method === m ? 'text-[#1FAF57]' : ''" />
-                {{ m === 'whatsapp' ? 'WhatsApp' : 'Email' }}
+        <template v-if="google">
+            <a :href="route('login.google')" class="btn btn-outline flex items-center justify-center gap-3 bg-white no-underline">
+                <GoogleLogo />
+                Continue with Google
+            </a>
+            <div class="flex items-center gap-3 text-[13px] text-muted" aria-hidden="true">
+                <span class="h-px grow bg-divider" />or<span class="h-px grow bg-divider" />
+            </div>
+        </template>
+
+        <template v-if="mode === 'code'">
+            <div class="grid grid-cols-2 gap-2 rounded-2xl bg-sand p-1" role="radiogroup" aria-label="Get your code by">
+                <button
+                    v-for="m in (['whatsapp', 'email'] as const)"
+                    :key="m"
+                    type="button"
+                    role="radio"
+                    :aria-checked="form.method === m"
+                    class="flex h-12 items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition"
+                    :class="form.method === m ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
+                    @click="choose(m)"
+                >
+                    <Icon :name="m === 'whatsapp' ? 'whatsapp' : 'mail'" :size="18" :class="m === 'whatsapp' && form.method === m ? 'text-[#1FAF57]' : ''" />
+                    {{ m === 'whatsapp' ? 'WhatsApp' : 'Email' }}
+                </button>
+            </div>
+
+            <form class="flex flex-col gap-4" @submit.prevent="submit">
+                <label v-if="form.method === 'whatsapp'" class="field-label">
+                    Your WhatsApp number
+                    <span class="flex gap-2">
+                        <span class="flex h-12 items-center rounded-xl border border-line-strong bg-white px-3 text-[15px] font-medium">+234</span>
+                        <input ref="phoneInput" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" required autofocus class="field" placeholder="0803 123 4567" />
+                    </span>
+                    <span class="font-normal text-muted">The code comes as a WhatsApp message, so there's no SMS charge.</span>
+                    <InputError :message="form.errors.phone" />
+                </label>
+                <label v-else class="field-label">
+                    Your email address
+                    <input ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required class="field" placeholder="you@example.com" />
+                    <span class="font-normal text-muted">Check your inbox (and spam folder) for the code.</span>
+                    <InputError :message="form.errors.email" />
+                </label>
+                <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ form.processing ? 'Sending…' : 'Send code' }}</button>
+            </form>
+            <button type="button" class="flex min-h-11 items-center justify-center gap-2 text-[15px] font-semibold text-forest hover:text-clay" @click="useMode('password')">
+                <Icon name="key" :size="18" />
+                Sign in with a password
             </button>
-        </div>
+        </template>
 
-        <form class="flex flex-col gap-4" @submit.prevent="submit">
-            <label v-if="form.method === 'whatsapp'" class="field-label">
-                Your WhatsApp number
-                <span class="flex gap-2">
-                    <span class="flex h-12 items-center rounded-xl border border-line-strong bg-white px-3 text-[15px] font-medium">+234</span>
-                    <input ref="phoneInput" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" required autofocus class="field" placeholder="0803 123 4567" />
-                </span>
-                <span class="font-normal text-muted">The code comes as a WhatsApp message, so there's no SMS charge.</span>
-                <InputError :message="form.errors.phone" />
-            </label>
-            <label v-else class="field-label">
-                Your email address
-                <input ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required class="field" placeholder="you@example.com" />
-                <span class="font-normal text-muted">Check your inbox (and spam folder) for the code.</span>
-                <InputError :message="form.errors.email" />
-            </label>
-            <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ form.processing ? 'Sending…' : 'Send code' }}</button>
-        </form>
+        <template v-else>
+            <form class="flex flex-col gap-4" @submit.prevent="submitPassword">
+                <label class="field-label">
+                    Email or WhatsApp number
+                    <input ref="loginInput" v-model="passwordForm.login" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus class="field" placeholder="you@example.com or 0803 123 4567" />
+                    <InputError :message="passwordForm.errors.login" />
+                </label>
+                <label class="field-label">
+                    Password
+                    <span class="relative flex">
+                        <input v-model="passwordForm.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required class="field pr-12" />
+                        <button
+                            type="button"
+                            class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"
+                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                            :aria-pressed="showPassword"
+                            @click="showPassword = !showPassword"
+                        >
+                            <Icon :name="showPassword ? 'eyeOff' : 'eye'" :size="20" />
+                        </button>
+                    </span>
+                    <InputError :message="passwordForm.errors.password" />
+                </label>
+                <button type="submit" class="btn btn-primary" :disabled="passwordForm.processing">{{ passwordForm.processing ? 'Signing in…' : 'Sign in' }}</button>
+            </form>
+            <p class="text-center text-[13px] text-muted">Forgot it, or never set one? Sign in with a code, then set a new password in Account → Sign-in and security.</p>
+            <button type="button" class="flex min-h-11 items-center justify-center gap-2 text-[15px] font-semibold text-forest hover:text-clay" @click="useMode('code')">
+                <Icon name="chat" :size="18" />
+                Get a one-time code instead
+            </button>
+        </template>
 
         <div class="mt-auto flex flex-col gap-3.5 pt-6">
             <div class="flex flex-col gap-1.5 rounded-2xl bg-forest p-4 text-white">

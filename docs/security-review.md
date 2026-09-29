@@ -9,7 +9,7 @@ checks keep running in CI.
 | Area | Status | Notes |
 | --- | --- | --- |
 | Tenancy (lot A can't reach lot B) | OK | `BelongsToLot` scope + `lot.member` + scoped bindings; a tenancy test for every lot-owned model (tests `*Tenancy*`, `VerificationTest`, `InspectionTest`, `ReviewTest`, `SocialPostTest`, `ImportTest`). |
-| Authentication | Fixed | Phone OTP hashed, attempt/send limits, session regenerated on login. **New:** admin two-step sign-in (TOTP) — `SecurityTest`. |
+| Authentication | Fixed | Phone OTP hashed, attempt/send limits, session regenerated on login. **New:** admin two-step sign-in (TOTP) — `SecurityTest`. Optional passwords (bcrypt, 8+ with letters and numbers, current password to change/remove, per-account lockout, one generic failure message, constant-ish timing with a dummy hash) and Google OAuth (state checked by Socialite, links by email only when Google verified it, a Google ID can't be moved between accounts). Changes are audit-logged and notified — `PasswordSignInTest`, `GoogleSignInTest`. |
 | Authorisation | OK | Policies per model; Filament panel admin-only; `Impersonation` audit-logged. |
 | Security headers | Fixed | **New** `SecurityHeaders` middleware: CSP with per-request nonces, HSTS, `X-Frame-Options: DENY` (mini-site embeddable), `nosniff`, `Referrer-Policy`, `Permissions-Policy`. |
 | Cookies and HTTPS | Fixed | Session cookie `secure` by default in production; `TRUSTED_PROXIES` so HTTPS is detected behind Caddy/Cloudflare. HttpOnly and SameSite=Lax already set. |

@@ -65,4 +65,11 @@ return [
         'graph_version' => env('META_GRAPH_VERSION', 'v21.0'),
     ],
 
+    // Continue with Google (Socialite). Off until both are set. Authorised redirect URI: {APP_URL}/auth/google/callback
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
 ];

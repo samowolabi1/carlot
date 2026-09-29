@@ -19,13 +19,15 @@ use InvalidArgumentException;
 /**
  * Sign in or sign up with a one-time code. People pick how: their WhatsApp number or their email
  * address (both quick, and neither costs them anything). New here: this creates the account.
+ * The same page offers "Continue with Google" and, for accounts that added one, a password.
  */
 class OtpLoginController extends Controller
 {
     public function create(Request $request): Response
     {
         return Inertia::render('Auth/Login', [
-            'method' => $request->query('method') === 'email' ? 'email' : 'whatsapp',
+            'method' => in_array($request->query('method'), ['email', 'password'], true) ? $request->query('method') : 'whatsapp',
+            'google' => GoogleController::enabled(),
         ]);
     }
 

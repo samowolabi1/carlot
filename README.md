@@ -208,7 +208,7 @@ Not in S2 (scheduled later in the TDD): bulk CSV/Excel import (S13), duplicate/f
 
 | Area | What works |
 | --- | --- |
-| Accounts (M1) | One-time-code sign-in and sign-up (6 digits, 5-min expiry, 5 attempts, 3 sends per 15 min). People pick **WhatsApp number** or **email address**: WhatsApp codes don't fall back to paid SMS unless `OTP_SMS_FALLBACK=true`, and email codes are free. Email-only accounts have no phone; lots' customer books match them by email. E.164 normalisation, customer / staff / admin roles |
+| Accounts (M1) | One-time-code sign-in and sign-up (6 digits, 5-min expiry, 5 attempts, 3 sends per 15 min). People pick **WhatsApp number** or **email address**: WhatsApp codes don't fall back to paid SMS unless `OTP_SMS_FALLBACK=true`, and email codes are free. Email-only accounts have no phone; lots' customer books match them by email. E.164 normalisation, customer / staff / admin roles. **Optional password**: once signed in, **Account → Sign-in and security** (also in the dealer sidebar) adds, changes or removes a password (8+ characters with letters and numbers; changing or removing needs the current one). Then `/login` → "Sign in with a password" takes the email **or** WhatsApp number and the password (5 tries a minute per account, one message for every failure, never creates accounts). Forgot it? Sign in with a code and set a new one. **Continue with Google** (when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are set): creates the account, or signs in to the one with the same Google-verified email and links it; signed-in people can connect or disconnect Google on the same page (WhatsApp sign-ups get Google's email added). Every change is audit-logged and emailed/notified to the person. |
 | Lots (M2) | Six-step onboarding: business details → logo and cover → map pin (GPS + Google Maps) → opening hours and booking rules → invite staff → submit for approval |
 | Staff | Invite by phone (SMS) or email, 7-day links, owner / manager / sales roles, plan seat limits, change role, remove |
 | Tenancy | `/dealer/{lot}` routes check membership; `BelongsToLot` scopes lot-owned models to the current lot |
@@ -251,6 +251,10 @@ cd carlot
 - **Sign in** at `/login` with a WhatsApp number or an email address. With `WHATSAPP_DRIVER=log` the WhatsApp
   code is written to `storage/logs/laravel.log` (search for "login_code"); with `MAIL_MAILER=log` the email code is
   in the same log (search for "Your LotLink code").
+  After signing in you can add a password in Account → Sign-in and security. For **Continue with Google**, create an
+  OAuth client (Google Cloud console → APIs & Services → Credentials → OAuth client ID, type "Web application"),
+  add `http://carlot.test/auth/google/callback` (your `APP_URL` + `/auth/google/callback`) as an authorised redirect
+  URI, and put the ID and secret in `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`. Without them the button is hidden.
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
 - **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password`. Change these in `.env`
   (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) before seeding anywhere public.
@@ -381,7 +385,7 @@ sold, and when a lot is approved or suspended.
 
 ```
 app/Domain/<Module>/     Models, Actions, Enums, Policies, Notifications per module
-  Accounts/              Users, OTP codes, SendOtp / VerifyOtp
+  Accounts/              Users, OTP codes, SendOtp / VerifyOtp, SetPassword, LogInWithPassword, SignInWithGoogle
   Lots/                  Lots, members, invitations, hours; BelongsToLot tenancy
   LotManager/            Walk-ins, customers, orders, payments, receipts, follow-ups
   Sharing/               Share links (/c/{code}), share cards, QR codes

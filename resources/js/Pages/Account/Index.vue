@@ -10,7 +10,7 @@ import { useShared } from '@/composables/useShared';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
-    profile: { name: string | null; initials: string; phone: string };
+    profile: { name: string | null; initials: string; phone: string | null; email: string | null };
     budget: string | null;
     counts: { saved: number; bookings: number; following: number };
     orders: { order_no: string; car: string | null; lot: string | null; status: string; balance: string | null; url: string }[];
@@ -39,7 +39,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <span class="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-forest font-display text-[22px] font-bold text-white">{{ profile.initials }}</span>
                 <div class="flex flex-col">
                     <h1 class="font-sans text-[20px] font-semibold">{{ profile.name ?? 'Your account' }}</h1>
-                    <span class="text-[14px] text-muted">{{ profile.phone }}</span>
+                    <span class="text-[14px] text-muted">{{ profile.phone ?? profile.email }}</span>
                 </div>
             </div>
 
@@ -72,6 +72,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
             <nav class="card overflow-hidden" aria-label="Settings">
                 <button v-if="install.canPrompt.value" type="button" :class="row" class="w-full text-left" @click="install.prompt()">Install the LotLink app<Icon name="download" :size="18" class="text-muted" /></button>
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
+                <Link :href="route('account.security')" :class="row">Sign-in and security<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <button type="button" :class="row" class="w-full text-left" :aria-expanded="deleting" @click="deleting = !deleting">Privacy and my data<Icon name="chevronDown" :size="18" class="text-muted" :class="{ 'rotate-180': deleting }" /></button>
             </nav>

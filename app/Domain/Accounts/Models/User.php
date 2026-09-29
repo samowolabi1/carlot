@@ -28,7 +28,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $name
  * @property string|null $phone null when the person signs in with email
  * @property string|null $email
- * @property string|null $password
+ * @property string|null $password optional: set on the account page to sign in with email/phone and password
+ * @property Carbon|null $password_changed_at
+ * @property string|null $google_id the linked Google account ("sub"), for "Continue with Google"
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
@@ -65,6 +67,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'remember_token',
         'two_factor_secret',
         'two_factor_recovery_codes',
+        'google_id',
     ];
 
     protected function casts(): array
@@ -75,6 +78,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'email_verified_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
+            'password_changed_at' => 'datetime',
             'role' => UserRole::class,
             'inspector_since' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
@@ -118,6 +122,25 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function budget(): HasOne
     {
         return $this->hasOne(Budget::class);
+    }
+
+    /**
+     * Signing in (any way) within 30 days of asking to delete the account cancels the deletion.
+     * False when the account is gone for good and can't be signed in to.
+     */
+    public function reopenForSignIn(): bool
+    {
+        if (! $this->trashed()) {
+            return true;
+        }
+        if ($this->deletion_requested_at === null || $this->anonymised_at !== null) {
+            return false;
+        }
+
+        $this->restore();
+        $this->deletion_requested_at = null;
+
+        return true;
     }
 
     public function isAdmin(): bool

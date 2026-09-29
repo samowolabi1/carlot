@@ -151,6 +151,9 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                     <Icon name="lifebuoy" :size="18" />Help & support
                     <span v-if="lot.support_badge" class="ml-auto rounded-full bg-clay px-2 py-0.5 text-[11px] font-bold text-white">{{ lot.support_badge }}</span>
                 </Link>
+                <Link :href="route('account.security')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
+                    <Icon name="key" :size="18" />Sign-in and security
+                </Link>
                 <Link :href="route('home')" class="flex h-10 items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-mist no-underline hover:text-white">
                     <Icon name="home" :size="18" />Marketplace
                 </Link>
