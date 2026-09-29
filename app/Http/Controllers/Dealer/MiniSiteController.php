@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Lots\Domains\CustomDomains;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Sharing\Support\Printables;
@@ -32,6 +33,15 @@ class MiniSiteController extends Controller
                 'initials' => $lot->initials(),
             ],
             'stickers' => $this->stickerCars()->count(),
+            'domain' => [
+                'allowed' => $lot->planAllows('custom_domain'),
+                'can_manage' => Gate::allows('manageBilling', $lot),
+                'name' => $lot->custom_domain,
+                'verified' => $lot->domain_verified_at !== null,
+                'txt_host' => $lot->custom_domain ? '_lotlink.'.$lot->custom_domain : null,
+                'txt_value' => $lot->domain_token ? 'lotlink-verify='.$lot->domain_token : null,
+                'cname' => CustomDomains::appHost(),
+            ],
             'canEdit' => Gate::allows('update', $lot),
         ]);
     }

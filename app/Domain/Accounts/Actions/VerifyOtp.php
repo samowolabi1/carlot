@@ -51,7 +51,11 @@ class VerifyOtp
 
         $user = User::withTrashed()->firstOrNew(['phone' => $phone]);
 
-        if ($user->trashed()) {
+        // Signing in again within 30 days of asking to delete the account cancels the deletion.
+        if ($user->trashed() && $user->deletion_requested_at !== null && $user->anonymised_at === null) {
+            $user->restore();
+            $user->deletion_requested_at = null;
+        } elseif ($user->trashed()) {
             throw OtpException::expired();
         }
 

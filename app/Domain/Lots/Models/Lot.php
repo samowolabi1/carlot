@@ -20,6 +20,7 @@ use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
 use App\Domain\Sharing\Jobs\RenderShareCard;
+use App\Domain\Social\Models\SocialAccount;
 use App\Domain\Trust\Models\LotVerification;
 use App\Domain\Trust\Models\Review;
 use Database\Factories\LotFactory;
@@ -43,6 +44,9 @@ use Illuminate\Support\Str;
  * @property int $owner_id
  * @property string $name
  * @property string $slug
+ * @property string|null $custom_domain
+ * @property string|null $domain_token
+ * @property Carbon|null $domain_verified_at
  * @property string|null $tagline
  * @property string|null $about
  * @property string|null $logo_path
@@ -95,7 +99,7 @@ class Lot extends Model
         'accepts_offers', 'reservation_deposit', 'reservation_refundable', 'test_drive_deposit',
     ];
 
-    protected $hidden = ['id', 'owner_id', 'plan_id', 'location', 'paystack_subaccount'];
+    protected $hidden = ['id', 'owner_id', 'plan_id', 'location', 'paystack_subaccount', 'domain_token'];
 
     protected function casts(): array
     {
@@ -116,6 +120,7 @@ class Lot extends Model
             'reservation_refundable' => 'boolean',
             'test_drive_deposit' => 'integer',
             'daily_summary_sent_on' => 'date',
+            'domain_verified_at' => 'datetime',
         ];
     }
 
@@ -219,6 +224,16 @@ class Lot extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Scoped {socialAccount} bindings.
+     *
+     * @return HasMany<SocialAccount, $this>
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
     }
 
     public function isVerified(): bool

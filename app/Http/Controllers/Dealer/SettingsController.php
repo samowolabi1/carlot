@@ -44,6 +44,7 @@ class SettingsController extends Controller
                 'plan' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
             ],
             'verification' => VerificationController::present($lot, Gate::allows('submit', $lot)),
+            'social' => SocialController::present($lot),
         ]);
     }
 

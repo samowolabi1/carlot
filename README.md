@@ -14,6 +14,20 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S14 (Integrations and full release) ✅**
+
+| Area | What works |
+| --- | --- |
+| Facebook and Instagram | Settings → **Social media**: connect a Facebook Page (and the Instagram Business account linked to it) through Meta. Every newly published car is posted once to each, with its cover photo (a JPEG copy for Instagram), price, key specs and a tracked link, so clicks show in Analytics by platform. Auto-post can be turned off per account; failed posts show why and can be retried. `SOCIAL_DRIVER=log` (default) gives a demo Page and writes posts to the log. |
+| Custom domains | Mini-site & QR → **Custom domain** (Enterprise, owners): enter a domain, add a CNAME and a TXT record, press Check. Once verified, the domain opens the lot's mini-site. For HTTPS, Caddy's on-demand TLS asks `/internal/domains/allowed` before issuing a certificate, so only LotLink and verified lot domains get one. |
+| Finance pre-qualification | On a car's "Pay monthly" card, **Check if you qualify**: deposit, term, income, commitments and work, plus an explicit consent box naming the lender. The details go to the finance partner (`FINANCE_PARTNER_DRIVER=log` is a demo lender using the budget rule; `http` posts to a partner API). The buyer sees the answer under Account → Finance applications and gets a notification; later updates arrive by signed webhook. Lots never see the buyer's financial details. |
+| Security | New security headers (CSP with per-request nonces in production, HSTS, no framing except mini-sites, nosniff, referrer and permissions policies), secure session cookies in production, trusted-proxy support, and **two-step sign-in for admins** with an authenticator app and recovery codes. Full write-up in `docs/security-review.md`. |
+| Privacy | Account → Privacy and my data → **Delete my account**: closes it now; personal data is removed after 30 days (`accounts:anonymise`, daily); signing in before then cancels it. Lots keep their own sales records. |
+| Load test | `loadtest/marketplace.js` (k6) ramps 100 buyers through home, search, landing pages, cars, lots and slots with the TDD's thresholds; `loadtest/smoke.mjs` is a quick check without k6. Results: see `loadtest/README.md`. |
+| Quality | 460 tests, including OAuth state checks, encrypted tokens, one post per car, failure and retry, DNS verification and the TLS ask endpoint, consent and signed finance webhooks, CSP nonces, the RFC 6238 test vector, the admin 2FA flow, and account deletion and restore. |
+
+With S14 every sprint in the TDD plan is built. Still open, by choice: Sanctum API endpoints (no mobile app yet), Redis/Horizon (the database queue is enough for launch), admin-editable finance rates and message templates, web push, and automatic CAC lookups.
+
 **Sprint S13 (SEO and growth tools) ✅**
 
 | Area | What works |
@@ -292,6 +306,18 @@ your `APP_URL` with a `{{1}}` suffix):
 | `review_invite` | Utility | lot, what (visit type and car) | leave a review |
 | `saved_search_match` | Marketing | search name, car, price, lot | see the car |
 | `price_drop` | Marketing | car, new price, amount off, lot | see the car |
+
+### Going live checklist
+
+1. `APP_ENV=production`, `APP_DEBUG=false`, a real `APP_URL` on HTTPS, `TRUSTED_PROXIES` for your proxy.
+2. `PAYMENT_DRIVER=paystack`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
+3. Optional integrations: `SOCIAL_DRIVER=meta` with `META_APP_ID`/`META_APP_SECRET` (redirect URL
+   `https://your-domain/dealer/social/callback`); `FINANCE_PARTNER_DRIVER=http` with the partner's URL, key and
+   `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`).
+4. Caddy in front with on-demand TLS: `on_demand_tls { ask https://your-domain/internal/domains/allowed }`.
+5. Sign in to `/admin`, set up two-step sign-in, change the seeded admin password.
+6. Cron `* * * * * php artisan schedule:run` and a queue worker (`php artisan queue:work --queue=critical,notifications,media,default`).
+7. Run `k6 run -e BASE_URL=https://staging… loadtest/marketplace.js` against staging and read `docs/security-review.md`.
 
 Until a template is approved, messages fall back to SMS automatically.
 

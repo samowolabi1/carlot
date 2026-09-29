@@ -38,7 +38,7 @@ it('shows buyers and dealers their own notification settings', function () {
     $this->actingAs($this->buyer)->get(route('notifications.settings'))
         ->assertInertia(fn (Assert $page) => $page
             ->component('Account/NotificationSettings')
-            ->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'new_stock', 'alerts', 'reviews']));
+            ->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'new_stock', 'alerts', 'finance', 'reviews']));
 
     $this->actingAs($this->owner)->get(route('notifications.settings'))
         ->assertInertia(fn (Assert $page) => $page->where('types', fn ($types) => collect($types)->pluck('type')->all() === ['messages', 'bookings', 'offers', 'leads', 'billing', 'summary', 'reviews']));

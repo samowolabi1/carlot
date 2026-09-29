@@ -92,6 +92,19 @@ Run all four before pushing.
 - Every printed QR goes through `CreateShareLink` with platform `qr` (`Printables`). PDFs use DejaVu with font subsetting.
 - Bulk import: `ImportVehicles` creates drafts only through the add-car Actions; plan feature `bulk_import` (Enterprise).
 
+## Integrations and hardening (S14)
+
+- Social auto-post: `SocialPublisher` (log | meta Graph API). Posts only through `PublishToSocial` (first publish, once
+  per car and account, JPEG copy for Instagram, tracked share link in the caption). Tokens use the `encrypted` cast.
+- Custom domains: `CustomDomains` (TXT `_lotlink.{domain}` = `lotlink-verify={token}`, `DnsLookup` faked in tests);
+  a verified domain's `/` renders the mini-site; Caddy asks `/internal/domains/allowed`. Enterprise (`custom_domain`).
+- Finance hand-off: `FinancePartner` (log | http). `SubmitFinanceApplication` needs consent; applicant data is
+  encrypted and never shown to lots; partner updates arrive at `/webhooks/finance` (HMAC-SHA256).
+- `SecurityHeaders` sets CSP (nonce via `Vite::useCspNonce()`; keep inline scripts out of Blade), HSTS and framing
+  rules; `/l/*` stays embeddable. Admin 2FA: `RequireAdminTwoFactor` + `Totp`. Config: `LOTLINK_CSP`, `ADMIN_2FA`.
+- Account deletion: `DeleteAccount` (soft delete, 30-day grace, sign-in restores) then `AnonymiseAccount`.
+- See `docs/security-review.md` and `loadtest/` (k6) before changing auth, headers or hot paths.
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -220,7 +233,7 @@ rather than fake data.
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations.
+S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
-Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
-Redis/Horizon (the database queue for now).
+Still deferred: Sanctum API endpoints (the package is installed), Redis/Horizon (the database queue for now),
+admin-editable finance rates and message templates, web push.

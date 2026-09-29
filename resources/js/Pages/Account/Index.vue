@@ -4,9 +4,10 @@ import { useBudget } from '@/composables/useBudget';
 import { usePwaInstall } from '@/composables/usePwaInstall';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { formatNaira } from '@/lib/format';
-import { Head, Link } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useShared } from '@/composables/useShared';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     profile: { name: string | null; initials: string; phone: string };
@@ -23,6 +24,11 @@ const install = usePwaInstall();
 const budgetLabel = computed(() => props.budget ?? (local.maxPrice.value !== null ? formatNaira(local.maxPrice.value) : null));
 
 const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t border-divider px-4 text-[15px] text-ink no-underline first:border-t-0 hover:bg-ivory';
+
+// Privacy (TDD, NDPA): close the account; details are removed after 30 days.
+const deleting = ref(false);
+const deleteForm = useForm({ confirm: false });
+const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preserveScroll: true });
 </script>
 
 <template>
@@ -45,6 +51,7 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
                 <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
                 <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
                 <Link :href="`${route('bookings.index')}#offers`" :class="row">Offers and trade-ins<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
+                <Link :href="route('finance.index')" :class="row">Finance applications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('following')" :class="row">Lots I follow<span class="text-[13px] text-muted">{{ counts.following || '' }}</span></Link>
             </nav>
 
@@ -66,8 +73,22 @@ const row = 'flex min-h-[54px] items-center justify-between gap-3 border-t borde
                 <button v-if="install.canPrompt.value" type="button" :class="row" class="w-full text-left" @click="install.prompt()">Install the LotLink app<Icon name="download" :size="18" class="text-muted" /></button>
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
                 <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <span :class="row" class="text-muted/60" aria-disabled="true">Privacy and my data<span class="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">Soon</span></span>
+                <button type="button" :class="row" class="w-full text-left" :aria-expanded="deleting" @click="deleting = !deleting">Privacy and my data<Icon name="chevronDown" :size="18" class="text-muted" :class="{ 'rotate-180': deleting }" /></button>
             </nav>
+
+            <section v-if="deleting" class="card flex flex-col gap-3 p-4" aria-labelledby="delete-heading">
+                <h2 id="delete-heading" class="font-sans text-[16px] font-bold">Delete my account</h2>
+                <p class="text-[14px] text-muted">
+                    Your account closes now. Your name, phone, email, saved cars, searches and budget are removed after 30 days; sign in before then if you change your mind.
+                    Lots you bought from keep their own sales records, as the law requires.
+                </p>
+                <label class="flex cursor-pointer items-start gap-3 text-[14px]">
+                    <input v-model="deleteForm.confirm" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
+                    I understand and want to delete my account.
+                </label>
+                <InputError :message="deleteForm.errors.confirm || (deleteForm.errors as Record<string, string>).account" />
+                <button type="button" class="btn h-11 self-start border-danger bg-white text-danger" :disabled="!deleteForm.confirm || deleteForm.processing" @click="deleteAccount">Delete my account</button>
+            </section>
 
             <template v-if="lots.length">
                 <Link v-for="lot in lots" :key="lot.url" :href="lot.url" class="flex items-center justify-between rounded-2xl bg-forest p-4 text-white no-underline hover:text-white">

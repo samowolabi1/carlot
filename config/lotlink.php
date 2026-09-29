@@ -36,6 +36,27 @@ return [
     // log or meta (WhatsApp Business Cloud API). Templates to create in Meta: see README.
     'whatsapp_driver' => env('WHATSAPP_DRIVER', 'log'),
 
+    'browse_rate_limit' => (int) env('BROWSE_RATE_LIMIT', 120),
+
+    // Content Security Policy (TDD Security). On by default in production; `npm run dev` needs it off.
+    'csp' => (bool) env('LOTLINK_CSP', env('APP_ENV') === 'production'),
+
+    // Admins must use an authenticator app (TDD M1). On by default in production.
+    'admin_2fa' => (bool) env('ADMIN_2FA', env('APP_ENV') === 'production'),
+
+    // Facebook/Instagram auto-post (TDD M9): log | meta
+    'social_driver' => env('SOCIAL_DRIVER', 'log'),
+
+    // Finance pre-qualification hand-off (TDD M10): log | http
+    'finance_partner' => [
+        'driver' => env('FINANCE_PARTNER_DRIVER', 'log'),
+        'code' => env('FINANCE_PARTNER_CODE', 'demo'),
+        'name' => env('FINANCE_PARTNER_NAME', 'Demo Finance'),
+        'url' => env('FINANCE_PARTNER_URL'),
+        'key' => env('FINANCE_PARTNER_KEY'),
+        'webhook_secret' => env('FINANCE_PARTNER_WEBHOOK_SECRET'),
+    ],
+
     'invitation_ttl_days' => 7,
 
     // Billing (TDD M16). "sandbox" fakes the Paystack checkout so plans and spotlights can be

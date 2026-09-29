@@ -7,6 +7,7 @@ use App\Domain\Marketplace\Search\VehicleSearch;
 use App\Domain\Seo\Landing;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 
 /**
@@ -18,7 +19,8 @@ class LandingController extends Controller
     public function __invoke(Request $request, VehicleSearch $search, string $first, ?string $second = null, ?string $third = null): Response
     {
         $landing = Landing::resolve([$first, $second, $third]) ?? abort(404);
-        $stats = $landing->stats();
+        // TDD performance: SEO page figures are cached for 10 minutes.
+        [$stats, $related] = Cache::remember('landing:'.md5($landing->canonical()), now()->addMinutes(10), fn () => [$landing->stats(), $landing->related()]);
 
         $filtered = $request->query() !== [];
 
@@ -30,7 +32,7 @@ class LandingController extends Controller
             'landing' => [
                 'heading' => $landing->heading(),
                 'intro' => $landing->intro($stats),
-                'related' => $landing->related(),
+                'related' => $related,
                 'url' => $landing->canonical(),
             ],
         ], [

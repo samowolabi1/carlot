@@ -47,3 +47,6 @@ Schedule::command('reviews:invite')->everyFifteenMinutes()->withoutOverlapping()
 
 // SEO (TDD M18)
 Schedule::command('sitemap:generate')->dailyAt('03:00')->withoutOverlapping();
+
+// Privacy (TDD: account deletion)
+Schedule::command('accounts:anonymise')->dailyAt('02:30')->withoutOverlapping();

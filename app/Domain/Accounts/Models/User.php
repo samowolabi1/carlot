@@ -29,6 +29,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $phone
  * @property string|null $email
  * @property string|null $password
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property Carbon|null $two_factor_confirmed_at
+ * @property Carbon|null $deletion_requested_at
+ * @property Carbon|null $anonymised_at
  * @property UserRole $role
  * @property Carbon|null $inspector_since
  * @property string|null $inspector_company
@@ -58,6 +63,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         'id',
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     protected function casts(): array
@@ -70,6 +77,9 @@ class User extends Authenticatable implements FilamentUser, HasName
             'password' => 'hashed',
             'role' => UserRole::class,
             'inspector_since' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
+            'deletion_requested_at' => 'datetime',
+            'anonymised_at' => 'datetime',
         ];
     }
 

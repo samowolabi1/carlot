@@ -198,7 +198,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         </div>
                     </section>
 
-                    <template v-if="!sold && finance"><CarFinance :finance="finance" /></template>
+                    <template v-if="!sold && finance"><CarFinance :finance="finance" :apply-href="canDeal && !preview ? route('finance.create', car.ulid) : null" /></template>
 
                     <button
                         v-if="!sold"

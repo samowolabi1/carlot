@@ -17,13 +17,13 @@ class PlanSeeder extends Seeder
         $plans = [
             // Lot Manager gating (TDD M19): Free lots keep up to 10 open orders. Offers and deposits are Pro (spec).
             ['code' => 'free', 'name' => 'Free', 'price' => 0, 'listing_limit' => 10, 'staff_limit' => 1, 'free_spotlights' => 0, 'sort' => 1,
-                'features' => ['open_orders' => 10, 'share_cards' => false, 'offers' => false, 'deposits' => false, 'instalments' => false, 'daily_summary' => false, 'costs' => false, 'analytics' => false, 'analytics_full' => false, 'bulk_import' => false]],
+                'features' => ['open_orders' => 10, 'share_cards' => false, 'offers' => false, 'deposits' => false, 'instalments' => false, 'daily_summary' => false, 'costs' => false, 'analytics' => false, 'analytics_full' => false, 'bulk_import' => false, 'custom_domain' => false]],
             ['code' => 'starter', 'name' => 'Starter', 'price' => 15_000_00, 'listing_limit' => 50, 'staff_limit' => 3, 'free_spotlights' => 0, 'sort' => 2,
-                'features' => ['share_cards' => true, 'offers' => false, 'deposits' => false, 'instalments' => true, 'daily_summary' => true, 'costs' => false, 'analytics' => true, 'analytics_full' => false, 'bulk_import' => false]],
+                'features' => ['share_cards' => true, 'offers' => false, 'deposits' => false, 'instalments' => true, 'daily_summary' => true, 'costs' => false, 'analytics' => true, 'analytics_full' => false, 'bulk_import' => false, 'custom_domain' => false]],
             ['code' => 'pro', 'name' => 'Pro', 'price' => 45_000_00, 'listing_limit' => null, 'staff_limit' => 10, 'free_spotlights' => 2, 'sort' => 3,
-                'features' => ['share_cards' => true, 'offers' => true, 'deposits' => true, 'instalments' => true, 'daily_summary' => true, 'costs' => true, 'analytics' => true, 'analytics_full' => true, 'bulk_import' => false]],
+                'features' => ['share_cards' => true, 'offers' => true, 'deposits' => true, 'instalments' => true, 'daily_summary' => true, 'costs' => true, 'analytics' => true, 'analytics_full' => true, 'bulk_import' => false, 'custom_domain' => false]],
             ['code' => 'enterprise', 'name' => 'Enterprise', 'price' => 0, 'listing_limit' => null, 'staff_limit' => null, 'free_spotlights' => 2, 'sort' => 4, 'self_serve' => false,
-                'features' => ['share_cards' => true, 'offers' => true, 'deposits' => true, 'instalments' => true, 'daily_summary' => true, 'costs' => true, 'analytics' => true, 'analytics_full' => true, 'bulk_import' => true]],
+                'features' => ['share_cards' => true, 'offers' => true, 'deposits' => true, 'instalments' => true, 'daily_summary' => true, 'costs' => true, 'analytics' => true, 'analytics_full' => true, 'bulk_import' => true, 'custom_domain' => true]],
         ];
 
         foreach ($plans as $data) {

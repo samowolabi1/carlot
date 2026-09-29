@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Marketplace;
 
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Lots\Domains\CustomDomains;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
@@ -16,6 +17,11 @@ class HomeController extends Controller
 {
     public function __invoke(Request $request, VehicleSearch $search): Response
     {
+        // A lot's own domain (TDD M6, Enterprise) opens straight on its mini-site.
+        if ($lot = CustomDomains::lotFor($request->getHost())) {
+            return app(LotSiteController::class)($request, $lot, $search);
+        }
+
         // Newest first; nearest first once the buyer has shared their location.
         $criteria = new SearchCriteria(
             lat: is_numeric($request->query('lat')) ? (float) $request->query('lat') : null,

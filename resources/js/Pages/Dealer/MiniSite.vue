@@ -2,14 +2,21 @@
 import Icon from '@/components/Icon.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
     site: { url: string; live: boolean; tagline: string | null; brand_color: string; logo_url: string | null; initials: string };
     stickers: number;
     canEdit: boolean;
+    domain: { allowed: boolean; can_manage: boolean; name: string | null; verified: boolean; txt_host: string | null; txt_value: string | null; cname: string };
 }>();
+
+const domainForm = useForm({ domain: props.domain.name ?? '' });
+const saveDomain = () => domainForm.put(route('dealer.domain.store', lot.value.slug), { preserveScroll: true });
+const verifyDomain = () => router.post(route('dealer.domain.verify', lot.value.slug), {}, { preserveScroll: true });
+const removeDomain = () => router.delete(route('dealer.domain.destroy', lot.value.slug), { preserveScroll: true });
 
 const { currentLot } = useShared();
 const lot = computed(() => currentLot.value!);
@@ -76,12 +83,34 @@ async function copy() {
                     </div>
                 </section>
 
-                <section class="card flex flex-col gap-1 bg-ivory p-5" aria-labelledby="domain-heading">
+                <section class="card flex flex-col gap-3 p-5" :class="{ 'bg-ivory': !domain.allowed }" aria-labelledby="domain-heading">
                     <div class="flex items-center justify-between">
                         <h2 id="domain-heading" class="font-sans text-[15px] font-bold">Custom domain</h2>
-                        <span class="rounded-lg bg-forest px-2 py-0.5 text-[11px] font-semibold text-white">Enterprise · Soon</span>
+                        <span v-if="!domain.allowed" class="rounded-lg bg-forest px-2 py-0.5 text-[11px] font-semibold text-white">Enterprise</span>
+                        <span v-else-if="domain.verified" class="rounded-lg bg-map px-2 py-0.5 text-[12px] font-semibold text-forest">Live</span>
                     </div>
-                    <p class="text-[13px] text-muted">Use your own address, like primemotors.ng, instead of the LotLink link.</p>
+                    <p v-if="!domain.allowed" class="text-[13px] text-muted">Use your own address, like primemotors.ng, instead of the LotLink link. Available on Enterprise.</p>
+                    <template v-else-if="domain.can_manage">
+                        <form class="flex gap-2" @submit.prevent="saveDomain">
+                            <label class="grow">
+                                <span class="sr-only">Your domain</span>
+                                <input v-model="domainForm.domain" class="field h-11" placeholder="cars.primemotors.ng" autocomplete="off" />
+                            </label>
+                            <button type="submit" class="btn btn-outline h-11 shrink-0" :disabled="domainForm.processing">Save</button>
+                        </form>
+                        <InputError :message="domainForm.errors.domain" />
+                        <div v-if="domain.name && !domain.verified" class="flex flex-col gap-2 rounded-xl bg-ivory p-3 text-[13px]">
+                            <p>At your domain provider, add these two records:</p>
+                            <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 break-all">
+                                <dt class="font-semibold">CNAME</dt><dd><code>{{ domain.name }}</code> → <code>{{ domain.cname }}</code></dd>
+                                <dt class="font-semibold">TXT</dt><dd><code>{{ domain.txt_host }}</code> = <code>{{ domain.txt_value }}</code></dd>
+                            </dl>
+                            <button type="button" class="btn btn-primary h-11 self-start" @click="verifyDomain">Check</button>
+                        </div>
+                        <p v-else-if="domain.verified" class="text-[13px] text-muted"><a :href="`https://${domain.name}`" target="_blank" rel="noopener">{{ domain.name }}</a> opens your mini-site.</p>
+                        <button v-if="domain.name" type="button" class="min-h-11 self-start text-[13px] font-semibold text-muted hover:text-danger" @click="removeDomain">Remove domain</button>
+                    </template>
+                    <p v-else class="text-[13px] text-muted">{{ domain.name ? `${domain.name}${domain.verified ? ' is live' : ' is being set up'}.` : 'The lot owner can set this up.' }}</p>
                 </section>
             </div>
 

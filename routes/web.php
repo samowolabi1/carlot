@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Account\AccountDeletionController;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Account\NotificationController;
+use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\ProfileNameController;
 use App\Http\Controllers\Billing\SandboxCheckoutController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealController;
 use App\Http\Controllers\Dealer\DealerHomeController;
+use App\Http\Controllers\Dealer\DomainController;
 use App\Http\Controllers\Dealer\InspectionController;
 use App\Http\Controllers\Dealer\LeadController;
 use App\Http\Controllers\Dealer\Manager\CustomerController;
@@ -33,6 +36,7 @@ use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\ReferralController;
 use App\Http\Controllers\Dealer\ReviewController as DealerReviewController;
 use App\Http\Controllers\Dealer\SettingsController;
+use App\Http\Controllers\Dealer\SocialController;
 use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
@@ -44,6 +48,7 @@ use App\Http\Controllers\Dealer\VinDecodeController;
 use App\Http\Controllers\Deals\OfferController;
 use App\Http\Controllers\Deals\ReservationController;
 use App\Http\Controllers\Deals\TradeInController;
+use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Location\LocationSessionController;
@@ -63,14 +68,17 @@ use App\Http\Controllers\Trust\IndependentInspectionController;
 use App\Http\Controllers\Trust\InspectionReportController;
 use App\Http\Controllers\Trust\ReportController as ContentReportController;
 use App\Http\Controllers\Trust\ReviewController;
+use App\Http\Controllers\Webhooks\FinanceWebhookController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Marketplace (M4) and lot mini-sites (M6)
 Route::get('/', HomeController::class)->name('home');
-Route::get('/cars', SearchController::class)->middleware('throttle:120,1')->name('cars.index');
+Route::get('/cars', SearchController::class)->middleware('throttle:browse')->name('cars.index');
 // SEO landing pages (M18): /cars/{city}, /cars/{make}/{model?}/{city?}
-Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(['first' => '[a-z0-9-]+', 'second' => '[a-z0-9-]+', 'third' => '[a-z0-9-]+'])->middleware('throttle:120,1')->name('cars.landing');
+Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(['first' => '[a-z0-9-]+', 'second' => '[a-z0-9-]+', 'third' => '[a-z0-9-]+'])->middleware('throttle:browse')->name('cars.landing');
+// Caddy on-demand TLS asks here before issuing a certificate for a lot's custom domain (M6).
+Route::get('/internal/domains/allowed', [DomainController::class, 'allowed'])->middleware('throttle:120,1')->name('domains.allowed');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
@@ -80,6 +88,7 @@ Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
 // Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
 Route::post('/webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
+Route::post('/webhooks/finance', FinanceWebhookController::class)->middleware('throttle:60,1')->name('webhooks.finance');
 
 // Local stand-in for Paystack's checkout (PAYMENT_DRIVER=sandbox).
 Route::middleware('signed')->group(function () {
@@ -123,6 +132,14 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
 
+// Admin two-step sign-in (TDD M1), before the Filament panel opens.
+Route::middleware(['auth', 'throttle:30,1'])->prefix('/admin-2fa')->name('admin.2fa.')->group(function () {
+    Route::get('/setup', [TwoFactorController::class, 'setup'])->name('setup');
+    Route::post('/setup', [TwoFactorController::class, 'confirm'])->name('confirm');
+    Route::get('/challenge', [TwoFactorController::class, 'challenge'])->name('challenge');
+    Route::post('/challenge', [TwoFactorController::class, 'verify'])->name('verify');
+});
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [OtpLoginController::class, 'destroy'])->name('logout');
     Route::post('/impersonation/stop', [ImpersonationController::class, 'destroy'])->name('impersonation.stop');
@@ -136,6 +153,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/saved-searches/{savedSearch}', [SavedSearchController::class, 'update'])->name('saved-searches.update');
     Route::delete('/saved-searches/{savedSearch}', [SavedSearchController::class, 'destroy'])->name('saved-searches.destroy');
     Route::get('/account', AccountController::class)->name('account');
+    Route::delete('/account', [AccountDeletionController::class, 'destroy'])->middleware('throttle:5,1')->name('account.destroy');
     Route::get('/following', [FollowController::class, 'index'])->name('following');
 
     // Notification centre (M18)
@@ -188,12 +206,17 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/trade-ins/{tradeIn}/answer', [TradeInController::class, 'answer'])->middleware('throttle:10,1')->name('trade-ins.answer');
     Route::get('/car/{car}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/vehicles/{car}/reservations', [ReservationController::class, 'store'])->middleware('throttle:10,1')->name('reservations.store');
+    // Finance pre-qualification (M10)
+    Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
+    Route::get('/car/{car}/finance', [FinanceController::class, 'create'])->name('finance.create');
+    Route::post('/vehicles/{car}/finance', [FinanceController::class, 'store'])->middleware('throttle:5,60')->name('finance.store');
     Route::get('/reservations/callback', [ReservationController::class, 'callback'])->name('reservations.callback');
 
     // Independent inspections by registered inspectors (M14)
     Route::get('/inspect/{car}', [IndependentInspectionController::class, 'create'])->name('inspector.create');
     Route::post('/inspect/{car}', [IndependentInspectionController::class, 'store'])->middleware('throttle:10,1')->name('inspector.store');
 
+    Route::get('/dealer/social/callback', [SocialController::class, 'callback'])->name('social.callback');
     Route::get('/dealer', DealerHomeController::class)->name('dealer.home');
     Route::get('/dealer/start', [OnboardingController::class, 'create'])->name('dealer.onboarding.start');
     Route::post('/dealer/lots', [OnboardingController::class, 'store'])->name('dealer.lots.store');
@@ -213,6 +236,10 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/settings/branding', [SettingsController::class, 'updateBranding'])->name('settings.branding');
             Route::put('/settings/location', [SettingsController::class, 'updateLocation'])->name('settings.location');
             Route::put('/settings/hours', [SettingsController::class, 'updateHours'])->name('settings.hours');
+            Route::get('/social/connect', [SocialController::class, 'connect'])->middleware('throttle:10,1')->name('social.connect');
+            Route::patch('/social/{socialAccount}', [SocialController::class, 'update'])->name('social.update');
+            Route::delete('/social/{socialAccount}', [SocialController::class, 'destroy'])->name('social.destroy');
+            Route::post('/social/{socialAccount}/retry/{vehicle}', [SocialController::class, 'retry'])->withoutScopedBindings()->middleware('throttle:10,1')->name('social.retry');
             Route::post('/verification', [VerificationController::class, 'store'])->middleware('throttle:10,1')->name('verification.store');
 
             Route::get('/staff', [StaffController::class, 'index'])->name('staff');
@@ -272,6 +299,9 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             // Mini-site and QR printables (M6)
             Route::get('/mini-site', [MiniSiteController::class, 'show'])->name('minisite');
             Route::get('/qr/poster', [MiniSiteController::class, 'poster'])->middleware('throttle:20,1')->name('qr.poster');
+            Route::put('/domain', [DomainController::class, 'store'])->middleware('throttle:10,1')->name('domain.store');
+            Route::post('/domain/verify', [DomainController::class, 'verify'])->middleware('throttle:20,1')->name('domain.verify');
+            Route::delete('/domain', [DomainController::class, 'destroy'])->name('domain.destroy');
             Route::get('/qr/stickers', [MiniSiteController::class, 'stickers'])->middleware('throttle:10,1')->name('qr.stickers');
 
             // Trust (M14): inspection reports and replies to reviews

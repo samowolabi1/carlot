@@ -7,6 +7,9 @@ use App\Domain\Appointments\Policies\AppointmentPolicy;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Gateways\PaystackGateway;
 use App\Domain\Billing\Gateways\SandboxGateway;
+use App\Domain\Finance\Partners\FinancePartner;
+use App\Domain\Finance\Partners\HttpFinancePartner;
+use App\Domain\Finance\Partners\LogFinancePartner;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Policies\VehiclePolicy;
 use App\Domain\Inventory\Support\NhtsaVinDecoder;
@@ -15,6 +18,8 @@ use App\Domain\Leads\Models\Conversation;
 use App\Domain\Leads\Policies\ConversationPolicy;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Policies\SalesOrderPolicy;
+use App\Domain\Lots\Domains\DnsLookup;
+use App\Domain\Lots\Domains\SystemDnsLookup;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Policies\LotPolicy;
 use App\Domain\Lots\Support\CurrentLot;
@@ -28,6 +33,9 @@ use App\Domain\Messaging\MetaWhatsAppGateway;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\TermiiSmsGateway;
 use App\Domain\Messaging\WhatsAppGateway;
+use App\Domain\Social\Gateways\LogSocialPublisher;
+use App\Domain\Social\Gateways\MetaSocialPublisher;
+use App\Domain\Social\Gateways\SocialPublisher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -55,6 +63,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(VehicleSearch::class, fn () => config('scout.driver') === 'meilisearch'
             ? new MeilisearchVehicleSearch
             : new DatabaseVehicleSearch);
+
+        $this->app->bind(SocialPublisher::class, fn () => config('lotlink.social_driver') === 'meta'
+            ? new MetaSocialPublisher((string) config('services.meta.app_id'), (string) config('services.meta.app_secret'), (string) config('services.meta.graph_version'))
+            : new LogSocialPublisher);
+
+        $this->app->bind(DnsLookup::class, SystemDnsLookup::class);
+
+        $this->app->bind(FinancePartner::class, fn () => config('lotlink.finance_partner.driver') === 'http'
+            ? new HttpFinancePartner((string) config('lotlink.finance_partner.code'), (string) config('lotlink.finance_partner.name'), (string) config('lotlink.finance_partner.url'), (string) config('lotlink.finance_partner.key'))
+            : new LogFinancePartner);
 
         $this->app->bind(VinDecoder::class, fn () => new NhtsaVinDecoder(config('services.nhtsa.base_url')));
 
@@ -91,6 +109,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SalesOrder::class, SalesOrderPolicy::class);
         Gate::policy(Conversation::class, ConversationPolicy::class);
 
+        // Search and SEO pages, per IP (TDD: 120/min). Raise BROWSE_RATE_LIMIT for a load test from one machine.
+        RateLimiter::for('browse', fn (Request $request) => Limit::perMinute((int) config('lotlink.browse_rate_limit'))->by($request->ip()));
         RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
     }
 }
