@@ -81,6 +81,7 @@ Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(
 Route::get('/internal/domains/allowed', [DomainController::class, 'allowed'])->middleware('throttle:120,1')->name('domains.allowed');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/car/{car}/photos', [CarController::class, 'photos'])->where('car', '[0-9A-Za-z]{26}')->middleware('throttle:browse')->name('cars.photos');
 Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[a-z0-9-]+)?')->name('cars.show');
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
@@ -280,6 +281,8 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/vehicles/{vehicle}/media', [VehicleMediaController::class, 'store'])->name('vehicles.media.store');
             Route::put('/vehicles/{vehicle}/media/order', [VehicleMediaController::class, 'reorder'])->name('vehicles.media.reorder');
             Route::delete('/vehicles/{vehicle}/media/{media}', [VehicleMediaController::class, 'destroy'])->name('vehicles.media.destroy');
+            Route::post('/vehicles/{vehicle}/media/{media}/rotate', [VehicleMediaController::class, 'rotate'])->middleware('throttle:60,1')->name('vehicles.media.rotate');
+            Route::post('/vehicles/{vehicle}/media/{media}/cover', [VehicleMediaController::class, 'cover'])->name('vehicles.media.cover');
 
             // Leads and chat (M11)
             Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');

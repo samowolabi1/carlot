@@ -47,7 +47,7 @@ class MarketplacePresenter
         ];
     }
 
-    /** @return array{src: string, srcset: string}|null */
+    /** @return array{src: string, srcset: string, full: string}|null src for cards, full (1600 px) for the zoom viewer */
     public static function image(?VehicleMedia $media): ?array
     {
         $urls = $media?->urls() ?? [];
@@ -59,6 +59,7 @@ class MarketplacePresenter
         return [
             'src' => $urls[800],
             'srcset' => implode(', ', array_map(fn ($w, $url) => "{$url} {$w}w", array_keys($urls), $urls)),
+            'full' => $urls[1600] ?? $urls[800],
         ];
     }
 

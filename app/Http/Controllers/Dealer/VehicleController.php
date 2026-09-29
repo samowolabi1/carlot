@@ -213,6 +213,7 @@ class VehicleController extends Controller
                 'low' => intdiv($g['low'], 100), 'median' => intdiv($g['median'], 100), 'high' => intdiv($g['high'], 100), 'count' => $g['count'],
             ] : null,
             'canChangePrice' => $vehicle ? request()->user()->can('changePrice', $vehicle) : true,
+            'maxPhotos' => Vehicle::MAX_PHOTOS,
             'uploadsDirect' => config('filesystems.disks.'.config('lotlink.upload_disk').'.driver') === 's3',
         ]);
     }

@@ -60,6 +60,7 @@ const props = defineProps<{
     missing: string[];
     guide?: { low: number; median: number; high: number; count: number } | null;
     canChangePrice: boolean;
+    maxPhotos: number;
 }>();
 
 const { currentLot } = useShared();
@@ -251,7 +252,7 @@ function nextStep() {
 
 <template>
     <Head :title="titles[step]" />
-    <WizardLayout :close-href="route('dealer.vehicles.index', lot.slug)" :title="titles[step]" :status="statusText">
+    <WizardLayout :close-href="route('dealer.vehicles.index', lot.slug)" :title="titles[step]" :status="statusText" :wide="step === 'photos'">
         <template #steps>
             <StepBar :steps="stepLinks" :current="step" :reached="reached" />
         </template>
@@ -465,7 +466,7 @@ function nextStep() {
                 <Icon name="check" class="text-success" :stroke-width="2.4" />
                 <span class="text-[15px] font-semibold">{{ vehicle.title }}</span>
             </div>
-            <PhotoUploader :lot-slug="lot.slug" :vehicle-ulid="vehicle.ulid" :initial="vehicle.media" :max="20" @change="readyPhotos = $event" />
+            <PhotoUploader :lot-slug="lot.slug" :vehicle-ulid="vehicle.ulid" :initial="vehicle.media" :max="maxPhotos" @change="readyPhotos = $event" />
         </div>
 
         <!-- Step 4: price and publish -->

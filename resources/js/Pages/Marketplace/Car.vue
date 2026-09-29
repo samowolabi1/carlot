@@ -4,6 +4,7 @@ import Icon from '@/components/Icon.vue';
 import CarFinance, { type CarFinanceData } from '@/components/finance/CarFinance.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import LotBadge from '@/components/marketplace/LotBadge.vue';
+import PhotoViewer, { type ViewerPhoto } from '@/components/marketplace/PhotoViewer.vue';
 import SaveButton from '@/components/marketplace/SaveButton.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
 import InspectionReport, { type InspectionData } from '@/components/trust/InspectionReport.vue';
@@ -31,7 +32,7 @@ const props = defineProps<{
         description: string | null;
         specs: { label: string; value: string }[];
         features: { group: string; items: string[] }[];
-        photos: { src: string; srcset: string }[];
+        photos: ViewerPhoto[];
         new_arrival: boolean;
         reserved: boolean;
         listed_days: number | null;
@@ -56,6 +57,13 @@ const compare = useCompare();
 
 function onScroll() {
     if (track.value) slide.value = Math.round(track.value.scrollLeft / track.value.clientWidth);
+}
+
+// Tap a photo (or Zoom) for the full-screen viewer; it keeps the gallery on the same photo.
+const viewer = ref<number | null>(null);
+function viewerMoved(i: number) {
+    slide.value = i;
+    track.value?.scrollTo({ left: i * track.value.clientWidth });
 }
 
 function goTo(i: number) {
@@ -108,16 +116,23 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                 <!-- Gallery -->
                 <div class="relative overflow-hidden bg-sand md:rounded-2xl">
                     <div v-if="car.photos.length" ref="track" class="flex aspect-[4/3] snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] md:aspect-[16/10]" @scroll.passive="onScroll">
-                        <img
+                        <button
                             v-for="(photo, i) in car.photos"
                             :key="photo.src"
-                            :src="photo.src"
-                            :srcset="photo.srcset"
-                            sizes="(min-width: 1024px) 700px, 100vw"
-                            :alt="`${car.title}, photo ${i + 1}`"
-                            :loading="i === 0 ? 'eager' : 'lazy'"
-                            class="h-full w-full shrink-0 snap-center object-cover"
-                        />
+                            type="button"
+                            class="h-full w-full shrink-0 snap-center cursor-zoom-in"
+                            :aria-label="`Open photo ${i + 1} of ${car.photos.length} full screen`"
+                            @click="viewer = i"
+                        >
+                            <img
+                                :src="photo.src"
+                                :srcset="photo.srcset"
+                                sizes="(min-width: 1024px) 700px, 100vw"
+                                :alt="`${car.title}, photo ${i + 1}`"
+                                :loading="i === 0 ? 'eager' : 'lazy'"
+                                class="h-full w-full object-cover"
+                            />
+                        </button>
                     </div>
                     <div v-else class="flex aspect-[4/3] items-center justify-center md:aspect-[16/10]"><CarGlyph :width="160" /></div>
 
@@ -137,7 +152,30 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         </button>
                         <span class="absolute right-4 bottom-3.5 rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">{{ slide + 1 }} / {{ car.photos.length }}</span>
                     </template>
+                    <button
+                        v-if="car.photos.length"
+                        type="button"
+                        class="absolute bottom-2 left-3 flex h-11 items-center gap-1.5 rounded-full bg-ink/70 px-3.5 text-[13px] font-semibold text-white backdrop-blur-sm hover:bg-ink/90"
+                        @click="viewer = slide"
+                    >
+                        <Icon name="zoomIn" :size="18" /> Zoom
+                    </button>
                 </div>
+                <div v-if="car.photos.length > 1" class="hidden gap-2 overflow-x-auto md:flex">
+                    <button
+                        v-for="(photo, i) in car.photos"
+                        :key="photo.src"
+                        type="button"
+                        class="h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition"
+                        :class="i === slide ? 'ring-forest' : 'opacity-75 ring-transparent hover:opacity-100'"
+                        :aria-label="`Show photo ${i + 1}`"
+                        :aria-current="i === slide"
+                        @click="goTo(i)"
+                    >
+                        <img :src="photo.src" alt="" loading="lazy" class="h-full w-full object-cover" />
+                    </button>
+                </div>
+                <PhotoViewer v-if="viewer !== null" :photos="car.photos" :start="viewer" :title="car.title" :price="car.price" @change="viewerMoved" @close="viewer = null" />
 
                 <div class="flex flex-col gap-4 px-5 md:px-0">
                     <div v-if="sold" class="rounded-2xl bg-forest p-4 text-white">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Inventory\Actions\ArrangeVehicleMedia;
 use App\Domain\Inventory\Actions\AttachVehicleMedia;
+use App\Domain\Inventory\Actions\RotateVehicleMedia;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Models\VehicleMedia;
 use App\Domain\Inventory\Support\MediaUploads;
@@ -92,6 +93,22 @@ class VehicleMediaController extends Controller
         $arrange->delete($vehicle, $media);
 
         return response()->json(['ok' => true]);
+    }
+
+    public function rotate(Request $request, Lot $lot, Vehicle $vehicle, VehicleMedia $media, RotateVehicleMedia $rotate): JsonResponse
+    {
+        Gate::authorize('update', $vehicle);
+        $data = $request->validate(['degrees' => ['required', 'integer', Rule::in([90, -90, 180])]]);
+
+        return response()->json(VehicleResource::media($rotate->run($media, (int) $data['degrees'])));
+    }
+
+    public function cover(Lot $lot, Vehicle $vehicle, VehicleMedia $media, ArrangeVehicleMedia $arrange): JsonResponse
+    {
+        Gate::authorize('update', $vehicle);
+        $arrange->makeCover($vehicle, $media);
+
+        return response()->json(['order' => $vehicle->media()->pluck('ulid')]);
     }
 
     /** Polled by the uploader while photos are processing. */

@@ -67,6 +67,26 @@ class VehicleMedia extends Model
         return "vehicles/{$vehicleUlid}/{$mediaUlid}-{$width}.webp";
     }
 
+    /**
+     * The stored renditions, width => path. Paths come from `path`, so a rotated photo (which is
+     * written under a new name, as the CDN caches files forever) is found too.
+     *
+     * @return array<int, string>
+     */
+    public function variantPaths(): array
+    {
+        if ($this->path === null) {
+            return [];
+        }
+
+        $paths = [];
+        foreach (self::WIDTHS as $width) {
+            $paths[$width] = str_replace('-'.self::WIDTHS[0].'.webp', "-{$width}.webp", $this->path);
+        }
+
+        return $paths;
+    }
+
     /** @return array<int, string> width => URL, for srcset */
     public function urls(): array
     {
@@ -75,13 +95,8 @@ class VehicleMedia extends Model
         }
 
         $disk = Storage::disk(config('lotlink.media_disk'));
-        $urls = [];
 
-        foreach (self::WIDTHS as $width) {
-            $urls[$width] = $disk->url(str_replace('-'.self::WIDTHS[0].'.webp', "-{$width}.webp", $this->path));
-        }
-
-        return $urls;
+        return array_map(fn (string $path) => $disk->url($path), $this->variantPaths());
     }
 
     public function thumbUrl(): ?string

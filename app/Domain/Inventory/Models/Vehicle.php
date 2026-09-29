@@ -77,7 +77,8 @@ class Vehicle extends Model
     /** @use HasFactory<VehicleFactory> */
     use BelongsToLot, HasFactory, HasUlids, Searchable, SoftDeletes;
 
-    public const MAX_PHOTOS = 20;
+    /** Photos per car (dealers asked for a tighter, better-chosen gallery). */
+    public const MAX_PHOTOS = 12;
 
     public const NEW_ARRIVAL_DAYS = 7;
 

@@ -33,9 +33,16 @@ class ArrangeVehicleMedia
         RenderShareCard::refresh($vehicle->id);
     }
 
+    /** "Make cover": moves the photo to the front, keeping the others in order. */
+    public function makeCover(Vehicle $vehicle, VehicleMedia $media): void
+    {
+        $ulids = $vehicle->media()->pluck('ulid')->reject(fn (string $u) => $u === $media->ulid)->prepend($media->ulid)->values()->all();
+        $this->reorder($vehicle, $ulids);
+    }
+
     public function delete(Vehicle $vehicle, VehicleMedia $media): void
     {
-        $files = array_map(fn (int $width) => VehicleMedia::variantPath($vehicle->ulid, $media->ulid, $width), VehicleMedia::WIDTHS);
+        $files = array_values($media->variantPaths());
 
         DB::transaction(function () use ($vehicle, $media): void {
             $media->delete();

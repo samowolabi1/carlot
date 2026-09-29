@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
+import PhotoViewer, { type ViewerPhoto } from '@/components/marketplace/PhotoViewer.vue';
 import SaveButton from '@/components/marketplace/SaveButton.vue';
 import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
@@ -14,7 +15,7 @@ export interface CarCardData {
     price: string | null;
     price_value?: number | null;
     specs: string;
-    image: { src: string; srcset: string } | null;
+    image: { src: string; srcset: string; full?: string } | null;
     lot: { name: string; slug: string; city: string | null };
     distance: string | null;
     new_arrival: boolean;
@@ -29,6 +30,21 @@ withDefaults(defineProps<{ car: CarCardData; variant?: 'tile' | 'row'; compare?:
 const compareList = useCompare();
 const budget = useBudget();
 const compareFull = ref(false);
+
+// Quick look: peek at every photo without leaving the list.
+const peek = ref<{ photos: ViewerPhoto[]; loading: boolean; error: boolean } | null>(null);
+
+async function quickLook(car: CarCardData) {
+    peek.value = { photos: car.image ? [{ ...car.image, full: car.image.full ?? car.image.src }] : [], loading: true, error: false };
+    try {
+        const res = await fetch(route('cars.photos', car.ulid), { headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as { photos: ViewerPhoto[] };
+        if (peek.value) peek.value = { photos: data.photos, loading: false, error: false };
+    } catch {
+        if (peek.value) peek.value = { ...peek.value, loading: false, error: true };
+    }
+}
 
 function toggleCompare(ulid: string) {
     compareFull.value = !compareList.toggle(ulid);
@@ -59,6 +75,17 @@ function toggleCompare(ulid: string) {
             <div v-if="variant === 'tile'" class="absolute top-2 right-2 z-10">
                 <SaveButton :ulid="car.ulid" :saved="car.saved" size="sm" />
             </div>
+            <button
+                v-if="car.image"
+                type="button"
+                class="absolute z-10 flex items-center justify-center gap-1.5 rounded-full bg-ink/70 font-semibold text-white backdrop-blur-sm transition hover:bg-ink/90"
+                :class="variant === 'row' ? 'right-0.5 bottom-0.5 h-11 w-11' : 'right-2 bottom-2 h-11 px-3.5 text-[13px]'"
+                :aria-label="`Quick look at photos of ${car.title}`"
+                @click="quickLook(car)"
+            >
+                <Icon name="image" :size="variant === 'row' ? 16 : 18" />
+                <span v-if="variant === 'tile'">Photos</span>
+            </button>
         </div>
 
         <div class="flex min-w-0 flex-col gap-1" :class="variant === 'row' ? 'justify-center py-0.5' : 'px-3.5 pt-3 pb-3.5'">
@@ -87,5 +114,8 @@ function toggleCompare(ulid: string) {
                 {{ compareFull ? 'Compare up to 3 cars' : 'Compare' }}
             </button>
         </div>
+
+        <PhotoViewer v-if="peek" :photos="peek.photos" :loading="peek.loading" :title="car.title" :price="car.price" :href="car.url" @close="peek = null" />
+        <p v-if="peek?.error" class="sr-only" role="status">Couldn't load all the photos.</p>
     </article>
 </template>

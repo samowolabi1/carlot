@@ -3,6 +3,7 @@
 use App\Domain\Inventory\Enums\MediaStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Models\VehicleMedia;
+use App\Domain\Lots\Models\Lot;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -80,8 +81,10 @@ it('will not attach an upload key issued for another car', function () {
         ->assertJsonValidationErrors('key');
 });
 
-it('caps a car at 20 photos', function () {
-    foreach (range(1, 20) as $i) {
+it('caps a car at 12 photos', function () {
+    expect(Vehicle::MAX_PHOTOS)->toBe(12);
+
+    foreach (range(1, 12) as $i) {
         $this->vehicle->media()->create(['status' => MediaStatus::Ready, 'sort_order' => $i]);
     }
 
@@ -143,4 +146,67 @@ it('hands out a pre-signed PUT URL when uploads go to R2', function () {
 
     // The local upload endpoint is closed when uploads go direct.
     $this->post(route('dealer.vehicles.media.upload', [$this->lot, $this->vehicle]), [], ['Accept' => 'application/json'])->assertNotFound();
+});
+
+it('rotates a photo into new files and removes the old ones', function () {
+    $media = uploadPhoto($this->vehicle);
+    $record = VehicleMedia::where('ulid', $media['ulid'])->sole();
+    $old = $record->variantPaths();
+
+    $response = $this->postJson(route('dealer.vehicles.media.rotate', [$this->lot, $this->vehicle, $record->ulid]), ['degrees' => 90])
+        ->assertOk()->json();
+
+    $record->refresh();
+    expect($record->width)->toBe(1200)
+        ->and($record->height)->toBe(1600)
+        ->and($record->path)->not->toBe($old[1600])
+        ->and($record->path)->toStartWith("vehicles/{$this->vehicle->ulid}/{$record->ulid}-")
+        ->and($response['thumb_url'])->toContain(basename((string) $record->thumb_path));
+
+    foreach ($record->variantPaths() as $width => $path) {
+        Storage::disk('public')->assertExists($path);
+        expect(getimagesizefromstring(Storage::disk('public')->get($path))[0])->toBeLessThanOrEqual($width);
+    }
+    foreach ($old as $path) {
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    // A second turn works from the renamed files.
+    $this->postJson(route('dealer.vehicles.media.rotate', [$this->lot, $this->vehicle, $record->ulid]), ['degrees' => -90])->assertOk();
+    expect($record->refresh())->width->toBe(1600)->height->toBe(1200);
+});
+
+it('only rotates by quarter or half turns', function () {
+    $media = uploadPhoto($this->vehicle);
+
+    $this->postJson(route('dealer.vehicles.media.rotate', [$this->lot, $this->vehicle, $media['ulid']]), ['degrees' => 45])
+        ->assertJsonValidationErrors('degrees');
+});
+
+it('makes any photo the cover and keeps the rest in order', function () {
+    $a = uploadPhoto($this->vehicle);
+    $b = uploadPhoto($this->vehicle);
+    $c = uploadPhoto($this->vehicle);
+
+    $this->postJson(route('dealer.vehicles.media.cover', [$this->lot, $this->vehicle, $c['ulid']]))
+        ->assertOk()
+        ->assertJson(['order' => [$c['ulid'], $a['ulid'], $b['ulid']]]);
+
+    expect(VehicleMedia::where('ulid', $c['ulid'])->sole())->is_cover->toBeTrue()->sort_order->toBe(0)
+        ->and(VehicleMedia::where('ulid', $a['ulid'])->sole()->is_cover)->toBeFalse();
+});
+
+it('lets staff only rotate or reorder their own lot\'s photos', function () {
+    $theirs = Vehicle::factory()->withPhoto()->create();
+    $mine = Lot::factory()->create();
+    $ulid = $theirs->media()->first()->ulid;
+
+    $this->actingAs($mine->owner);
+    $this->postJson(route('dealer.vehicles.media.rotate', [$mine, $theirs, $ulid]), ['degrees' => 90])->assertNotFound();
+    $this->postJson(route('dealer.vehicles.media.cover', [$mine, $theirs, $ulid]))->assertNotFound();
+
+    // Another car at the same lot can't be reached through this car's URL either.
+    $this->actingAs($this->lot->owner);
+    $sibling = Vehicle::factory()->withPhoto()->create(['lot_id' => $this->lot->id]);
+    $this->postJson(route('dealer.vehicles.media.cover', [$this->lot, $this->vehicle, $sibling->media()->first()->ulid]))->assertNotFound();
 });

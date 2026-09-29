@@ -14,6 +14,7 @@ use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\DealsPresenter;
 use App\Http\Presenters\MarketplacePresenter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -88,6 +89,23 @@ class CarController extends Controller
             'jsonld' => $public ? StructuredData::car($vehicle) : null,
             'robots' => $public && $vehicle->status !== VehicleStatus::Sold ? null : 'noindex',
         ]]);
+    }
+
+    /** Quick look from a listing card: the car's photos without opening the page. */
+    public function photos(string $car): JsonResponse
+    {
+        $vehicle = Vehicle::query()
+            ->marketplace()
+            ->where('vehicles.ulid', strtolower($car))
+            ->with(['make', 'model', 'media' => fn ($q) => $q->where('status', 'ready')])
+            ->firstOrFail();
+
+        return response()->json([
+            'title' => $vehicle->title(),
+            'price' => $vehicle->formattedPrice(),
+            'url' => $vehicle->publicPath(),
+            'photos' => $vehicle->media->map(fn ($m) => MarketplacePresenter::image($m))->filter()->values(),
+        ])->header('Cache-Control', 'public, max-age=300');
     }
 
     private function similar(Vehicle $vehicle): array

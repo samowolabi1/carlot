@@ -174,10 +174,10 @@ Deferred as planned: test-drive deposits (S9, needs Paystack), lead records from
 
 | Area | What works |
 | --- | --- |
-| Search (M4) | `/cars` with text search, make, body type, price, year, mileage, gearbox, condition and fuel filters, sorting, and removable filter chips. Filter sheet on phones, sidebar on desktop. |
+| Search (M4) | `/cars` with text search, make, body type, price, year, mileage, gearbox, condition and fuel filters, sorting, and removable filter chips. Filter sheet on phones, sidebar on desktop. **Photos** on each card opens a quick look at all the car's photos (from `/car/{ulid}/photos`, live cars only) without leaving the list. |
 | Near me | Uses the phone's location (asked first, never stored on the server) to sort by distance or limit to 5–100 km, with distances on every card. |
 | Search engines | Meilisearch in production (typo-tolerant, geo filters) via Laravel Scout; plain MySQL on Laragon. Both pass the same tests. |
-| Car page | `/car/{id}-{slug}`: photo gallery, specs, features, lot card with open/closed status and directions, WhatsApp (message pre-filled with the car and link) and Call buttons, share menu, similar cars. Link previews (Open Graph) are rendered on the server. Sold cars stay reachable but marked sold. |
+| Car page | `/car/{id}-{slug}`: photo gallery (tap a photo or **Zoom** for a full-screen viewer: swipe or arrow keys, pinch, double-tap, mouse wheel or +/− to zoom up to 4×, drag to look around; thumbnails on desktop), specs, features, lot card with open/closed status and directions, WhatsApp (message pre-filled with the car and link) and Call buttons, share menu, similar cars. Link previews (Open Graph) are rendered on the server. Sold cars stay reachable but marked sold. |
 | Compare | Up to 3 cars side by side, best value in each row highlighted. |
 | Favourites | Heart on every car; guests sign in and the car is saved when they return. `/saved` shows price drops. |
 | Lot mini-site (M6) | `/l/{slug}`: branded page with logo, cover and colour, stock with quick filters, opening hours, directions, call, WhatsApp and share. Unapproved lots can preview their own page. |
@@ -192,7 +192,7 @@ Try it on Laragon with demo data: `php artisan db:seed --class=DemoMarketplaceSe
 | Add a car (M3) | Four phone-first steps from the designs: VIN & model → details → photos → price & publish. Every step saves the draft. |
 | VIN decode | NHTSA vPIC lookup fills make, model, year, trim, engine, fuel, drivetrain and body type, cached 30 days. Without a VIN (or if the lookup fails), pick the make and model by hand. |
 | Catalogue | 25 makes and 213 models common on Nigerian lots, plus 33 features. Models a dealer types in wait for admin review in `/admin`. |
-| Photos | Up to 20 per car. Large photos are shrunk in the browser, uploaded (directly to Cloudflare R2 in production), then converted to WebP at 1600, 800 and 400 px with location data removed. Reorder, set cover, remove. |
+| Photos | Up to 12 per car. Drag several in on a computer, or choose or take them on a phone; two upload at a time with overall progress, and failed ones can be retried. Large photos are shrunk in the browser, uploaded (directly to Cloudflare R2 in production), then converted to WebP at 1600, 800 and 400 px with location data removed. Empty slots name the recommended shot (front ¾, sides, dashboard & odometer, engine bay…) and a photo guide (shot list and tips) sits beside the grid on big screens and folds away on phones. Tap or click a photo to rotate it, make it the cover, move it or remove it; drag to reorder on a computer. |
 | Stock (D3) | Status tabs and counts, search by make, model or VIN, ageing flag at 45 days, new-arrival badge for 7 days, hide, unhide and reserve. |
 | Rules | Status state machine (draft → available → reserved → sold, plus hidden), plan listing limits, price history with price-drop event, VIN unique per lot, sales staff can't change live prices or delete. |
 | Quality | 114 Pest tests (also run on MySQL 8), Pint, Larastan level 6, vue-tsc |

@@ -183,9 +183,12 @@ Run all four before pushing.
   orders (S5), not the stock list.
 - Prices are kobo on the model; forms and `VehicleResource` use whole naira. `SaveVehiclePrice`
   writes `vehicle_price_history` once a car has been listed and fires `VehiclePriceDropped`.
-- Photos: browser → `MediaUploads` target (pre-signed R2 PUT, or the app's upload endpoint on a
+- Photos (max `Vehicle::MAX_PHOTOS` = 12): browser → `MediaUploads` target (pre-signed R2 PUT, or the app's upload endpoint on a
   local disk) → `AttachVehicleMedia` → `ProcessVehicleMedia` (queue `media`) → WebP 1600/800/400
   on the media disk. Originals never reach the public disk.
+  `RotateVehicleMedia` writes renditions under new names (`{media}-{rand}-{w}.webp`, the CDN caches forever),
+  so always derive files from `VehicleMedia::variantPaths()` / `urls()`, not `variantPath()`. Buyers see photos in
+  `PhotoViewer.vue` (quick look via `cars.photos`, zoom on the car page), using the `full` (1600) URL.
 - `new arrival` (7 days) and `ageing` (45 days) are computed from `listed_at`, not stored.
 
 ## Marketplace (S3)

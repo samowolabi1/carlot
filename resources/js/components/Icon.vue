@@ -50,6 +50,15 @@ const paths = {
     flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
     star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z',
     clipboard: 'M8 4h8v3H8zM6 5.5H5v15.5h14V5.5h-1M9 12l2 2 4-4M9 17h6',
+    chevronRight: 'M9 6l6 6-6 6',
+    chevronUp: 'M6 15l6-6 6 6',
+    zoomIn: 'M11 4a7 7 0 1 1 0 14a7 7 0 0 1 0-14M20 20l-4-4M8 11h6M11 8v6',
+    zoomOut: 'M11 4a7 7 0 1 1 0 14a7 7 0 0 1 0-14M20 20l-4-4M8 11h6',
+    expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
+    rotateLeft: 'M4 5v5h5M4.5 10A8 8 0 1 1 6 17',
+    rotateRight: 'M20 5v5h-5M19.5 10A8 8 0 1 0 18 17',
+    trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
+    move: 'M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3',
 } as const;
 
 export type IconName = keyof typeof paths;
