@@ -52,7 +52,7 @@ class DocumentController extends Controller
     public function file(Lot $lot, SalesOrder $order, OrderDocument $document): StreamedResponse
     {
         Gate::authorize('view', $order);
-        abort_if($document->file_path === null, 404);
+        abort_if($document->file_path === null || ! Storage::disk(OrderDocument::DISK)->exists($document->file_path), 404);
 
         return Storage::disk(OrderDocument::DISK)->download($document->file_path, str($document->name())->slug().'.'.pathinfo($document->file_path, PATHINFO_EXTENSION));
     }

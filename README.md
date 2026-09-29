@@ -386,7 +386,9 @@ php artisan scout:import "App\Domain\Inventory\Models\Vehicle"
 ```
 
 Cars are added to and removed from the index automatically as they are published, hidden or
-sold, and when a lot is approved or suspended.
+sold, and when a lot is approved or suspended. Run `php artisan scout:sync-index-settings` again on every deploy
+(it is quick and safe): new search filters only work once Meilisearch knows about them. Until then sponsored cars
+are left out of results (the error is logged) rather than breaking search.
 
 ### Photos in production (Cloudflare R2)
 

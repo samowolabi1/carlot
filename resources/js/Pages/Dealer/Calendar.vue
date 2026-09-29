@@ -215,10 +215,10 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
             </div>
         </div>
 
-        <div class="grid gap-4 xl:grid-cols-[1fr_320px]">
+        <div class="grid gap-4 xl:grid-cols-[1fr_280px] 2xl:grid-cols-[1fr_320px]">
             <!-- Week grid (desktop) -->
             <div class="card hidden overflow-x-auto lg:block">
-                <div class="grid min-w-[760px]" :style="{ gridTemplateColumns: `56px repeat(${shownDays.length}, minmax(0, 1fr))` }">
+                <div class="grid min-w-[700px]" :style="{ gridTemplateColumns: `56px repeat(${shownDays.length}, minmax(0, 1fr))` }">
                     <div />
                     <div v-for="d in shownDays" :key="d.date" class="border-b border-l border-divider py-2 text-center" :class="d.today ? 'bg-cream' : ''">
                         <div class="text-[11px] font-semibold text-muted">{{ d.weekday }}</div>

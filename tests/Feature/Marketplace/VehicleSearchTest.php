@@ -4,6 +4,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use Meilisearch\Client;
 use Tests\Support\MarketplaceFixtures;
 
 uses(MarketplaceFixtures::class);
@@ -121,3 +122,14 @@ it('finds spotlighted cars that match the search for the sponsored row', functio
         ->and($sponsored(['query' => 'honda']))->toBe(['Accord'])
         ->and(app(VehicleSearch::class)->sponsored(new SearchCriteria, 1))->toHaveCount(1);
 })->with('engines');
+
+it('leaves sponsored cars out, without breaking search, when the index settings are out of date', function () {
+    $this->useSearchEngine('meilisearch');
+    seedCars();
+    // As on a server where scout:sync-index-settings wasn't run after spotlight_until became filterable.
+    app(Client::class)->index($this->testIndex)->updateFilterableAttributes(['status', 'price', 'lot_id']);
+    test()->reindex();
+
+    expect(app(VehicleSearch::class)->sponsored(new SearchCriteria))->toHaveCount(0)
+        ->and(run([]))->toBe(['Accord', 'Camry', 'RAV4']);
+});

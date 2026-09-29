@@ -106,6 +106,7 @@ class VehicleCostController extends Controller
     {
         Gate::authorize('viewCosts', $lot);
         abort_unless($cost->vehicle_id === $vehicle->id && $cost->receipt_path !== null, 404);
+        abort_unless(Storage::disk(VehicleCost::DISK)->exists($cost->receipt_path), 404);
 
         return Storage::disk(VehicleCost::DISK)->download($cost->receipt_path);
     }

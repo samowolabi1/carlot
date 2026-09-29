@@ -34,6 +34,17 @@ it('shows the week, today\'s visits and requests to confirm', function () {
             ->where('appointments.0.phone', '+2348035550001'));
 });
 
+it('stretches the grid over visits booked outside opening hours', function () {
+    $this->actingAs($this->owner)->get(route('dealer.calendar', $this->lot))
+        ->assertInertia(fn (Assert $page) => $page->where('week.first_hour', 8)->where('week.last_hour', 18));
+
+    ($this->booking)([], '2026-10-06 06:00');
+    ($this->booking)([], '2026-10-08 19:30');
+
+    $this->actingAs($this->owner)->get(route('dealer.calendar', $this->lot))
+        ->assertInertia(fn (Assert $page) => $page->where('week.first_hour', 6)->where('week.last_hour', 20)); // 19:30 + 30 min
+});
+
 it('confirms a request and tells the buyer', function () {
     $a = ($this->booking)(['status' => 'pending', 'confirmed_at' => null]);
 

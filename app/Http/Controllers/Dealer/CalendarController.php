@@ -56,6 +56,15 @@ class CalendarController extends Controller
         $firstHour = (int) ($hours->min(fn ($h) => (int) substr((string) $h->opens_at, 0, 2)) ?? 8);
         $lastHour = (int) ($hours->max(fn ($h) => (int) ceil(((int) substr((string) $h->closes_at, 0, 2) * 60 + (int) substr((string) $h->closes_at, 3, 2)) / 60)) ?? 18);
 
+        // Stretch the grid over visits outside opening hours (hours changed after booking, or booked by hand),
+        // otherwise they'd be drawn off the grid where nobody can see or move them.
+        foreach ($week as $a) {
+            $start = $a->starts_at->copy()->setTimezone($tz);
+            $end = $a->ends_at->copy()->setTimezone($tz);
+            $firstHour = min($firstHour, $start->hour);
+            $lastHour = max($lastHour, $end->isSameDay($start) ? (int) ceil(($end->hour * 60 + $end->minute) / 60) : 24);
+        }
+
         return Inertia::render('Dealer/Calendar', [
             'week' => [
                 'start' => $weekStart->toDateString(),

@@ -6,6 +6,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Meilisearch\Exceptions\ApiException;
 
 /**
  * Production search (TDD M4): the Meilisearch "vehicles" index holds only marketplace
@@ -27,13 +28,21 @@ class MeilisearchVehicleSearch implements VehicleSearch
     public function sponsored(SearchCriteria $criteria, int $limit = 3): Collection
     {
         // Meilisearch has no random order, so a handful are fetched and shuffled here.
-        $ids = Vehicle::search($criteria->query ?? '')
-            ->options(['filter' => [...$this->filters($criteria), 'spotlight_until > '.now()->getTimestamp()]])
-            ->take(20)
-            ->keys()
-            ->shuffle()
-            ->take($limit)
-            ->all();
+        // Sponsored cars are extra: if the index settings are out of date (spotlight_until not yet
+        // filterable because scout:sync-index-settings wasn't run), report it and show the results without them.
+        try {
+            $ids = Vehicle::search($criteria->query ?? '')
+                ->options(['filter' => [...$this->filters($criteria), 'spotlight_until > '.now()->getTimestamp()]])
+                ->take(20)
+                ->keys()
+                ->shuffle()
+                ->take($limit)
+                ->all();
+        } catch (ApiException $e) {
+            report($e);
+
+            return new Collection;
+        }
 
         return Vehicle::query()->withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover'])->whereIn('id', $ids)->get()
             ->sortBy(fn (Vehicle $v) => array_search($v->id, $ids, false))->values();
