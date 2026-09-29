@@ -140,13 +140,18 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
 
             <template v-if="past.length || pastDeals.length">
                 <h2 class="mt-3 font-sans text-[13px] font-semibold tracking-wide text-muted uppercase">Past</h2>
-                <Link v-for="b in past" :key="b.ulid" :href="b.url" class="card flex flex-col gap-1 p-3.5 text-ink no-underline">
+                <div v-for="b in past" :key="b.ulid" class="card relative flex flex-col gap-1 p-3.5">
+                    <Link :href="b.url" class="absolute inset-0 rounded-[inherit]" :aria-label="`${b.type} on ${b.when} at ${b.lot.name}`" />
                     <span class="flex justify-between gap-3">
                         <span class="text-[15px] font-semibold">{{ b.when }} · {{ b.type }}</span>
                         <span class="text-[12px] text-muted">{{ b.status_label }}</span>
                     </span>
                     <span class="text-[14px] text-[#4A4D53]"><template v-if="b.car">{{ b.car.title }} · </template>{{ b.lot.name }}</span>
-                </Link>
+                    <Link v-if="b.review" :href="b.review.url" class="relative z-[1] inline-flex min-h-11 items-center self-start text-[14px] font-semibold">
+                        <template v-if="b.review.rating">You rated it {{ b.review.rating }}/5 · Edit</template>
+                        <template v-else>Leave a review</template>
+                    </Link>
+                </div>
                 <div v-for="d in pastDeals" :key="d.key" class="card flex flex-col gap-1 p-3.5">
                     <span class="flex justify-between gap-3">
                         <span class="text-[15px] font-semibold">{{ d.title }}</span>

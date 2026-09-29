@@ -6,6 +6,7 @@ import HoursForm from '@/components/lot/HoursForm.vue';
 import InviteForm from '@/components/lot/InviteForm.vue';
 import LocationForm from '@/components/lot/LocationForm.vue';
 import StepActions from '@/components/lot/StepActions.vue';
+import VerificationForm, { type VerificationState } from '@/components/lot/VerificationForm.vue';
 import OnboardingLayout from '@/layouts/OnboardingLayout.vue';
 import type { LotSettings } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -16,6 +17,7 @@ const props = defineProps<{
     steps: string[];
     lot: LotSettings | null;
     defaults: { phone: string; email: string | null } | null;
+    verification: VerificationState | null;
 }>();
 
 const copy: Record<string, { label: string; title: (name: string) => string; intro: string }> = {
@@ -45,9 +47,9 @@ const copy: Record<string, { label: string; title: (name: string) => string; int
         intro: 'Staff can add cars, handle their own leads and bookings, and share cars. You stay in charge of prices, billing and staff.',
     },
     submit: {
-        label: 'Submit for approval',
-        title: () => 'Ready to go live',
-        intro: 'We check every lot before it appears on LotLink. Verification with your CAC certificate comes next.',
+        label: 'Verify with CAC',
+        title: () => 'Verify and go live',
+        intro: 'We check every lot before it appears on LotLink. Add your CAC documents for the Verified lot badge: you can list cars while we check.',
     },
 };
 
@@ -107,6 +109,10 @@ const submitForm = useForm({});
                 </div>
 
                 <div v-else-if="step === 'submit'" class="flex flex-col gap-5">
+                    <section v-if="verification" class="card flex flex-col gap-3 p-5" aria-labelledby="verify-heading">
+                        <h2 id="verify-heading" class="font-sans text-[16px] font-bold">Verified lot badge <span class="font-normal text-muted">(optional now)</span></h2>
+                        <VerificationForm :lot-slug="lot.slug" :verification="verification" />
+                    </section>
                     <div class="card flex flex-col gap-3 p-5">
                         <div class="flex items-center gap-3 text-[15px]">
                             <Icon name="check" class="text-success" :stroke-width="2.5" /> Business details for <strong>{{ lot.name }}</strong>

@@ -41,3 +41,6 @@ Schedule::command('manager:daily-summary')->hourly()->withoutOverlapping();
 // Location and analytics (TDD M8, M15)
 Schedule::command('stats:rollup')->hourly()->withoutOverlapping();
 Schedule::command('location:end-expired')->everyMinute()->withoutOverlapping();
+
+// Trust (TDD M14)
+Schedule::command('reviews:invite')->everyFifteenMinutes()->withoutOverlapping();

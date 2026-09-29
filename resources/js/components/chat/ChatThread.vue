@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ReportButton from '@/components/trust/ReportButton.vue';
 import type { ChatMessage } from '@/composables/useChat';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
@@ -57,8 +58,9 @@ onMounted(scrollToEnd);
                             <template v-else>{{ part.text }}</template>
                         </template>
                     </div>
-                    <span v-if="item.showMeta" class="text-[11px] text-muted" :class="item.message.side === me ? 'self-end' : 'self-start'">
-                        <template v-if="item.message.sender">{{ item.message.sender }} · </template>{{ item.message.time }}
+                    <span v-if="item.showMeta" class="flex items-center gap-2 text-[11px] text-muted" :class="item.message.side === me ? 'self-end' : 'self-start'">
+                        <span><template v-if="item.message.sender">{{ item.message.sender }} · </template>{{ item.message.time }}</span>
+                        <ReportButton v-if="item.message.side !== me" kind="message" :id="String(item.message.id)" label="Report" />
                     </span>
                 </template>
             </template>

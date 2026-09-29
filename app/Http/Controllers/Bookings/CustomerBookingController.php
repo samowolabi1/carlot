@@ -42,6 +42,7 @@ class CustomerBookingController extends Controller
     {
         $appointments = Appointment::withoutGlobalScopes()
             ->where('customer_id', $request->user()->id)
+            ->with('review')
             ->latest('starts_at')
             ->limit(100)
             ->get();
@@ -164,6 +165,11 @@ class CustomerBookingController extends Controller
             'can_cancel' => $a->isUpcoming(),
             'cancel_reason' => $a->status === AppointmentStatus::Cancelled ? $a->cancel_reason : null,
             'deposit' => $this->deposit($a, $lot),
+            // Design 17: a completed visit can be reviewed (signed, so it opens from WhatsApp too).
+            'review' => $a->canBeReviewed() ? [
+                'url' => URL::signedRoute('reviews.edit', ['appointment' => $a->ulid], now()->addDays(30)),
+                'rating' => $a->review?->rating,
+            ] : null,
         ];
     }
 

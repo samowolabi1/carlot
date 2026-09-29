@@ -91,10 +91,13 @@ class VehicleController extends Controller
             'order' => ($o = $orders->get($v->id)) ? ['ulid' => $o->ulid, 'order_no' => $o->order_no] : null,
             // Shareable once buyers can see it (the lot is approved and the car is live).
             'spotlight_until' => $v->spotlight_until?->isFuture() ? $v->spotlight_until->copy()->setTimezone($lot->timezone)->format('j M') : null,
-            'share_url' => $lot->status === LotStatus::Active && in_array($v->status, VehicleStatus::live(), true) ? url($v->publicPath()) : null,
+            'share_url' => $lot->status === LotStatus::Active && in_array($v->status, VehicleStatus::live(), true) && ! $v->isHeld() ? url($v->publicPath()) : null,
+            'inspected' => $v->inspection_id !== null,
+            // Off the marketplace while LotLink looks at reports or signals (TDD M14).
+            'held' => $v->isHeld() ? ($v->held_reason ?: 'Held for review by LotLink') : null,
             // Quick actions on the stock list. Drafts are finished in the add-car flow,
             // and selling goes through Lot Manager, so neither appears here.
-            'next_statuses' => $v->status === VehicleStatus::Draft ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(
+            'next_statuses' => $v->status === VehicleStatus::Draft || $v->isHeld() ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(
                 $stateMachine->allowedFrom($v->status),
                 fn (VehicleStatus $s) => $s !== VehicleStatus::Sold,
             ))),

@@ -22,7 +22,7 @@ class CompareController extends Controller
         $vehicles = Vehicle::query()
             ->marketplace()
             ->whereIn('ulid', $ulids)
-            ->with(['make', 'model', 'lot', 'cover'])
+            ->with(['make', 'model', 'lot', 'cover', 'inspection'])
             ->get()
             ->sortBy(fn (Vehicle $v) => array_search($v->ulid, $ulids, true))
             ->values();
@@ -48,6 +48,7 @@ class CompareController extends Controller
                     'fuel' => ['value' => $v->fuel?->label(), 'best' => false],
                     'condition' => ['value' => $v->condition?->label(), 'best' => false],
                     'duty' => ['value' => $v->duty_status?->value === 'paid' ? 'Paid' : ($v->duty_status?->value === 'unpaid' ? 'Not paid' : null), 'best' => false],
+                    'inspection' => ['value' => $v->inspection ? $v->inspection->score.'/100'.($v->inspection->isIndependent() ? ', independent' : '') : 'No', 'best' => false],
                     'lot' => ['value' => $v->lot->name.($v->lot->city ? ', '.$v->lot->city : ''), 'best' => false],
                 ],
             ]),

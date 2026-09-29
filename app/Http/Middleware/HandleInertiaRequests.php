@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Admin\Impersonation;
 use App\Domain\Deals\Enums\OfferStatus;
 use App\Domain\Deals\Enums\TradeInStatus;
 use App\Domain\Deals\Models\Offer;
@@ -86,6 +87,7 @@ class HandleInertiaRequests extends Middleware
                     ->count(),
             ] : null,
             'budget' => fn () => $user?->budget ? intdiv($user->budget->max_price, 100) : null,
+            'impersonating' => fn () => Impersonation::active(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

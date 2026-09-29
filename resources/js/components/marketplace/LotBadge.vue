@@ -23,6 +23,7 @@ const distance = computed(() => (location.value && props.lot.location ? formatDi
                     <span v-if="lot.verified" class="sr-only">Verified lot</span>
                 </span>
                 <span class="truncate text-[12px] text-muted">
+                    <template v-if="lot.rating"><span class="font-semibold text-ink">★ {{ lot.rating.toFixed(1) }}</span> ({{ lot.reviews_count }}) · </template>
                     <template v-if="distance">{{ distance }} · </template>
                     <span v-if="lot.open" :class="lot.open.open ? 'font-semibold text-success' : ''">{{ lot.open.label }}</span>
                     <template v-else>{{ lot.city }}</template>

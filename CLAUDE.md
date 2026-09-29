@@ -67,6 +67,20 @@ Run all four before pushing.
   is stored and it is cleared on end; only the two sides of the appointment may view it (the
   `location-session.{ulid}` channel uses the same rule). End sessions whenever a visit ends.
 
+## Trust and admin (S12)
+
+- Trust lives in `app/Domain/Trust`. Verifications: `SubmitLotVerification` / `DecideLotVerification`
+  (sets `lots.verified_at`); CAC files stay on the private `local` disk behind signed `verifications.file` links.
+- Inspections: `SaveInspection` (40 checks in `InspectionChecklist`, score = pass 1 / advisory ½ / fail 0)
+  sets `vehicles.inspection_id`; a dealer check never replaces a signed independent one. PDFs via `InspectionPdf`.
+- Reviews only through `SubmitReview` (completed visits, one per appointment, 14-day edits) and `ReplyToReview`
+  (once). Call `RefreshLotRating::run()` whenever a review's visibility changes; ratings show from 3 reviews.
+- Reports only through `SubmitReport`. Held cars (`vehicles.held_at`) are off `Vehicle::marketplace()` and
+  can't be published; only `ModerateListing` (admin) clears them. Fraud signals come from `DetectFraudSignals`
+  (on publish and price drops) and never hide anything themselves.
+- Filament closures are injected by parameter name: use `$query`, `$record`, `$state`, `$search`.
+- "Log in as" goes through `Impersonation` (audit-logged); never log in as another user any other way.
+
 ## Sharing and budgets (S6)
 
 - Shares go through `CreateShareLink` and `/c/{code}` (never raw car URLs from share buttons), so
@@ -195,7 +209,7 @@ rather than fake data.
 
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin · S13 SEO · S14 Integrations.
+S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO · S14 Integrations.
 
 Deferred from S1: admin 2FA (TOTP), Sanctum API endpoints (the package is installed),
 Redis/Horizon (the database queue for now).

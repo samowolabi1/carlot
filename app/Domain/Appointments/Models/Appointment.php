@@ -9,12 +9,14 @@ use App\Domain\Billing\Models\Payment;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Concerns\BelongsToLot;
 use App\Domain\Support\StoresUtc;
+use App\Domain\Trust\Models\Review;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -33,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $confirmed_at
  * @property Carbon|null $checked_in_at
  * @property Carbon|null $completed_at
+ * @property Carbon|null $review_invited_at
  * @property Carbon|null $cancelled_at
  * @property int|null $cancelled_by
  * @property string|null $cancel_reason
@@ -64,6 +67,7 @@ class Appointment extends Model
             'confirmed_at' => 'datetime',
             'checked_in_at' => 'datetime',
             'completed_at' => 'datetime',
+            'review_invited_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'reminded_24h_at' => 'datetime',
             'reminded_2h_at' => 'datetime',
@@ -119,6 +123,18 @@ class Appointment extends Model
     public function scopeHoldingSlot(Builder $query): void
     {
         $query->whereIn('status', [...AppointmentStatus::active(), AppointmentStatus::AwaitingDeposit]);
+    }
+
+    /** @return HasOne<Review, $this> */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class)->withoutGlobalScopes();
+    }
+
+    /** A buyer can review a visit that happened (TDD M14: only after a completed appointment). */
+    public function canBeReviewed(): bool
+    {
+        return $this->status === AppointmentStatus::Completed;
     }
 
     /** @return BelongsTo<Payment, $this> */

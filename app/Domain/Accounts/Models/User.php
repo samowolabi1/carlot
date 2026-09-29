@@ -30,6 +30,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $email
  * @property string|null $password
  * @property UserRole $role
+ * @property Carbon|null $inspector_since
+ * @property string|null $inspector_company
  * @property string $locale
  * @property Carbon|null $phone_verified_at
  * @property Carbon|null $email_verified_at
@@ -67,6 +69,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'inspector_since' => 'datetime',
         ];
     }
 
@@ -110,6 +113,12 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
+    }
+
+    /** A registered independent inspector (TDD M14); set by an admin. */
+    public function isInspector(): bool
+    {
+        return $this->inspector_since !== null;
     }
 
     public function roleIn(Lot $lot): ?LotRole

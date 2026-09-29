@@ -9,6 +9,8 @@ export interface PublicLot {
     cover_url: string | null;
     brand_color: string | null;
     verified: boolean;
+    rating: number | null;
+    reviews_count: number;
     address: string | null;
     landmark: string | null;
     city: string | null;
@@ -20,4 +22,16 @@ export interface PublicLot {
     whatsapp: string | null;
     open: { open: boolean; label: string } | null;
     hours: { days: string; hours: string }[];
+}
+
+export interface PublicReview {
+    ulid: string;
+    mine: boolean;
+    author: string;
+    rating: number;
+    body: string | null;
+    tags: string[];
+    visit: string | null;
+    date: string;
+    reply: string | null;
 }

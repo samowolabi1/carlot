@@ -16,6 +16,7 @@ use App\Http\Controllers\Dealer\CalendarController;
 use App\Http\Controllers\Dealer\DashboardController;
 use App\Http\Controllers\Dealer\DealController;
 use App\Http\Controllers\Dealer\DealerHomeController;
+use App\Http\Controllers\Dealer\InspectionController;
 use App\Http\Controllers\Dealer\LeadController;
 use App\Http\Controllers\Dealer\Manager\CustomerController;
 use App\Http\Controllers\Dealer\Manager\DocumentController;
@@ -29,16 +30,19 @@ use App\Http\Controllers\Dealer\Manager\TodayController;
 use App\Http\Controllers\Dealer\Manager\WalkInController;
 use App\Http\Controllers\Dealer\OnboardingController;
 use App\Http\Controllers\Dealer\ReferralController;
+use App\Http\Controllers\Dealer\ReviewController as DealerReviewController;
 use App\Http\Controllers\Dealer\SettingsController;
 use App\Http\Controllers\Dealer\SpotlightController;
 use App\Http\Controllers\Dealer\StaffController;
 use App\Http\Controllers\Dealer\VehicleController;
 use App\Http\Controllers\Dealer\VehicleCostController;
 use App\Http\Controllers\Dealer\VehicleMediaController;
+use App\Http\Controllers\Dealer\VerificationController;
 use App\Http\Controllers\Dealer\VinDecodeController;
 use App\Http\Controllers\Deals\OfferController;
 use App\Http\Controllers\Deals\ReservationController;
 use App\Http\Controllers\Deals\TradeInController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Location\LocationSessionController;
 use App\Http\Controllers\Marketplace\CarController;
@@ -50,6 +54,10 @@ use App\Http\Controllers\Marketplace\LotSiteController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Orders\OrderTrackingController;
 use App\Http\Controllers\Sharing\ShareController;
+use App\Http\Controllers\Trust\IndependentInspectionController;
+use App\Http\Controllers\Trust\InspectionReportController;
+use App\Http\Controllers\Trust\ReportController as ContentReportController;
+use App\Http\Controllers\Trust\ReviewController;
 use App\Http\Controllers\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +90,14 @@ Route::post('/bookings/{appointment}/cancel', [CustomerBookingController::class,
 // Trade-in photos are private; the lot's team and the buyer get short-lived signed links.
 Route::get('/trade-ins/{tradeIn}/photos/{index}', [TradeInController::class, 'photo'])->whereNumber('index')->middleware('signed')->name('trade-ins.photo');
 
+// Reviews after a completed visit (M14): the buyer, or a signed link from the invite message.
+Route::get('/bookings/{appointment}/review', [ReviewController::class, 'edit'])->name('reviews.edit');
+Route::post('/appointments/{appointment}/review', [ReviewController::class, 'store'])->middleware('throttle:10,1')->name('reviews.store');
+
+// Trust (M14): CAC files for the owner and admins (signed), inspection reports for anyone.
+Route::get('/verifications/{verification}/{file}', [VerificationController::class, 'file'])->whereIn('file', ['certificate', 'frontage'])->middleware('signed')->name('verifications.file');
+Route::get('/inspections/{inspection}/report.pdf', InspectionReportController::class)->middleware('throttle:30,1')->name('inspections.pdf');
+
 // Order tracking (M19). Signed links on receipts and messages; no sign-in needed.
 Route::middleware(['signed', 'throttle:60,1'])->scopeBindings()->group(function () {
     Route::get('/o/{order}', [OrderTrackingController::class, 'show'])->name('orders.track');
@@ -100,6 +116,7 @@ Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name(
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [OtpLoginController::class, 'destroy'])->name('logout');
+    Route::post('/impersonation/stop', [ImpersonationController::class, 'destroy'])->name('impersonation.stop');
     Route::get('/welcome', [ProfileNameController::class, 'edit'])->name('profile.name');
     Route::put('/welcome', [ProfileNameController::class, 'update'])->name('profile.name.update');
 });
@@ -124,6 +141,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/leads/intent', LeadIntentController::class)->middleware('throttle:30,1')->name('leads.intent');
     Route::post('/lots/{lot:slug}/follow', [FollowController::class, 'store'])->name('lots.follow');
     Route::delete('/lots/{lot:slug}/follow', [FollowController::class, 'destroy'])->name('lots.unfollow');
+    Route::post('/reports', [ContentReportController::class, 'store'])->middleware('throttle:10,1')->name('reports.store');
     Route::put('/budget', [BudgetController::class, 'update'])->name('budget.update');
     Route::delete('/budget', [BudgetController::class, 'destroy'])->name('budget.destroy');
     Route::post('/favourites/{vehicle}', [FavouriteController::class, 'store'])->name('favourites.store');
@@ -160,6 +178,10 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::post('/vehicles/{car}/reservations', [ReservationController::class, 'store'])->middleware('throttle:10,1')->name('reservations.store');
     Route::get('/reservations/callback', [ReservationController::class, 'callback'])->name('reservations.callback');
 
+    // Independent inspections by registered inspectors (M14)
+    Route::get('/inspect/{car}', [IndependentInspectionController::class, 'create'])->name('inspector.create');
+    Route::post('/inspect/{car}', [IndependentInspectionController::class, 'store'])->middleware('throttle:10,1')->name('inspector.store');
+
     Route::get('/dealer', DealerHomeController::class)->name('dealer.home');
     Route::get('/dealer/start', [OnboardingController::class, 'create'])->name('dealer.onboarding.start');
     Route::post('/dealer/lots', [OnboardingController::class, 'store'])->name('dealer.lots.store');
@@ -179,6 +201,7 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::post('/settings/branding', [SettingsController::class, 'updateBranding'])->name('settings.branding');
             Route::put('/settings/location', [SettingsController::class, 'updateLocation'])->name('settings.location');
             Route::put('/settings/hours', [SettingsController::class, 'updateHours'])->name('settings.hours');
+            Route::post('/verification', [VerificationController::class, 'store'])->middleware('throttle:10,1')->name('verification.store');
 
             Route::get('/staff', [StaffController::class, 'index'])->name('staff');
             Route::post('/staff/invitations', [StaffController::class, 'invite'])->name('staff.invite');
@@ -230,6 +253,12 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::delete('/vehicles/{vehicle}/costs/{cost}', [VehicleCostController::class, 'destroy'])->name('vehicles.costs.destroy');
             Route::get('/vehicles/{vehicle}/costs/{cost}/receipt', [VehicleCostController::class, 'receipt'])->name('vehicles.costs.receipt');
             Route::get('/referrals', ReferralController::class)->name('referrals');
+
+            // Trust (M14): inspection reports and replies to reviews
+            Route::get('/vehicles/{vehicle}/inspection', [InspectionController::class, 'create'])->name('vehicles.inspection');
+            Route::post('/vehicles/{vehicle}/inspection', [InspectionController::class, 'store'])->name('vehicles.inspection.store');
+            Route::get('/reviews', [DealerReviewController::class, 'index'])->name('reviews');
+            Route::post('/reviews/{review}/reply', [DealerReviewController::class, 'reply'])->name('reviews.reply');
             Route::get('/analytics', AnalyticsController::class)->name('analytics');
 
             // Offers, trade-ins and reservations (M12)

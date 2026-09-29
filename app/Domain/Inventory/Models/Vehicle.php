@@ -15,6 +15,9 @@ use App\Domain\LotManager\Models\VehicleCost;
 use App\Domain\Lots\Concerns\BelongsToLot;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Support\Money;
+use App\Domain\Trust\Models\FraudSignal;
+use App\Domain\Trust\Models\Inspection;
+use App\Domain\Trust\Models\Report;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -24,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -56,6 +60,9 @@ use Laravel\Scout\Searchable;
  * @property bool $registered
  * @property string|null $description
  * @property VehicleStatus $status
+ * @property Carbon|null $held_at
+ * @property string|null $held_reason
+ * @property int|null $inspection_id
  * @property Carbon|null $spotlight_until
  * @property Carbon|null $listed_at
  * @property Carbon|null $sold_at
@@ -82,7 +89,7 @@ class Vehicle extends Model
         'vin', 'duty_status', 'registered', 'description', 'created_by',
     ];
 
-    protected $hidden = ['id', 'lot_id', 'created_by'];
+    protected $hidden = ['id', 'lot_id', 'created_by', 'inspection_id'];
 
     protected function casts(): array
     {
@@ -104,6 +111,7 @@ class Vehicle extends Model
             'listed_at' => 'datetime',
             'sold_at' => 'datetime',
             'price_changed_at' => 'datetime',
+            'held_at' => 'datetime',
         ];
     }
 
@@ -196,17 +204,18 @@ class Vehicle extends Model
     {
         $query->withoutGlobalScope('lot')
             ->whereIn($query->qualifyColumn('status'), VehicleStatus::live())
+            ->whereNull($query->qualifyColumn('held_at'))
             ->whereHas('lot', fn (Builder $q) => $q->where('status', LotStatus::Active));
     }
 
     public function isOnMarketplace(): bool
     {
         return in_array($this->status, VehicleStatus::live(), true)
+            && $this->held_at === null
             && ! $this->trashed()
             && $this->lot()->where('status', LotStatus::Active)->exists();
     }
 
-    /** "/car/01j9…-2018-toyota-camry-se" */
     /**
      * What the lot spent on the car; owners and managers only. Scoped {cost} bindings.
      *
@@ -217,6 +226,41 @@ class Vehicle extends Model
         return $this->hasMany(VehicleCost::class);
     }
 
+    /**
+     * The current inspection report (TDD M14).
+     *
+     * @return BelongsTo<Inspection, $this>
+     */
+    public function inspection(): BelongsTo
+    {
+        return $this->belongsTo(Inspection::class)->withoutGlobalScopes();
+    }
+
+    /** @return HasMany<Inspection, $this> */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class)->withoutGlobalScopes()->latest('id');
+    }
+
+    /** @return MorphMany<Report, $this> */
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    /** @return HasMany<FraudSignal, $this> */
+    public function fraudSignals(): HasMany
+    {
+        return $this->hasMany(FraudSignal::class);
+    }
+
+    /** Held for an admin to look at: off the marketplace, and the lot cannot republish it. */
+    public function isHeld(): bool
+    {
+        return $this->held_at !== null;
+    }
+
+    /** "/car/01j9…-2018-toyota-camry-se" */
     public function publicPath(): string
     {
         return '/car/'.$this->ulid.($this->slug ? '-'.$this->slug : '');

@@ -20,6 +20,8 @@ use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Marketplace\Jobs\SyncLotVehiclesToSearch;
 use App\Domain\Sharing\Jobs\RenderShareCard;
+use App\Domain\Trust\Models\LotVerification;
+use App\Domain\Trust\Models\Review;
 use Database\Factories\LotFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -62,6 +64,8 @@ use Illuminate\Support\Str;
  * @property LotStatus $status
  * @property Carbon|null $submitted_at
  * @property Carbon|null $verified_at
+ * @property float|null $rating
+ * @property int $reviews_count
  * @property int|null $plan_id
  * @property Carbon|null $featured_until
  * @property Carbon|null $followers_notified_at
@@ -101,6 +105,8 @@ class Lot extends Model
             'longitude' => 'float',
             'submitted_at' => 'datetime',
             'verified_at' => 'datetime',
+            'rating' => 'float',
+            'reviews_count' => 'integer',
             'booking_auto_confirm' => 'boolean',
             'booking_min_notice_minutes' => 'integer',
             'featured_until' => 'datetime',
@@ -191,6 +197,39 @@ class Lot extends Model
     public function spotlights(): HasMany
     {
         return $this->hasMany(Spotlight::class);
+    }
+
+    /** @return HasMany<LotVerification, $this> */
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(LotVerification::class)->withoutGlobalScopes()->latest('id');
+    }
+
+    /** @return HasOne<LotVerification, $this> */
+    public function latestVerification(): HasOne
+    {
+        return $this->hasOne(LotVerification::class)->withoutGlobalScopes()->latestOfMany();
+    }
+
+    /**
+     * Scoped {review} bindings.
+     *
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verified_at !== null;
+    }
+
+    /** The star rating buyers see: only once there are enough visible reviews (TDD M14). */
+    public function publicRating(): ?float
+    {
+        return $this->reviews_count >= Review::MIN_FOR_RATING && $this->rating !== null ? round($this->rating, 1) : null;
     }
 
     /** Scoped route bindings for {lead}. @return HasMany<Lead, $this> */

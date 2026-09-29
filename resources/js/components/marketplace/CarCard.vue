@@ -21,6 +21,7 @@ export interface CarCardData {
     reserved: boolean;
     saved: boolean;
     sponsored?: boolean;
+    inspected?: boolean;
 }
 
 withDefaults(defineProps<{ car: CarCardData; variant?: 'tile' | 'row'; compare?: boolean }>(), { variant: 'tile', compare: false });
@@ -65,6 +66,7 @@ function toggleCompare(ulid: string) {
             <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span class="font-display font-bold text-forest" :class="variant === 'row' ? 'text-[16px]' : 'text-[20px]'">{{ car.price }}</span>
                 <span v-if="budget.within(car.price_value)" class="rounded-lg bg-[#E3F1E8] px-1.5 py-0.5 text-[11px] font-semibold text-success">Within budget</span>
+                <span v-if="car.inspected" class="flex items-center gap-0.5 rounded-lg bg-map px-1.5 py-0.5 text-[11px] font-semibold text-forest"><Icon name="clipboard" :size="12" :stroke-width="2" /> Inspected</span>
             </div>
             <div class="truncate text-[13px] text-muted">{{ car.specs }}</div>
             <div class="flex items-center gap-1 truncate text-[13px] text-muted">

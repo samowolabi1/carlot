@@ -9,6 +9,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Support\VehicleStateMachine;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Sharing\Jobs\RenderShareCard;
+use App\Domain\Trust\Jobs\DetectFraudSignals;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,6 +20,10 @@ class PublishVehicle
     /** Takes a draft or hidden car live, within the lot's plan listing limit. */
     public function run(Vehicle $vehicle): Vehicle
     {
+        if ($vehicle->isHeld()) {
+            throw ValidationException::withMessages(['publish' => 'LotLink is reviewing this car. It goes back on sale once the review is done.']);
+        }
+
         $this->ensureComplete($vehicle);
 
         return DB::transaction(function () use ($vehicle): Vehicle {
@@ -31,6 +36,9 @@ class PublishVehicle
             if ($firstPublish) {
                 DB::afterCommit(fn () => VehiclePublished::dispatch($vehicle));
             }
+
+            // Duplicate VIN or photo, very low price, new-lot bursts (TDD M14): for an admin to check.
+            DB::afterCommit(fn () => DetectFraudSignals::dispatch($vehicle->id));
 
             RenderShareCard::refresh($vehicle->id);
 

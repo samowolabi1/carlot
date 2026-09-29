@@ -14,6 +14,20 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 
 ## Status
 
+**Sprint S12 (Trust and admin) ✅**
+
+| Area | What works |
+| --- | --- |
+| Lot verification | The last onboarding step (and Settings → Verification) takes the CAC number, the CAC certificate and a photo of the lot frontage. The files stay private: only the owner and admins open them, through short-lived links. An admin approves (the lot gets the **Verified lot** badge) or sends it back with a note; the owner is told either way. Lots can list cars while they wait. |
+| Inspection reports | Stock → **Inspect** on any car: a 40-point checklist in 7 groups (engine, gearbox, body, electrics, tyres/brakes/suspension, interior, documents). Every check starts as a pass, so you only change what isn't; a fail needs a note, and photos can be added. The score counts an advisory as half. Buyers see the score, the issues and photos on the car page, an **Inspected** tag in search and compare, and a PDF of the full report. A registered independent inspector (set by an admin) can sign a report from the car page; it shows **Independently inspected**, and the lot's own later checks don't replace it. |
+| Reviews (17) | Two hours after a visit is marked complete, the buyer gets a WhatsApp/SMS invite (`reviews:invite`, every 15 minutes) with a link that works without signing in; past bookings also show **Leave a review**. Stars, "what went well" chips and a comment; editable for 14 days; shown as first name and initial. The lot's owner and managers are told, and can reply once from **Reviews** in the sidebar. The star rating shows on the lot page, mini-site and car pages once there are 3 reviews. |
+| Reports | **Report this listing**, **Report this lot**, **Report this review** and **Report** on chat messages. One report per person per item. A review a buyer reports is hidden until an admin looks (a lot reporting a review of itself doesn't hide it). A car with 3 open reports comes off LotLink until an admin decides; the lot sees why and can't republish it meanwhile. |
+| Fraud signals | When a car is published or its price drops: the same VIN on another lot, a cover photo matching another lot's (a perceptual hash, so re-saved copies still match), a price under 40% of the pricing-guide median, or a lot under 30 days old publishing more than 30 cars in a day. Signals go to the admin queue; nothing is hidden automatically. |
+| Admin (A1) | The dashboard shows the review queue (lots to verify, flagged listings, reports, reported reviews) and platform metrics for the last 30 days (active lots, live listings, new users, bookings, recorded sales, MRR, churn). Admins approve or reject verifications, hide or approve listings, message the lots involved, restore or remove reviews, close reports, browse every listing and the audit log, mark users as inspectors, and **Log in as** a user for support (both ends go in the audit log; a banner shows "Back to admin"). |
+| Quality | 432 tests, including verification files and decisions, the checklist score and PDF, independent reports, review invites, editing and replies, the 3-review rule, report limits and auto-hold, every fraud signal, the admin queue actions, impersonation, and tenancy checks for verifications, inspections and reviews. |
+
+Not in S12: admin 2FA (still deferred), admin-editable finance rates and message templates (they stay in `config/lotlink.php` and Meta), and automatic CAC lookups (no registry API yet).
+
 **Sprint S11 (Location and analytics) ✅**
 
 | Area | What works |
@@ -219,6 +233,10 @@ cd carlot
 - **Install the app**: the service worker only runs over HTTPS or on `localhost`/`127.0.0.1`,
   and only with the built files (`npm run build`), not `npm run dev`. On `http://carlot.test`
   the site works normally without it; enable SSL in Laragon to try installing on a phone.
+- **Trust**: `php artisan db:seed --class=DemoTrustSeeder` (after DemoMarketplaceSeeder) adds 3 reviews
+  and an inspection at Demo Lot Ikeja, and an independent inspector: sign in as `08000000200`
+  and open any car to add a signed report. Verification files and inspection PDFs are stored
+  under `storage/app/private`.
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
@@ -255,6 +273,7 @@ your `APP_URL` with a `{{1}}` suffix):
 | `reservation_update` | Utility | name, car, lot, update | open bookings and offers |
 | `instalment_reminder` | Utility | name, amount, car, lot, due date | track order |
 | `daily_summary` | Utility | lot, date, walk-ins, new orders, money received, balances due, overdue instalments | open the report |
+| `review_invite` | Utility | lot, what (visit type and car) | leave a review |
 
 Until a template is approved, messages fall back to SMS automatically.
 

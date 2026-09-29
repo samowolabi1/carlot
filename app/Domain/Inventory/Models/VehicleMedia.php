@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $thumb_path
  * @property int|null $width
  * @property int|null $height
+ * @property string|null $phash
  * @property int $sort_order
  * @property bool $is_cover
  * @property string|null $error
@@ -31,7 +32,7 @@ class VehicleMedia extends Model
     /** Widths of the WebP renditions; the largest is `path`, the smallest `thumb_path`. */
     public const WIDTHS = [1600, 800, 400];
 
-    protected $fillable = ['vehicle_id', 'type', 'status', 'original_path', 'path', 'thumb_path', 'width', 'height', 'sort_order', 'is_cover', 'error'];
+    protected $fillable = ['vehicle_id', 'type', 'status', 'original_path', 'path', 'thumb_path', 'width', 'height', 'phash', 'sort_order', 'is_cover', 'error'];
 
     protected $hidden = ['id', 'vehicle_id', 'original_path'];
 

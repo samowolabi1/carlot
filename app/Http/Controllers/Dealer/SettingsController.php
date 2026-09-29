@@ -43,6 +43,7 @@ class SettingsController extends Controller
                 'test_drive_deposit' => $lot->test_drive_deposit ? intdiv($lot->test_drive_deposit, 100) : null,
                 'plan' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
             ],
+            'verification' => VerificationController::present($lot, Gate::allows('submit', $lot)),
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Domain\Inventory\Jobs;
 
 use App\Domain\Inventory\Enums\MediaStatus;
 use App\Domain\Inventory\Models\VehicleMedia;
+use App\Domain\Inventory\Support\ImageHash;
 use App\Domain\Inventory\Support\MediaUploads;
 use App\Domain\Sharing\Jobs\RenderShareCard;
 use Illuminate\Bus\Queueable;
@@ -86,6 +87,7 @@ class ProcessVehicleMedia implements ShouldQueue
             'thumb_path' => VehicleMedia::variantPath($vehicleUlid, $media->ulid, VehicleMedia::WIDTHS[2]),
             'width' => $size[0],
             'height' => $size[1],
+            'phash' => ImageHash::dhash($image),
             'original_path' => null,
             'error' => null,
         ]);

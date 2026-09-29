@@ -21,6 +21,7 @@ export interface BookingSummary {
     can_cancel: boolean;
     cancel_reason: string | null;
     deposit: { state: 'due' | 'paid' | 'refunded'; amount: string; left: string | null; pay_url: string | null } | null;
+    review: { url: string; rating: number | null } | null;
 }
 
 const props = defineProps<{
@@ -102,6 +103,12 @@ function cancel() {
                 <div v-if="booking.staff" class="flex justify-between gap-4 border-t border-divider py-2.5"><dt class="text-muted">With</dt><dd class="text-right font-semibold">{{ booking.staff }}</dd></div>
                 <div class="flex justify-between gap-4 border-t border-divider py-2.5"><dt class="text-muted">Status</dt><dd class="text-right font-semibold">{{ booking.status_label }}</dd></div>
             </dl>
+
+            <Link v-if="booking.review" :href="booking.review.url" class="card flex items-center gap-3 p-4 text-ink no-underline">
+                <Icon name="star" :size="22" class="shrink-0 text-clay" />
+                <span class="grow text-[15px] font-semibold">{{ booking.review.rating ? `You rated this visit ${booking.review.rating}/5` : `How was your visit to ${lot.name}?` }}</span>
+                <span class="shrink-0 text-[14px] font-semibold text-clay">{{ booking.review.rating ? 'Edit' : 'Leave a review' }}</span>
+            </Link>
 
             <!-- Live location (TDD M8, design 14) -->
             <div v-if="location && (location.live.length || location.can_share)" class="card flex flex-col gap-3 p-4">

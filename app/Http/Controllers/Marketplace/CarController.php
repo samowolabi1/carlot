@@ -28,13 +28,14 @@ class CarController extends Controller
         $vehicle = Vehicle::query()
             ->withoutGlobalScope('lot')
             ->where('ulid', $ulid)
-            ->with(['make', 'model', 'lot', 'cover', 'features', 'media' => fn ($q) => $q->where('status', 'ready')])
+            ->with(['make', 'model', 'lot', 'cover', 'features', 'inspection', 'media' => fn ($q) => $q->where('status', 'ready')])
             ->first();
 
         abort_if($vehicle === null, 404);
 
         $lotLive = $vehicle->lot->status === LotStatus::Active;
-        $public = $lotLive && in_array($vehicle->status, [...VehicleStatus::live(), VehicleStatus::Sold], true);
+        // Held cars (reported, or hidden by an admin) are off LotLink until the review is done.
+        $public = $lotLive && in_array($vehicle->status, [...VehicleStatus::live(), VehicleStatus::Sold], true) && ! $vehicle->isHeld();
         // Lot staff can preview drafts and cars at a lot that isn't approved yet.
         $preview = ! $public && $request->user()?->hasLotRole($vehicle->lot);
 
@@ -65,6 +66,7 @@ class CarController extends Controller
             'saved' => $user ? $user->favourites()->whereKey($vehicle->id)->exists() : false,
             'similar' => $this->similar($vehicle),
             'deals' => $public ? DealsPresenter::forCar($vehicle, $user) : null,
+            'inspector' => $public && ($user?->isInspector() ?? false),
             'finance' => $price ? [
                 'price' => $price,
                 'from' => FinanceCalculator::fromPrice($price),

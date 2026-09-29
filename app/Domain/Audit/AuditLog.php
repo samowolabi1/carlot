@@ -3,7 +3,9 @@
 namespace App\Domain\Audit;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Lots\Models\Lot;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Who changed prices, statuses, staff or payments, and when (TDD: Security).
@@ -26,6 +28,18 @@ class AuditLog extends Model
     protected function casts(): array
     {
         return ['changes' => 'array'];
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<Lot, $this> */
+    public function lot(): BelongsTo
+    {
+        return $this->belongsTo(Lot::class)->withTrashed();
     }
 
     /** @param array<string, mixed> $changes */

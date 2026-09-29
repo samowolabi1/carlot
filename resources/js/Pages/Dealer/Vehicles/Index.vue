@@ -20,6 +20,8 @@ interface Row {
     ageing: boolean;
     new_arrival: boolean;
     next_statuses: string[];
+    inspected: boolean;
+    held: string | null;
     order: { ulid: string; order_no: string } | null;
     share_url: string | null;
     spotlight_until: string | null;
@@ -171,6 +173,8 @@ function editHref(row: Row) {
                                 <template v-else>{{ row.photos }} photos</template>
                                 <span v-if="row.new_arrival" class="ml-1.5 rounded-lg bg-blush px-1.5 py-0.5 text-[11px] font-semibold text-clay-dark">New arrival</span>
                                 <span v-if="row.spotlight_until" class="ml-1.5 rounded-lg bg-forest px-1.5 py-0.5 text-[11px] font-semibold text-white">Spotlight to {{ row.spotlight_until }}</span>
+                                <span v-if="row.inspected" class="ml-1.5 rounded-lg bg-map px-1.5 py-0.5 text-[11px] font-semibold text-forest">Inspected</span>
+                                <span v-if="row.held" class="mt-0.5 block font-semibold text-danger">{{ row.held }}</span>
                             </span>
                         </span>
                     </Link>
@@ -207,6 +211,7 @@ function editHref(row: Row) {
                             >Mark sold</Link
                         >
                         <Link v-if="lot.can_costs && row.status !== 'draft'" :href="route('dealer.vehicles.costs.index', [lot.slug, row.ulid])">Costs</Link>
+                        <Link v-if="row.status !== 'sold'" :href="route('dealer.vehicles.inspection', [lot.slug, row.ulid])">{{ row.inspected ? 'Inspection' : 'Inspect' }}</Link>
                         <button v-if="canManage && row.status === 'available' && row.share_url" type="button" class="text-clay hover:text-clay-dark" @click="spotlighting = row">Spotlight</button>
                         <template v-if="canManage">
                             <button

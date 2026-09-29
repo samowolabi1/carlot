@@ -19,6 +19,7 @@ final class NotificationPreferences
         'leads' => ['New leads and follow-ups', 'dealers'],
         'billing' => ['Billing and plan', 'dealers'],
         'summary' => ['Daily summary', 'dealers'],
+        'reviews' => ['Reviews of visits', 'all'],
     ];
 
     public const OPTIONAL = ['phone', 'mail'];

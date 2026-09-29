@@ -6,6 +6,8 @@ import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue'
 import LotBadge from '@/components/marketplace/LotBadge.vue';
 import SaveButton from '@/components/marketplace/SaveButton.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
+import InspectionReport, { type InspectionData } from '@/components/trust/InspectionReport.vue';
+import ReportButton from '@/components/trust/ReportButton.vue';
 import type { PublicLot } from '@/components/marketplace/types-lot';
 import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
@@ -33,6 +35,7 @@ const props = defineProps<{
         new_arrival: boolean;
         reserved: boolean;
         listed_days: number | null;
+        inspection: InspectionData | null;
     };
     lot: PublicLot;
     sold: boolean;
@@ -40,6 +43,7 @@ const props = defineProps<{
     saved: boolean;
     similar: CarCardData[];
     finance: CarFinanceData | null;
+    inspector: boolean;
     deals: { offers: boolean; reserve: string | null; my_offer: { status: string; text: string } | null; reserved_until: string | null } | null;
 }>();
 
@@ -144,6 +148,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                     <div class="flex flex-wrap gap-1.5">
                         <span v-if="car.reserved" class="rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">Reserved</span>
                         <span v-if="car.new_arrival" class="rounded-xl bg-blush px-2.5 py-1 text-[12px] font-semibold text-clay-dark">New arrival</span>
+                        <span v-if="car.inspection" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">{{ car.inspection.independent ? 'Independently inspected' : 'Inspected' }}</span>
                         <span v-if="lot.verified" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">Verified lot</span>
                         <span v-if="withinBudget" class="rounded-xl bg-[#E3F1E8] px-2.5 py-1 text-[12px] font-semibold text-success">Within your budget</span>
                     </div>
@@ -178,6 +183,8 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <h2 class="font-sans text-[16px] font-bold">About this car</h2>
                         <p class="text-[15px] whitespace-pre-line text-ink">{{ car.description }}</p>
                     </section>
+
+                    <InspectionReport v-if="car.inspection" :inspection="car.inspection" />
 
                     <section v-if="car.features.length" class="flex flex-col gap-3">
                         <h2 class="font-sans text-[16px] font-bold">Features</h2>
@@ -219,6 +226,11 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Link :href="tradeInHref" class="inline-flex min-h-11 items-center">Trade in my car</Link>
                         <a v-if="lot.phone && deals?.offers" :href="`tel:${lot.phone}`" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('call')">Call the lot</a>
                         <a v-if="whatsappHref && deals?.offers" :href="whatsappHref" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('whatsapp')">WhatsApp</a>
+                    </div>
+
+                    <div v-if="!sold && !preview && !ownLot" class="flex flex-wrap items-center gap-x-4">
+                        <ReportButton kind="vehicle" :id="car.ulid" />
+                        <Link v-if="inspector" :href="route('inspector.create', car.ulid)" class="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-semibold"><Icon name="clipboard" :size="15" /> Add an independent inspection</Link>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use App\Domain\Trust\Models\Review;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\Request;
@@ -33,6 +34,8 @@ class LotSiteController extends Controller
             'preview' => $preview,
             'following' => $request->user() ? $lot->followers()->whereKey($request->user()->id)->exists() : false,
             'followers' => $lot->followers()->count(),
+            'reviews' => $lot->reviews()->withoutGlobalScopes()->visible()->with(['author', 'appointment'])->latest()->limit(20)->get()
+                ->map(fn (Review $r) => MarketplacePresenter::review($r, $lot->timezone, $request->user()?->id)),
         ])->withViewData(['meta' => [
             'title' => $lot->name.($lot->city ? " — cars for sale in {$lot->city}" : ''),
             'description' => $lot->tagline ?? "See {$lot->name}'s cars, opening hours and directions on LotLink.",

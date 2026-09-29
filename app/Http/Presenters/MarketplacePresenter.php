@@ -11,6 +11,8 @@ use App\Domain\Lots\Models\Lot;
 use App\Domain\Marketplace\Support\Geo;
 use App\Domain\Marketplace\Support\OpeningHours;
 use App\Domain\Support\PhoneNumber;
+use App\Domain\Trust\Models\Inspection;
+use App\Domain\Trust\Models\Review;
 
 /**
  * Shapes cars and lots for public pages. Only fields meant for buyers leave here:
@@ -41,6 +43,7 @@ class MarketplacePresenter
             'reserved' => $v->status === VehicleStatus::Reserved,
             'saved' => in_array($v->id, $savedIds, true),
             'sponsored' => $v->spotlight_until?->isFuture() ?? false,
+            'inspected' => $v->inspection_id !== null,
         ];
     }
 
@@ -100,6 +103,24 @@ class MarketplacePresenter
             'new_arrival' => $v->isNewArrival(),
             'reserved' => $v->status === VehicleStatus::Reserved,
             'listed_days' => $v->daysListed(),
+            'inspection' => $v->inspection ? self::inspection($v->inspection, $v->lot->timezone) : null,
+        ];
+    }
+
+    /** The car's current inspection report (TDD M14), as the car page and compare show it. */
+    public static function inspection(Inspection $i, string $timezone = 'Africa/Lagos'): array
+    {
+        return [
+            'ulid' => $i->ulid,
+            'score' => $i->score,
+            'independent' => $i->isIndependent(),
+            'label' => $i->isIndependent() ? 'Independently inspected' : 'Inspected by the lot',
+            'inspector' => $i->inspector_name,
+            'date' => $i->created_at?->timezone($timezone)->format('j M Y'),
+            'summary' => $i->summary,
+            'groups' => $i->summaryRows(),
+            'photos' => $i->photoUrls(),
+            'pdf_url' => route('inspections.pdf', $i),
         ];
     }
 
@@ -118,6 +139,8 @@ class MarketplacePresenter
             'cover_url' => $lot->cover_url,
             'brand_color' => $lot->brand_color,
             'verified' => $lot->verified_at !== null,
+            'rating' => $lot->publicRating(),
+            'reviews_count' => $lot->reviews_count,
             'address' => $lot->address,
             'landmark' => $lot->landmark,
             'city' => $lot->city,
@@ -129,6 +152,22 @@ class MarketplacePresenter
             'whatsapp' => $lot->whatsapp ? ltrim($lot->whatsapp, '+') : null,
             'open' => $hours->status(),
             'hours' => $hours->table(),
+        ];
+    }
+
+    /** A visible review on the lot's pages: first name and initial only (design 17). */
+    public static function review(Review $r, string $timezone, ?int $viewerId = null): array
+    {
+        return [
+            'mine' => $viewerId !== null && $r->user_id === $viewerId,
+            'ulid' => $r->ulid,
+            'author' => $r->authorName(),
+            'rating' => $r->rating,
+            'body' => $r->body,
+            'tags' => $r->tagLabels(),
+            'visit' => $r->appointment?->type->label(),
+            'date' => $r->created_at->copy()->setTimezone($timezone)->format('M Y'),
+            'reply' => $r->reply,
         ];
     }
 

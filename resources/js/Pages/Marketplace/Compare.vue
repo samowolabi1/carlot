@@ -22,6 +22,7 @@ const rows: { key: string; label: string }[] = [
     { key: 'fuel', label: 'Fuel' },
     { key: 'condition', label: 'Condition' },
     { key: 'duty', label: 'Duty' },
+    { key: 'inspection', label: 'Inspection report' },
     { key: 'lot', label: 'Lot' },
 ];
 

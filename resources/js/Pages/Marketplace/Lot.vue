@@ -4,9 +4,10 @@ import Logo from '@/components/Logo.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import ShareLocation from '@/components/marketplace/ShareLocation.vue';
 import ShareMenu from '@/components/marketplace/ShareMenu.vue';
+import ReportButton from '@/components/trust/ReportButton.vue';
 import type { Filters } from '@/components/marketplace/types';
 import { toQuery } from '@/components/marketplace/types';
-import type { PublicLot } from '@/components/marketplace/types-lot';
+import type { PublicLot, PublicReview } from '@/components/marketplace/types-lot';
 import { distanceKm, formatDistance, useLocation } from '@/composables/useLocation';
 import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
@@ -22,6 +23,7 @@ const props = defineProps<{
     preview: boolean;
     following: boolean;
     followers: number;
+    reviews: PublicReview[];
 }>();
 
 const { user, lots } = useShared();
@@ -36,12 +38,13 @@ function toggleFollow() {
     else router.post(url, {}, { preserveScroll: true });
 }
 
-const tab = ref<'stock' | 'about'>('stock');
+const tab = ref<'stock' | 'reviews' | 'about'>('stock');
 const { location } = useLocation();
 const distance = computed(() => (location.value && props.lot.location ? formatDistance(distanceKm(location.value, props.lot.location)) : null));
 const brand = computed(() => props.lot.brand_color ?? '#16302B');
+const ownLot = computed(() => lots.value.some((l) => l.slug === props.lot.slug));
 function intent(source: 'whatsapp' | 'call') {
-    if (user.value && !lots.value.some((l) => l.slug === props.lot.slug)) recordIntent(source, { lot: props.lot.slug });
+    if (user.value && !ownLot.value) recordIntent(source, { lot: props.lot.slug });
 }
 
 const whatsappHref = computed(() => (props.lot.whatsapp ? `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(`Hi ${props.lot.name}, I found you on LotLink.`)}` : null));
@@ -86,6 +89,7 @@ function filter(query: Partial<Filters>) {
                     </h1>
                     <p v-if="lot.tagline" class="text-[15px] text-muted">{{ lot.tagline }}</p>
                     <p class="text-[14px] text-muted">
+                        <button v-if="lot.rating" type="button" class="font-semibold text-ink" @click="tab = 'reviews'">★ {{ lot.rating.toFixed(1) }} ({{ lot.reviews_count }} reviews)</button><template v-if="lot.rating"> · </template>
                         <span v-if="lot.open" :class="lot.open.open ? 'font-semibold text-success' : ''">{{ lot.open.label }}</span>
                         <template v-if="lot.address || lot.city"> · {{ [lot.address, lot.city, lot.state].filter(Boolean).join(', ') }}</template>
                     </p>
@@ -137,8 +141,26 @@ function filter(query: Partial<Filters>) {
                 <div class="flex min-w-0 flex-col gap-4">
                     <div role="tablist" aria-label="Lot sections" class="flex gap-5 border-b border-line">
                         <button type="button" role="tab" :aria-selected="tab === 'stock'" class="h-10 border-b-2 text-[15px]" :class="tab === 'stock' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'stock'">Stock ({{ total }})</button>
+                        <button v-if="reviews.length" type="button" role="tab" :aria-selected="tab === 'reviews'" class="h-10 border-b-2 text-[15px]" :class="tab === 'reviews' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'reviews'">Reviews ({{ lot.reviews_count }})</button>
                         <button type="button" role="tab" :aria-selected="tab === 'about'" class="h-10 border-b-2 text-[15px] lg:hidden" :class="tab === 'about' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'about'">About</button>
                     </div>
+
+                    <ul v-if="tab === 'reviews'" class="flex flex-col gap-3">
+                        <li v-for="r in reviews" :key="r.ulid" class="card flex flex-col gap-1.5 p-4">
+                            <div class="flex flex-wrap items-center gap-x-2 text-[14px]">
+                                <span class="font-semibold text-clay" :aria-label="`${r.rating} out of 5 stars`">{{ '★'.repeat(r.rating) }}<span class="text-line-strong">{{ '★'.repeat(5 - r.rating) }}</span></span>
+                                <strong>{{ r.author }}</strong>
+                                <span class="text-muted"><template v-if="r.visit">{{ r.visit }} · </template>{{ r.date }}</span>
+                            </div>
+                            <p v-if="r.body" class="text-[15px] whitespace-pre-line">"{{ r.body }}"</p>
+                            <ul v-if="r.tags.length" class="flex flex-wrap gap-1.5">
+                                <li v-for="t in r.tags" :key="t" class="rounded-full bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">{{ t }}</li>
+                            </ul>
+                            <div v-if="r.reply" class="mt-1 rounded-xl bg-ivory p-3 text-[14px]"><strong>Reply from {{ lot.name }}</strong><p class="mt-0.5 whitespace-pre-line">{{ r.reply }}</p></div>
+                            <ReportButton v-if="!ownLot && !r.mine" kind="review" :id="r.ulid" class="self-end" />
+                        </li>
+                        <li v-if="lot.reviews_count > reviews.length" class="text-center text-[13px] text-muted">Showing the latest {{ reviews.length }} of {{ lot.reviews_count }} reviews.</li>
+                    </ul>
 
                     <template v-if="tab === 'stock'">
                         <div class="-mr-5 flex gap-2 overflow-x-auto pr-5">
@@ -194,6 +216,7 @@ function filter(query: Partial<Filters>) {
                         <h2 class="font-sans text-[15px] font-bold">About {{ lot.name }}</h2>
                         <p class="text-[14px] whitespace-pre-line">{{ lot.about }}</p>
                     </div>
+                    <ReportButton v-if="!preview && !ownLot" kind="lot" :id="lot.slug" class="self-start" />
                 </aside>
             </div>
         </div>

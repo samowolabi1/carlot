@@ -15,7 +15,7 @@ use Inertia\Response;
 
 class OnboardingController extends Controller
 {
-    /** Wizard order, from the D1 onboarding design. CAC verification arrives in sprint S12. */
+    /** Wizard order, from the D1 onboarding design. The last step is "Verify with CAC" and submit. */
     public const STEPS = ['business', 'branding', 'location', 'hours', 'staff', 'submit'];
 
     public function create(Request $request): Response
@@ -52,6 +52,7 @@ class OnboardingController extends Controller
             'steps' => self::STEPS,
             'lot' => new LotSettingsResource($lot),
             'defaults' => null,
+            'verification' => $step === 'submit' ? VerificationController::present($lot, Gate::allows('submit', $lot)) : null,
         ]);
     }
 
