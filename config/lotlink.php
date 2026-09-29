@@ -73,6 +73,13 @@ return [
         ],
     ],
 
+    // Adverts lots buy from LotLink (placeholder prices in whole naira). Every advert is checked by
+    // an admin before it runs; "slots" is how many can run at once.
+    'adverts' => [
+        'home_banner' => ['slots' => (int) env('ADS_HOME_SLOTS', 5), 'prices' => [7 => 40000, 14 => 75000, 30 => 140000]],
+        'search_banner' => ['slots' => (int) env('ADS_SEARCH_SLOTS', 6), 'prices' => [7 => 20000, 14 => 36000, 30 => 65000]],
+    ],
+
     // Share-card images (TDD M9), rendered on the media queue.
     'share_cards' => (bool) env('LOTLINK_SHARE_CARDS', true),
 

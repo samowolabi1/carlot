@@ -2,6 +2,8 @@
 
 namespace App\Domain\Billing\Actions;
 
+use App\Domain\Advertising\Actions\SubmitAdCampaign;
+use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Appointments\Actions\ConfirmDeposit;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\PaymentPurpose;
@@ -21,6 +23,7 @@ class FulfilPayment
         private readonly ActivateSubscription $activate,
         private readonly ActivateSpotlight $spotlight,
         private readonly ConfirmDeposit $deposit,
+        private readonly SubmitAdCampaign $advert,
         private readonly RefundPayment $refund,
     ) {}
 
@@ -68,6 +71,7 @@ class FulfilPayment
         match ($payment->purpose) {
             PaymentPurpose::Subscription => $this->activate->run($payment, $transaction),
             PaymentPurpose::Spotlight => $this->spotlight->run(Spotlight::withoutGlobalScopes()->findOrFail($payment->payable_id)),
+            PaymentPurpose::Advert => $this->advert->run(AdCampaign::withoutGlobalScopes()->findOrFail($payment->payable_id)),
             PaymentPurpose::Renewal => null,
             // Buyer checkouts started before LotLink stopped taking payments for cars. A reservation
             // is now paid to the lot directly, so an old one is closed and the money goes back;

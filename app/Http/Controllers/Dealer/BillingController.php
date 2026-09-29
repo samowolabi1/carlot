@@ -131,11 +131,17 @@ class BillingController extends Controller
         // Car spotlights are bought from Stock; plans and featured-lot slots from Billing.
         $carSpotlight = $payment->purpose === PaymentPurpose::Spotlight
             && Spotlight::withoutGlobalScopes()->whereKey($payment->payable_id)->whereNotNull('vehicle_id')->exists();
-        $back = $carSpotlight ? route('dealer.vehicles.index', $lot) : route('dealer.billing', $lot);
+        $advert = $payment->purpose === PaymentPurpose::Advert;
+        $back = match (true) {
+            $carSpotlight => route('dealer.vehicles.index', $lot),
+            $advert => route('dealer.ads.index', $lot),
+            default => route('dealer.billing', $lot),
+        };
 
         return redirect($back)->with(...match ($payment->status) {
             PaymentStatus::Success => ['success', match (true) {
                 $carSpotlight => 'Paid. Your spotlight is live.',
+                $advert => 'Paid. LotLink will check your advert (usually within a working day) and it runs from its start date.',
                 $payment->purpose === PaymentPurpose::Spotlight => 'Paid. Your lot is featured on the home page.',
                 default => 'Paid. Your plan is active.',
             }],

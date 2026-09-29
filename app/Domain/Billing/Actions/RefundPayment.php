@@ -3,6 +3,8 @@
 namespace App\Domain\Billing\Actions;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Advertising\Enums\AdStatus;
+use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Enums\PaymentPurpose;
 use App\Domain\Billing\Enums\PaymentStatus;
@@ -30,6 +32,14 @@ class RefundPayment
 
         $this->gateway->refund($payment->reference, $payment->amount);
         $payment->forceFill(['status' => PaymentStatus::Refunded, 'refunded_at' => now()])->save();
+
+        // A refunded advert stops: one in review counts as rejected, a running one as removed.
+        if ($payment->purpose === PaymentPurpose::Advert) {
+            $campaign = AdCampaign::withoutGlobalScopes()->find($payment->payable_id);
+            if ($campaign !== null && in_array($campaign->status, AdStatus::holding(), true)) {
+                $campaign->forceFill(['status' => $campaign->status === AdStatus::InReview ? AdStatus::Rejected : AdStatus::Removed])->save();
+            }
+        }
 
         if ($payment->purpose === PaymentPurpose::Spotlight) {
             $spotlight = Spotlight::withoutGlobalScopes()->find($payment->payable_id);

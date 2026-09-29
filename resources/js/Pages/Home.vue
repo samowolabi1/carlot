@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HomeBanners from '@/components/marketplace/HomeBanners.vue';
+import type { AdBanner } from '@/lib/ads';
 import CarGlyph from '@/components/CarGlyph.vue';
 import Icon from '@/components/Icon.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
@@ -26,6 +28,7 @@ const props = defineProps<{
     arrivals: CarCardData[];
     spotlight: CarCardData[];
     featuredLots: FeaturedLot[];
+    banners: AdBanner[];
     carCount: number;
     lotCount: number;
     nearMe: boolean;
@@ -83,6 +86,10 @@ const chips = computed(() => [
                 >
             </div>
         </section>
+
+        <div v-if="banners.length" class="mx-auto mt-6 max-w-6xl px-5">
+            <HomeBanners :banners="banners" />
+        </div>
 
         <section v-if="spotlight.length" class="mx-auto mt-7 flex max-w-6xl flex-col gap-3 px-5" aria-labelledby="spotlight-heading">
             <div class="flex items-baseline justify-between gap-3">

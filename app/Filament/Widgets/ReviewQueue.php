@@ -3,8 +3,11 @@
 namespace App\Filament\Widgets;
 
 use App\Domain\Admin\PlatformMetrics;
+use App\Domain\Advertising\Enums\AdStatus;
+use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Helpdesk\Enums\TicketStatus;
 use App\Domain\Helpdesk\Models\SupportTicket;
+use App\Filament\Resources\AdCampaignResource;
 use App\Filament\Resources\FraudSignalResource;
 use App\Filament\Resources\LotVerificationResource;
 use App\Filament\Resources\ReportResource;
@@ -35,6 +38,7 @@ class ReviewQueue extends StatsOverviewWidget
             $stat('Flagged listings', $q['signals'], FraudSignalResource::getUrl()),
             $stat('Reports', $q['reports'], ReportResource::getUrl()),
             $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl()),
+            $stat('Adverts to check', AdCampaign::withoutGlobalScopes()->where('status', AdStatus::InReview)->count(), AdCampaignResource::getUrl()),
             $stat('Support tickets', SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->count(), SupportTicketResource::getUrl()),
         ];
     }

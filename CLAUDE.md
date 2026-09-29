@@ -141,6 +141,14 @@ Run all four before pushing.
   (both engines).
 - Tests bind `Tests\Support\FakePaymentGateway` (`$this->payments`); never call Paystack.
 
+## Adverts
+
+- Lots' paid banners live in `app/Domain/Advertising` (`AdCampaign`, lot-owned). Placements: `home_banner`, `search_banner`
+  (targetable by make, body type, city). Book with `CreateAdCampaign` (slot check under a lock via `AdSchedule`, image via
+  `AdImage`, a `Payment` with purpose `advert`); `FulfilPayment` calls `SubmitAdCampaign` (in review); admins use
+  `ReviewAdCampaign` (approve schedules it, reject refunds, remove takes down). Serve only through `AdServer`; count views and
+  clicks only through `AdController` (`ads.seen`/`ads.click`, once per visit, no bots or lot staff). Never run an advert unreviewed.
+
 ## Leads and chat (S8)
 
 - Every enquiry goes through `CaptureLead` (dedupes lot + buyer + car over 30 days, adds the buyer to

@@ -12,6 +12,7 @@ use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Bookings\CustomerBookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\LeadIntentController;
+use App\Http\Controllers\Dealer\AdvertController;
 use App\Http\Controllers\Dealer\AnalyticsController;
 use App\Http\Controllers\Dealer\BankAccountController;
 use App\Http\Controllers\Dealer\BillingController;
@@ -55,6 +56,7 @@ use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Location\LocationSessionController;
+use App\Http\Controllers\Marketplace\AdController;
 use App\Http\Controllers\Marketplace\CarController;
 use App\Http\Controllers\Marketplace\CompareController;
 use App\Http\Controllers\Marketplace\FavouriteController;
@@ -119,6 +121,9 @@ Route::post('/appointments/{appointment}/review', [ReviewController::class, 'sto
 // Trust (M14): CAC files for the owner and admins (signed), inspection reports for anyone.
 Route::get('/verifications/{verification}/{file}', [VerificationController::class, 'file'])->whereIn('file', ['certificate', 'frontage'])->middleware('signed')->name('verifications.file');
 Route::get('/inspections/{inspection}/report.pdf', InspectionReportController::class)->middleware('throttle:30,1')->name('inspections.pdf');
+// Adverts lots buy (homepage and search banners): clicks and views, once per visit.
+Route::get('/ad/{campaign}', [AdController::class, 'click'])->middleware('throttle:browse')->name('ads.click');
+Route::post('/ad/{campaign}/seen', [AdController::class, 'seen'])->middleware('throttle:browse')->name('ads.seen');
 // Support ticket attachments: signed, and only for the lot's staff or admins.
 Route::get('/support/attachments/{message}', SupportAttachmentController::class)->middleware(['auth', 'signed'])->name('support.attachment');
 
@@ -349,6 +354,10 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
             Route::get('/billing/card', [BillingController::class, 'card'])->name('billing.card');
             Route::get('/billing/invoices/{billingPayment}', [BillingController::class, 'invoice'])->name('billing.invoice');
             Route::get('/spotlight/options', [SpotlightController::class, 'options'])->name('spotlight.options');
+            // Adverts (paid to LotLink, checked before they run)
+            Route::get('/advertise', [AdvertController::class, 'index'])->name('ads.index');
+            Route::get('/advertise/new', [AdvertController::class, 'create'])->name('ads.create');
+            Route::post('/advertise', [AdvertController::class, 'store'])->middleware('throttle:10,60')->name('ads.store');
             Route::post('/vehicles/{vehicle}/spotlight', [SpotlightController::class, 'car'])->name('vehicles.spotlight');
             Route::post('/spotlight/featured', [SpotlightController::class, 'featured'])->name('spotlight.featured');
 

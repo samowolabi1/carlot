@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketplace;
 
+use App\Domain\Advertising\Support\AdServer;
 use App\Domain\Inventory\Enums\BodyType;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Enums\Transmission;
@@ -48,6 +49,8 @@ class SearchController extends Controller
             // Up to 3 spotlighted cars matching the search, labelled "Sponsored" (TDD M5).
             'sponsored' => $search->sponsored($criteria)->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds))->values(),
             'lotCount' => $results->getCollection()->pluck('lot.slug')->unique()->count(),
+            // A lot's search banner that fits this search (make, body type or city), if any.
+            'banner' => AdServer::search($criteria),
             'filters' => $criteria->toArray(),
             'activeFilters' => $criteria->activeFilterCount(),
             'options' => self::filterOptions(),

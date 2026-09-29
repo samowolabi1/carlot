@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketplace;
 
+use App\Domain\Advertising\Support\AdServer;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Domains\CustomDomains;
 use App\Domain\Lots\Models\Lot;
@@ -33,6 +34,8 @@ class HomeController extends Controller
         $savedIds = $request->user()?->favourites()->pluck('vehicles.id')->all() ?? [];
 
         return Inertia::render('Home', [
+            // Homepage banners lots pay for (checked by LotLink before they run).
+            'banners' => AdServer::home(),
             'arrivals' => $search->search($criteria)->getCollection()->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds)),
             // Spotlighted cars rotate on each visit; the row is hidden when there are none.
             'spotlight' => Vehicle::query()->marketplace()->where('vehicles.spotlight_until', '>', now())

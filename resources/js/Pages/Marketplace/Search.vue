@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SearchBanner from '@/components/marketplace/SearchBanner.vue';
+import type { AdBanner } from '@/lib/ads';
 import Icon from '@/components/Icon.vue';
 import CarCard, { type CarCardData } from '@/components/marketplace/CarCard.vue';
 import FiltersPanel from '@/components/marketplace/FiltersPanel.vue';
@@ -20,6 +22,7 @@ const props = defineProps<{
     activeFilters: number;
     options: FilterOptions;
     sponsored: CarCardData[];
+    banner: AdBanner | null;
     landing: { heading: string; intro: string; related: { label: string; url: string; count: number }[]; url: string } | null;
     savedSearch: string | null;
 }>();
@@ -186,7 +189,11 @@ const heading = computed(() => {
                 </section>
 
                 <div v-if="results.data.length" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    <CarCard v-for="car in results.data" :key="car.ulid" :car="car" compare />
+                    <template v-for="(car, i) in results.data" :key="car.ulid">
+                        <CarCard :car="car" compare />
+                        <!-- A lot's search banner after the sixth car (or at the end of a short list). -->
+                        <SearchBanner v-if="banner && (i === 5 || (i === results.data.length - 1 && results.data.length < 6))" :ad="banner" />
+                    </template>
                 </div>
                 <div v-else class="card flex flex-col items-center gap-2 px-6 py-12 text-center">
                     <h2 class="text-xl font-bold">No cars match yet</h2>
