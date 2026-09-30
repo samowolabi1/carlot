@@ -25,5 +25,11 @@ class DatabaseSeeder extends Seeder
                 'phone_verified_at' => now(),
             ],
         );
+
+        // On a local install (Laragon), the demo lenders too, so the lender portal can be tried straight away
+        // (lender@lotlink.test / password). Never in production.
+        if (app()->isLocal()) {
+            $this->call(DemoLenderSeeder::class);
+        }
     }
 }

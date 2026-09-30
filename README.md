@@ -298,7 +298,7 @@ components; run `php artisan optimize:clear` and `php artisan filament:optimize-
 - **Terms and privacy**: `/terms`, `/privacy`, `/lender-terms` and `/security` (linked at the bottom of every page). Accounts that
   existed before, or that an admin or a lot created, are asked once to accept the Terms and Privacy Policy; new sign-ups accept on the
   sign-in page. Acceptances (with version, time, IP and browser) are in the `legal_acceptances` table.
-- **Car loans and lenders**: `php artisan db:seed --class=DemoLenderSeeder` (also run by DemoMarketplaceSeeder) adds
+- **Car loans and lenders**: `php artisan db:seed --class=DemoLenderSeeder` (also run by `php artisan db:seed` when `APP_ENV=local`, and by DemoMarketplaceSeeder) adds
   "Demo Finance" (answers at once, nothing is sent anywhere) and "Kobo Motor Finance", which works in the lender portal:
   sign in with the password option as `lender@lotlink.test` / `password` and open `/lender`. As a buyer, open a car →
   Apply for a car loan → pick Kobo; then review, ask for documents, approve and record payment in the portal, and follow it
