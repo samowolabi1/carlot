@@ -53,3 +53,8 @@ Schedule::command('sitemap:generate')->dailyAt('03:00')->withoutOverlapping();
 
 // Privacy (TDD: account deletion)
 Schedule::command('accounts:anonymise')->dailyAt('02:30')->withoutOverlapping();
+
+// Horizon's dashboard graphs (Redis queue only).
+if (config('queue.default') === 'redis') {
+    Schedule::command('horizon:snapshot')->everyFiveMinutes();
+}

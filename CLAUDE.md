@@ -324,4 +324,6 @@ S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments 
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
 S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
-Still deferred: Redis/Horizon (the database queue for now).
+Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in
+`AppServiceProvider`; `HorizonServiceProvider` gates `/horizon` to admins with no local bypass; supervisors `app` and `media` in
+`config/horizon.php`). Keep every queue's `retry_after` above the longest job `timeout` (broadcasts: 900 s).

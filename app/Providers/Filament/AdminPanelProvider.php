@@ -8,6 +8,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -56,6 +57,11 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             // Results as you type: a shorter pause than Filament's 500 ms default.
             ->globalSearchDebounce('250ms')
+            // Queue workers' dashboard, when the queue runs on Redis (Horizon).
+            ->navigationItems([
+                NavigationItem::make('Queues')->url('/horizon', shouldOpenInNewTab: true)->icon('heroicon-o-queue-list')
+                    ->group('System')->sort(90)->visible(fn (): bool => config('queue.default') === 'redis'),
+            ])
             ->globalSearchDebounce('400ms')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

@@ -63,6 +63,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(CurrentLot::class);
 
+        // Horizon runs the Redis queue (production). With the database queue (Laragon, tests) it isn't loaded at all,
+        // which also keeps its Linux-only process control out of Windows.
+        if (config('queue.default') === 'redis') {
+            $this->app->register(\Laravel\Horizon\HorizonServiceProvider::class);
+            $this->app->register(HorizonServiceProvider::class);
+        }
+
         $this->app->bind(WhatsAppGateway::class, fn () => match (config('lotlink.whatsapp_driver')) {
             'meta' => new MetaWhatsAppGateway(
                 (string) config('services.whatsapp.token'),

@@ -150,7 +150,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <button type="button" class="absolute top-1/2 right-3 hidden h-11 w-11 -translate-y-1/2 rotate-180 items-center justify-center rounded-full bg-white/90 shadow md:flex" aria-label="Next photo" @click="goTo(slide + 1)">
                             <Icon name="chevronLeft" :size="20" :stroke-width="2" />
                         </button>
-                        <span class="absolute right-4 bottom-3.5 rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">{{ slide + 1 }} / {{ car.photos.length }}</span>
+                        <span class="absolute right-4 bottom-3.5 rounded-xl bg-black/40 px-2.5 py-1 text-[12px] font-semibold text-white text-shadow-sm">{{ slide + 1 }} / {{ car.photos.length }}</span>
                     </template>
                     <!-- Just the icon on a see-through circle, so the car stays visible; the 44 px tap area around it is invisible. -->
                     <button

@@ -88,6 +88,6 @@ class ReservationController extends Controller
         abort_unless($reservation->customer_id === $request->user()->id, 404);
         $deposits->sent($reservation, $request->user());
 
-        return back()->with('success', 'Thanks. We\'ve told the lot to check their account and confirm.');
+        return back(); // The page itself now says the lot has been told.
     }
 }

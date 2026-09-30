@@ -26,7 +26,7 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 | Load test | `loadtest/marketplace.js` (k6) ramps 100 buyers through home, search, landing pages, cars, lots and slots with the TDD's thresholds; `loadtest/smoke.mjs` is a quick check without k6. Results: see `loadtest/README.md`. |
 | Quality | 460 tests, including OAuth state checks, encrypted tokens, one post per car, failure and retry, DNS verification and the TLS ask endpoint, consent and signed finance webhooks, CSP nonces, the RFC 6238 test vector, the admin 2FA flow, and account deletion and restore. |
 
-With S14 every sprint in the TDD plan is built. Still open, by choice: Redis/Horizon (the database queue is enough for launch) and automatic CAC lookups. Admin-editable finance rates and message templates, web push and the mobile API (`docs/api.md`) have since been added.
+With S14 every sprint in the TDD plan is built. Redis/Horizon (for the server; Laragon keeps the database queue) has since been added. Still open, by choice: automatic CAC lookups. Admin-editable finance rates and message templates, web push and the mobile API (`docs/api.md`) have since been added.
 
 **Sprint S13 (SEO and growth tools) ✅**
 
@@ -346,7 +346,8 @@ same variables and button, then enter its name in `/admin` → Message templates
    `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`).
 4. Caddy in front with on-demand TLS: `on_demand_tls { ask https://your-domain/internal/domains/allowed }`.
 5. Sign in to `/admin`, set up two-step sign-in, change the seeded admin password.
-6. Cron `* * * * * php artisan schedule:run` and a queue worker (`php artisan queue:work --queue=critical,notifications,media,default`).
+6. Cron `* * * * * php artisan schedule:run` and the queue workers: with Redis (recommended, see "Queues in production"), keep
+   `php artisan horizon` running; with the database queue, `php artisan queue:work --queue=critical,notifications,media,default`.
 7. On every deploy: `php artisan optimize` and `php artisan filament:optimize` (config, routes, views, admin components
    and icons), with OPcache on in PHP-FPM.
 8. Run `k6 run -e BASE_URL=https://staging… loadtest/marketplace.js` against staging and read `docs/security-review.md`.
@@ -399,7 +400,34 @@ to catch the index up with changes made in the meantime.
 2. Add a CORS rule to `lotlink-uploads` so browsers can upload directly: allowed origin your app
    URL, method `PUT`, header `Content-Type`.
 3. Set the `R2_*` variables, then `LOTLINK_UPLOAD_DISK=r2_uploads` and `LOTLINK_MEDIA_DISK=r2_media`.
-4. Run a queue worker for the `media` queue (`php artisan queue:work --queue=critical,notifications,media,default`).
+4. Run the queue workers (Horizon, or `php artisan queue:work --queue=critical,notifications,media,default`), which process photos on the `media` queue.
+
+### Queues in production (Redis and Horizon)
+
+The database queue is fine on Laragon and for a small launch. On the server, move queues, cache and sessions to Redis
+and let Horizon run the workers:
+
+1. Install Redis (Forge can, or use a managed Redis) and the PHP `redis` extension, then set
+   `REDIS_HOST` / `REDIS_PASSWORD`, `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` and `SESSION_DRIVER=redis`.
+2. Keep `php artisan horizon` running under Supervisor (Forge: Daemons), for example:
+   ```ini
+   [program:lotlink-horizon]
+   command=php /home/forge/lotlink/artisan horizon
+   autostart=true
+   autorestart=true
+   user=forge
+   redirect_stderr=true
+   stdout_logfile=/home/forge/lotlink/storage/logs/horizon.log
+   stopwaitsecs=960
+   ```
+3. On every deploy run `php artisan horizon:terminate` (Supervisor starts it again with the new code).
+4. Watch the queues at `/horizon` (admins only, after two-step sign-in; also under System → Queues in `/admin`).
+   The scheduler takes a snapshot for its graphs every five minutes.
+
+Horizon runs two groups: `app` (critical, notifications, default; scales up to 8 workers) and `media` (photos, up to 3),
+so a batch of uploads never delays WhatsApp alerts. Horizon itself needs Linux: on Windows (Laragon) it isn't loaded,
+and `composer install` still works there because `composer.json` tells Composer to assume the process-control
+extensions Horizon lists.
 
 ## Commands
 
