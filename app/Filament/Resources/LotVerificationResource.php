@@ -4,9 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Admin\AdminCounters;
+use App\Domain\Trust\Actions\CheckCompanyRegistry;
 use App\Domain\Trust\Actions\DecideLotVerification;
 use App\Domain\Trust\Enums\VerificationStatus;
 use App\Domain\Trust\Models\LotVerification;
+use App\Domain\Trust\Registry\CompanyRegistry;
+use App\Domain\Trust\Registry\RegistryUnavailable;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\LotVerificationResource\Pages;
 use Filament\Forms;
@@ -57,6 +60,18 @@ class LotVerificationResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable()->description(fn (LotVerification $v) => collect([$v->lot->city, $v->lot->state])->filter()->implode(', ')),
                 Tables\Columns\TextColumn::make('cac_number')->label('CAC')->formatStateUsing(fn (LotVerification $v) => $v->cacLabel())->searchable(),
+                // The automatic CAC lookup (when set up): the registered name, status and how well it matches the lot's name.
+                Tables\Columns\TextColumn::make('registry_name')->label('Registry')
+                    ->state(fn (LotVerification $v) => $v->registry_result === 'found' ? $v->registry_name : $v->registrySummary())
+                    ->description(fn (LotVerification $v) => $v->registry_result === 'found' ? collect([
+                        $v->registry_status,
+                        $v->registry_registered_on ? 'since '.$v->registry_registered_on->format('Y') : null,
+                        $v->registry_name_match !== null ? "name match {$v->registry_name_match}%" : null,
+                    ])->filter()->implode(' · ') : null)
+                    ->icon(fn (LotVerification $v) => $v->registry_result === null ? null : ($v->registryConcern() ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-check-badge'))
+                    ->color(fn (LotVerification $v) => $v->registryConcern() ? 'danger' : ($v->registry_result === 'found' ? 'success' : 'gray'))
+                    ->placeholder('Check by hand')
+                    ->visible(fn () => app(CompanyRegistry::class)->enabled()),
                 Tables\Columns\TextColumn::make('status')->badge()
                     ->formatStateUsing(fn (VerificationStatus $state) => $state->label())
                     ->color(fn (VerificationStatus $state) => match ($state) {
@@ -76,10 +91,21 @@ class LotVerificationResource extends Resource
                     ->url(fn (LotVerification $v) => $v->fileUrl('certificate'), shouldOpenInNewTab: true),
                 Tables\Actions\Action::make('frontage')->label('Frontage')->icon('heroicon-o-photo')
                     ->url(fn (LotVerification $v) => $v->fileUrl('frontage'), shouldOpenInNewTab: true),
+                Tables\Actions\Action::make('registry')->label('Check registry')->icon('heroicon-o-arrow-path')->color('gray')
+                    ->visible(fn (LotVerification $v) => $v->status === VerificationStatus::Submitted && app(CompanyRegistry::class)->enabled())
+                    ->action(function (LotVerification $v): void {
+                        try {
+                            app(CheckCompanyRegistry::class)->run($v);
+                            Notification::make()->title($v->registrySummary() ?? 'Checked')->success()->send();
+                        } catch (RegistryUnavailable) {
+                            Notification::make()->title('The registry lookup is not answering. Try again later.')->danger()->send();
+                        }
+                    }),
                 Tables\Actions\Action::make('approve')->icon('heroicon-o-check-circle')->color('success')
                     ->visible(fn (LotVerification $v) => $v->status === VerificationStatus::Submitted)
                     ->form([Forms\Components\Textarea::make('notes')->label('Note (optional)')->rows(2)->maxLength(500)])
-                    ->modalDescription('Check the CAC number on the certificate and that the photo matches the lot\'s address and pin.')
+                    ->modalDescription(fn (LotVerification $v) => 'Check the CAC number on the certificate and that the photo matches the lot\'s address and pin.'
+                        .($v->registrySummary() ? ' Registry: '.$v->registrySummary().'.' : ''))
                     ->action(fn (LotVerification $v, array $data) => self::decide(fn (DecideLotVerification $d, User $admin) => $d->approve($v, $admin, $data['notes'] ?? null), 'Lot verified')),
                 Tables\Actions\Action::make('reject')->icon('heroicon-o-x-circle')->color('danger')
                     ->visible(fn (LotVerification $v) => $v->status === VerificationStatus::Submitted)

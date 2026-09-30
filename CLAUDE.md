@@ -86,6 +86,9 @@ Run all four before pushing.
 
 - Trust lives in `app/Domain/Trust`. Verifications: `SubmitLotVerification` / `DecideLotVerification`
   (sets `lots.verified_at`); CAC files stay on the private `local` disk behind signed `verifications.file` links.
+- CAC lookups: `CompanyRegistry` (none | dojah; `COMPANY_REGISTRY_DRIVER`) through `CheckCompanyRegistry`, queued by
+  `SubmitLotVerification` as `LookUpCompany` (retries when the registry is down). It stores the registry's answer and a
+  `NameMatch` score on the verification (`registrySummary()` / `registryConcern()` in the admin queue) and never decides.
 - Inspections: `SaveInspection` (40 checks in `InspectionChecklist`, score = pass 1 / advisory ½ / fail 0)
   sets `vehicles.inspection_id`; a dealer check never replaces a signed independent one. PDFs via `InspectionPdf`.
 - Reviews only through `SubmitReview` (completed visits, one per appointment, 14-day edits) and `ReplyToReview`

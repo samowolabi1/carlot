@@ -48,6 +48,9 @@ use App\Domain\Social\Gateways\SocialPublisher;
 use App\Domain\Trust\Models\FraudSignal;
 use App\Domain\Trust\Models\LotVerification;
 use App\Domain\Trust\Models\Report;
+use App\Domain\Trust\Registry\CompanyRegistry;
+use App\Domain\Trust\Registry\DojahCompanyRegistry;
+use App\Domain\Trust\Registry\NoCompanyRegistry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -99,6 +102,10 @@ class AppServiceProvider extends ServiceProvider
             : new LogFinancePartner);
 
         $this->app->bind(VinDecoder::class, fn () => new NhtsaVinDecoder(config('services.nhtsa.base_url')));
+
+        $this->app->bind(CompanyRegistry::class, fn () => config('lotlink.company_registry.driver') === 'dojah'
+            ? new DojahCompanyRegistry((string) config('lotlink.company_registry.dojah.base_url'), (string) config('lotlink.company_registry.dojah.app_id'), (string) config('lotlink.company_registry.dojah.secret_key'))
+            : new NoCompanyRegistry);
 
         $this->app->bind(SmsGateway::class, fn () => match (config('lotlink.sms_driver')) {
             'termii' => new TermiiSmsGateway(

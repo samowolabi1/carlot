@@ -62,6 +62,16 @@ return [
     'social_driver' => env('SOCIAL_DRIVER', 'log'),
 
     // Finance pre-qualification hand-off (TDD M10): log | http
+    // Automatic CAC lookups for lot verification: none (admins check by hand) | dojah.
+    'company_registry' => [
+        'driver' => env('COMPANY_REGISTRY_DRIVER', 'none'),
+        'dojah' => [
+            'base_url' => env('DOJAH_BASE_URL', 'https://api.dojah.io'), // sandbox: https://sandbox.dojah.io
+            'app_id' => env('DOJAH_APP_ID'),
+            'secret_key' => env('DOJAH_SECRET_KEY'),
+        ],
+    ],
+
     'finance_partner' => [
         'driver' => env('FINANCE_PARTNER_DRIVER', 'log'),
         'code' => env('FINANCE_PARTNER_CODE', 'demo'),

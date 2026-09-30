@@ -6,7 +6,9 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Trust\Enums\VerificationStatus;
+use App\Domain\Trust\Jobs\LookUpCompany;
 use App\Domain\Trust\Models\LotVerification;
+use App\Domain\Trust\Registry\CompanyRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -48,6 +50,12 @@ class SubmitLotVerification
         }
 
         AuditLog::record('lot.verification_submitted', $verification, ['cac_number' => $verification->cac_number], $owner, $lot->id);
+
+        // Ask the CAC registry in the background (if a lookup is set up); the admin sees its answer when reviewing.
+        if (app(CompanyRegistry::class)->enabled()) {
+            $verification->forceFill(['registry_result' => null, 'registry_checked_at' => null])->save();
+            LookUpCompany::dispatch($verification->id)->afterCommit();
+        }
 
         return $verification;
     }

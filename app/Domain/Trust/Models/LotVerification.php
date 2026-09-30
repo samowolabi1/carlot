@@ -27,6 +27,13 @@ use Illuminate\Support\Facades\URL;
  * @property int|null $reviewed_by
  * @property Carbon|null $reviewed_at
  * @property string|null $notes
+ * @property string|null $registry_result found | not_found | unavailable (null: not looked up)
+ * @property string|null $registry_name
+ * @property string|null $registry_status
+ * @property Carbon|null $registry_registered_on
+ * @property string|null $registry_address
+ * @property int|null $registry_name_match 0–100
+ * @property Carbon|null $registry_checked_at
  * @property Carbon|null $created_at
  */
 class LotVerification extends Model
@@ -45,6 +52,9 @@ class LotVerification extends Model
             'status' => VerificationStatus::class,
             'documents' => 'array',
             'reviewed_at' => 'datetime',
+            'registry_registered_on' => 'date',
+            'registry_name_match' => 'integer',
+            'registry_checked_at' => 'datetime',
         ];
     }
 
@@ -103,5 +113,29 @@ class LotVerification extends Model
     public function cacLabel(): string
     {
         return (preg_match('/^\d/', $this->cac_number) ? 'RC ' : '').$this->cac_number;
+    }
+
+    /** What the CAC registry said, in a line for the admin; null when nothing was looked up. */
+    public function registrySummary(): ?string
+    {
+        return match ($this->registry_result) {
+            'found' => collect([
+                $this->registry_name,
+                $this->registry_status,
+                $this->registry_registered_on ? 'registered '.$this->registry_registered_on->format('j M Y') : null,
+                $this->registry_name_match !== null ? "name match {$this->registry_name_match}%" : null,
+            ])->filter()->implode(' · '),
+            'not_found' => 'Not found in the CAC registry',
+            'unavailable' => 'Registry lookup failed; trying again',
+            default => $this->registry_checked_at === null && $this->registry_result === null ? null : 'Checking the registry…',
+        };
+    }
+
+    /** Worth a closer look: not found, not active, or a name that doesn't match the lot's. */
+    public function registryConcern(): bool
+    {
+        return $this->registry_result === 'not_found'
+            || ($this->registry_result === 'found' && (($this->registry_name_match ?? 100) < 60
+                || ($this->registry_status !== null && ! in_array(strtolower($this->registry_status), ['active', 'registered'], true))));
     }
 }

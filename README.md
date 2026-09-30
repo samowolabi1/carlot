@@ -26,7 +26,7 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 | Load test | `loadtest/marketplace.js` (k6) ramps 100 buyers through home, search, landing pages, cars, lots and slots with the TDD's thresholds; `loadtest/smoke.mjs` is a quick check without k6. Results: see `loadtest/README.md`. |
 | Quality | 460 tests, including OAuth state checks, encrypted tokens, one post per car, failure and retry, DNS verification and the TLS ask endpoint, consent and signed finance webhooks, CSP nonces, the RFC 6238 test vector, the admin 2FA flow, and account deletion and restore. |
 
-With S14 every sprint in the TDD plan is built. Redis/Horizon (for the server; Laragon keeps the database queue) has since been added. Still open, by choice: automatic CAC lookups. Admin-editable finance rates and message templates, web push and the mobile API (`docs/api.md`) have since been added.
+With S14 every sprint in the TDD plan is built. Redis/Horizon (for the server; Laragon keeps the database queue) and automatic CAC lookups (Dojah) have since been added. Admin-editable finance rates and message templates, web push and the mobile API (`docs/api.md`) have since been added.
 
 **Sprint S13 (SEO and growth tools) ✅**
 
@@ -343,7 +343,10 @@ same variables and button, then enter its name in `/admin` → Message templates
 2. `PAYMENT_DRIVER=live`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
 3. Optional integrations: `SOCIAL_DRIVER=meta` with `META_APP_ID`/`META_APP_SECRET` (redirect URL
    `https://your-domain/dealer/social/callback`); `FINANCE_PARTNER_DRIVER=http` with the partner's URL, key and
-   `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`).
+   `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`); `COMPANY_REGISTRY_DRIVER=dojah` with
+   `DOJAH_APP_ID` / `DOJAH_SECRET_KEY` (and `DOJAH_BASE_URL=https://sandbox.dojah.io` while testing) to look up each CAC
+   number a lot sends: the verification queue then shows the registered name, status and date, how well the name matches
+   the lot's, and flags numbers that aren't found, inactive companies and names that don't match. Admins still approve.
 4. Caddy in front with on-demand TLS: `on_demand_tls { ask https://your-domain/internal/domains/allowed }`.
 5. Sign in to `/admin`, set up two-step sign-in, change the seeded admin password.
 6. Cron `* * * * * php artisan schedule:run` and the queue workers: with Redis (recommended, see "Queues in production"), keep
