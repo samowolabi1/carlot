@@ -152,13 +152,18 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         </button>
                         <span class="absolute right-4 bottom-3.5 rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">{{ slide + 1 }} / {{ car.photos.length }}</span>
                     </template>
+                    <!-- Just the icon on a see-through circle, so the car stays visible; the 44 px tap area around it is invisible. -->
                     <button
                         v-if="car.photos.length"
                         type="button"
-                        class="absolute bottom-2 left-3 flex h-11 items-center gap-1.5 rounded-full bg-ink/70 px-3.5 text-[13px] font-semibold text-white backdrop-blur-sm hover:bg-ink/90"
+                        class="group absolute bottom-1.5 left-2 flex h-11 w-11 items-center justify-center text-white"
+                        aria-label="Zoom in on this photo"
+                        title="Zoom"
                         @click="viewer = slide"
                     >
-                        <Icon name="zoomIn" :size="18" /> Zoom
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-black/25 transition group-hover:bg-black/45 group-focus-visible:bg-black/45">
+                            <Icon name="zoomIn" :size="16" class="drop-shadow" />
+                        </span>
                     </button>
                 </div>
                 <div v-if="car.photos.length > 1" class="hidden gap-2 overflow-x-auto md:flex">
