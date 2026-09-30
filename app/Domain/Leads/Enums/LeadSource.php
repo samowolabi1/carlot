@@ -15,6 +15,7 @@ enum LeadSource: string
     case Offer = 'offer';
     case TradeIn = 'trade_in';
     case Reservation = 'reservation';
+    case Finance = 'finance';
 
     public function label(): string
     {
@@ -26,6 +27,7 @@ enum LeadSource: string
             self::Offer => 'Offer',
             self::TradeIn => 'Trade-in',
             self::Reservation => 'Reservation',
+            self::Finance => 'Car loan',
         };
     }
 }

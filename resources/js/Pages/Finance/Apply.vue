@@ -101,7 +101,7 @@ function submit() {
                 <input v-model="form.consent" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
                 <span>
                     I agree to LotLink sending my name, phone, email, income, commitments and work details, with this car and loan, to <strong>{{ partner }}</strong> so they can
-                    pre-qualify me. {{ car.lot.name }} doesn't see these details.
+                    pre-qualify me. {{ car.lot.name }} will know that I applied for this car and, if I'm pre-approved, for how much, but never sees my income, commitments or work details, or a decline.
                 </span>
             </label>
             <InputError :message="form.errors.consent" />

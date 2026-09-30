@@ -123,7 +123,9 @@ Run all four before pushing.
 - Custom domains: `CustomDomains` (TXT `_lotlink.{domain}` = `lotlink-verify={token}`, `DnsLookup` faked in tests);
   a verified domain's `/` renders the mini-site; Caddy asks `/internal/domains/allowed`. Enterprise (`custom_domain`).
 - Finance hand-off: `FinancePartner` (log | http). `SubmitFinanceApplication` needs consent; applicant data is
-  encrypted and never shown to lots; partner updates arrive at `/webhooks/finance` (HMAC-SHA256).
+  encrypted and never shown to lots; partner updates arrive at `/webhooks/finance` (HMAC-SHA256). The lot hears only through
+  `FinanceLeadNotice`: a `LeadSource::Finance` ("Car loan") lead, a chat line and a `DealAlert` when the buyer applies (not when the
+  partner can't be reached) and when they're pre-approved (with the amount). Never income, commitments, employer or declines.
 - `SecurityHeaders` sets CSP (nonce via `Vite::useCspNonce()`; keep inline scripts out of Blade), HSTS and framing
   rules; `/l/*` stays embeddable. Admin 2FA: `RequireAdminTwoFactor` + `Totp`. Config: `LOTLINK_CSP`, `ADMIN_2FA`.
 - Account deletion: `DeleteAccount` (soft delete, 30-day grace, sign-in restores) then `AnonymiseAccount`.

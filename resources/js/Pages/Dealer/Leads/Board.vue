@@ -54,6 +54,7 @@ const sourceTone: Record<string, string> = {
     offer: 'bg-blush text-clay-dark',
     trade_in: 'bg-[#EDE7F8] text-[#5B21B6]',
     reservation: 'bg-[#E0ECF8] text-[#1E3A8A]',
+    finance: 'bg-[#FDF3D7] text-[#7A4B00]',
 };
 
 </script>
