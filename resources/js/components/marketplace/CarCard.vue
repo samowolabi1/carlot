@@ -75,16 +75,19 @@ function toggleCompare(ulid: string) {
             <div v-if="variant === 'tile'" class="absolute top-2 right-2 z-10">
                 <SaveButton :ulid="car.ulid" :saved="car.saved" size="sm" />
             </div>
+            <!-- Just the icon on a see-through circle, so the car stays visible; the 44 px tap area around it is invisible. -->
             <button
                 v-if="car.image"
                 type="button"
-                class="absolute z-10 flex items-center justify-center gap-1.5 rounded-full bg-ink/70 font-semibold text-white backdrop-blur-sm transition hover:bg-ink/90"
-                :class="variant === 'row' ? 'right-0.5 bottom-0.5 h-11 w-11' : 'right-2 bottom-2 h-11 px-3.5 text-[13px]'"
+                class="group absolute z-10 flex h-11 w-11 items-center justify-center text-white"
+                :class="variant === 'row' ? 'right-0 bottom-0' : 'right-1 bottom-1'"
                 :aria-label="`Quick look at photos of ${car.title}`"
+                :title="`Photos of ${car.title}`"
                 @click="quickLook(car)"
             >
-                <Icon name="image" :size="variant === 'row' ? 16 : 18" />
-                <span v-if="variant === 'tile'">Photos</span>
+                <span class="flex items-center justify-center rounded-full bg-black/25 transition group-hover:bg-black/45 group-focus-visible:bg-black/45" :class="variant === 'row' ? 'h-7 w-7' : 'h-8 w-8'">
+                    <Icon name="image" :size="variant === 'row' ? 14 : 16" class="drop-shadow" />
+                </span>
             </button>
         </div>
 
