@@ -75,6 +75,8 @@ use Illuminate\Support\Str;
  * @property Carbon|null $featured_until
  * @property Carbon|null $followers_notified_at
  * @property bool $accepts_offers
+ * @property bool $accepts_trade_ins
+ * @property bool $accepts_finance
  * @property int|null $reservation_deposit
  * @property bool $reservation_refundable
  * @property int|null $test_drive_deposit no longer used: LotLink takes no buyer deposits
@@ -98,7 +100,7 @@ class Lot extends Model
         'owner_id', 'name', 'slug', 'tagline', 'about', 'logo_path', 'cover_path', 'brand_color',
         'phone', 'whatsapp', 'email', 'address', 'landmark', 'city', 'state', 'country',
         'latitude', 'longitude', 'timezone', 'status', 'plan_id', 'booking_auto_confirm', 'booking_min_notice_minutes',
-        'accepts_offers', 'reservation_deposit', 'reservation_refundable', 'test_drive_deposit',
+        'accepts_offers', 'accepts_trade_ins', 'accepts_finance', 'reservation_deposit', 'reservation_refundable', 'test_drive_deposit',
     ];
 
     protected $hidden = ['id', 'owner_id', 'plan_id', 'location', 'paystack_subaccount', 'domain_token'];
@@ -118,6 +120,8 @@ class Lot extends Model
             'featured_until' => 'datetime',
             'followers_notified_at' => 'datetime',
             'accepts_offers' => 'boolean',
+            'accepts_trade_ins' => 'boolean',
+            'accepts_finance' => 'boolean',
             'reservation_deposit' => 'integer',
             'reservation_refundable' => 'boolean',
             'test_drive_deposit' => 'integer',
@@ -293,6 +297,18 @@ class Lot extends Model
     public function takesOffers(): bool
     {
         return $this->accepts_offers && $this->planAllows('offers');
+    }
+
+    /** Buyers can send their car for valuation (every plan; the owner can turn it off). */
+    public function takesTradeIns(): bool
+    {
+        return $this->accepts_trade_ins;
+    }
+
+    /** Buyers can apply for a car loan on this lot's cars (the owner can turn it off). */
+    public function takesFinance(): bool
+    {
+        return $this->accepts_finance;
     }
 
     /** The reservation deposit in minor units, or null when reservations are off. */

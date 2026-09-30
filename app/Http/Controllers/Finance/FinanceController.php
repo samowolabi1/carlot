@@ -40,10 +40,13 @@ class FinanceController extends Controller
         ])->withViewData(['meta' => ['title' => 'Finance applications', 'robots' => 'noindex']]);
     }
 
-    public function create(Request $request, string $car, FinancePartner $partner): Response
+    public function create(Request $request, string $car, FinancePartner $partner): Response|RedirectResponse
     {
         $vehicle = DealsPresenter::car($car);
         abort_unless($vehicle->price > 0, 404);
+        if (! $vehicle->lot->takesFinance()) {
+            return redirect($vehicle->publicPath())->with('error', "{$vehicle->lot->name} isn't taking car loan applications right now.");
+        }
         $price = intdiv((int) $vehicle->price, 100);
         $budget = $request->user()->budget;
 

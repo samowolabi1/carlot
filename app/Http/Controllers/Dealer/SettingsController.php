@@ -40,6 +40,8 @@ class SettingsController extends Controller
             ],
             'deals' => [
                 'accepts_offers' => $lot->accepts_offers,
+                'accepts_trade_ins' => $lot->accepts_trade_ins,
+                'accepts_finance' => $lot->accepts_finance,
                 'reservation_deposit' => $lot->reservation_deposit ? intdiv($lot->reservation_deposit, 100) : null,
                 'reservation_refundable' => $lot->reservation_refundable,
                 'plan' => ['offers' => $lot->planAllows('offers'), 'deposits' => $lot->planAllows('deposits')],
@@ -64,6 +66,8 @@ class SettingsController extends Controller
 
         $data = $request->validate([
             'accepts_offers' => ['required', 'boolean'],
+            'accepts_trade_ins' => ['sometimes', 'boolean'],
+            'accepts_finance' => ['sometimes', 'boolean'],
             'reservation_deposit' => ['nullable', 'integer', 'min:1000', 'max:50000000'],
             'reservation_refundable' => ['required', 'boolean'],
         ], [
@@ -77,12 +81,14 @@ class SettingsController extends Controller
 
         $lot->update([
             'accepts_offers' => $data['accepts_offers'],
+            'accepts_trade_ins' => $data['accepts_trade_ins'] ?? $lot->accepts_trade_ins,
+            'accepts_finance' => $data['accepts_finance'] ?? $lot->accepts_finance,
             'reservation_deposit' => isset($data['reservation_deposit']) ? Money::fromMajor((int) $data['reservation_deposit']) : null,
             'reservation_refundable' => $data['reservation_refundable'],
             'test_drive_deposit' => null, // LotLink doesn't take test-drive deposits: the lot is paid directly
         ]);
 
-        return back()->with('success', 'Offer and deposit settings saved.');
+        return back()->with('success', 'Offers and deals settings saved.');
     }
 
     public function updateProfile(LotProfileRequest $request, Lot $lot): RedirectResponse

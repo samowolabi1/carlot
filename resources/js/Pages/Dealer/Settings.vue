@@ -29,7 +29,7 @@ const tabs = [
     { key: 'hours', label: 'Opening hours' },
     { key: 'booking', label: 'Booking rules and closures' },
     { key: 'bank', label: 'Bank details' },
-    { key: 'deals', label: 'Offers and reservations' },
+    { key: 'deals', label: 'Offers and deals' },
     { key: 'verification', label: 'Verification' },
     { key: 'social', label: 'Social media' },
 ] as const;

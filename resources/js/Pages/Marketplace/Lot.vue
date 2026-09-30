@@ -120,7 +120,7 @@ function filter(query: Partial<Filters>) {
                     ><Icon name="chat" :size="18" /> Message the lot</Link
                 >
                 <Link
-                    v-if="!lots.some((l) => l.slug === lot.slug)"
+                    v-if="lot.trade_ins && !lots.some((l) => l.slug === lot.slug)"
                     :href="route('trade-ins.create', lot.slug)"
                     class="btn btn-outline w-full md:w-auto"
                     ><Icon name="swap" :size="18" /> Trade in my car</Link

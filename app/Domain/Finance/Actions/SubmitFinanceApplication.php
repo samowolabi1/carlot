@@ -21,6 +21,9 @@ class SubmitFinanceApplication
     /** @param array{monthly_income: int, monthly_commitments: int, employment: string, employer?: ?string, deposit: int, tenor_months: int, consent: bool} $data whole naira */
     public function run(User $buyer, Vehicle $vehicle, array $data): FinanceApplication
     {
+        if (! $vehicle->lot->takesFinance()) {
+            throw ValidationException::withMessages(['monthly_income' => "{$vehicle->lot->name} isn't taking car loan applications right now."]);
+        }
         if (! $data['consent']) {
             throw ValidationException::withMessages(['consent' => 'Tick the box to agree to share your details with '.$this->partner->name().'.']);
         }

@@ -22,6 +22,7 @@ export interface PublicLot {
     whatsapp: string | null;
     open: { open: boolean; label: string } | null;
     hours: { days: string; hours: string }[];
+    trade_ins: boolean;
 }
 
 export interface PublicReview {

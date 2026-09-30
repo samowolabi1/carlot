@@ -23,9 +23,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /** "Trade in my car" (design 10), the buyer's answer, and the private photos. */
 class TradeInController extends Controller
 {
-    public function create(Request $request, Lot $lot): Response
+    public function create(Request $request, Lot $lot): Response|RedirectResponse
     {
         abort_unless($lot->status === LotStatus::Active, 404);
+        if (! $lot->takesTradeIns()) {
+            return redirect()->route('lots.show', $lot)->with('error', "{$lot->name} isn't taking trade-ins right now.");
+        }
         $car = $this->towards($request->query('car'), $lot);
 
         return Inertia::render('Deals/TradeIn', [

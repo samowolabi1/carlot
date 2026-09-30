@@ -38,6 +38,9 @@ final class DealsPresenter
 
         return [
             'offers' => $available && $vehicle->negotiable && $vehicle->price > 0 && $lot->takesOffers(),
+            // The owner's switches (Settings → Offers and deals).
+            'trade_ins' => $lot->takesTradeIns(),
+            'finance' => $lot->takesFinance() && $vehicle->price > 0,
             'reserve' => $available && $lot->reservationDeposit() !== null ? Money::format($lot->reservationDeposit(), $vehicle->currency) : null,
             'my_offer' => $mine ? [
                 'status' => $mine->status->value,

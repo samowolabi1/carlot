@@ -4,6 +4,8 @@ import { Link, useForm } from '@inertiajs/vue3';
 
 export type DealSettings = {
     accepts_offers: boolean;
+    accepts_trade_ins: boolean;
+    accepts_finance: boolean;
     reservation_deposit: number | null;
     reservation_refundable: boolean;
     plan: { offers: boolean; deposits: boolean };
@@ -14,6 +16,8 @@ const props = defineProps<{ lotSlug: string; deals: DealSettings; hasBank: boole
 const naira = (n: number | null) => (n ? `₦${n.toLocaleString('en-NG')}` : '');
 const form = useForm({
     accepts_offers: props.deals.accepts_offers,
+    accepts_trade_ins: props.deals.accepts_trade_ins,
+    accepts_finance: props.deals.accepts_finance,
     reservation_deposit: naira(props.deals.reservation_deposit),
     reservation_refundable: props.deals.reservation_refundable,
 });
@@ -24,7 +28,7 @@ const toggle =
 
 <template>
     <form class="flex flex-col gap-4" @submit.prevent="form.put(route('dealer.settings.deals', lotSlug), { preserveScroll: true })">
-        <h3 class="font-sans text-[16px] font-bold">Offers and reservations</h3>
+        <h3 class="font-sans text-[16px] font-bold">Offers and deals</h3>
         <p v-if="!deals.plan.offers || !deals.plan.deposits" class="rounded-xl bg-cream px-3.5 py-2.5 text-[14px] text-clay-dark">
             Offers and reservations are part of the Pro plan. You can set them up now; they switch on when you
             <Link :href="route('dealer.billing', lotSlug)" class="font-semibold">upgrade</Link>.
@@ -36,6 +40,24 @@ const toggle =
                 <span class="text-[13px] text-muted">On cars marked negotiable. Offers must be at least half the asking price and expire after 48 hours.</span>
             </span>
             <input v-model="form.accepts_offers" type="checkbox" role="switch" class="peer sr-only" />
+            <span :class="toggle" />
+        </label>
+
+        <label class="flex items-start justify-between gap-4 border-b border-divider pb-4 text-[15px]">
+            <span class="flex flex-col">
+                Take trade-ins from buyers
+                <span class="text-[13px] text-muted">Buyers send photos and details of their car for you to value, towards one of yours. Off: the "Trade in my car" buttons are hidden. Trade-ins you add to a sale in Lot Manager still work.</span>
+            </span>
+            <input v-model="form.accepts_trade_ins" type="checkbox" role="switch" class="peer sr-only" />
+            <span :class="toggle" />
+        </label>
+
+        <label class="flex items-start justify-between gap-4 border-b border-divider pb-4 text-[15px]">
+            <span class="flex flex-col">
+                Take car loan applications
+                <span class="text-[13px] text-muted">Buyers can check if they qualify for a loan on your cars with our finance partner. Off: the application is hidden; buyers still see the monthly estimate.</span>
+            </span>
+            <input v-model="form.accepts_finance" type="checkbox" role="switch" class="peer sr-only" />
             <span :class="toggle" />
         </label>
 

@@ -218,6 +218,10 @@ Run all four before pushing.
 - No test-drive deposits: bookings are confirmed or pending, never `awaiting_deposit` (kept only for old rows).
 - Offers and reservations are plan features (`Lot::takesOffers()`, `reservationDeposit()`, which also needs a bank
   account); trade-ins are on every plan. Trade-in photos stay on the private `local` disk.
+- Owners can switch off buyer trade-ins and car loan applications (`lots.accepts_trade_ins` / `accepts_finance`, Settings → Offers and
+  deals). Check `Lot::takesTradeIns()` / `takesFinance()`: `SubmitTradeIn` and `SubmitFinanceApplication` refuse, the pages hide the
+  buttons (`DealsPresenter` `trade_ins`/`finance`, `MarketplacePresenter::lot()` `trade_ins`). The monthly estimate always shows;
+  dealer-entered trade-ins on Lot Manager orders are unaffected.
 
 ## Engagement (lots)
 

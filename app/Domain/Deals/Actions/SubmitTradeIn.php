@@ -38,6 +38,9 @@ class SubmitTradeIn
         if ($customer->hasLotRole($lot)) {
             throw ValidationException::withMessages(['make_id' => 'You work at this lot.']);
         }
+        if (! $lot->takesTradeIns()) {
+            throw ValidationException::withMessages(['make_id' => "{$lot->name} isn't taking trade-ins right now."]);
+        }
 
         $ulid = Str::lower((string) Str::ulid());
         $paths = array_map(fn (UploadedFile $photo) => $this->store($ulid, $photo), array_slice($photos, 0, TradeIn::MAX_PHOTOS));

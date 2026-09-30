@@ -153,6 +153,7 @@ class MarketplacePresenter
             'whatsapp' => $lot->whatsapp ? ltrim($lot->whatsapp, '+') : null,
             'open' => $hours->status(),
             'hours' => $hours->table(),
+            'trade_ins' => $lot->takesTradeIns(),
         ];
     }
 
