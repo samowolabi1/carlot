@@ -6,29 +6,38 @@ use App\Domain\Inventory\Models\Vehicle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Meilisearch\Exceptions\ApiException;
+use Meilisearch\Exceptions\ExceptionInterface as MeilisearchException;
 
 /**
  * Production search (TDD M4): the Meilisearch "vehicles" index holds only marketplace
- * cars; results are hydrated from MySQL in hit order.
+ * cars; results are hydrated from MySQL in hit order. If Meilisearch is down or rejects
+ * the query, buyers get the same search from MySQL (slower, but the marketplace stays up).
  */
 class MeilisearchVehicleSearch implements VehicleSearch
 {
+    public function __construct(private readonly DatabaseVehicleSearch $fallback) {}
+
     public function search(SearchCriteria $criteria): LengthAwarePaginator
     {
-        return Vehicle::search($criteria->query ?? '')
-            ->options(array_filter([
-                'filter' => $this->filters($criteria),
-                'sort' => $this->sort($criteria),
-            ]))
-            ->query(fn (Builder $query) => $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover']))
-            ->paginate($criteria->perPage, 'page', $criteria->page);
+        try {
+            return Vehicle::search($criteria->query ?? '')
+                ->options(array_filter([
+                    'filter' => $this->filters($criteria),
+                    'sort' => $this->sort($criteria),
+                ]))
+                ->query(fn (Builder $query) => $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover']))
+                ->paginate($criteria->perPage, 'page', $criteria->page);
+        } catch (MeilisearchException $e) {
+            report($e);
+
+            return $this->fallback->search($criteria);
+        }
     }
 
     public function sponsored(SearchCriteria $criteria, int $limit = 3): Collection
     {
         // Meilisearch has no random order, so a handful are fetched and shuffled here.
-        // Sponsored cars are extra: if the index settings are out of date (spotlight_until not yet
+        // Sponsored cars are extra: if Meilisearch is down or its settings are out of date (spotlight_until not yet
         // filterable because scout:sync-index-settings wasn't run), report it and show the results without them.
         try {
             $ids = Vehicle::search($criteria->query ?? '')
@@ -38,7 +47,7 @@ class MeilisearchVehicleSearch implements VehicleSearch
                 ->shuffle()
                 ->take($limit)
                 ->all();
-        } catch (ApiException $e) {
+        } catch (MeilisearchException $e) {
             report($e);
 
             return new Collection;

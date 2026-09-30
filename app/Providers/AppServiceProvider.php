@@ -74,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(VehicleSearch::class, fn () => config('scout.driver') === 'meilisearch'
-            ? new MeilisearchVehicleSearch
+            ? new MeilisearchVehicleSearch(new DatabaseVehicleSearch)
             : new DatabaseVehicleSearch);
 
         $this->app->bind(SocialPublisher::class, fn () => config('lotlink.social_driver') === 'meta'

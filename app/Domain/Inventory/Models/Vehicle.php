@@ -20,6 +20,7 @@ use App\Domain\Trust\Models\Inspection;
 use App\Domain\Trust\Models\Report;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
+use Meilisearch\Exceptions\ExceptionInterface as MeilisearchException;
 
 /**
  * @property int $id
@@ -75,7 +77,12 @@ use Laravel\Scout\Searchable;
 class Vehicle extends Model
 {
     /** @use HasFactory<VehicleFactory> */
-    use BelongsToLot, HasFactory, HasUlids, Searchable, SoftDeletes;
+    use BelongsToLot, HasFactory, HasUlids, SoftDeletes;
+
+    use Searchable {
+        syncMakeSearchable as scoutSyncMakeSearchable;
+        syncRemoveFromSearch as scoutSyncRemoveFromSearch;
+    }
 
     /** Photos per car (dealers asked for a tighter, better-chosen gallery). */
     public const MAX_PHOTOS = 12;
@@ -277,6 +284,36 @@ class Vehicle extends Model
     public function shouldBeSearchable(): bool
     {
         return $this->isOnMarketplace();
+    }
+
+    /**
+     * Index updates never block a save: if Meilisearch is down or rejects the update, dealers can still add,
+     * publish and sell cars. The error is reported; `php artisan scout:import` brings the index back in step.
+     * The scout:* commands still fail loudly, so an import can't "succeed" against a dead index.
+     *
+     * @param  EloquentCollection<int, static>  $models
+     */
+    public function syncMakeSearchable($models): void
+    {
+        self::guardIndex(fn () => $this->scoutSyncMakeSearchable($models));
+    }
+
+    /** @param  EloquentCollection<int, static>  $models */
+    public function syncRemoveFromSearch($models): void
+    {
+        self::guardIndex(fn () => $this->scoutSyncRemoveFromSearch($models));
+    }
+
+    private static function guardIndex(callable $update): void
+    {
+        try {
+            $update();
+        } catch (MeilisearchException $e) {
+            if (app()->runningInConsole() && str_starts_with((string) ($_SERVER['argv'][1] ?? ''), 'scout:')) {
+                throw $e;
+            }
+            report($e);
+        }
     }
 
     /** @return array<string, mixed> */

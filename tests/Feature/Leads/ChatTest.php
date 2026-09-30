@@ -11,6 +11,8 @@ use App\Domain\LotManager\Models\LotCustomer;
 use App\Domain\Lots\Actions\CreateLot;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\LotMember;
+use App\Domain\Trust\Models\Inspection;
+use App\Domain\Trust\Support\InspectionChecklist;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -230,4 +232,38 @@ it('lists each chat by its latest message and shows the thread oldest first', fu
     $this->get(route('conversations.index'))->assertInertia(fn (Assert $page) => $page->where('conversations.0.last', 'Third'));
     $this->get(route('conversations.show', $conversation))->assertInertia(fn (Assert $page) => $page
         ->where('messages.0.body', 'First')->where('messages.2.body', 'Third'));
+});
+
+it('sends the car\'s inspection report as a quick reply, or points to adding one', function () {
+    Storage::fake('local');
+    ($this->start)(['body' => 'Has it been inspected?']);
+    $lead = Lead::withoutGlobalScopes()->sole();
+    $send = fn () => $this->actingAs($this->owner)->post(route('dealer.leads.messages.store', [$this->lot, $lead]), ['preset' => 'inspection']);
+
+    // No report yet: the button links to the inspection form, and sending explains why it can't.
+    $this->actingAs($this->owner)->get(route('dealer.leads.show', [$this->lot, $lead]))
+        ->assertInertia(fn (Assert $page) => $page->where('lead.inspection', null)
+            ->where('lead.inspection_url', route('dealer.vehicles.inspection', [$this->lot, $this->car])));
+    $send()->assertSessionHasErrors(['preset' => 'This car has no inspection report yet. Add one from Stock.']);
+
+    $checklist = collect(InspectionChecklist::keys())->mapWithKeys(fn ($k) => [$k => ['status' => 'pass', 'note' => null]])->all();
+    $this->actingAs($this->owner)->post(route('dealer.vehicles.inspection.store', [$this->lot, $this->car]), [
+        'checklist' => array_replace($checklist, ['paint' => ['status' => 'advisory', 'note' => 'Stone chips']]),
+        'summary' => 'Serviced last month.',
+        'inspector_name' => 'Kemi (workshop)',
+    ])->assertSessionHasNoErrors();
+
+    $this->actingAs($this->owner)->get(route('dealer.leads.show', [$this->lot, $lead]))
+        ->assertInertia(fn (Assert $page) => $page->where('lead.inspection.score', 99));
+    $send()->assertSessionHasNoErrors();
+
+    $inspection = Inspection::withoutGlobalScopes()->sole();
+    $body = Message::query()->where('side', Message::LOT)->latest('id')->value('body');
+    expect($body)->toStartWith("Inspection report for the {$this->car->title()}: 99/100, inspected by Prime Motors on 5 Oct 2026.")
+        ->toContain('Serviced last month.')
+        ->toContain(route('inspections.pdf', $inspection));
+
+    // The buyer can open the report from the link without signing in.
+    auth()->logout();
+    $this->get(route('inspections.pdf', $inspection))->assertOk()->assertHeader('Content-Type', 'application/pdf');
 });

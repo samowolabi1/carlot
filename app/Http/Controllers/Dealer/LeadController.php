@@ -71,7 +71,7 @@ class LeadController extends Controller
 
     public function show(Request $request, Lot $lot, Lead $lead): Response
     {
-        $lead->load(['customer.budget', 'lotCustomer', 'vehicle.make', 'vehicle.model', 'vehicle.cover', 'assignee', 'notes.user', 'conversation']);
+        $lead->load(['customer.budget', 'lotCustomer', 'vehicle.make', 'vehicle.model', 'vehicle.cover', 'vehicle.inspection', 'assignee', 'notes.user', 'conversation']);
         $tz = $lot->timezone;
 
         // Opening the lead reads the chat.
@@ -88,6 +88,9 @@ class LeadController extends Controller
                 'budget' => $budget instanceof Budget ? 'Up to '.Money::format($budget->max_price) : null,
                 'car_url' => $lead->vehicle ? url($lead->vehicle->publicPath()) : null,
                 'car_price' => $lead->vehicle?->formattedPrice(),
+                // For the "Send inspection report" quick reply: the report to send, or where to add one.
+                'inspection' => $lead->vehicle?->inspection ? ['score' => $lead->vehicle->inspection->score] : null,
+                'inspection_url' => $lead->vehicle ? route('dealer.vehicles.inspection', [$lot, $lead->vehicle]) : null,
                 'assigned_ulid' => $lead->assignee?->ulid,
                 'follow_up_at' => $lead->next_follow_up_at?->copy()->setTimezone($tz)->format('Y-m-d\TH:i'),
                 'customer_book' => $lead->lotCustomer ? route('dealer.manager.customers.show', [$lot, $lead->lotCustomer->ulid]) : null,
@@ -134,12 +137,12 @@ class LeadController extends Controller
         return back()->with('success', 'Note added.');
     }
 
-    /** The lot's reply, or a quick action: send the lot's location, its bank details, or similar cars. */
+    /** The lot's reply, or a quick action: send the lot's location, its bank details, similar cars or the car's inspection report. */
     public function message(Request $request, Lot $lot, Lead $lead, SendMessage $send): RedirectResponse
     {
         $data = $request->validate([
             'body' => ['required_without_all:preset,photo', 'nullable', 'string', 'max:2000'],
-            'preset' => ['nullable', 'in:location,similar,bank'],
+            'preset' => ['nullable', 'in:location,similar,bank,inspection'],
             'photo' => ['nullable', 'image', 'max:8192'],
         ]);
 
@@ -148,6 +151,7 @@ class LeadController extends Controller
                 ? "Here's how to find us: {$lot->name}".($lot->address ? ", {$lot->address}" : '').'. Directions: '.$lot->directionsUrl()
                 : abort(422, 'Set your lot location in Settings first.'),
             'similar' => $this->similar($lot, $lead),
+            'inspection' => $this->inspection($lot, $lead),
             // Buyers pay the lot directly (LotLink never takes car payments).
             'bank' => LotBankAccount::preferredFor($lot->id)?->shareText($lot->name)
                 ?? throw ValidationException::withMessages(['preset' => 'Add your bank details in Settings first.']),
@@ -158,6 +162,21 @@ class LeadController extends Controller
         $send->run($conversation, $request->user(), Message::LOT, $body, $request->file('photo'));
 
         return back();
+    }
+
+    /** The car's current inspection report in a message: score, who inspected it, the summary and a link to the PDF. */
+    private function inspection(Lot $lot, Lead $lead): string
+    {
+        $vehicle = $lead->vehicle ?? throw ValidationException::withMessages(['preset' => 'This lead isn\'t about a particular car.']);
+        $inspection = $vehicle->inspection
+            ?? throw ValidationException::withMessages(['preset' => 'This car has no inspection report yet. Add one from Stock.']);
+
+        $by = $inspection->isIndependent() ? "independently inspected by {$inspection->inspector_name}" : 'inspected by '.$lot->name;
+        $date = $inspection->created_at?->copy()->setTimezone($lot->timezone)->format('j M Y');
+
+        return "Inspection report for the {$vehicle->title()}: {$inspection->score}/100, {$by}".($date ? " on {$date}" : '').'.'
+            .($inspection->summary ? "\n{$inspection->summary}" : '')
+            ."\nFull report (PDF): ".route('inspections.pdf', $inspection);
     }
 
     private function similar(Lot $lot, Lead $lead): string

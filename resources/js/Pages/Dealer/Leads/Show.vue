@@ -28,6 +28,8 @@ interface Lead {
     customer_book: string | null;
     conversation: string | null;
     lost_reason: string | null;
+    inspection: { score: number } | null;
+    inspection_url: string | null;
 }
 
 const props = defineProps<{
@@ -69,7 +71,7 @@ function setStage(stage: string) {
     update({ stage });
 }
 
-function preset(kind: 'location' | 'similar' | 'bank') {
+function preset(kind: 'location' | 'similar' | 'bank' | 'inspection') {
     router.post(route('dealer.leads.messages.store', [lot.value.slug, props.lead.ulid]), { preset: kind }, {
         preserveScroll: true,
         onError: (errors) => (error.value = Object.values(errors)[0] ?? 'Could not send.'),
@@ -112,7 +114,12 @@ const whatsapp = computed(() =>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('location')">Send lot location</button>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('similar')">Suggest similar cars</button>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('bank')">Send bank details</button>
-                        <span class="flex h-9 items-center gap-1.5 rounded-full border border-dashed border-line-strong px-3 text-[13px] text-muted/70" aria-disabled="true">Send inspection report <span class="text-[10px] font-semibold uppercase">Soon</span></span>
+                        <button v-if="lead.inspection" type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('inspection')">
+                            Send inspection report <span class="text-muted">· {{ lead.inspection.score }}/100</span>
+                        </button>
+                        <Link v-else-if="lead.inspection_url" :href="lead.inspection_url" class="flex h-9 items-center rounded-full border border-dashed border-line-strong px-3 text-[13px] text-muted">
+                            Add an inspection report
+                        </Link>
                     </div>
                     <ChatComposer
                         :url="route('dealer.leads.messages.store', [lot.slug, lead.ulid])"

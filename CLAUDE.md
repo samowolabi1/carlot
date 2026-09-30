@@ -176,6 +176,8 @@ Run all four before pushing.
 
 - Every enquiry goes through `CaptureLead` (dedupes lot + buyer + car over 30 days, adds the buyer to
   the customer book, alerts the lot). New lead sources (offers, trade-ins, reservations) call it too.
+- Lead quick replies (`LeadController::message()` presets: location, similar, bank, inspection) build the text on the server
+  from live data (the inspection one uses the car's current `inspection` and the public `inspections.pdf` link).
 - Chat messages only go through `SendMessage`: it updates read markers, moves a new lead to
   contacted on the lot's first reply and broadcasts `MessageSent`. Chat must keep working without
   Reverb (`useChat` polls when `VITE_REVERB_APP_KEY` is empty).
@@ -268,6 +270,9 @@ Run all four before pushing.
   production) or `DatabaseVehicleSearch` (SCOUT_DRIVER=null, Laragon). Any new filter must be
   added to both and to the shared engine tests in `tests/Feature/Marketplace/VehicleSearchTest.php`
   (set `MEILISEARCH_TEST_HOST` to run the Meilisearch side locally).
+  Meilisearch must never take the marketplace or dealers down: `MeilisearchVehicleSearch` falls back to
+  `DatabaseVehicleSearch` on any Meilisearch error (sponsored cars are just left out), and `Vehicle::syncMakeSearchable()` /
+  `syncRemoveFromSearch()` report index failures instead of failing the save (`scout:import` catches the index up).
 - Share previews: controllers pass `->withViewData(['meta' => [...]])`; `app.blade.php` renders
   the Open Graph tags on the server.
 - The buyer's location lives in localStorage (`useLocation`) and is only sent as query params

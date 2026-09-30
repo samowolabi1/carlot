@@ -2,8 +2,10 @@
 
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Marketplace\Search\MeilisearchVehicleSearch;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use Laravel\Scout\EngineManager;
 use Meilisearch\Client;
 use Tests\Support\MarketplaceFixtures;
 
@@ -132,4 +134,23 @@ it('leaves sponsored cars out, without breaking search, when the index settings 
 
     expect(app(VehicleSearch::class)->sponsored(new SearchCriteria))->toHaveCount(0)
         ->and(run([]))->toBe(['Accord', 'Camry', 'RAV4']);
+});
+
+it('keeps the marketplace and car saves working when Meilisearch is down', function () {
+    $this->useSearchEngine('database');
+    $cars = seedCars();
+    // Nothing listens on port 1: every call to Meilisearch fails to connect.
+    config(['scout.driver' => 'meilisearch', 'scout.meilisearch.host' => 'http://127.0.0.1:1']);
+    app()->forgetInstance(Client::class);
+    app()->forgetInstance(EngineManager::class);
+
+    // Dealers can still change cars (the index catches up with scout:import)...
+    $cars['camry']->forceFill(['price' => 1_200_000_000])->save();
+    $cars['accord']->forceFill(['status' => 'hidden'])->save();
+
+    // ...and buyers get the same search from the database, without sponsored cars.
+    expect(app(VehicleSearch::class))->toBeInstanceOf(MeilisearchVehicleSearch::class)
+        ->and(app(VehicleSearch::class)->search(new SearchCriteria)->getCollection()->map(fn (Vehicle $v) => $v->model->name)->all())->toBe(['Camry', 'RAV4'])
+        ->and(app(VehicleSearch::class)->sponsored(new SearchCriteria))->toHaveCount(0);
+    $this->get(route('cars.index', ['q' => 'toyota']))->assertOk();
 });
