@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LegalFooter from '@/components/LegalFooter.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
@@ -113,6 +114,7 @@ const isActive = (item: NavItem) => route().current(item.match ?? item.route);
 
             <main class="flex flex-col gap-5 px-5 py-6 lg:px-8 lg:py-7">
                 <slot />
+                <LegalFooter class="mt-6 border-t border-line pt-4" />
             </main>
         </div>
 

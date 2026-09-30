@@ -21,6 +21,7 @@ Schedule::command('sanctum:prune-expired --hours=24')->daily();
 // Lot Manager (TDD M19)
 Schedule::command('manager:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('share-links:prune')->daily();
+Schedule::command('finance:prune')->dailyAt('03:30')->withoutOverlapping();
 
 // Billing and spotlight (TDD M16, M5)
 Schedule::command('subscriptions:enforce-limits')->dailyAt('02:00')->withoutOverlapping();

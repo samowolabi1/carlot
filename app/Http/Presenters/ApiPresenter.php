@@ -5,6 +5,8 @@ namespace App\Http\Presenters;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Support\AppointmentText;
+use App\Domain\Legal\Actions\AcceptTerms;
+use App\Domain\Legal\LegalDocuments;
 use App\Domain\Lots\Models\Lot;
 
 /**
@@ -24,6 +26,7 @@ final class ApiPresenter
             'role' => $user->role->value,
             'has_password' => $user->password !== null,
             'google_connected' => $user->google_id !== null,
+            'terms' => ['accepted' => AcceptTerms::current($user), 'required_version' => LegalDocuments::userVersion(), 'accepted_version' => $user->terms_version],
             'lots' => $user->lots()->orderBy('name')->get()->map(fn (Lot $lot) => [
                 'slug' => $lot->slug,
                 'name' => $lot->name,

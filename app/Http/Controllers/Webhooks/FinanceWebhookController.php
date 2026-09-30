@@ -34,6 +34,7 @@ class FinanceWebhookController extends Controller
             'reference' => ['required', 'string', 'max:100'],
             'status' => ['required', Rule::in(HttpConnection::STATUSES)],
             'message' => Fields::text(1000),
+            'next_steps' => Fields::text(1000),
             'approved_amount' => ['nullable', 'integer', 'min:0', 'max:'.Fields::MONEY_MAX],
             'rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'tenor_months' => ['nullable', 'integer', 'min:1', 'max:120'],
@@ -47,6 +48,7 @@ class FinanceWebhookController extends Controller
         try {
             $update->run($application, FinanceStatus::from($data['status']), [
                 'message' => $data['message'] ?? null,
+                'next_steps' => $data['next_steps'] ?? null,
                 'approved_amount' => isset($data['approved_amount']) ? $data['approved_amount'] * 100 : null,
                 'offer_rate_bp' => isset($data['rate']) ? (int) round($data['rate'] * 100) : null,
                 'offer_tenor_months' => $data['tenor_months'] ?? null,

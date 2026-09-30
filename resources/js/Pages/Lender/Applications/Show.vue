@@ -49,6 +49,7 @@ const props = defineProps<{
     assigned: string | null;
     tenors: number[];
     rate: number;
+    next_steps: string;
     upload: { max_kb: number; mimes: string[] };
 }>();
 
@@ -61,7 +62,7 @@ const labels: Record<Action, string> = {
     documents: 'Ask for documents',
     pre_approve: 'Pre-approve',
     approve: 'Approve',
-    disburse: 'Record payment to the lot',
+    disburse: 'Record payment to the lot (optional)',
     decline: 'Decline',
 };
 const open = ref<Action | null>(null);
@@ -74,6 +75,7 @@ const form = useForm({
     tenor_months: props.tenors.includes(props.application.months) ? props.application.months : props.tenors[0],
     disbursed_amount: String(props.application.numbers.approved ?? props.application.numbers.amount),
     disbursed_reference: '',
+    next_steps: props.next_steps,
 });
 
 function start(action: Action) {
@@ -156,6 +158,19 @@ function assign() {
                                 </label>
                             </template>
                         </div>
+                        <label v-if="open === 'pre_approve' || open === 'approve'" class="field-label">
+                            Next steps at {{ page.props.currentLender!.name }}
+                            <textarea
+                                v-field="{ kind: 'text', max: 1000 }"
+                                v-model="form.next_steps"
+                                rows="3"
+                                maxlength="1000"
+                                class="field h-auto py-2.5"
+                                placeholder="e.g. Visit any branch with your ID, BVN and 6 months of statements, or call 0700 000 0000. We'll complete the loan agreement and checks there."
+                            />
+                            <span class="text-[12px] font-normal text-muted">The buyer finishes the loan with you: agreement, identity and credit checks, and payment all happen with you, outside LotLink.</span>
+                            <InputError :message="form.errors.next_steps" />
+                        </label>
                         <div v-if="open === 'disburse'" class="grid gap-3 sm:grid-cols-2">
                             <label class="field-label">
                                 Amount paid to {{ a.lot }} (₦)

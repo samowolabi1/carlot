@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LegalFooter from '@/components/LegalFooter.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Icon from '@/components/Icon.vue';
 import { Link } from '@inertiajs/vue3';
@@ -20,6 +21,7 @@ defineProps<{ closeHref: string; title: string; status?: string; wide?: boolean 
                 <h1 class="text-[26px] leading-tight font-bold">{{ title }}</h1>
                 <slot name="steps" />
                 <slot />
+                <LegalFooter compact class="mt-auto pt-6" />
             </div>
         </div>
         <div class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LegalFooter from '@/components/LegalFooter.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import SupportViewBar from '@/components/SupportViewBar.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
@@ -69,6 +70,10 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
         <main>
             <slot />
         </main>
+
+        <div class="mx-auto max-w-6xl border-t border-line px-5 pt-4 pb-24 md:pb-8">
+            <LegalFooter />
+        </div>
 
         <nav aria-label="Main" class="fixed inset-x-0 bottom-0 z-40 grid h-[76px] grid-cols-5 border-t border-line bg-white pb-2 md:hidden">
             <template v-for="tab in tabs" :key="tab.key">

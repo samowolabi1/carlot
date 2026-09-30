@@ -31,6 +31,15 @@ JSON API for the LotLink mobile app, at `/api/v1`. Authentication is a Sanctum b
 | GET | `/cars/{ulid}` | Car details, photos (`src`, `full`), specs, features, inspection summary, `lot`, `saved`, `from_monthly`. |
 | GET | `/lots/{slug}` | Lot page: details, opening hours, rating, `following`, and its cars (`?page=`). |
 | GET | `/lots/{slug}/slots` | Bookable times for 14 days (`starts_at` in UTC). |
+| GET | `/legal` | The legal documents: `{data: [{key, title, version, url}], required_version}` (Terms, Privacy Policy, Lender Terms, Security). |
+
+## Terms and privacy
+
+The app's sign-in screen must say, next to the button, that continuing accepts the Terms of Use and Privacy Policy (with links from
+`/legal`): a new account made by `POST /auth/token` is recorded as accepting them. `GET /me` returns `terms: {accepted, required_version,
+accepted_version}`. While `accepted` is false (older accounts, accounts made by a lot or an admin, or after we change the documents), every
+signed-in endpoint except `/me`, `/auth/token` and `/legal/accept` answers `403 {code: "terms_not_accepted", required_version}`: show the
+documents and send `POST /legal/accept` with `agree: true` (returns the updated user).
 
 ## Buyer (token)
 
@@ -67,7 +76,8 @@ Adding and editing cars, Lot Manager and billing stay on the website for now.
 
 ## Lenders' systems (car loans)
 
-A lender that chooses "Our own system (API)" in the lender portal (Settings) or is set up that way by an admin gets each
+Loans start on LotLink and continue with the lender: LotLink gathers and passes on the application; the lender decides and
+completes KYC, the agreement and payment through its own channels. A lender that chooses "Our own system (API)" in the lender portal (Settings) or is set up that way by an admin gets each
 application posted to it instead of waiting in the portal. There is no token: LotLink calls the lender, and the lender calls back.
 
 **LotLink → lender**: `POST {api_url}/applications` with `Authorization: Bearer {api_key}` and JSON:
@@ -80,6 +90,6 @@ employment, employer}`, `consented_at`, `callback_url`. Answer `2xx` with `{refe
 **Lender → LotLink**: `POST /webhooks/finance/{lender slug}` (the `callback_url`) with a JSON body signed with HMAC-SHA256 of the
 raw body using the lender's webhook secret, in `X-LotLink-Signature`. Fields: `reference` (LotLink's or yours), `status`
 (`received`, `documents_requested`, `pre_approved`, `approved`, `disbursed`, `declined`), optional `message` (shown to the buyer),
-`approved_amount`, `rate` (% a year), `tenor_months`, `disbursed_amount`, `disbursed_reference`. Replies are JSON: `200 {ok, status}`,
+`next_steps` (with `pre_approved` / `approved`: how the buyer continues with you; defaults to the next steps in your settings), `approved_amount`, `rate` (% a year), `tenor_months`, `disbursed_amount`, `disbursed_reference`. Replies are JSON: `200 {ok, status}`,
 `401` bad signature, `404` not your application, `422 {errors}` invalid or not allowed from the current status (for example
 `disbursed` before `approved`). Repeating the current status only updates the message.

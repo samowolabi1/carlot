@@ -78,6 +78,7 @@ class LenderResource extends Resource
                 Forms\Components\TextInput::make('contact_email')->label('Contact email')->email()->rule('email:rfc,strict')->required()->maxLength(190),
                 Forms\Components\TextInput::make('website')->url()->maxLength(190),
                 Forms\Components\Textarea::make('about')->label('About (buyers see this)')->rows(2)->maxLength(600)->columnSpanFull(),
+                Forms\Components\Textarea::make('next_steps')->label('Next steps at the bank (shown to buyers they approve)')->rows(2)->maxLength(1000)->columnSpanFull(),
             ]),
             Forms\Components\Section::make('Car loan')->columns(3)->schema([
                 Forms\Components\TextInput::make('rate')->label('Rate from (% a year)')->numeric()->minValue(1)->maxValue(99)->step(0.01)->required(),
@@ -142,7 +143,7 @@ class LenderResource extends Resource
                         ->fillForm(fn (Lender $l) => [
                             'name' => $l->name, 'licence_type' => $l->licence_type->value, 'licence_number' => $l->licence_number,
                             'contact_name' => $l->contact_name, 'contact_phone' => PhoneNumber::display($l->contact_phone), 'contact_email' => $l->contact_email,
-                            'website' => $l->website, 'about' => $l->about, 'rate' => $l->rate_bp / 100, 'min_amount' => intdiv($l->min_amount, 100),
+                            'website' => $l->website, 'about' => $l->about, 'next_steps' => $l->next_steps, 'rate' => $l->rate_bp / 100, 'min_amount' => intdiv($l->min_amount, 100),
                             'max_amount' => intdiv($l->max_amount, 100), 'min_deposit_percent' => $l->min_deposit_percent, 'tenors' => array_map('strval', $l->tenors),
                             'states' => $l->states ?? [], 'integration' => $l->integration->value, 'api_url' => $l->api_url,
                         ])

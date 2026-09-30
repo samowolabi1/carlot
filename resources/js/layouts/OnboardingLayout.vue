@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LegalFooter from '@/components/LegalFooter.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Icon from '@/components/Icon.vue';
 import Logo from '@/components/Logo.vue';
@@ -43,6 +44,7 @@ const currentIndex = () => props.steps.findIndex((s) => s.key === props.current)
         </aside>
         <main class="flex grow flex-col gap-5 px-5 py-7 lg:px-16 lg:py-12">
             <slot />
+            <LegalFooter compact class="mt-auto pt-6" />
         </main>
         <FlashMessage />
     </div>

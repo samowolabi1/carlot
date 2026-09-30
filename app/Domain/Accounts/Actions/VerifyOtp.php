@@ -7,6 +7,7 @@ use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Accounts\Models\OtpCode;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Legal\Actions\AcceptTerms;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -75,7 +76,8 @@ class VerifyOtp
             throw OtpException::expired();
         }
 
-        if (! $user->exists) {
+        $new = ! $user->exists;
+        if ($new) {
             $user->role = UserRole::Customer;
         }
 
@@ -85,6 +87,11 @@ class VerifyOtp
             $user->email_verified_at ??= now();
         }
         $user->save();
+
+        // A new account: the sign-in page (and the app's) says that continuing accepts the Terms and Privacy Policy.
+        if ($new) {
+            app(AcceptTerms::class)->run($user);
+        }
 
         return $user;
     }

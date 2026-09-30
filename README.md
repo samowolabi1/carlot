@@ -295,6 +295,9 @@ components; run `php artisan optimize:clear` and `php artisan filament:optimize-
   and an inspection at Demo Lot Ikeja, and an independent inspector: sign in as `08000000200`
   and open any car to add a signed report. Verification files and inspection PDFs are stored
   under `storage/app/private`.
+- **Terms and privacy**: `/terms`, `/privacy`, `/lender-terms` and `/security` (linked at the bottom of every page). Accounts that
+  existed before, or that an admin or a lot created, are asked once to accept the Terms and Privacy Policy; new sign-ups accept on the
+  sign-in page. Acceptances (with version, time, IP and browser) are in the `legal_acceptances` table.
 - **Car loans and lenders**: `php artisan db:seed --class=DemoLenderSeeder` (also run by DemoMarketplaceSeeder) adds
   "Demo Finance" (answers at once, nothing is sent anywhere) and "Kobo Motor Finance", which works in the lender portal:
   sign in with the password option as `lender@lotlink.test` / `password` and open `/lender`. As a buyer, open a car →
@@ -354,6 +357,12 @@ same variables and button, then enter its name in `/admin` → Message templates
    number a lot sends: the verification queue then shows the registered name, status and date, how well the name matches
    the lot's, and flags numbers that aren't found, inactive companies and names that don't match. Admins still approve.
 4. Caddy in front with on-demand TLS: `on_demand_tls { ask https://your-domain/internal/domains/allowed }`.
+5. Legal details on the Terms, Privacy Policy, Lender Terms and Security pages: `LEGAL_COMPANY_NAME`, `LEGAL_RC_NUMBER`,
+   `LEGAL_ADDRESS`, `LEGAL_EMAIL`, `LEGAL_PRIVACY_EMAIL` (your Data Protection Officer) and `LEGAL_SECURITY_EMAIL`, then
+   `php artisan config:cache`. The documents are drafts written for Nigerian law (NDPA 2023 and the NDPC's GAID 2025, the FCCPA 2018,
+   CBN and FCCPC lending rules, state moneylender laws, the Arbitration and Mediation Act 2023): **have a Nigerian lawyer review
+   `resources/legal/*.md` before launch.** After a material change, bump the date in `config/lotlink.php` → `legal.versions` and
+   everyone is asked to accept again on their next visit.
 5. Sign in to `/admin`, set up two-step sign-in, change the seeded admin password.
 6. Cron `* * * * * php artisan schedule:run` and the queue workers: with Redis (recommended, see "Queues in production"), keep
    `php artisan horizon` running; with the database queue, `php artisan queue:work --queue=critical,notifications,media,default`.

@@ -36,6 +36,7 @@ use Illuminate\Support\Carbon;
  * @property FinanceStatus $status
  * @property string|null $external_ref
  * @property string|null $partner_message
+ * @property string|null $next_steps what the buyer does at the lender to continue (after a pre-approval or approval)
  * @property int|null $approved_amount
  * @property int|null $offer_rate_bp
  * @property int|null $offer_tenor_months
@@ -54,7 +55,7 @@ class FinanceApplication extends Model
 
     public const EMPLOYMENT = ['salaried' => 'Salaried', 'self_employed' => 'Self-employed', 'business_owner' => 'Business owner', 'other' => 'Other'];
 
-    protected $fillable = ['user_id', 'vehicle_id', 'lot_id', 'partner', 'amount', 'deposit', 'tenor_months', 'currency', 'applicant', 'consented_at', 'status', 'external_ref', 'partner_message', 'approved_amount',
+    protected $fillable = ['user_id', 'vehicle_id', 'lot_id', 'partner', 'amount', 'deposit', 'tenor_months', 'currency', 'applicant', 'consented_at', 'status', 'external_ref', 'partner_message', 'next_steps', 'approved_amount',
         'lender_id', 'assigned_to', 'offer_rate_bp', 'offer_tenor_months', 'disbursed_amount', 'disbursed_reference', 'disbursed_at', 'decided_at', 'buyer_read_at', 'lender_read_at'];
 
     protected $hidden = ['id', 'user_id', 'vehicle_id', 'lot_id', 'lender_id', 'assigned_to', 'applicant'];

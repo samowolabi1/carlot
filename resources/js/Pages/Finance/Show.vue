@@ -27,6 +27,7 @@ const props = defineProps<{
         image: string | null;
         date: string;
         consented_at: string | null;
+        continue: { steps: string | null; phone: string | null; email: string | null; website: string | null } | null;
         offer: { rate: string | null; months: number | null; disbursed: string | null; disbursed_reference: string | null; disbursed_at: string | null };
         messages: FinanceThreadMessage[];
     };
@@ -37,8 +38,8 @@ const steps = [
     { key: 'submitted', label: 'Sent' },
     { key: 'received', label: 'Being reviewed' },
     { key: 'pre_approved', label: 'Pre-approved' },
-    { key: 'approved', label: 'Approved' },
-    { key: 'disbursed', label: 'Paid to the lot' },
+    { key: 'approved', label: 'Approved (finish with the lender)' },
+    { key: 'disbursed', label: 'Paid to the lot by the lender' },
 ];
 const order = ['submitted', 'received', 'documents_requested', 'pre_approved', 'approved', 'disbursed'];
 const reached = (key: string) => order.indexOf(props.application.status) >= order.indexOf(key);
@@ -105,6 +106,21 @@ function withdraw() {
                 </div>
             </section>
 
+            <section v-if="application.continue" class="card flex flex-col gap-2 border-forest p-5" aria-labelledby="continue-title">
+                <h2 id="continue-title" class="font-sans text-[17px] font-bold">Continue with {{ application.lender }}</h2>
+                <p class="text-[14px] text-[#4A4D53]">
+                    The loan itself is completed with {{ application.lender }}, not on LotLink: they check your identity and credit, give you the loan agreement to sign and pay
+                    the lot directly.
+                </p>
+                <p v-if="application.continue.steps" class="rounded-xl bg-map px-3 py-2.5 text-[14px] whitespace-pre-line text-forest">{{ application.continue.steps }}</p>
+                <div class="flex flex-wrap gap-2">
+                    <a v-if="application.continue.phone" :href="`tel:${application.continue.phone.replace(/\s/g, '')}`" class="btn btn-outline h-11"><Icon name="phone" :size="18" /> {{ application.continue.phone }}</a>
+                    <a v-if="application.continue.email" :href="`mailto:${application.continue.email}`" class="btn btn-outline h-11"><Icon name="mail" :size="18" /> Email</a>
+                    <a v-if="application.continue.website" :href="application.continue.website" target="_blank" rel="noopener nofollow" class="btn btn-outline h-11">Website</a>
+                </div>
+                <p class="text-[12px] text-muted">Never pay a fee to anyone to "speed up" a loan. Pay the car's price only to the lot, and loan charges only to the lender's own official account.</p>
+            </section>
+
             <FinanceThread
                 :messages="application.messages"
                 :action="route('finance.message', application.ulid)"
@@ -115,7 +131,8 @@ function withdraw() {
 
             <p class="text-[12px] text-muted">
                 You agreed to share your details with {{ application.lender }} on {{ application.consented_at }}. {{ application.lot }} never sees your income, work details, messages or
-                documents. LotLink doesn't lend money.
+                documents. LotLink doesn't lend money or decide on loans: it passes your application to the lender you chose. See our
+                <Link :href="route('legal.show', 'privacy')">Privacy Policy</Link> and <Link :href="route('legal.show', 'terms')">Terms</Link>.
             </p>
         </div>
     </CustomerLayout>

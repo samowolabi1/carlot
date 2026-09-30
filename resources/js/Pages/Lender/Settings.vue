@@ -17,6 +17,7 @@ const props = defineProps<{
         contact_phone: string;
         website: string;
         about: string;
+        next_steps: string;
         rate: number;
         min_amount: string;
         max_amount: string;
@@ -97,6 +98,18 @@ async function copy(text: string) {
                         About your car loans <span class="font-normal text-muted">(buyers see this)</span>
                         <textarea v-field="{ kind: 'text', max: 600 }" v-model="form.about" rows="3" maxlength="600" class="field h-auto py-2.5" />
                         <InputError :message="form.errors.about" />
+                    </label>
+                    <label class="field-label sm:col-span-2">
+                        Next steps with you <span class="font-normal text-muted">(shown to buyers you pre-approve or approve; you can change it per application)</span>
+                        <textarea
+                            v-field="{ kind: 'text', max: 1000 }"
+                            v-model="form.next_steps"
+                            rows="3"
+                            maxlength="1000"
+                            class="field h-auto py-2.5"
+                            placeholder="e.g. Visit any branch with your ID, BVN and 6 months of statements. We'll complete the loan agreement and checks there."
+                        />
+                        <InputError :message="form.errors.next_steps" />
                     </label>
                 </div>
             </fieldset>

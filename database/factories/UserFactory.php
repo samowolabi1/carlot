@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Legal\LegalDocuments;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +23,16 @@ class UserFactory extends Factory
             'email' => null,
             'phone_verified_at' => now(),
             'role' => UserRole::Customer,
+            // Most tests are about something else: people have accepted the current Terms and Privacy Policy.
+            'terms_version' => LegalDocuments::userVersion(),
+            'terms_accepted_at' => now(),
         ];
+    }
+
+    /** Someone who hasn't accepted the current Terms and Privacy Policy (older account, or made by an admin or a lot). */
+    public function withoutTerms(): static
+    {
+        return $this->state(['terms_version' => null, 'terms_accepted_at' => null]);
     }
 
     public function staff(): static

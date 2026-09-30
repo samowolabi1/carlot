@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Legal\LegalDocuments;
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AccountDeletionController;
 use App\Http\Controllers\Account\BudgetController;
@@ -61,6 +62,7 @@ use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\Lender\ApplicationController as LenderApplicationController;
 use App\Http\Controllers\Lender\JoinController;
 use App\Http\Controllers\Lender\LicenceController;
@@ -106,6 +108,9 @@ Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
 Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
+// Legal pages for the whole platform (resources/legal/*.md).
+Route::get('/{document}', [LegalController::class, 'show'])->whereIn('document', array_keys(LegalDocuments::TITLES))->name('legal.show');
+Route::get('/.well-known/security.txt', [LegalController::class, 'securityTxt'])->name('security.txt');
 Route::get('/lenders', [JoinController::class, 'show'])->name('lenders.join');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
 // Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
@@ -233,7 +238,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/favourites/{vehicle}/save', [FavouriteController::class, 'remember'])->name('favourites.remember');
 });
 
-Route::middleware(['auth', 'profile.complete'])->group(function () {
+Route::middleware('auth')->group(function () {
+    Route::get('/legal/accept', [LegalController::class, 'accept'])->name('legal.accept');
+    Route::post('/legal/accept', [LegalController::class, 'store'])->middleware('throttle:10,1')->name('legal.accept.store');
+});
+
+Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(function () {
     Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
 
     Route::get('/book/{lot:slug}', [BookingController::class, 'create'])->name('bookings.create');
@@ -277,6 +287,7 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
         ->scopeBindings()
         ->group(function () {
             Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
+            Route::post('/terms', [PortalController::class, 'acceptTerms'])->name('terms');
             Route::get('/applications', [LenderApplicationController::class, 'index'])->name('applications.index');
             Route::get('/applications/{application}', [LenderApplicationController::class, 'show'])->name('applications.show');
             Route::post('/applications/{application}/status', [LenderApplicationController::class, 'status'])->middleware('throttle:30,1')->name('applications.status');

@@ -72,6 +72,24 @@ return [
         ],
     ],
 
+    // Terms, Privacy Policy, Lender Terms and Security page (resources/legal/*.md). Bump a document's version when it
+    // changes materially: people who accepted an older Terms or Privacy Policy are asked to accept again, and lenders'
+    // admins the Lender Terms.
+    'legal' => [
+        'company' => env('LEGAL_COMPANY_NAME', 'LotLink Technologies Limited'),
+        'rc_number' => env('LEGAL_RC_NUMBER', 'RC number to be added'),
+        'address' => env('LEGAL_ADDRESS', 'Lagos, Nigeria'),
+        'email' => env('LEGAL_EMAIL', 'support@lotlink.ng'),
+        'privacy_email' => env('LEGAL_PRIVACY_EMAIL', 'privacy@lotlink.ng'),
+        'security_email' => env('LEGAL_SECURITY_EMAIL', 'security@lotlink.ng'),
+        'versions' => [
+            'terms' => '2026-10-01',
+            'privacy' => '2026-10-01',
+            'lender-terms' => '2026-10-01',
+            'security' => '2026-10-01',
+        ],
+    ],
+
     'invitation_ttl_days' => 7,
 
     // Billing (TDD M16). "sandbox" fakes the Paystack checkout so plans and spotlights can be

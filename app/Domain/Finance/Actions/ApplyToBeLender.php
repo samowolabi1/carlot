@@ -9,6 +9,7 @@ use App\Domain\Finance\Enums\LenderIntegration;
 use App\Domain\Finance\Enums\LenderRole;
 use App\Domain\Finance\Enums\LenderStatus;
 use App\Domain\Finance\Models\Lender;
+use App\Domain\Legal\Actions\AcceptTerms;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,6 +22,8 @@ use Illuminate\Validation\ValidationException;
  */
 class ApplyToBeLender
 {
+    public function __construct(private readonly AcceptTerms $accept) {}
+
     public const LICENCE_KB = 10240;
 
     public const LICENCE_MIMES = ['pdf', 'jpg', 'jpeg', 'png'];
@@ -45,6 +48,8 @@ class ApplyToBeLender
             ]);
             $lender->members()->attach($user->id, ['role' => LenderRole::Admin->value]);
             AuditLog::record('lender.applied', $lender, ['name' => $lender->name], $user);
+            // The sign-up form's "I agree to the Lender Terms" box.
+            $this->accept->forLender($lender, $user);
 
             return $lender;
         });

@@ -150,7 +150,10 @@ function submitPassword() {
                 <span class="text-[13px] text-mist">Sign in the same way, then put your stock online, take bookings and share cars in one tap. Lots in every state in Nigeria are welcome.</span>
                 <Link :href="route('dealer.home')" class="text-[14px] font-semibold text-peach hover:text-white">List your lot</Link>
             </div>
-            <p class="text-center text-[12px] text-muted">By continuing you agree to the Terms and Privacy Policy.</p>
+            <p class="text-center text-[12px] text-muted">
+                By continuing you agree to LotLink's <Link :href="route('legal.show', 'terms')">Terms of Use</Link> and
+                <Link :href="route('legal.show', 'privacy')">Privacy Policy</Link>, and confirm you're 18 or older.
+            </p>
         </div>
     </AuthLayout>
 </template>

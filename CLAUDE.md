@@ -134,10 +134,26 @@ Run all four before pushing.
   only to the chosen lender (`FinancePresenter` with the lender side), never to lots, never in /admin. The lot hears only through
   `FinanceLeadNotice`: a `LeadSource::Finance` lead, chat lines and `DealAlert`s when the buyer applies, is pre-approved, approved
   and paid for. Never income, commitments, employer, messages, declines or withdrawals.
+- Lenders may be commercial banks, microfinance banks, finance companies, licensed money lenders or individuals (`LenderType`); say
+  "lender", not "bank", in the UI. Loans start on LotLink and continue with the lender: after a pre-approval/approval the buyer sees
+  the lender's `next_steps` (application's, else the lender's default) and contact details; KYC, agreement and payment happen off-platform.
+  `finance:prune` (daily) clears applicants' details, messages and documents 24 months after an application closes (the Privacy Policy says so).
 - `SecurityHeaders` sets CSP (nonce via `Vite::useCspNonce()`; keep inline scripts out of Blade), HSTS and framing
   rules; `/l/*` stays embeddable. Admin 2FA: `RequireAdminTwoFactor` + `Totp`. Config: `LOTLINK_CSP`, `ADMIN_2FA`.
 - Account deletion: `DeleteAccount` (soft delete, 30-day grace, sign-in restores) then `AnonymiseAccount`.
 - See `docs/security-review.md` and `loadtest/` (k6) before changing auth, headers or hot paths.
+
+## Legal (whole platform)
+
+- Terms of Use, Privacy Policy (NDPA 2023 / GAID 2025), Lender Terms and Security and safety live in `resources/legal/*.md`, rendered by
+  `Legal\LegalDocuments` (raw HTML stripped; `{company}` etc. from `config('lotlink.legal')`) at `/terms`, `/privacy`, `/lender-terms`,
+  `/security`; `/.well-known/security.txt`. Bump `lotlink.legal.versions.*` when a document changes materially. When you change what the
+  platform does with data, money or loans, update the matching document in the same change.
+- Acceptance only through `Legal\Actions\AcceptTerms` (`legal_acceptances` rows with version, IP and browser; `users.terms_version`).
+  New accounts accept on the sign-in page (`VerifyOtp`, `SignInWithGoogle`); everyone else meets `terms.accepted` (`EnsureTermsAccepted`:
+  web redirect to `/legal/accept`, API 403 `terms_not_accepted`) — never for admins, never accepted during "Log in as". Lenders' admins
+  accept the Lender Terms (`forLender()`; `SetCurrentLender` holds applications until they do). Every layout shows `LegalFooter.vue`.
+  Tests: `UserFactory` accepts by default (`withoutTerms()`), `LenderFixtures::lender()` too.
 
 ## Support desk
 

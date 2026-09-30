@@ -79,6 +79,7 @@ export interface CurrentLender {
     status: 'pending' | 'active' | 'suspended' | 'rejected';
     status_label: string;
     role: 'admin' | 'officer';
+    terms_ok: boolean;
     new_badge: number;
     unread_badge: number;
 }

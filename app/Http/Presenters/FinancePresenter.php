@@ -2,6 +2,7 @@
 
 namespace App\Http\Presenters;
 
+use App\Domain\Finance\Enums\FinanceStatus;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Models\FinanceMessage;
 use App\Domain\Finance\Models\Lender;
@@ -86,6 +87,13 @@ final class FinancePresenter
                 'disbursed_reference' => $a->disbursed_reference,
                 'disbursed_at' => $a->disbursed_at ? self::date($a->disbursed_at) : null,
             ],
+            // Where the buyer goes from here: the lender's next steps and how to reach it, once it has said yes.
+            'continue' => in_array($a->status, [FinanceStatus::PreApproved, FinanceStatus::Approved, FinanceStatus::Disbursed], true) && $lender ? [
+                'steps' => $a->next_steps ?? $lender->next_steps,
+                'phone' => PhoneNumber::display($lender->contact_phone) ?: null,
+                'email' => $lender->contact_email,
+                'website' => $lender->website,
+            ] : null,
             'consented_at' => self::date($a->consented_at, 'j M Y, g:ia'),
             // What the buyer agreed to share: only for the lender.
             'applicant' => $side === FinanceMessage::LENDER ? [

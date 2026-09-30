@@ -5,7 +5,7 @@ import InputError from '@/components/InputError.vue';
 import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     mine: { slug: string; name: string; status: string; status_label: string; note: string | null }[];
@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const { user } = useShared();
+const individual = computed(() => form.licence_type === 'individual');
 const picker = ref<HTMLInputElement | null>(null);
 
 const form = useForm<{
@@ -27,6 +28,7 @@ const form = useForm<{
     contact_phone: string;
     website: string;
     about: string;
+    next_steps: string;
     rate: number | string;
     min_amount: string;
     max_amount: string;
@@ -44,6 +46,7 @@ const form = useForm<{
     contact_phone: '',
     website: '',
     about: '',
+    next_steps: '',
     rate: 24,
     min_amount: '1000000',
     max_amount: '30000000',
@@ -65,7 +68,7 @@ function submit() {
 const perks = [
     { icon: 'leads', title: 'Buyers who already chose a car', text: 'Each application comes with the car, the lot, the price, the deposit and the term.' },
     { icon: 'shield', title: "With the buyer's consent", text: 'Buyers agree to share their income and work details with you, and only you.' },
-    { icon: 'chat', title: 'Work it in one place', text: 'Ask for documents, pre-approve, approve and record payment to the lot. The buyer is told at each step.' },
+    { icon: 'chat', title: 'Decide here, finish with you', text: 'Review, ask for documents and pre-approve or approve here; the buyer then finishes with you (KYC, agreement, payment).' },
     { icon: 'settings', title: 'Or use your own system', text: 'Receive applications by API and send updates back to a signed webhook.' },
 ] as const;
 </script>
@@ -77,7 +80,7 @@ const perks = [
             <header class="flex flex-col gap-2">
                 <h1 class="text-[30px] leading-tight font-bold">Lend with LotLink</h1>
                 <p class="text-[16px] text-[#4A4D53]">
-                    Banks, microfinance banks and finance companies: get car loan applications from buyers on LotLink and work them in the lender portal. LotLink doesn't lend and
+                    Banks, microfinance banks, finance companies, licensed money lenders and individual lenders: get car loan applications from buyers on LotLink and work them in the lender portal. LotLink doesn't lend and
                     never takes a cut of the car's price.
                 </p>
             </header>
@@ -119,12 +122,12 @@ const perks = [
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="field-label sm:col-span-2">
-                        Company name
+                        {{ individual ? 'Your full name (as on your ID)' : 'Company name' }}
                         <input v-field="'business_name'" v-model="form.name" class="field h-11" required />
                         <InputError :message="form.errors.name" />
                     </label>
                     <label class="field-label">
-                        Licence
+                        Type of lender
                         <select v-model="form.licence_type" class="field h-11" required>
                             <option value="" disabled>Choose</option>
                             <option v-for="t in types" :key="t.value" :value="t.value">{{ t.label }}</option>
@@ -132,7 +135,7 @@ const perks = [
                         <InputError :message="form.errors.licence_type" />
                     </label>
                     <label class="field-label">
-                        Licence number
+                        {{ individual ? 'NIN, or moneylender licence number' : 'Licence number' }}
                         <input v-field="{ kind: 'reference', max: 40 }" v-model="form.licence_number" class="field h-11" required />
                         <InputError :message="form.errors.licence_number" />
                     </label>
@@ -169,7 +172,7 @@ const perks = [
                 </div>
 
                 <div class="flex flex-col gap-1.5 border-t border-line pt-4">
-                    <span class="field-label">CBN licence</span>
+                    <span class="field-label">{{ individual ? 'Your ID (NIN slip, passport or driver\'s licence) or moneylender licence' : 'Licence (CBN or state moneylender licence)' }}</span>
                     <input ref="picker" type="file" accept="application/pdf,image/jpeg,image/png" class="sr-only" tabindex="-1" aria-hidden="true" @change="pick" />
                     <div class="flex flex-wrap items-center gap-2">
                         <button type="button" class="btn btn-outline h-11" @click="picker?.click()"><Icon name="upload" :size="18" /> {{ form.licence ? 'Change file' : 'Add a copy' }}</button>
@@ -179,11 +182,18 @@ const perks = [
                     <InputError :message="form.errors.licence" />
                 </div>
 
+                <label class="field-label">
+                    Next steps with you <span class="font-normal text-muted">(optional; shown to buyers you approve)</span>
+                    <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.next_steps" rows="2" maxlength="1000" class="field h-auto py-2.5" />
+                    <InputError :message="form.errors.next_steps" />
+                </label>
+
                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 text-[14px]">
                     <input v-model="form.agree" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
                     <span>
-                        We hold the licence above, will use buyers' details only to consider their car loan, will tell buyers our decision through LotLink, and will record when we pay a
-                        lot.
+                        I have authority to act for this company and agree to the <Link :href="route('legal.show', 'lender-terms')" target="_blank">Lender Terms</Link>: we hold the
+                        licence above, will use buyers' details only to consider their car loan, will tell buyers our decision through LotLink, and complete loans (KYC, agreement,
+                        payment) ourselves, outside LotLink.
                     </span>
                 </label>
                 <InputError :message="form.errors.agree" />

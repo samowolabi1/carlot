@@ -44,7 +44,7 @@ class JoinController extends Controller
             ...LenderRules::product(),
             'licence' => ['required', 'file', 'max:'.ApplyToBeLender::LICENCE_KB, 'mimes:'.implode(',', ApplyToBeLender::LICENCE_MIMES)],
             'agree' => ['accepted'],
-        ], ['agree.accepted' => 'Tick the box to agree to the lender terms.', 'licence.required' => 'Add a copy of your CBN licence.']);
+        ], ['agree.accepted' => 'Tick the box to agree to the lender terms.', 'licence.required' => 'Add a copy of your licence (or, for an individual lender, your ID).']);
         unset($data['licence'], $data['agree']);
 
         $lender = $apply->run($request->user(), $data, $request->file('licence'));

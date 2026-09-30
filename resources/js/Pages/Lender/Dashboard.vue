@@ -3,7 +3,8 @@ import StatusChip from '@/components/finance/StatusChip.vue';
 import Icon from '@/components/Icon.vue';
 import LenderLayout from '@/layouts/LenderLayout.vue';
 import type { SharedProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
 import { computed } from 'vue';
 
 export type LenderRow = {
@@ -24,13 +25,17 @@ export type LenderRow = {
 };
 
 defineProps<{
-    lender: { status: string; status_label: string; note: string | null; product: string; integration: string };
+    lender: { status: string; status_label: string; note: string | null; product: string; integration: string; terms_version: string; is_admin: boolean };
     stats: { new: number; open: number; documents: number; approved_month: number; disbursed_month: string; mine: number };
     recent: LenderRow[];
 }>();
 
 const page = usePage<SharedProps>();
 const slug = computed(() => page.props.currentLender!.slug);
+const terms = useForm({ agree: false });
+function acceptTerms() {
+    terms.post(route('lender.terms', slug.value), { preserveScroll: true });
+}
 </script>
 
 <template>
@@ -40,6 +45,24 @@ const slug = computed(() => page.props.currentLender!.slug);
             <h1 class="text-[30px] font-bold">Dashboard</h1>
             <p class="text-[14px] text-muted">{{ lender.product }} · {{ lender.integration }}</p>
         </div>
+
+        <form v-if="!page.props.currentLender!.terms_ok" class="card flex flex-col gap-3 border-clay p-5" aria-labelledby="terms-title" @submit.prevent="acceptTerms">
+            <h2 id="terms-title" class="font-sans text-[17px] font-bold">Accept the Lender Terms</h2>
+            <p class="text-[14px] text-[#4A4D53]">
+                Before your team can work applications, one of your admins must accept the
+                <Link :href="route('legal.show', 'lender-terms')" target="_blank">Lender Terms</Link> (effective {{ lender.terms_version }}). They cover your licence or identity,
+                fair treatment of buyers, data protection and how loans continue with you outside LotLink.
+            </p>
+            <template v-if="lender.is_admin">
+                <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 text-[14px]">
+                    <input v-model="terms.agree" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
+                    <span>I'm authorised to act for {{ page.props.currentLender!.name }} and accept the Lender Terms for it.</span>
+                </label>
+                <InputError :message="terms.errors.agree" />
+                <button type="submit" class="btn btn-primary h-11 self-start" :disabled="terms.processing || !terms.agree">Accept for {{ page.props.currentLender!.name }}</button>
+            </template>
+            <p v-else class="text-[14px] font-semibold">Ask one of your admins to sign in and accept them.</p>
+        </form>
 
         <p v-if="lender.status !== 'active' && lender.note" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">
             <strong>Note from LotLink:</strong> {{ lender.note }}

@@ -64,7 +64,7 @@ class SaveLender
     public static function attributes(array $data, ?Lender $lender = null): array
     {
         $out = [];
-        foreach (['name', 'licence_number', 'contact_name', 'website', 'about', 'api_url'] as $key) {
+        foreach (['name', 'licence_number', 'contact_name', 'website', 'about', 'next_steps', 'api_url'] as $key) {
             if (array_key_exists($key, $data)) {
                 $out[$key] = filled($data[$key]) ? trim((string) $data[$key]) : null;
             }

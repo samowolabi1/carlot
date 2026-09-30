@@ -170,7 +170,11 @@ function submit() {
             </label>
             <InputError :message="form.errors.consent" />
 
-            <p class="text-[12px] text-muted">The lender makes the decision and may ask for documents and a credit check. LotLink doesn't lend money.</p>
+            <p class="text-[12px] text-muted">
+                LotLink only collects your application and passes it to the lender you pick. The lender decides, and the loan is completed with them: identity (BVN/NIN) and credit
+                checks, the loan agreement and payment to the lot all happen with the lender. LotLink doesn't lend money or charge you for this. See our
+                <Link :href="route('legal.show', 'privacy')">Privacy Policy</Link>.
+            </p>
             <button type="submit" class="btn btn-primary h-[52px] rounded-[14px]" :disabled="form.processing || !form.consent || !chosen">
                 {{ chosen ? `Send to ${chosen.name}` : 'Pick a lender' }}
             </button>

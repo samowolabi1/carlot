@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Lender;
 
+use App\Domain\Admin\Impersonation;
 use App\Domain\Finance\Enums\FinanceStatus;
+use App\Domain\Finance\Enums\LenderRole;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Models\FinanceMessage;
 use App\Domain\Finance\Models\Lender;
+use App\Domain\Legal\Actions\AcceptTerms;
+use App\Domain\Legal\LegalDocuments;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\FinancePresenter;
@@ -25,6 +29,17 @@ class PortalController extends Controller
         return $lender ? to_route('lender.dashboard', $lender) : to_route('lenders.join');
     }
 
+    /** One of the lender's admins accepts the current Lender Terms for the lender. */
+    public function acceptTerms(Request $request, Lender $lender, AcceptTerms $accept): RedirectResponse
+    {
+        abort_unless($lender->roleOf($request->user()) === LenderRole::Admin, 403);
+        abort_if(Impersonation::active(), 403, 'Only the lender\'s own admin can accept the Lender Terms.');
+        $request->validate(['agree' => ['accepted']], ['agree.accepted' => 'Tick the box to accept the Lender Terms.']);
+        $accept->forLender($lender, $request->user());
+
+        return back()->with('success', 'Thanks. Your team can now work applications.');
+    }
+
     public function dashboard(Request $request, Lender $lender): Response
     {
         $apps = $lender->applications();
@@ -38,6 +53,8 @@ class PortalController extends Controller
                 'note' => $lender->review_note,
                 'product' => $lender->productLine(),
                 'integration' => $lender->integration->label(),
+                'terms_version' => LegalDocuments::render('lender-terms')['effective'],
+                'is_admin' => $lender->roleOf($request->user()) === LenderRole::Admin,
             ],
             'stats' => [
                 'new' => $counts[FinanceStatus::Submitted->value] ?? 0,

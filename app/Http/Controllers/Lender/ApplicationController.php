@@ -69,6 +69,7 @@ class ApplicationController extends Controller
             'assigned' => $application->assignee?->ulid,
             'tenors' => $lender->tenors,
             'rate' => $lender->rate_bp / 100,
+            'next_steps' => $application->next_steps ?? $lender->next_steps ?? '',
             'upload' => ['max_kb' => SendFinanceMessage::MAX_KB, 'mimes' => SendFinanceMessage::MIMES],
         ])->withViewData(['meta' => ['title' => 'Application — '.$lender->name, 'robots' => 'noindex']]);
     }
@@ -88,6 +89,7 @@ class ApplicationController extends Controller
             'tenor_months' => [Rule::requiredIf($action === 'approve'), 'nullable', 'integer', Rule::in($lender->tenors)],
             'disbursed_amount' => [Rule::requiredIf($action === 'disburse'), 'nullable', 'integer', 'min:1', 'max:'.Fields::MONEY_MAX],
             'disbursed_reference' => [...Fields::reference(required: $action === 'disburse')],
+            'next_steps' => Fields::text(1000),
         ], [
             'message.required' => $action === 'documents' ? 'Say which documents you need.' : 'Tell the buyer why, and what might help.',
             'approved_amount.max' => 'You can\'t approve more than the buyer asked for ('.$application->money().').',
@@ -104,6 +106,7 @@ class ApplicationController extends Controller
 
         $update->run($application, $to, [
             'message' => $data['message'] ?? null,
+            'next_steps' => $data['next_steps'] ?? null,
             'approved_amount' => isset($data['approved_amount']) ? (int) $data['approved_amount'] * 100 : null,
             'offer_rate_bp' => isset($data['rate']) ? (int) round((float) $data['rate'] * 100) : null,
             'offer_tenor_months' => isset($data['tenor_months']) ? (int) $data['tenor_months'] : null,

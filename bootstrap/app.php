@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureProfileComplete;
+use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetCurrentLender;
@@ -42,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'lot.member' => SetCurrentLot::class,
             'lender.member' => SetCurrentLender::class,
             'profile.complete' => EnsureProfileComplete::class,
+            'terms.accepted' => EnsureTermsAccepted::class,
         ]);
 
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : route('login'));

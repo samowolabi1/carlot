@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\URL;
  * @property string $contact_phone
  * @property string|null $website
  * @property string|null $about
+ * @property string|null $next_steps what buyers do at the bank after approval (default for each application)
  * @property int $rate_bp yearly interest in basis points (2400 = 24%)
  * @property int $min_amount kobo
  * @property int $max_amount kobo
@@ -47,6 +48,8 @@ use Illuminate\Support\Facades\URL;
  * @property int|null $reviewed_by
  * @property Carbon|null $reviewed_at
  * @property string|null $review_note
+ * @property string|null $terms_version Lender Terms version its admin accepted
+ * @property Carbon|null $terms_accepted_at
  * @property Carbon|null $created_at
  */
 class Lender extends Model
@@ -59,8 +62,8 @@ class Lender extends Model
 
     protected $fillable = [
         'slug', 'name', 'status', 'licence_type', 'licence_number', 'licence_path', 'contact_name', 'contact_email', 'contact_phone',
-        'website', 'about', 'rate_bp', 'min_amount', 'max_amount', 'min_deposit_percent', 'tenors', 'states', 'integration',
-        'api_url', 'api_key', 'webhook_secret', 'submitted_by', 'reviewed_by', 'reviewed_at', 'review_note',
+        'website', 'about', 'next_steps', 'rate_bp', 'min_amount', 'max_amount', 'min_deposit_percent', 'tenors', 'states', 'integration',
+        'api_url', 'api_key', 'webhook_secret', 'submitted_by', 'reviewed_by', 'reviewed_at', 'review_note', 'terms_version', 'terms_accepted_at',
     ];
 
     protected $hidden = ['id', 'licence_path', 'api_key', 'webhook_secret', 'submitted_by', 'reviewed_by'];
@@ -80,6 +83,7 @@ class Lender extends Model
             'api_key' => 'encrypted',
             'webhook_secret' => 'encrypted',
             'reviewed_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 

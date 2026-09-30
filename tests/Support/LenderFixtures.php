@@ -11,6 +11,7 @@ use App\Domain\Finance\Lenders\LenderConnection;
 use App\Domain\Finance\Lenders\LenderConnections;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Models\Lender;
+use App\Domain\Legal\LegalDocuments;
 use Closure;
 use Illuminate\Support\Str;
 
@@ -36,6 +37,8 @@ trait LenderFixtures
             'min_deposit_percent' => 10,
             'tenors' => [12, 24, 36, 48],
             'integration' => LenderIntegration::Portal,
+            'terms_version' => LegalDocuments::version('lender-terms'),
+            'terms_accepted_at' => now(),
             ...$attributes,
         ]);
         if ($admin !== null) {

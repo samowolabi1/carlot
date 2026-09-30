@@ -172,6 +172,8 @@ it('lets lender admins manage the team and settings, not officers', function () 
         ->assertSessionHasNoErrors();
     $ngozi = User::where('email', 'ngozi@kobo.test')->sole();
     expect($this->kobo->roleOf($ngozi))->toBe(LenderRole::Officer);
+    $this->actingAs($ngozi)->get(route('lender.dashboard', $this->kobo))->assertRedirect(route('legal.accept'));
+    $this->actingAs($ngozi)->post(route('legal.accept.store'), ['agree' => true]);
 
     $this->actingAs($ngozi)->post(route('lender.team.store', $this->kobo), ['name' => 'Eve', 'email' => 'eve@x.test', 'role' => 'admin'])->assertForbidden();
     $this->actingAs($ngozi)->put(route('lender.settings.update', $this->kobo), [])->assertForbidden();

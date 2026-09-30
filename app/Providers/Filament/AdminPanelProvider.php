@@ -14,6 +14,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -53,6 +54,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             // Moving between admin pages swaps only the content (no full reload). Links that leave the admin
             // open in a new tab, and "Log in as" returns a plain redirect, which always loads the whole page.
+            // The platform's legal links in the admin too (staff act under the same Terms and Privacy Policy).
+            ->renderHook(PanelsRenderHook::FOOTER, fn () => view('filament.legal-footer'))
             ->spa()
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])

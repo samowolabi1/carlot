@@ -279,6 +279,10 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <ReportButton kind="vehicle" :id="car.ulid" />
                         <Link v-if="inspector" :href="route('inspector.create', car.ulid)" class="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-semibold"><Icon name="clipboard" :size="15" /> Add an independent inspection</Link>
                     </div>
+                    <p v-if="!preview" class="text-[12px] leading-snug text-muted">
+                        Listed by {{ lot.name }}, who is responsible for this car and its description. Check the car and its papers before paying, and pay only the lot's own
+                        account. LotLink doesn't sell cars or take payment for them. <Link :href="route('legal.show', 'security')">Stay safe</Link>
+                    </p>
                 </div>
             </div>
 

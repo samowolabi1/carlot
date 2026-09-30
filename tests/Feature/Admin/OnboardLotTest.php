@@ -47,6 +47,9 @@ it('onboards a lot owner who signs in by WhatsApp, and welcomes them there', fun
     $this->post(route('login.send'), ['phone' => '0803 555 1212']);
     $this->post(route('login.check'), ['code' => $this->lastCode('+2348035551212')]);
     $this->assertAuthenticatedAs($owner);
+    // The account was made for them, so they accept the Terms and Privacy Policy first, then carry on.
+    $this->get(route('dealer.dashboard', $lot))->assertRedirect(route('legal.accept'));
+    $this->post(route('legal.accept.store'), ['agree' => true])->assertRedirect(route('dealer.dashboard', $lot));
     $this->get(route('dealer.dashboard', $lot))->assertOk();
 });
 

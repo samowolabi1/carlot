@@ -25,6 +25,7 @@ final class LenderRules
             'contact_phone' => Fields::phone(),
             'website' => ['nullable', 'url:https,http', 'max:190'],
             'about' => Fields::text(600),
+            'next_steps' => Fields::text(1000),
         ];
     }
 

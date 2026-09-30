@@ -30,6 +30,7 @@ class SettingsController extends Controller
                 'contact_phone' => PhoneNumber::display($lender->contact_phone),
                 'website' => $lender->website ?? '',
                 'about' => $lender->about ?? '',
+                'next_steps' => $lender->next_steps ?? '',
                 'rate' => $lender->rate_bp / 100,
                 'min_amount' => (string) intdiv($lender->min_amount, 100),
                 'max_amount' => (string) intdiv($lender->max_amount, 100),

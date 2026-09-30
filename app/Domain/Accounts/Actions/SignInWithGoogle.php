@@ -6,6 +6,7 @@ use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Accounts\Notifications\SignInChanged;
 use App\Domain\Audit\AuditLog;
+use App\Domain\Legal\Actions\AcceptTerms;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -47,6 +48,8 @@ class SignInWithGoogle
                 $user->role = UserRole::Customer;
                 $user->forceFill(['google_id' => $id, 'email_verified_at' => $email ? now() : null])->save();
                 AuditLog::record('account.created_with_google', $user, [], $user);
+                // The sign-in page says that continuing accepts the Terms and Privacy Policy.
+                app(AcceptTerms::class)->run($user);
 
                 return $user;
             }

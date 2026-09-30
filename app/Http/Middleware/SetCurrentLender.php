@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Domain\Finance\Enums\FinanceStatus;
 use App\Domain\Finance\Models\FinanceMessage;
 use App\Domain\Finance\Models\Lender;
+use App\Domain\Legal\Actions\AcceptTerms;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -24,7 +25,15 @@ class SetCurrentLender
         $role = $lender->roleOf($request->user());
         abort_if($role === null, 403);
 
+        // Until one of the lender's admins accepts the current Lender Terms, only the dashboard (where they accept), team and
+        // settings open; applications wait.
+        $termsOk = AcceptTerms::lenderCurrent($lender);
+        if (! $termsOk && ! in_array($request->route()?->getName(), ['lender.dashboard', 'lender.terms', 'lender.team', 'lender.team.store', 'lender.team.destroy', 'lender.settings', 'lender.settings.update'], true)) {
+            return redirect()->route('lender.dashboard', $lender)->with('error', 'Your admin needs to accept the Lender Terms before you can work applications.');
+        }
+
         $request->attributes->set('currentLender', fn () => [
+            'terms_ok' => $termsOk,
             'slug' => $lender->slug,
             'name' => $lender->name,
             'initials' => Str::upper(collect(explode(' ', $lender->name))->filter()->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode('')),

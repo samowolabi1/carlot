@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LegalFooter from '@/components/LegalFooter.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import SupportViewBar from '@/components/SupportViewBar.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
@@ -230,6 +231,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
 
             <main class="flex flex-col gap-5 px-5 py-6 lg:px-8 lg:py-7">
                 <slot />
+                <LegalFooter tone="light" class="mt-6 border-t border-line pt-4" />
             </main>
         </div>
 

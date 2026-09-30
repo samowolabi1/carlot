@@ -5,6 +5,7 @@ namespace App\Domain\Seo;
 use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Models\VehicleModel;
+use App\Domain\Legal\LegalDocuments;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +46,11 @@ final class Sitemap
         $urls = [
             ['loc' => url('/'), 'priority' => '1.0'],
             ['loc' => route('cars.index'), 'priority' => '0.9'],
+            ['loc' => route('lenders.join'), 'priority' => '0.4'],
         ];
+        foreach (array_keys(LegalDocuments::TITLES) as $doc) {
+            $urls[] = ['loc' => route('legal.show', $doc), 'lastmod' => LegalDocuments::version($doc), 'priority' => '0.3'];
+        }
 
         // Landing pages with stock: makes, make + model, cities, make + city, make + model + city.
         $stock = Vehicle::query()->marketplace()->join('lots as l', 'l.id', '=', 'vehicles.lot_id')->toBase()
