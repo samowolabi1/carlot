@@ -86,7 +86,7 @@ class MessageTemplateResource extends Resource
                         'Authentication' => 'info',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('whatsapp_template')->label('WhatsApp template')
+                Tables\Columns\TextColumn::make('whatsapp_template')->label('WhatsApp template')->searchable(['whatsapp_template', 'key'])
                     ->description(fn (MessageTemplate $record) => $record->whatsapp_template !== $record->key ? 'Replaced version' : null),
                 Tables\Columns\TextColumn::make('language'),
                 Tables\Columns\IconColumn::make('sms_text')->label('Custom SMS')->boolean()->state(fn (MessageTemplate $record) => filled($record->sms_text)),

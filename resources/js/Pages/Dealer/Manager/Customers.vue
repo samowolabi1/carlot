@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { useLiveReload } from '@/composables/useLiveReload';
 import Icon from '@/components/Icon.vue';
 import Pager from '@/components/manager/Pager.vue';
 import type { Customer, ManagerOptions, Paginated } from '@/components/manager/types';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 type Row = Customer & { visits: number; orders: number };
@@ -15,15 +16,11 @@ const { currentLot } = useShared();
 const lot = computed(() => currentLot.value!);
 const search = ref(props.filters.q);
 
-function go(tag: string | null) {
-    router.get(route('dealer.manager.customers.index', lot.value.slug), { q: search.value || undefined, tag: tag ?? undefined }, { preserveState: true, replace: true });
-}
-
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(search, () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => go(props.filters.tag), 350);
-});
+const list = useLiveReload(() => route('dealer.manager.customers.index', lot.value.slug), ['customers', 'filters', 'total']);
+const searching = list.searching;
+const params = (tag: string | null) => ({ q: search.value.trim() || undefined, tag: tag ?? undefined });
+const go = (tag: string | null) => list.now(params(tag));
+watch(search, () => list.later(() => params(props.filters.tag)));
 </script>
 
 <template>
@@ -61,6 +58,7 @@ watch(search, () => {
                 <span class="sr-only">Search customers</span>
                 <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
                 <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
+                <Icon v-if="searching" name="refresh" class="absolute top-3.5 right-3 animate-spin text-muted" :size="16" aria-label="Searching" />
             </label>
         </div>
 

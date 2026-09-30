@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LiveSearchInput from '@/components/marketplace/LiveSearchInput.vue';
 import HomeBanners from '@/components/marketplace/HomeBanners.vue';
 import type { AdBanner } from '@/lib/ads';
 import CarGlyph from '@/components/CarGlyph.vue';
@@ -68,10 +69,10 @@ const chips = computed(() => [
         <section class="mx-auto flex max-w-6xl flex-col gap-5 px-5 pt-3 md:pt-12">
             <h1 class="max-w-xl text-[30px] leading-[1.1] font-bold tracking-tight md:text-5xl">Find your next car at lots near you</h1>
             <form class="flex max-w-xl gap-2" role="search" @submit.prevent="search">
-                <label class="flex h-[52px] grow items-center gap-2.5 rounded-[14px] border border-line bg-white px-4">
+                <div class="relative flex h-[52px] grow items-center gap-2.5 rounded-[14px] border border-line bg-white px-4 focus-within:border-forest">
                     <Icon name="search" :stroke-width="2" class="text-muted" />
-                    <input v-model="q" type="search" maxlength="80" class="w-full bg-transparent text-[15px] outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
-                </label>
+                    <LiveSearchInput v-model="q" @submit="search" />
+                </div>
                 <Link :href="route('cars.index')" aria-label="All filters" class="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[14px] bg-forest text-white hover:text-white">
                     <Icon name="filters" :stroke-width="2" />
                 </Link>

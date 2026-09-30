@@ -279,6 +279,11 @@ Run all four before pushing.
   Meilisearch must never take the marketplace or dealers down: `MeilisearchVehicleSearch` falls back to
   `DatabaseVehicleSearch` on any Meilisearch error (sponsored cars are just left out), and `Vehicle::syncMakeSearchable()` /
   `syncRemoveFromSearch()` report index failures instead of failing the save (`scout:import` catches the index up).
+- Search is live everywhere. The marketplace box (`components/marketplace/LiveSearchInput.vue`) suggests as people type from
+  `/search/suggest` (`SearchSuggestions`: makes/models/places/lots from a small cached catalogue of what's on sale, plus cars from
+  `VehicleSearch`; `throttle:suggest`); the search page and `FiltersPanel live` apply typing and filter changes with partial reloads
+  (`only` the result props). Dealer lists use `composables/useLiveReload` (partial reloads, 250 ms pause). Wrap props a live reload
+  doesn't need in closures so they aren't computed; Filament tables and global search wait 250 ms.
 - Share previews: controllers pass `->withViewData(['meta' => [...]])`; `app.blade.php` renders
   the Open Graph tags on the server.
 - The buyer's location lives in localStorage (`useLocation`) and is only sent as query params

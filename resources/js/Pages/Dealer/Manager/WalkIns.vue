@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { useLiveReload } from '@/composables/useLiveReload';
 import Icon from '@/components/Icon.vue';
 import Pager from '@/components/manager/Pager.vue';
 import { interestBadge, type ManagerOptions, type Paginated, type StockCar, type WalkInRow } from '@/components/manager/types';
 import WalkInSheet from '@/components/manager/WalkInSheet.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{ walkIns: Paginated<WalkInRow>; filters: { q: string }; stock: StockCar[]; options: ManagerOptions }>();
@@ -15,11 +16,9 @@ const lot = computed(() => currentLot.value!);
 const adding = ref(false);
 const search = ref(props.filters.q);
 
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(search, () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => router.get(route('dealer.manager.walk-ins.index', lot.value.slug), { q: search.value || undefined }, { preserveState: true, replace: true }), 350);
-});
+const list = useLiveReload(() => route('dealer.manager.walk-ins.index', lot.value.slug), ['walkIns', 'filters']);
+const searching = list.searching;
+watch(search, () => list.later(() => ({ q: search.value.trim() || undefined })));
 </script>
 
 <template>
@@ -39,6 +38,7 @@ watch(search, () => {
             <span class="sr-only">Search walk-ins</span>
             <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
             <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
+                <Icon v-if="searching" name="refresh" class="absolute top-3.5 right-3 animate-spin text-muted" :size="16" aria-label="Searching" />
         </label>
 
         <div v-if="walkIns.data.length === 0" class="card flex flex-col items-center gap-3 px-6 py-12 text-center">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveReload } from '@/composables/useLiveReload';
 import Icon from '@/components/Icon.vue';
 import { useShared } from '@/composables/useShared';
 import DealerLayout from '@/layouts/DealerLayout.vue';
@@ -31,15 +32,11 @@ const search = ref(props.filters.q);
 const dragging = ref<LeadCard | null>(null);
 const over = ref<string | null>(null);
 
-function filter(next: Partial<{ q: string; who: string }>) {
-    router.get(route('dealer.leads.index', lot.value.slug), { q: search.value || undefined, who: props.filters.who === 'everyone' ? undefined : props.filters.who, ...next }, { preserveState: true, replace: true });
-}
-
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(search, () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => filter({}), 350);
-});
+const list = useLiveReload(() => route('dealer.leads.index', lot.value.slug), ['columns', 'lost', 'filters']);
+const searching = list.searching;
+const params = (next: Partial<{ q: string; who: string }>) => ({ q: search.value.trim() || undefined, who: props.filters.who === 'everyone' ? undefined : props.filters.who, ...next });
+const filter = (next: Partial<{ q: string; who: string }>) => list.now(params(next));
+watch(search, () => list.later(() => params({})));
 
 function drop(stage: string) {
     const lead = dragging.value;
@@ -74,6 +71,7 @@ const sourceTone: Record<string, string> = {
                     <span class="sr-only">Search leads</span>
                     <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
                     <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name, phone or car" />
+                <Icon v-if="searching" name="refresh" class="absolute top-3.5 right-3 animate-spin text-muted" :size="16" aria-label="Searching" />
                 </label>
                 <label>
                     <span class="sr-only">Whose leads</span>

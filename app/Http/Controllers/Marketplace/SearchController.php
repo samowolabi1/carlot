@@ -53,7 +53,7 @@ class SearchController extends Controller
             'banner' => AdServer::search($criteria),
             'filters' => $criteria->toArray(),
             'activeFilters' => $criteria->activeFilterCount(),
-            'options' => self::filterOptions(),
+            'options' => fn () => self::filterOptions(), // not reloaded by live search
             'landing' => null,
             'savedSearch' => $request->user() ? SavedSearches::matching($request->user(), $criteria) : null,
             ...$extra,

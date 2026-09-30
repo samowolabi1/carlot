@@ -36,8 +36,9 @@ class WalkInController extends Controller
         return Inertia::render('Dealer/Manager/WalkIns', [
             'walkIns' => $walkIns->through(fn (WalkIn $w) => Presenter::walkIn($w, $lot->timezone, $cars)),
             'filters' => ['q' => $filters['q'] ?? ''],
-            'stock' => Presenter::stock(),
-            'options' => Presenter::options(),
+            // Closures: skipped when a live search reloads only the list.
+            'stock' => fn () => Presenter::stock(),
+            'options' => fn () => Presenter::options(),
         ]);
     }
 

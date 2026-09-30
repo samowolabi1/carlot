@@ -112,7 +112,8 @@ class VehicleController extends Controller
                 'all' => (int) $counts->sum(),
                 ...collect(VehicleStatus::cases())->mapWithKeys(fn (VehicleStatus $s) => [$s->value => (int) ($counts[$s->value] ?? 0)]),
             ],
-            'stats' => [
+            // Closures: skipped when a live search reloads only the list.
+            'stats' => fn () => [
                 'sold_this_month' => Vehicle::where('status', VehicleStatus::Sold)->where('sold_at', '>=', now($lot->timezone)->startOfMonth()->utc())->count(),
                 'ageing' => Vehicle::where('status', VehicleStatus::Available)->where('listed_at', '<=', now()->subDays(Vehicle::AGEING_DAYS))->count(),
             ],

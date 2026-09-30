@@ -52,7 +52,7 @@ class CustomerController extends Controller
             ]),
             'filters' => ['q' => $filters['q'] ?? '', 'tag' => $filters['tag'] ?? null],
             'total' => LotCustomer::query()->count(),
-            'options' => Presenter::options(),
+            'options' => fn () => Presenter::options(),
         ]);
     }
 

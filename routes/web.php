@@ -73,6 +73,7 @@ use App\Http\Controllers\Marketplace\LotSiteController;
 use App\Http\Controllers\Marketplace\SavedSearchController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\SeoController;
+use App\Http\Controllers\Marketplace\SuggestController;
 use App\Http\Controllers\Orders\OrderTrackingController;
 use App\Http\Controllers\Sharing\ShareController;
 use App\Http\Controllers\Trust\IndependentInspectionController;
@@ -87,6 +88,7 @@ use Illuminate\Support\Facades\Route;
 // Marketplace (M4) and lot mini-sites (M6)
 Route::get('/', HomeController::class)->name('home');
 Route::get('/cars', SearchController::class)->middleware('throttle:browse')->name('cars.index');
+Route::get('/search/suggest', SuggestController::class)->middleware('throttle:suggest')->name('search.suggest');
 // SEO landing pages (M18): /cars/{city}, /cars/{make}/{model?}/{city?}
 Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(['first' => '[a-z0-9-]+', 'second' => '[a-z0-9-]+', 'third' => '[a-z0-9-]+'])->middleware('throttle:browse')->name('cars.landing');
 // Caddy on-demand TLS asks here before issuing a certificate for a lot's custom domain (M6).

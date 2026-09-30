@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveReload } from '@/composables/useLiveReload';
 import CarGlyph from '@/components/CarGlyph.vue';
 import SpotlightSheet from '@/components/billing/SpotlightSheet.vue';
 import Icon from '@/components/Icon.vue';
@@ -52,15 +53,11 @@ const tabs = computed(() => [
 const live = computed(() => props.counts.available + props.counts.reserved);
 const monthName = new Date().toLocaleDateString('en-GB', { month: 'long' });
 
-function filter(status: string | null) {
-    router.get(route('dealer.vehicles.index', lot.value.slug), { status: status ?? undefined, q: search.value || undefined }, { preserveState: true, preserveScroll: true });
-}
-
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(search, () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => filter(props.filters.status), 350);
-});
+const list = useLiveReload(() => route('dealer.vehicles.index', lot.value.slug), ['vehicles', 'filters', 'counts']);
+const searching = list.searching;
+const params = (status: string | null) => ({ status: status ?? undefined, q: search.value.trim() || undefined });
+const filter = (status: string | null) => list.now(params(status));
+watch(search, () => list.later(() => params(props.filters.status)));
 
 const badge: Record<Row['status'], string> = {
     available: 'bg-[#E3F1E8] text-success',
@@ -144,6 +141,7 @@ function editHref(row: Row) {
                 <span class="sr-only">Search stock</span>
                 <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
                 <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search make, model or VIN" />
+                <Icon v-if="searching" name="refresh" class="absolute top-3.5 right-3 animate-spin text-muted" :size="16" aria-label="Searching" />
             </label>
         </div>
 

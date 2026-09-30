@@ -4,13 +4,36 @@ import type { FilterOptions, Filters } from '@/components/marketplace/types';
 import { useLocation } from '@/composables/useLocation';
 import { useShared } from '@/composables/useShared';
 import { formatNaira, typedAmount } from '@/lib/format';
-import { reactive } from 'vue';
+import { onBeforeUnmount, reactive, watch } from 'vue';
 
-const props = defineProps<{ filters: Filters; options: FilterOptions }>();
+const props = defineProps<{ filters: Filters; options: FilterOptions; live?: boolean }>();
 const emit = defineEmits<{ apply: [filters: Filters]; clear: [] }>();
 
-// Plain copy: edits stay local until "Show cars".
-const state = reactive<Filters>(JSON.parse(JSON.stringify(props.filters)));
+// A plain copy. With `live`, every change applies after a short pause (typing a price doesn't send each digit);
+// without it, edits stay local until the form is submitted.
+const copy = (f: Filters): Filters => JSON.parse(JSON.stringify(f));
+const state = reactive<Filters>(copy(props.filters));
+
+let pause: ReturnType<typeof setTimeout> | undefined;
+watch(
+    state,
+    () => {
+        if (!props.live) return;
+        clearTimeout(pause);
+        if (JSON.stringify(state) === JSON.stringify(props.filters)) return;
+        pause = setTimeout(() => emit('apply', copy(state)), 350);
+    },
+    { deep: true },
+);
+// Filters changed elsewhere (a chip removed, "Clear all", back button): show them here too.
+watch(
+    () => props.filters,
+    (filters) => {
+        if (JSON.stringify(filters) !== JSON.stringify(state)) Object.assign(state, copy(filters));
+    },
+    { deep: true },
+);
+onBeforeUnmount(() => clearTimeout(pause));
 const { locate, locating, error: locationError } = useLocation();
 const { regions } = useShared();
 

@@ -139,6 +139,8 @@ class AppServiceProvider extends ServiceProvider
         // Search and SEO pages, per IP (TDD: 120/min). Raise BROWSE_RATE_LIMIT for a load test from one machine.
         RateLimiter::for('browse', fn (Request $request) => Limit::perMinute((int) config('lotlink.browse_rate_limit'))->by($request->ip()));
         RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        // Search-box suggestions fire as people type, so they get more room than page views.
+        RateLimiter::for('suggest', fn (Request $request) => Limit::perMinute(max(300, (int) config('lotlink.browse_rate_limit')))->by($request->ip()));
         // Mobile API: per signed-in user, else per address.
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute((int) config('lotlink.api_rate_limit', 120))->by($request->user('sanctum')?->getAuthIdentifier() ?? $request->ip()));
     }

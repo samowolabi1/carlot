@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LiveSearchInput from '@/components/marketplace/LiveSearchInput.vue';
 import SearchBanner from '@/components/marketplace/SearchBanner.vue';
 import type { AdBanner } from '@/lib/ads';
 import Icon from '@/components/Icon.vue';
@@ -13,7 +14,7 @@ import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { shortNaira } from '@/lib/finance';
 import { formatNaira } from '@/lib/format';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
 const props = defineProps<{
     results: { data: CarCardData[]; total: number; current_page: number; last_page: number; links: { url: string | null; label: string; active: boolean }[] };
@@ -56,12 +57,32 @@ const sorts = computed(() => [
     { value: 'mileage_asc', label: 'Lowest mileage' },
 ]);
 
-function go(filters: Partial<Filters>) {
-    sheetOpen.value = false;
-    router.get(route('cars.index'), toQuery({ ...filters }) as Record<string, string>, { preserveState: true, preserveScroll: false });
+// Live search: typing and every filter change refresh just the results (the rest of the page stays),
+// a newer change cancels the request still on its way, and the URL follows so it can be shared or saved.
+const RESULTS = ['results', 'sponsored', 'lotCount', 'banner', 'filters', 'activeFilters', 'savedSearch', 'landing'];
+const searching = ref(false);
+
+function go(filters: Partial<Filters>, closeSheet = true) {
+    if (closeSheet) sheetOpen.value = false;
+    router.get(route('cars.index'), toQuery({ ...filters }) as Record<string, string>, {
+        only: RESULTS,
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+        onStart: () => (searching.value = true),
+        onFinish: () => (searching.value = false),
+    });
 }
 
-const apply = (next: Partial<Filters>) => go({ ...props.filters, ...next, q: q.value || null });
+const apply = (next: Partial<Filters>, closeSheet = true) => go({ ...props.filters, ...next, q: q.value.trim() || null }, closeSheet);
+
+let typing: ReturnType<typeof setTimeout> | undefined;
+watch(q, (value) => {
+    clearTimeout(typing);
+    if (value.trim() === (props.filters.q ?? '')) return;
+    typing = setTimeout(() => apply({}, false), 300);
+});
+onBeforeUnmount(() => clearTimeout(typing));
 
 async function nearMe() {
     const here = await locate();
@@ -102,10 +123,11 @@ const heading = computed(() => {
         <div class="border-b border-line bg-white">
             <div class="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-4">
                 <form class="flex items-center gap-2" role="search" @submit.prevent="apply({})">
-                    <label class="flex h-11 grow items-center gap-2 rounded-xl bg-ivory px-3">
+                    <div class="relative flex h-11 grow items-center gap-2 rounded-xl bg-ivory px-3">
                         <Icon name="search" :size="18" class="text-muted" :stroke-width="2" />
-                        <input v-model="q" type="search" maxlength="80" class="w-full bg-transparent text-[15px] font-medium outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
-                    </label>
+                        <!-- Cars show live in the results below, so the list suggests makes, models, places and lots. -->
+                        <LiveSearchInput v-model="q" input-class="w-full bg-transparent text-[15px] font-medium outline-none" :with-cars="false" @submit="apply({})" />
+                    </div>
                     <button type="button" class="flex h-11 shrink-0 items-center rounded-xl border border-forest bg-white px-3 text-[14px] font-semibold text-forest lg:hidden" @click="sheetOpen = true">
                         Filters<template v-if="activeFilters"> · {{ activeFilters }}</template>
                     </button>
@@ -122,9 +144,9 @@ const heading = computed(() => {
         <div class="mx-auto flex max-w-6xl gap-8 px-5 py-4 lg:py-6">
             <aside class="hidden w-72 shrink-0 lg:block" aria-label="Filters">
                 <div class="sticky top-4 card p-4">
-                    <FiltersPanel :key="JSON.stringify(filters)" :filters="filters" :options="options" @apply="(f) => apply(f)">
+                    <FiltersPanel live :filters="filters" :options="options" @apply="(f) => apply(f, false)">
                         <template #actions>
-                            <button type="submit" class="btn btn-primary mt-2 w-full">Show cars</button>
+                            <button v-if="activeFilters" type="button" class="btn btn-outline mt-2 w-full" @click="apply(empty)">Clear all filters</button>
                         </template>
                     </FiltersPanel>
                 </div>
@@ -189,7 +211,7 @@ const heading = computed(() => {
                     </div>
                 </section>
 
-                <div v-if="results.data.length" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div v-if="results.data.length" class="grid gap-3 transition-opacity sm:grid-cols-2 xl:grid-cols-3" :class="{ 'opacity-60': searching }" :aria-busy="searching">
                     <template v-for="(car, i) in results.data" :key="car.ulid">
                         <CarCard :car="car" compare />
                         <!-- A lot's search banner after the sixth car (or at the end of a short list). -->
@@ -233,11 +255,14 @@ const heading = computed(() => {
                     <button type="button" class="flex h-11 w-11 items-center justify-center" aria-label="Close" @click="sheetOpen = false"><Icon name="close" :size="22" :stroke-width="2" /></button>
                 </div>
                 <div class="grow overflow-y-auto px-5 pb-28">
-                    <FiltersPanel :filters="filters" :options="options" @apply="(f) => apply(f)">
+                    <FiltersPanel live :filters="filters" :options="options" @apply="(f) => apply(f, false)">
                         <template #actions>
                             <div class="fixed inset-x-0 bottom-0 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-6">
-                                <button type="button" class="btn btn-outline h-[52px] rounded-[14px]" @click="apply(empty)">Clear all</button>
-                                <button type="submit" class="btn btn-primary h-[52px] grow rounded-[14px]">Show cars</button>
+                                <button type="button" class="btn btn-outline h-[52px] rounded-[14px]" @click="apply(empty, false)">Clear all</button>
+                                <!-- Results update behind the sheet as filters change; this just shows them. -->
+                                <button type="button" class="btn btn-primary h-[52px] grow rounded-[14px]" :aria-busy="searching" @click="sheetOpen = false">
+                                    {{ searching ? 'Updating…' : `Show ${results.total.toLocaleString('en-NG')} ${results.total === 1 ? 'car' : 'cars'}` }}
+                                </button>
                             </div>
                         </template>
                     </FiltersPanel>
