@@ -104,12 +104,12 @@ function submit() {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label class="field-label">
                     Name
-                    <input ref="nameInput" v-model="form.name" class="field" autocomplete="off" required maxlength="80" />
+                    <input v-field="'person_name'" ref="nameInput" v-model="form.name" class="field" autocomplete="off" required />
                     <InputError :message="form.errors.name" />
                 </label>
                 <label class="field-label">
                     Phone
-                    <input v-model="form.phone" class="field" type="tel" inputmode="tel" autocomplete="off" placeholder="0803 123 4567" required />
+                    <input v-field="'phone'" v-model="form.phone" class="field" type="tel" inputmode="tel" autocomplete="off" placeholder="0803 123 4567" required />
                     <InputError :message="form.errors.phone" />
                 </label>
             </div>
@@ -125,7 +125,7 @@ function submit() {
                     </span>
                 </div>
                 <div class="relative">
-                    <input id="car-search" v-model="carSearch" class="field" type="search" autocomplete="off" placeholder="Search your stock" />
+                    <input v-field="{ kind: 'text', max: 60 }" id="car-search" v-model="carSearch" class="field" type="search" autocomplete="off" placeholder="Search your stock" />
                     <ul v-if="matches.length" class="absolute inset-x-0 top-13 z-10 overflow-hidden rounded-xl border border-line bg-white shadow-lg">
                         <li v-for="car in matches" :key="car.ulid">
                             <button type="button" class="flex h-11 w-full items-center justify-between gap-2 px-3 text-left text-[14px] font-normal hover:bg-ivory" @click="pick(car)">
@@ -165,13 +165,13 @@ function submit() {
                 </label>
                 <label class="field-label">
                     Budget (₦, optional)
-                    <input v-model="form.budget_max" class="field" inputmode="numeric" placeholder="8,000,000" />
+                    <input v-field="{ kind: 'money', min: 0 }" v-model="form.budget_max" class="field" inputmode="numeric" placeholder="8,000,000" />
                 </label>
             </div>
 
             <label class="field-label">
                 Note
-                <textarea v-model="form.notes" class="field h-20 py-2.5" maxlength="1000" placeholder="Wants a 2015+ Camry, will bring spouse Saturday" />
+                <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.notes" class="field h-20 py-2.5" placeholder="Wants a 2015+ Camry, will bring spouse Saturday" />
             </label>
 
             <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl bg-ivory p-3 text-[14px]">

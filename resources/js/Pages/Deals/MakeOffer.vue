@@ -62,7 +62,7 @@ function submit() {
 
             <label class="flex flex-col gap-1.5 text-[13px] font-semibold">
                 Your offer
-                <input
+                <input v-field="'money'"
                     v-model="form.amount"
                     inputmode="numeric"
                     autocomplete="off"
@@ -108,7 +108,7 @@ function submit() {
 
             <label class="flex flex-col gap-1.5 text-[13px] font-semibold">
                 Message to the lot (optional)
-                <textarea v-model="form.message" rows="3" maxlength="500" class="field h-auto py-3 font-normal" placeholder="e.g. I can pay this week and would like to test drive first." />
+                <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.message" rows="3" class="field h-auto py-3 font-normal" placeholder="e.g. I can pay this week and would like to test drive first." />
                 <InputError :message="form.errors.message" />
             </label>
 

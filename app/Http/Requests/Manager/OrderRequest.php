@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use App\Domain\LotManager\Actions\SyncOfflineItems;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -18,7 +19,7 @@ class OrderRequest extends FormRequest
         // "₦12,500,000" → 12500000 (whole naira; stored in kobo)
         foreach (['agreed_price', 'discount', 'trade_in_value', 'deposit_required'] as $key) {
             if ($this->filled($key)) {
-                $this->merge([$key => preg_replace('/[^\d]/', '', (string) $this->input($key))]);
+                $this->merge([$key => Fields::cleanMoney($this->input($key))]);
             }
         }
     }

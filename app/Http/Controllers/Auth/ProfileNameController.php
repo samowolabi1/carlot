@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class ProfileNameController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $data = $request->validate(['name' => ['required', 'string', 'max:80']]);
+        $data = $request->validate(['name' => Fields::personName()]);
 
         $request->user()->update($data);
 

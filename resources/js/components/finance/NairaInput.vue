@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatNaira, parseAmount } from '@/lib/format';
+import { formatNaira, parseAmount, typedAmount } from '@/lib/format';
 import { ref, watch } from 'vue';
 
 // A money field that shows "₦1,300,000" while holding a plain number of naira.
@@ -13,7 +13,7 @@ watch(model, (value) => {
 });
 
 function onInput(e: Event) {
-    const value = parseAmount((e.target as HTMLInputElement).value) ?? 0;
+    const value = typedAmount((e.target as HTMLInputElement).value) ?? 0;
     model.value = value;
     text.value = value ? formatNaira(value) : '';
 }
@@ -22,6 +22,6 @@ function onInput(e: Event) {
 <template>
     <label class="field-label">
         {{ label }}
-        <input :id="id" :value="text" class="field" inputmode="numeric" autocomplete="off" placeholder="₦0" @input="onInput" />
+        <input v-field="{ kind: 'money', min: 0, max: 10000000000 }" :id="id" :value="text" class="field" inputmode="numeric" autocomplete="off" placeholder="₦0" @input="onInput" />
     </label>
 </template>

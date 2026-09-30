@@ -104,7 +104,7 @@ const goBack = () => window.history.back();
                 </label>
                 <label v-if="!models.length || form.vehicle_model_id === 'other'" class="field-label" :class="{ 'col-span-2': models.length }">
                     Model
-                    <input v-model="form.model_name" class="field" maxlength="60" required placeholder="e.g. Civic" />
+                    <input v-field="'model'" v-model="form.model_name" class="field" required placeholder="e.g. Civic" />
                     <InputError :message="form.errors.model_name" />
                 </label>
                 <label class="field-label">
@@ -117,7 +117,7 @@ const goBack = () => window.history.back();
                 </label>
                 <label class="field-label">
                     Mileage (km)
-                    <input v-model="form.mileage_km" class="field" inputmode="numeric" required placeholder="118,000" />
+                    <input v-field="{ kind: 'count', min: 0, max: 2000000 }" v-model="form.mileage_km" class="field" inputmode="numeric" required placeholder="118,000" />
                     <InputError :message="form.errors.mileage_km" />
                 </label>
             </div>
@@ -149,7 +149,7 @@ const goBack = () => window.history.back();
 
             <label class="field-label">
                 Anything the lot should know?
-                <textarea v-model="form.notes" rows="3" maxlength="1000" class="field h-auto py-3 font-normal" placeholder="e.g. AC recently serviced. Papers up to date." />
+                <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.notes" rows="3" class="field h-auto py-3 font-normal" placeholder="e.g. AC recently serviced. Papers up to date." />
             </label>
 
             <label v-if="car" class="flex min-h-11 items-center gap-2.5 text-[14px]">

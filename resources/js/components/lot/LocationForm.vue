@@ -47,12 +47,12 @@ function submit() {
         <div class="grid gap-3 md:grid-cols-[2fr_1fr_1fr]">
             <label class="field-label">
                 Street address
-                <input v-model="form.address" class="field" required maxlength="255" autocomplete="street-address" placeholder="e.g. 12 Allen Avenue" />
+                <input v-field="{ kind: 'text', min: 5, max: 255 }" v-model="form.address" class="field" required autocomplete="street-address" placeholder="e.g. 12 Allen Avenue" />
                 <InputError :message="form.errors.address" />
             </label>
             <label class="field-label">
                 Area / city
-                <input v-model="form.city" class="field" required maxlength="80" placeholder="Ikeja" />
+                <input v-field="'place'" v-model="form.city" class="field" required placeholder="Ikeja" />
                 <InputError :message="form.errors.city" />
             </label>
             <label class="field-label">
@@ -66,7 +66,7 @@ function submit() {
         </div>
         <label class="field-label">
             Landmark buyers will recognise
-            <input v-model="form.landmark" class="field" maxlength="255" placeholder="e.g. Opposite the big church, after the filling station" />
+            <input v-field="{ kind: 'text', max: 255 }" v-model="form.landmark" class="field" placeholder="e.g. Opposite the big church, after the filling station" />
             <InputError :message="form.errors.landmark" />
         </label>
 

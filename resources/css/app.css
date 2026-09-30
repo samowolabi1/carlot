@@ -86,3 +86,13 @@
 @utility field-label {
     @apply flex flex-col gap-1.5 text-[13px] font-semibold;
 }
+
+/* v-field marks a value that doesn't fit its field (directives/field.ts) once the person has typed and moved on. */
+[aria-invalid='true'],
+[aria-invalid=''] {
+    border-color: var(--color-danger);
+}
+[aria-invalid='true']:focus,
+[aria-invalid='']:focus {
+    --tw-ring-color: color-mix(in oklab, var(--color-danger) 15%, transparent);
+}

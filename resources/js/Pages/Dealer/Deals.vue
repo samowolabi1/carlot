@@ -232,8 +232,8 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                 </article>
                 <p v-if="o.message" class="-mt-1.5 px-1 text-[13px] text-muted">{{ o.buyer }}: “{{ o.message }}”</p>
                 <form v-if="countering === o.ulid" class="card flex flex-col gap-3 p-4 md:flex-row md:items-end" @submit.prevent="sendCounter(o)">
-                    <label class="field-label md:w-48">Your counter<input v-model="counter.counter_amount" class="field" inputmode="numeric" required /></label>
-                    <label class="field-label grow">Message (optional)<input v-model="counter.message" class="field" maxlength="500" placeholder="e.g. We can include a full service at this price." /></label>
+                    <label class="field-label md:w-48">Your counter<input v-field="'money'" v-model="counter.counter_amount" class="field" inputmode="numeric" required /></label>
+                    <label class="field-label grow">Message (optional)<input v-field="{ kind: 'text', max: 500 }" v-model="counter.message" class="field" placeholder="e.g. We can include a full service at this price." /></label>
                     <div class="flex gap-2">
                         <button type="submit" :class="btnDark" class="h-12" :disabled="counter.processing">Send counter</button>
                         <button type="button" :class="btn" class="h-12" @click="countering = null">Cancel</button>
@@ -268,13 +268,13 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                         <template v-if="t.status !== 'accepted'">
                             <div class="flex flex-wrap items-center gap-2">
                                 <label class="sr-only" :for="`low-${t.ulid}`">Low estimate</label>
-                                <input :id="`low-${t.ulid}`" v-model="estimates[t.ulid].low" inputmode="numeric" placeholder="Low" class="field h-10 w-32 text-[14px]" />
+                                <input v-field="'money'" :id="`low-${t.ulid}`" v-model="estimates[t.ulid].low" inputmode="numeric" placeholder="Low" class="field h-10 w-32 text-[14px]" />
                                 <span aria-hidden="true">–</span>
                                 <label class="sr-only" :for="`high-${t.ulid}`">High estimate</label>
-                                <input :id="`high-${t.ulid}`" v-model="estimates[t.ulid].high" inputmode="numeric" placeholder="High" class="field h-10 w-32 text-[14px]" />
+                                <input v-field="'money'" :id="`high-${t.ulid}`" v-model="estimates[t.ulid].high" inputmode="numeric" placeholder="High" class="field h-10 w-32 text-[14px]" />
                                 <button type="button" :class="btnDark" :disabled="valuing === t.ulid" @click="sendValuation(t)">{{ t.status === 'valued' ? 'Update' : 'Send' }}</button>
                             </div>
-                            <input v-model="estimates[t.ulid].note" maxlength="500" class="field h-10 text-[14px]" placeholder="Note to the buyer (optional), e.g. subject to inspection" />
+                            <input v-field="{ kind: 'text', max: 500 }" v-model="estimates[t.ulid].note" class="field h-10 text-[14px]" placeholder="Note to the buyer (optional), e.g. subject to inspection" />
                             <InputError :message="valuationErrors[t.ulid]" />
                         </template>
                         <span v-else class="text-[14px]">The buyer wants to use it at <strong>{{ t.estimate }}</strong>. Add it to their order.</span>

@@ -7,6 +7,7 @@ use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Admin\Impersonation;
 use App\Domain\Push\Models\PushSubscription;
+use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -39,7 +40,7 @@ class OtpLoginController extends Controller
         $method = $request->input('method') === 'email' ? 'email' : 'whatsapp';
 
         if ($method === 'email') {
-            $email = Str::lower(trim((string) $request->validate(['email' => ['required', 'email:rfc', 'max:190']])['email']));
+            $email = Str::lower(trim((string) $request->validate(['email' => Fields::email()])['email']));
 
             try {
                 $sendOtp->toEmail($email);
@@ -52,7 +53,7 @@ class OtpLoginController extends Controller
             return redirect()->route('login.verify');
         }
 
-        $request->validate(['phone' => ['required', 'string', 'max:32']]);
+        $request->validate(['phone' => Fields::phone()]);
 
         try {
             $phone = PhoneNumber::normalize($request->string('phone'));

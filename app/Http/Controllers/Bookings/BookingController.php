@@ -9,6 +9,7 @@ use App\Domain\Appointments\Support\SlotGenerator;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\JsonResponse;
@@ -50,10 +51,10 @@ class BookingController extends Controller
     public function store(Request $request, BookAppointment $book): RedirectResponse
     {
         $data = $request->validate([
-            'lot' => ['required', 'string'],
+            'lot' => ['required', 'string', 'max:120'],
             'type' => ['required', Rule::enum(AppointmentType::class)],
             'starts_at' => ['required', 'date'],
-            'vehicle' => ['nullable', 'string', 'size:26'],
+            'vehicle' => Fields::ulid(required: false),
             'notes' => ['nullable', 'string', 'max:500'],
             'whatsapp_reminders' => ['boolean'],
         ]);

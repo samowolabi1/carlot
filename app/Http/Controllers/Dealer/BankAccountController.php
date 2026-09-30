@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dealer;
 use App\Domain\Lots\Actions\SaveBankAccount;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotBankAccount;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,10 +45,10 @@ class BankAccountController extends Controller
         $request->merge(['account_number' => preg_replace('/\D/', '', (string) $request->input('account_number'))]);
 
         $data = $request->validate([
-            'bank_name' => ['required', 'string', 'max:80'],
+            'bank_name' => Fields::businessName(max: 80),
             'account_number' => ['required', 'regex:'.config('lotlink.bank_account_pattern', '/^\d{10}$/'),
                 Rule::unique('lot_bank_accounts')->where('lot_id', $lot->id)->where('bank_name', (string) $request->input('bank_name'))->ignore($current?->id)],
-            'account_name' => ['required', 'string', 'min:3', 'max:120'],
+            'account_name' => Fields::businessName(),
             'is_default' => ['boolean'],
         ], [
             'account_number.regex' => 'Enter the 10-digit account number (NUBAN).',

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use App\Domain\LotManager\Actions\SyncOfflineItems;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -11,6 +12,13 @@ class WalkInRequest extends FormRequest
     public function authorize(): bool
     {
         return true; // Any member of the lot (lot.member middleware).
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('budget_max')) {
+            $this->merge(['budget_max' => Fields::cleanMoney($this->input('budget_max'))]);
+        }
     }
 
     /** @return array<string, mixed> */

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Dealer;
 
+use App\Domain\Support\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class VehiclePriceRequest extends FormRequest
@@ -14,7 +15,7 @@ class VehiclePriceRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // "₦12,500,000" or "12500000" → 12500000
-        $this->merge(['price' => preg_replace('/[^\d]/', '', (string) $this->input('price'))]);
+        $this->merge(['price' => Fields::cleanMoney($this->input('price'))]);
     }
 
     /** @return array<string, mixed> */
@@ -22,7 +23,7 @@ class VehiclePriceRequest extends FormRequest
     {
         return [
             // Whole naira; stored in kobo.
-            'price' => ['required', 'integer', 'min:10000', 'max:5000000000'],
+            'price' => Fields::money(min: 10000),
             'negotiable' => ['boolean'],
             'publish' => ['sometimes', 'boolean'],
         ];

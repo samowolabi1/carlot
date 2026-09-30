@@ -42,13 +42,13 @@ class PlanResource extends Resource
             Forms\Components\TextInput::make('price')->label('Price a month (₦)')->disabled()->dehydrated(false)
                 ->formatStateUsing(fn (?int $state) => $state !== null ? number_format(intdiv($state, 100)) : '0')
                 ->helperText('Use "Change price" on the plans list: it updates Paystack and Flutterwave and lets you choose who pays the new price.'),
-            Forms\Components\TextInput::make('listing_limit')->numeric()->minValue(1)->helperText('Empty for unlimited'),
-            Forms\Components\TextInput::make('staff_limit')->numeric()->minValue(1)->helperText('Empty for unlimited'),
-            Forms\Components\TextInput::make('free_spotlights')->numeric()->minValue(0)->required()->label('Free car spotlights a month'),
+            Forms\Components\TextInput::make('listing_limit')->numeric()->integer()->minValue(1)->maxValue(100_000)->helperText('Empty for unlimited'),
+            Forms\Components\TextInput::make('staff_limit')->numeric()->integer()->minValue(1)->maxValue(1_000)->helperText('Empty for unlimited'),
+            Forms\Components\TextInput::make('free_spotlights')->numeric()->integer()->minValue(0)->maxValue(100)->required()->label('Free car spotlights a month'),
             Forms\Components\Toggle::make('self_serve')->label('Owners can buy it in the app')->helperText('Off shows "Talk to us"'),
-            Forms\Components\TextInput::make('provider_plan_code')->label('Paystack plan code')->placeholder('PLN_...')
+            Forms\Components\TextInput::make('provider_plan_code')->label('Paystack plan code')->maxLength(64)->alphaDash()->placeholder('PLN_...')
                 ->helperText('Makes the plan renew monthly with Paystack. Use "Create on Paystack" on the list to make one.'),
-            Forms\Components\TextInput::make('flutterwave_plan_id')->label('Flutterwave payment plan id')->placeholder('123456')
+            Forms\Components\TextInput::make('flutterwave_plan_id')->label('Flutterwave payment plan id')->maxLength(20)->regex('/^\d+$/')->placeholder('123456')
                 ->helperText('Makes the plan renew monthly with Flutterwave. Use "Create on Flutterwave" on the list.'),
             Forms\Components\KeyValue::make('features')->helperText('e.g. open_orders = 10, share_cards = 0/1'),
         ]);

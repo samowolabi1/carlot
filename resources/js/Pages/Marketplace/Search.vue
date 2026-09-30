@@ -104,7 +104,7 @@ const heading = computed(() => {
                 <form class="flex items-center gap-2" role="search" @submit.prevent="apply({})">
                     <label class="flex h-11 grow items-center gap-2 rounded-xl bg-ivory px-3">
                         <Icon name="search" :size="18" class="text-muted" :stroke-width="2" />
-                        <input v-model="q" type="search" class="w-full bg-transparent text-[15px] font-medium outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
+                        <input v-model="q" type="search" maxlength="80" class="w-full bg-transparent text-[15px] font-medium outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
                     </label>
                     <button type="button" class="flex h-11 shrink-0 items-center rounded-xl border border-forest bg-white px-3 text-[14px] font-semibold text-forest lg:hidden" @click="sheetOpen = true">
                         Filters<template v-if="activeFilters"> · {{ activeFilters }}</template>

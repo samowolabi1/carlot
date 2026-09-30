@@ -119,7 +119,7 @@ const tone: Record<string, string> = {
         <form v-if="ticket.can_reply" class="card flex max-w-3xl flex-col gap-3 p-4" @submit.prevent="send">
             <label class="field-label">
                 {{ ticket.status === 'resolved' ? 'Still need help? Reply to reopen it' : 'Reply' }}
-                <textarea v-model="form.body" rows="4" maxlength="5000" class="field h-auto py-2.5" placeholder="Write to LotLink Support" required />
+                <textarea v-field="{ kind: 'text', max: 5000 }" v-model="form.body" rows="4" class="field h-auto py-2.5" placeholder="Write to LotLink Support" required />
                 <InputError :message="form.errors.body" />
             </label>
             <input ref="file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only" tabindex="-1" aria-hidden="true" @change="pick" />

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Dealer;
 
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -21,12 +22,12 @@ class LotProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:80'],
-            'tagline' => ['nullable', 'string', 'max:120'],
-            'about' => ['nullable', 'string', 'max:2000'],
-            'phone' => ['required', 'string', 'max:32'],
-            'whatsapp' => ['nullable', 'string', 'max:32'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'name' => Fields::businessName(max: 80),
+            'tagline' => Fields::text(120),
+            'about' => Fields::text(2000),
+            'phone' => Fields::phone(),
+            'whatsapp' => Fields::phone(required: false),
+            'email' => Fields::email(required: false),
         ];
     }
 

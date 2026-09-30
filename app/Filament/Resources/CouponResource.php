@@ -56,7 +56,7 @@ class CouponResource extends Resource
                 Forms\Components\Select::make('plan_id')->label('Trial on plan')->relationship('plan', 'name')->required(),
                 Forms\Components\TextInput::make('trial_days')->label('Free days')->numeric()->integer()->minValue(1)->maxValue(365)->required()->default(90)
                     ->helperText('Changing this only affects lots that use the code from now on.'),
-                Forms\Components\TextInput::make('max_redemptions')->label('How many lots can use it')->numeric()->integer()
+                Forms\Components\TextInput::make('max_redemptions')->label('How many lots can use it')->numeric()->integer()->maxValue(1_000_000)
                     ->minValue(fn (?Coupon $record) => max(1, (int) $record?->redeemed))
                     ->helperText(fn (?Coupon $record) => 'Empty for no limit.'.($record && $record->redeemed ? " Used {$record->redeemed} so far." : '')),
                 Forms\Components\DateTimePicker::make('expires_at')->label('Stops working on')->seconds(false)

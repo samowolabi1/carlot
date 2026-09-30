@@ -9,6 +9,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Inventory\Models\VehicleMedia;
 use App\Domain\Inventory\Support\MediaUploads;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VehicleResource;
 use Illuminate\Http\JsonResponse;
@@ -54,7 +55,7 @@ class VehicleMediaController extends Controller
         abort_if($uploads->isDirect(), 404);
 
         $request->validate([
-            'key' => ['required', 'string'],
+            'key' => ['required', 'string', 'max:255'],
             'file' => ['required', 'file', 'mimetypes:'.implode(',', array_keys(MediaUploads::MIME_TYPES)), 'max:'.(MediaUploads::MAX_BYTES / 1024)],
         ], ['file.max' => 'Photos can be up to 12 MB.', 'file.mimetypes' => 'Use JPEG, PNG or WebP photos.']);
 
@@ -70,7 +71,7 @@ class VehicleMediaController extends Controller
     {
         Gate::authorize('update', $vehicle);
 
-        $data = $request->validate(['key' => ['required', 'string']]);
+        $data = $request->validate(['key' => ['required', 'string', 'max:255']]);
         $media = $attach->run($vehicle, $data['key']);
 
         return response()->json(VehicleResource::media($media->refresh()), 201);
@@ -80,7 +81,7 @@ class VehicleMediaController extends Controller
     {
         Gate::authorize('update', $vehicle);
 
-        $data = $request->validate(['order' => ['required', 'array'], 'order.*' => ['string']]);
+        $data = $request->validate(['order' => ['required', 'array', 'max:'.Vehicle::MAX_PHOTOS], 'order.*' => Fields::ulid()]);
         $arrange->reorder($vehicle, array_values($data['order']));
 
         return response()->json(['ok' => true]);

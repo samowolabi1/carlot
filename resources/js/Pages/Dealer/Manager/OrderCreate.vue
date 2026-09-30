@@ -123,7 +123,7 @@ function submit() {
                         <label class="relative">
                             <span class="sr-only">Search customers</span>
                             <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
-                            <input v-model="customerSearch" type="search" class="field pl-10" placeholder="Search name or phone" />
+                            <input v-field="{ kind: 'text', max: 60 }" v-model="customerSearch" type="search" class="field pl-10" placeholder="Search name or phone" />
                         </label>
                         <ul class="divide-y divide-divider rounded-xl border border-line">
                             <li v-for="c in customerMatches" :key="c.ulid">
@@ -139,8 +139,8 @@ function submit() {
 
                 <template v-else>
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <label class="field-label">Name<input v-model="form.name" class="field" required /><InputError :message="form.errors.name" /></label>
-                        <label class="field-label">Phone<input v-model="form.phone" class="field" type="tel" inputmode="tel" required /><InputError :message="form.errors.phone" /></label>
+                        <label class="field-label">Name<input v-field="'person_name'" v-model="form.name" class="field" required /><InputError :message="form.errors.name" /></label>
+                        <label class="field-label">Phone<input v-field="'phone'" v-model="form.phone" class="field" type="tel" inputmode="tel" required /><InputError :message="form.errors.phone" /></label>
                     </div>
                     <label class="flex min-h-11 items-center gap-3 text-[14px]">
                         <input v-model="form.consent_whatsapp" type="checkbox" class="h-5 w-5 accent-forest" /> They agreed to receipts and updates on WhatsApp
@@ -151,9 +151,9 @@ function submit() {
             <section class="card flex flex-col gap-3 p-5">
                 <h2 class="font-sans text-[16px] font-bold">Price</h2>
                 <div class="grid gap-3 sm:grid-cols-3">
-                    <label class="field-label">Agreed price<input v-model="form.agreed_price" class="field" inputmode="numeric" required /><InputError :message="form.errors.agreed_price" /></label>
-                    <label class="field-label">Discount<input v-model="form.discount" class="field" inputmode="numeric" placeholder="₦0" /><InputError :message="form.errors.discount" /></label>
-                    <label class="field-label">Deposit needed<input v-model="form.deposit_required" class="field" inputmode="numeric" placeholder="Optional" /></label>
+                    <label class="field-label">Agreed price<input v-field="'money'" v-model="form.agreed_price" class="field" inputmode="numeric" required /><InputError :message="form.errors.agreed_price" /></label>
+                    <label class="field-label">Discount<input v-field="{ kind: 'money', min: 0 }" v-model="form.discount" class="field" inputmode="numeric" placeholder="₦0" /><InputError :message="form.errors.discount" /></label>
+                    <label class="field-label">Deposit needed<input v-field="{ kind: 'money', min: 0 }" v-model="form.deposit_required" class="field" inputmode="numeric" placeholder="Optional" /></label>
                 </div>
                 <p class="text-[14px]">
                     Customer pays <strong class="font-display text-[18px] text-forest">{{ formatNaira(total) }}</strong>
@@ -168,10 +168,10 @@ function submit() {
                         </select>
                         <InputError :message="form.errors.trade_in" />
                     </label>
-                    <label v-if="form.trade_in" class="field-label">Trade-in value<input v-model="form.trade_in_value" class="field" inputmode="numeric" /><InputError :message="form.errors.trade_in_value" /></label>
+                    <label v-if="form.trade_in" class="field-label">Trade-in value<input v-field="{ kind: 'money', min: 0 }" v-model="form.trade_in_value" class="field" inputmode="numeric" /><InputError :message="form.errors.trade_in_value" /></label>
                 </div>
                 <p class="text-[13px] text-muted">Instalment plans arrive with Lot Manager Pro.</p>
-                <label class="field-label">Notes<textarea v-model="form.notes" class="field h-20 py-2.5" maxlength="1000" /></label>
+                <label class="field-label">Notes<textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.notes" class="field h-20 py-2.5" /></label>
             </section>
 
             <div class="flex gap-3">

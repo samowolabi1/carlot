@@ -70,7 +70,7 @@ const chips = computed(() => [
             <form class="flex max-w-xl gap-2" role="search" @submit.prevent="search">
                 <label class="flex h-[52px] grow items-center gap-2.5 rounded-[14px] border border-line bg-white px-4">
                     <Icon name="search" :stroke-width="2" class="text-muted" />
-                    <input v-model="q" type="search" class="w-full bg-transparent text-[15px] outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
+                    <input v-model="q" type="search" maxlength="80" class="w-full bg-transparent text-[15px] outline-none" placeholder="Search make, model or lot" aria-label="Search cars" enterkeyhint="search" />
                 </label>
                 <Link :href="route('cars.index')" aria-label="All filters" class="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[14px] bg-forest text-white hover:text-white">
                     <Icon name="filters" :stroke-width="2" />

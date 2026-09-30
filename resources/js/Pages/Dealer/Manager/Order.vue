@@ -259,7 +259,7 @@ async function copyLink() {
                     <form v-if="voiding" class="flex flex-col gap-2 border-t border-divider bg-ivory p-4" @submit.prevent="voidPayment">
                         <label class="field-label">
                             Why void receipt {{ voiding.receipt_no }}?
-                            <input v-model="voidForm.reason" class="field" required maxlength="200" placeholder="Entered twice" />
+                            <input v-field="{ kind: 'text', max: 200 }" v-model="voidForm.reason" class="field" required placeholder="Entered twice" />
                             <InputError :message="voidForm.errors.reason" />
                         </label>
                         <div class="flex gap-2">
@@ -331,7 +331,7 @@ async function copyLink() {
                     <h2 id="pay-heading" class="font-sans text-[16px] font-bold">Record a payment</h2>
                     <p v-if="queued" class="rounded-xl bg-cream px-3 py-2.5 text-[14px] text-clay-dark" role="status">{{ queued }}</p>
                     <form class="flex flex-col gap-3" @submit.prevent="recordPayment">
-                        <label class="field-label">Amount<input v-model="pay.amount" class="field" inputmode="numeric" required /><InputError :message="pay.errors.amount" /></label>
+                        <label class="field-label">Amount<input v-field="'money'" v-model="pay.amount" class="field" inputmode="numeric" required /><InputError :message="pay.errors.amount" /></label>
                         <fieldset>
                             <legend class="mb-1.5 text-[13px] font-semibold">Method</legend>
                             <div class="grid grid-cols-2 gap-1.5">
@@ -341,7 +341,7 @@ async function copyLink() {
                             </div>
                             <InputError :message="pay.errors.method" />
                         </fieldset>
-                        <label class="field-label">Reference (optional)<input v-model="pay.reference" class="field" maxlength="64" placeholder="Transfer or POS reference" /></label>
+                        <label class="field-label">Reference (optional)<input v-field="'reference'" v-model="pay.reference" class="field" placeholder="Transfer or POS reference" /></label>
                         <button type="submit" class="btn btn-primary" :disabled="pay.processing">{{ pay.processing ? 'Saving…' : 'Save and send receipt' }}</button>
                         <p class="text-[13px] text-muted">
                             {{ customer?.consent_whatsapp ? 'The receipt goes to the customer on WhatsApp.' : 'The customer has not agreed to WhatsApp, so share the receipt yourself.' }}
@@ -373,7 +373,7 @@ async function copyLink() {
                         </li>
                     </ul>
                     <form v-if="order.open" class="flex gap-2" @submit.prevent="addDocument">
-                        <label class="grow"><span class="sr-only">Another item</span><input v-model="extra.label" class="field h-11" maxlength="80" placeholder="Another item, e.g. service book" /></label>
+                        <label class="grow"><span class="sr-only">Another item</span><input v-field="{ kind: 'text', min: 2, max: 80 }" v-model="extra.label" class="field h-11" placeholder="Another item, e.g. service book" /></label>
                         <button type="submit" class="btn btn-outline h-11 text-[14px]" :disabled="!extra.label || extra.processing">Add</button>
                     </form>
                     <p v-if="can.papers && missingPapers.length" class="text-[13px] text-muted">Papers are ready once these are in: {{ missingPapers.join(', ') }}.</p>
@@ -386,7 +386,7 @@ async function copyLink() {
                     <form v-if="overriding && isOwner && order.balance_minor > 0" class="flex flex-col gap-2 rounded-xl bg-cream p-3" @submit.prevent="setStatus('delivered')">
                         <label class="field-label">
                             {{ order.balance }} is still owed. Why hand over now?
-                            <input v-model="status.override_reason" class="field" required maxlength="200" placeholder="Balance by transfer on Friday" />
+                            <input v-field="{ kind: 'text', max: 200 }" v-model="status.override_reason" class="field" required placeholder="Balance by transfer on Friday" />
                             <InputError :message="status.errors.override_reason" />
                         </label>
                         <p class="text-[12px] text-muted">This is recorded in the audit log.</p>
@@ -421,7 +421,7 @@ async function copyLink() {
                 <section v-if="can.cancel" class="card p-5">
                     <button v-if="!cancelling" type="button" class="h-11 text-[14px] font-semibold text-clay" @click="cancelling = true">Cancel this order</button>
                     <form v-else class="flex flex-col gap-3" @submit.prevent="cancelOrder">
-                        <label class="field-label">Reason<input v-model="cancelForm.reason" class="field" required maxlength="200" /><InputError :message="cancelForm.errors.reason" /></label>
+                        <label class="field-label">Reason<input v-field="{ kind: 'text', max: 200 }" v-model="cancelForm.reason" class="field" required /><InputError :message="cancelForm.errors.reason" /></label>
                         <fieldset v-if="hasPayments" class="flex flex-col gap-2">
                             <legend class="mb-1 text-[13px] font-semibold">The customer has paid {{ order.paid }}</legend>
                             <label class="flex min-h-11 items-center gap-3 text-[14px]"><input v-model="cancelForm.money" type="radio" value="refund" class="h-5 w-5 accent-forest" /> Refund it</label>

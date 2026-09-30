@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Dealer;
 
+use App\Domain\Support\Fields;
 use App\Domain\Support\Regions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,9 +26,9 @@ class LotLocationRequest extends FormRequest
         return [
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
-            'address' => ['required', 'string', 'max:255'],
-            'landmark' => ['nullable', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:80'],
+            'address' => Fields::text(255, required: true, min: 5),
+            'landmark' => Fields::text(255),
+            'city' => Fields::place(),
             'state' => ['required', Rule::in(Regions::all())],
         ];
     }

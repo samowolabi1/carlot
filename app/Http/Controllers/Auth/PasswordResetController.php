@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Domain\Accounts\Actions\SetPassword;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,7 +32,7 @@ class PasswordResetController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $email = Str::lower(trim((string) $request->validate(['email' => ['required', 'email:rfc', 'max:190']])['email']));
+        $email = Str::lower(trim((string) $request->validate(['email' => Fields::email()])['email']));
 
         $status = Password::sendResetLink(['email' => $email]);
 
@@ -53,9 +53,9 @@ class PasswordResetController extends Controller
     public function update(Request $request, SetPassword $setPassword): RedirectResponse
     {
         $data = $request->validate([
-            'token' => ['required', 'string'],
-            'email' => ['required', 'email:rfc', 'max:190'],
-            'password' => ['required', 'string', 'max:200', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
+            'token' => ['required', 'string', 'max:255'],
+            'email' => Fields::email(),
+            'password' => Fields::newPassword(),
         ]);
 
         $user = null;

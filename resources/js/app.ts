@@ -6,6 +6,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { listenForInstall } from './composables/usePwaInstall';
+import { field } from './directives/field';
 import { registerServiceWorker } from './lib/pwa';
 
 const appName = import.meta.env.VITE_APP_NAME || 'LotLink';
@@ -17,6 +18,7 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .directive('field', field)
             .mount(el);
     },
     progress: {

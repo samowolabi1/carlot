@@ -41,7 +41,7 @@ const toggle =
 
         <label class="field-label">
             Reservation deposit
-            <input v-model="form.reservation_deposit" class="field md:w-64" inputmode="numeric" placeholder="Off" />
+            <input v-field="{ kind: 'money', min: 1000, max: 50000000 }" v-model="form.reservation_deposit" class="field md:w-64" inputmode="numeric" placeholder="Off" />
             <span class="font-normal text-muted">
                 Buyers transfer this straight to your bank account to hold a car for 24, 48 or 72 hours; you confirm it when it lands, and it counts towards the price.
                 LotLink never handles the money. Leave empty to turn reservations off.

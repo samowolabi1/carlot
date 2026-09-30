@@ -25,18 +25,18 @@ function submit() {
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <label v-if="!props.email" class="field-label">
                 Email address
-                <input v-model="form.email" type="email" autocomplete="email" required class="field" />
+                <input v-field="'email'" v-model="form.email" type="email" autocomplete="email" required class="field" />
             </label>
             <InputError :message="form.errors.email" />
             <label class="field-label">
                 New password
-                <input v-model="form.password" :type="show ? 'text' : 'password'" autocomplete="new-password" required minlength="8" autofocus class="field" />
+                <input v-field="'new_password'" v-model="form.password" :type="show ? 'text' : 'password'" autocomplete="new-password" required minlength="8" autofocus class="field" />
                 <span class="font-normal text-muted">At least 8 characters, with letters and numbers.</span>
                 <InputError :message="form.errors.password" />
             </label>
             <label class="field-label">
                 Type it again
-                <input v-model="form.password_confirmation" :type="show ? 'text' : 'password'" autocomplete="new-password" required class="field" />
+                <input v-field="{ kind: 'text', max: 72 }" v-model="form.password_confirmation" :type="show ? 'text' : 'password'" autocomplete="new-password" required class="field" />
             </label>
             <label class="flex min-h-11 cursor-pointer items-center gap-3 text-[14px]"><input v-model="show" type="checkbox" class="h-5 w-5 accent-forest" />Show passwords</label>
             <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ form.processing ? 'Saving…' : 'Save and sign in' }}</button>

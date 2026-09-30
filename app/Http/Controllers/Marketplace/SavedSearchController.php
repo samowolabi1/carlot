@@ -16,7 +16,7 @@ class SavedSearchController extends Controller
     public function store(Request $request, SaveSearch $save): RedirectResponse
     {
         $data = $request->validate([
-            'filters' => ['required', 'array'],
+            'filters' => ['required', 'array', 'max:20'],
             'channel' => ['nullable', Rule::in(array_keys(SavedSearch::CHANNELS))],
         ]);
 

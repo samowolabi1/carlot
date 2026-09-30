@@ -7,6 +7,7 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Admin\Impersonation;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\UserResource\Pages;
+use App\Rules\FieldPattern;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -48,9 +49,9 @@ class UserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('name')->maxLength(80),
+            Forms\Components\TextInput::make('name')->maxLength(80)->rules(['nullable', new FieldPattern('person_name')]),
             Forms\Components\TextInput::make('phone')->disabled(),
-            Forms\Components\TextInput::make('email')->email()->maxLength(255),
+            Forms\Components\TextInput::make('email')->email()->rule('email:rfc,strict')->maxLength(190),
             Forms\Components\Select::make('role')
                 ->options(collect(UserRole::cases())->mapWithKeys(fn ($r) => [$r->value => ucfirst($r->value)]))
                 ->required(),

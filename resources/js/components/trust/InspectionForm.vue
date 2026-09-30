@@ -114,7 +114,7 @@ function submit() {
                         <div class="flex flex-wrap items-start gap-2">
                             <label class="grow">
                                 <span class="sr-only">What's wrong with {{ item.label.toLowerCase() }}</span>
-                                <input v-model="form.checklist[item.key].note" class="field h-11" maxlength="200" :placeholder="form.checklist[item.key].status === 'fail' ? 'What failed? (required)' : 'Note for buyers (optional)'" />
+                                <input v-field="{ kind: 'text', max: 200 }" v-model="form.checklist[item.key].note" class="field h-11" :placeholder="form.checklist[item.key].status === 'fail' ? 'What failed? (required)' : 'Note for buyers (optional)'" />
                             </label>
                             <label v-if="photoCount < maxPhotos" class="btn btn-outline h-11 cursor-pointer px-3 text-[13px]">
                                 <Icon name="camera" :size="18" /> Photo
@@ -138,12 +138,12 @@ function submit() {
         <div class="card flex flex-col gap-4 p-4">
             <label class="field-label">
                 Summary for buyers <span class="font-normal text-muted">(optional)</span>
-                <textarea v-model="form.summary" rows="3" class="field h-auto py-2" maxlength="1000" placeholder="e.g. Serviced last month; front tyres due in about 5,000 km." />
+                <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.summary" rows="3" class="field h-auto py-2" placeholder="e.g. Serviced last month; front tyres due in about 5,000 km." />
                 <InputError :message="form.errors.summary" />
             </label>
             <label v-if="askName" class="field-label max-w-sm">
                 Inspected by
-                <input v-model="form.inspector_name" class="field" maxlength="120" placeholder="Name of the person who checked the car" />
+                <input v-field="'business_name'" v-model="form.inspector_name" class="field" placeholder="Name of the person who checked the car" />
                 <InputError :message="form.errors.inspector_name" />
             </label>
             <InputError :message="(form.errors as Record<string, string>).photos" />

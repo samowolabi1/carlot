@@ -15,6 +15,7 @@ use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotHour;
 use App\Domain\Lots\Models\LotMember;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Name;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
@@ -98,7 +99,7 @@ class CalendarController extends Controller
             'starts_at' => ['nullable', 'date'],
             'date' => ['nullable', 'date_format:Y-m-d', 'required_with:time'],
             'time' => ['nullable', 'date_format:H:i', 'required_with:date'],
-            'staff' => ['nullable', 'string'],
+            'staff' => Fields::ulid(required: false),
         ]);
 
         if ($request->has('staff')) {

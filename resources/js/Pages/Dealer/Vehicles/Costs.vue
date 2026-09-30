@@ -104,10 +104,10 @@ function remove(c: Cost) {
                         <option v-for="t in types" :key="t.value" :value="t.value">{{ t.label }}</option>
                     </select>
                 </label>
-                <label class="field-label">Amount<input v-model="form.amount" class="field" inputmode="numeric" required placeholder="₦0" /><InputError :message="form.errors.amount" /></label>
+                <label class="field-label">Amount<input v-field="'money'" v-model="form.amount" class="field" inputmode="numeric" required placeholder="₦0" /><InputError :message="form.errors.amount" /></label>
                 <label class="field-label">Date<input v-model="form.incurred_at" type="date" :max="today" class="field" required /><InputError :message="form.errors.incurred_at" /></label>
-                <label class="field-label">Paid to (optional)<input v-model="form.supplier" class="field" maxlength="120" placeholder="e.g. Apapa clearing agent" /></label>
-                <label class="field-label">Note (optional)<input v-model="form.note" class="field" maxlength="500" /></label>
+                <label class="field-label">Paid to (optional)<input v-field="'business_name'" v-model="form.supplier" class="field" placeholder="e.g. Apapa clearing agent" /></label>
+                <label class="field-label">Note (optional)<input v-field="{ kind: 'text', max: 500 }" v-model="form.note" class="field" /></label>
                 <label class="field-label">
                     Receipt (optional)
                     <input type="file" accept="image/*,application/pdf" class="text-[14px]" @change="form.receipt = ($event.target as HTMLInputElement).files?.[0] ?? null" />

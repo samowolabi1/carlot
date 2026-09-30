@@ -66,7 +66,7 @@ class NotificationController extends Controller
     {
         $types = array_keys(NotificationPreferences::TYPES);
         $data = $request->validate([
-            'preferences' => ['required', 'array'],
+            'preferences' => ['required', 'array', 'max:30'],
             'preferences.*.phone' => ['boolean'],
             'preferences.*.mail' => ['boolean'],
             'preferences.*.push' => ['boolean'],

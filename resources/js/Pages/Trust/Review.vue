@@ -82,7 +82,7 @@ function submit() {
 
                 <label class="flex flex-col gap-1.5 text-[15px] font-semibold">
                     Tell others about it
-                    <textarea v-model="form.body" rows="4" maxlength="1000" class="field h-auto py-3 text-[15px] font-normal" placeholder="What was the car and the lot like?" />
+                    <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.body" rows="4" class="field h-auto py-3 text-[15px] font-normal" placeholder="What was the car and the lot like?" />
                     <InputError :message="form.errors.body" />
                 </label>
             </fieldset>

@@ -73,7 +73,7 @@ const sourceTone: Record<string, string> = {
                 <label class="relative w-full sm:w-60">
                     <span class="sr-only">Search leads</span>
                     <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
-                    <input v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name, phone or car" />
+                    <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name, phone or car" />
                 </label>
                 <label>
                     <span class="sr-only">Whose leads</span>

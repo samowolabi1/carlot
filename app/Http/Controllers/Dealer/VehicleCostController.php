@@ -10,6 +10,7 @@ use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Models\VehicleCost;
 use App\Domain\LotManager\Support\Profit;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -78,11 +79,11 @@ class VehicleCostController extends Controller
     public function store(Request $request, Lot $lot, Vehicle $vehicle, RecordVehicleCost $record): RedirectResponse
     {
         Gate::authorize('viewCosts', $lot);
-        $request->merge(['amount' => preg_replace('/[^\d]/', '', (string) $request->input('amount'))]);
+        $request->merge(['amount' => Fields::cleanMoney($request->input('amount'))]);
         $data = $request->validate([
             'type' => ['required', Rule::enum(CostType::class)],
-            'amount' => ['required', 'integer', 'min:1', 'max:10000000000'],
-            'supplier' => ['nullable', 'string', 'max:120'],
+            'amount' => Fields::money(),
+            'supplier' => Fields::businessName(required: false),
             'note' => ['nullable', 'string', 'max:500'],
             'incurred_at' => ['required', 'date', 'before_or_equal:today'],
             'receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],

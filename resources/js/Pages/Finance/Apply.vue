@@ -58,7 +58,7 @@ function submit() {
             <div class="grid grid-cols-2 gap-3">
                 <label class="field-label">
                     Deposit (₦)
-                    <input v-model="form.deposit" inputmode="numeric" class="field" />
+                    <input v-field="{ kind: 'money', min: 0 }" v-model="form.deposit" inputmode="numeric" class="field" />
                     <InputError :message="form.errors.deposit" />
                 </label>
                 <label class="field-label">
@@ -75,12 +75,12 @@ function submit() {
             <div class="grid grid-cols-2 gap-3">
                 <label class="field-label">
                     Monthly income (₦)
-                    <input v-model="form.monthly_income" inputmode="numeric" class="field" required />
+                    <input v-field="{ kind: 'money', min: 30000, max: 1000000000 }" v-model="form.monthly_income" inputmode="numeric" class="field" required />
                     <InputError :message="form.errors.monthly_income" />
                 </label>
                 <label class="field-label">
                     Monthly loans and rent (₦)
-                    <input v-model="form.monthly_commitments" inputmode="numeric" class="field" />
+                    <input v-field="{ kind: 'money', min: 0, max: 1000000000 }" v-model="form.monthly_commitments" inputmode="numeric" class="field" />
                     <InputError :message="form.errors.monthly_commitments" />
                 </label>
             </div>
@@ -93,7 +93,7 @@ function submit() {
                 </label>
                 <label class="field-label">
                     Employer <span class="font-normal text-muted">(optional)</span>
-                    <input v-model="form.employer" class="field" maxlength="120" />
+                    <input v-field="'business_name'" v-model="form.employer" class="field" />
                 </label>
             </div>
 

@@ -38,7 +38,7 @@ watch(search, () => {
         <label class="relative lg:w-80">
             <span class="sr-only">Search walk-ins</span>
             <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
-            <input v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
+            <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
         </label>
 
         <div v-if="walkIns.data.length === 0" class="card flex flex-col items-center gap-3 px-6 py-12 text-center">

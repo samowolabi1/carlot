@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use App\Domain\LotManager\Actions\SyncOfflineItems;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -15,7 +16,7 @@ class PaymentRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge(['amount' => preg_replace('/[^\d]/', '', (string) $this->input('amount'))]);
+        $this->merge(['amount' => Fields::cleanMoney($this->input('amount'))]);
     }
 
     /** @return array<string, mixed> */

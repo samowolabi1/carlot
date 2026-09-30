@@ -167,7 +167,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
             <section v-if="can.manage && subscription.status === 'trialing' && !subscription.coupon" class="card flex flex-col gap-2 p-[18px]" aria-labelledby="coupon-heading">
                 <h2 id="coupon-heading" class="font-sans text-[15px] font-bold">Have a code?</h2>
                 <form class="flex gap-2" @submit.prevent="coupon.post(route('dealer.billing.coupon', lot.slug), { preserveScroll: true, onSuccess: () => coupon.reset() })">
-                    <label class="grow"><span class="sr-only">Code</span><input v-model="coupon.coupon" class="field h-11 uppercase" placeholder="LAUNCH3" maxlength="32" /></label>
+                    <label class="grow"><span class="sr-only">Code</span><input v-field="'code'" v-model="coupon.coupon" class="field h-11 uppercase" placeholder="LAUNCH3" /></label>
                     <button type="submit" class="btn btn-dark h-11 text-[14px]" :disabled="coupon.processing || !coupon.coupon">Apply</button>
                 </form>
                 <InputError :message="coupon.errors.coupon" />

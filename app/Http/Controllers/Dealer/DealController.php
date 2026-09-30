@@ -19,6 +19,7 @@ use App\Domain\Leads\Models\Lead;
 use App\Domain\Leads\Models\Message;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use App\Domain\Support\Name;
 use App\Http\Controllers\Controller;
@@ -132,10 +133,10 @@ class DealController extends Controller
 
     public function respond(Request $request, Lot $lot, Offer $offer, RespondToOffer $respond): RedirectResponse
     {
-        $request->merge(['counter_amount' => preg_replace('/[^\d]/', '', (string) $request->input('counter_amount'))]);
+        $request->merge(['counter_amount' => Fields::cleanMoney($request->input('counter_amount'))]);
         $data = $request->validate([
             'action' => ['required', Rule::in(RespondToOffer::ACTIONS)],
-            'counter_amount' => ['required_if:action,counter', 'nullable', 'integer', 'min:1'],
+            'counter_amount' => ['required_if:action,counter', ...Fields::money(required: false)],
             'message' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -151,11 +152,11 @@ class DealController extends Controller
     public function value(Request $request, Lot $lot, TradeIn $tradeIn, ValueTradeIn $value): RedirectResponse
     {
         foreach (['estimate_low', 'estimate_high'] as $key) {
-            $request->merge([$key => preg_replace('/[^\d]/', '', (string) $request->input($key))]);
+            $request->merge([$key => Fields::cleanMoney($request->input($key))]);
         }
         $data = $request->validate([
-            'estimate_low' => ['required', 'integer', 'min:1'],
-            'estimate_high' => ['required', 'integer', 'gte:estimate_low'],
+            'estimate_low' => Fields::money(),
+            'estimate_high' => [...Fields::money(), 'gte:estimate_low'],
             'note' => ['nullable', 'string', 'max:500'],
         ]);
 

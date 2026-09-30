@@ -79,19 +79,19 @@ function makeDefault(account: BankAccount) {
             <div class="grid gap-3 sm:grid-cols-2">
                 <label class="field-label">
                     Bank
-                    <input v-model="form.bank_name" class="field h-11" list="lotlink-banks" maxlength="80" required placeholder="e.g. GTBank" autocomplete="off" />
+                    <input v-field="{ kind: 'business_name', max: 80 }" v-model="form.bank_name" class="field h-11" list="lotlink-banks" required placeholder="e.g. GTBank" autocomplete="off" />
                     <datalist id="lotlink-banks"><option v-for="b in bank.banks" :key="b" :value="b" /></datalist>
                     <InputError :message="form.errors.bank_name" />
                 </label>
                 <label class="field-label">
                     Account number
-                    <input v-model="form.account_number" class="field h-11 tabular-nums" inputmode="numeric" maxlength="14" required placeholder="10 digits" autocomplete="off" />
+                    <input v-field="'account_number'" v-model="form.account_number" class="field h-11 tabular-nums" inputmode="numeric" required placeholder="10 digits" autocomplete="off" />
                     <InputError :message="form.errors.account_number" />
                 </label>
             </div>
             <label class="field-label">
                 Account name
-                <input v-model="form.account_name" class="field h-11" maxlength="120" required placeholder="As it appears on the account, e.g. Prime Motors Ltd" />
+                <input v-field="'business_name'" v-model="form.account_name" class="field h-11" required placeholder="As it appears on the account, e.g. Prime Motors Ltd" />
                 <InputError :message="form.errors.account_name" />
             </label>
             <label class="flex min-h-11 items-center gap-2 text-[14px]">

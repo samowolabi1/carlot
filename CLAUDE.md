@@ -25,6 +25,12 @@ Run all four before pushing.
   the API. Controllers stay thin.
 - **Validation** in Form Requests; authorisation via Policies (`LotPolicy`: view = any member,
   update = owner/manager, manageStaff/submit = owner).
+- **Field rules**: build rules from `App\Domain\Support\Fields` (`personName`, `businessName`, `place`, `model`, `phone`
+  (libphonenumber, current lot's region), `email`, `reference`, `code`, `money`, `count`, `text($max)`, `newPassword`, `ulid`),
+  never bare `'string'`: every text field needs a type, a `max` within its column, and a pattern where the data has a shape.
+  Money is whole naira through `Fields::cleanMoney()` (never strip all non-digits: "1500.50" must fail, not become 150,050).
+  In Vue, every text input gets `v-field` (`directives/field.ts`, rules in `lib/fields.ts`, kept in step with PHP by
+  `tests/Unit/FieldsTest.php`); plain wording for Laravel's own messages and field names is in `lang/en/validation.php`.
 - **Enums** are PHP backed enums, cast on models. Add `@property` docblocks for new columns so
   Larastan knows the types.
 - **Money**: unsigned bigint minor units (kobo) plus a `char(3)` currency. Never floats.

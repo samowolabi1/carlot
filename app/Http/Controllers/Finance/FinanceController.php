@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Finance;
 use App\Domain\Finance\Actions\SubmitFinanceApplication;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Partners\FinancePartner;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\DealsPresenter;
 use App\Http\Presenters\MarketplacePresenter;
@@ -67,15 +68,15 @@ class FinanceController extends Controller
         $vehicle = DealsPresenter::car($car);
 
         foreach (['monthly_income', 'monthly_commitments', 'deposit'] as $key) {
-            $request->merge([$key => (int) preg_replace('/[^\d]/', '', (string) $request->input($key))]);
+            $request->merge([$key => Fields::cleanMoney($request->input($key))]);
         }
 
         $data = $request->validate([
             'monthly_income' => ['required', 'integer', 'min:30000', 'max:1000000000'],
             'monthly_commitments' => ['required', 'integer', 'min:0', 'max:1000000000'],
             'employment' => ['required', Rule::in(array_keys(FinanceApplication::EMPLOYMENT))],
-            'employer' => ['nullable', 'string', 'max:120'],
-            'deposit' => ['required', 'integer', 'min:0'],
+            'employer' => Fields::businessName(required: false),
+            'deposit' => Fields::money(min: 0),
             'tenor_months' => ['required', 'integer', Rule::in([12, 24, 36, 48])],
             'consent' => ['accepted'],
         ], ['consent.accepted' => 'Tick the box to agree to share your details.', 'monthly_income.min' => 'Enter your monthly income in naira.']);

@@ -71,7 +71,7 @@ function removeClosure(id: number) {
                 </label>
                 <label class="field-label grow">
                     <span class="sr-only">Reason</span>
-                    <input v-model="closure.reason" class="field" maxlength="120" placeholder="Reason (optional), e.g. Independence Day" />
+                    <input v-field="{ kind: 'text', max: 120 }" v-model="closure.reason" class="field" placeholder="Reason (optional), e.g. Independence Day" />
                 </label>
                 <button type="submit" class="btn btn-dark" :disabled="closure.processing">Add closure</button>
             </form>

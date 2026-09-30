@@ -19,6 +19,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotMember;
 use App\Domain\Lots\Models\Plan;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -167,7 +168,7 @@ class BillingController extends Controller
     public function coupon(Request $request, Lot $lot, ApplyCoupon $apply): RedirectResponse
     {
         Gate::authorize('manageBilling', $lot);
-        $data = $request->validate(['coupon' => ['required', 'string', 'max:32']]);
+        $data = $request->validate(['coupon' => Fields::code()]);
         $subscription = $apply->run($lot, $data['coupon']);
 
         return back()->with('success', "Code applied: {$subscription->plan()->value('name')} free until ".$subscription->trial_ends_at?->setTimezone($lot->timezone)->format('j M Y').'.');

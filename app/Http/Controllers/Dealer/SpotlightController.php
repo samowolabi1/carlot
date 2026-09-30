@@ -7,6 +7,7 @@ use App\Domain\Billing\Enums\SpotlightPlacement;
 use App\Domain\Billing\Support\SpotlightPricing;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class SpotlightController extends Controller
     public function car(Request $request, Lot $lot, Vehicle $vehicle, BuySpotlight $buy): Response
     {
         Gate::authorize('buySpotlight', $lot);
-        $data = $request->validate(['days' => ['required', 'integer'], 'free' => ['boolean']]);
+        $data = $request->validate(['days' => Fields::count(1, 365), 'free' => ['boolean']]);
 
         $result = $buy->run($lot, $request->user(), SpotlightPlacement::Car, (int) $data['days'], $vehicle, (bool) ($data['free'] ?? false));
 
@@ -44,7 +45,7 @@ class SpotlightController extends Controller
     public function featured(Request $request, Lot $lot, BuySpotlight $buy): Response
     {
         Gate::authorize('buySpotlight', $lot);
-        $data = $request->validate(['days' => ['required', 'integer']]);
+        $data = $request->validate(['days' => Fields::count(1, 365)]);
 
         return Inertia::location($buy->run($lot, $request->user(), SpotlightPlacement::FeaturedLot, (int) $data['days'])['checkout'] ?? route('dealer.billing', $lot));
     }

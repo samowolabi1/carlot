@@ -14,6 +14,7 @@ use App\Domain\Inventory\Enums\BodyType;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Presenters\MarketplacePresenter;
@@ -96,11 +97,11 @@ class AdvertController extends Controller
             'headline' => ['required', 'string', 'min:4', 'max:60'],
             'subtext' => ['nullable', 'string', 'max:120'],
             'cta' => ['required', Rule::enum(AdCta::class)],
-            'vehicle' => ['nullable', 'string', 'size:26'],
+            'vehicle' => Fields::ulid(required: false),
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.AdImage::MAX_KB, 'dimensions:min_width=800,min_height=200'],
             'make_id' => ['nullable', 'integer', 'exists:makes,id'],
             'body_type' => ['nullable', Rule::enum(BodyType::class)],
-            'city' => ['nullable', 'string', 'max:60'],
+            'city' => Fields::place(required: false, max: 60),
         ], [
             'image.dimensions' => 'Use an image at least 800 pixels wide so the banner looks sharp.',
         ]);

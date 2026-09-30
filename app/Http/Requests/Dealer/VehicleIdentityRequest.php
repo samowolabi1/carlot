@@ -7,6 +7,7 @@ use App\Domain\Inventory\Enums\Drivetrain;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -44,14 +45,14 @@ class VehicleIdentityRequest extends FormRequest
             ],
             'make_id' => ['required', 'integer', 'exists:makes,id'],
             'vehicle_model_id' => ['nullable', 'integer', Rule::exists('vehicle_models', 'id')->where('make_id', $this->integer('make_id'))],
-            'model_name' => ['nullable', 'string', 'max:60', 'required_without:vehicle_model_id'],
+            'model_name' => [...Fields::model(required: false), 'required_without:vehicle_model_id'],
             'year' => ['required', 'integer', 'between:1970,'.(now()->year + 1)],
-            'trim' => ['nullable', 'string', 'max:60'],
-            'decoded' => ['nullable', 'array'],
+            'trim' => Fields::model(required: false),
+            'decoded' => ['nullable', 'array', 'max:10'],
             'decoded.engine_cc' => ['nullable', 'integer', 'between:500,10000'],
-            'decoded.fuel' => ['nullable', 'string'],
-            'decoded.drivetrain' => ['nullable', 'string'],
-            'decoded.body_type' => ['nullable', 'string'],
+            'decoded.fuel' => ['nullable', 'string', 'max:40'],
+            'decoded.drivetrain' => ['nullable', 'string', 'max:40'],
+            'decoded.body_type' => ['nullable', 'string', 'max:40'],
             'wizard' => ['sometimes', 'boolean'],
         ];
     }

@@ -143,7 +143,7 @@ function editHref(row: Row) {
             <label class="relative lg:w-80">
                 <span class="sr-only">Search stock</span>
                 <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
-                <input v-model="search" type="search" class="field h-11 pl-10" placeholder="Search make, model or VIN" />
+                <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search make, model or VIN" />
             </label>
         </div>
 

@@ -28,34 +28,34 @@ function submit() {
     <form class="flex flex-col gap-4" @submit.prevent="submit">
         <label class="field-label">
             Lot name
-            <input v-model="form.name" class="field" required maxlength="80" placeholder="e.g. Prime Motors" autocomplete="organization" />
+            <input v-field="{ kind: 'business_name', max: 80 }" v-model="form.name" class="field" required placeholder="e.g. Prime Motors" autocomplete="organization" />
             <InputError :message="form.errors.name" />
         </label>
         <label class="field-label">
             Tagline <span class="font-normal text-muted">(optional)</span>
-            <input v-model="form.tagline" class="field" maxlength="120" placeholder="e.g. Clean Tokunbo SUVs in Ikeja" />
+            <input v-field="{ kind: 'text', max: 120 }" v-model="form.tagline" class="field" placeholder="e.g. Clean Tokunbo SUVs in Ikeja" />
             <InputError :message="form.errors.tagline" />
         </label>
         <div class="grid gap-4 md:grid-cols-2">
             <label class="field-label">
                 Business phone
-                <input v-model="form.phone" class="field" required type="tel" inputmode="tel" placeholder="0803 123 4567" autocomplete="tel" />
+                <input v-field="'phone'" v-model="form.phone" class="field" required type="tel" inputmode="tel" placeholder="0803 123 4567" autocomplete="tel" />
                 <InputError :message="form.errors.phone" />
             </label>
             <label class="field-label">
                 WhatsApp number <span class="font-normal text-muted">(if different)</span>
-                <input v-model="form.whatsapp" class="field" type="tel" inputmode="tel" placeholder="Same as business phone" />
+                <input v-field="'phone'" v-model="form.whatsapp" class="field" type="tel" inputmode="tel" placeholder="Same as business phone" />
                 <InputError :message="form.errors.whatsapp" />
             </label>
         </div>
         <label class="field-label">
             Email <span class="font-normal text-muted">(optional)</span>
-            <input v-model="form.email" class="field" type="email" autocomplete="email" placeholder="sales@yourlot.com" />
+            <input v-field="'email'" v-model="form.email" class="field" type="email" autocomplete="email" placeholder="sales@yourlot.com" />
             <InputError :message="form.errors.email" />
         </label>
         <label class="field-label">
             About the lot <span class="font-normal text-muted">(optional)</span>
-            <textarea
+            <textarea v-field="{ kind: 'text', max: 2000 }"
                 v-model="form.about"
                 rows="4"
                 maxlength="2000"

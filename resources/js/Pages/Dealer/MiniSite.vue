@@ -94,7 +94,7 @@ async function copy() {
                         <form class="flex gap-2" @submit.prevent="saveDomain">
                             <label class="grow">
                                 <span class="sr-only">Your domain</span>
-                                <input v-model="domainForm.domain" class="field h-11" placeholder="cars.primemotors.ng" autocomplete="off" />
+                                <input v-field="{ kind: 'text', max: 190 }" v-model="domainForm.domain" class="field h-11" placeholder="cars.primemotors.ng" autocomplete="off" />
                             </label>
                             <button type="submit" class="btn btn-outline h-11 shrink-0" :disabled="domainForm.processing">Save</button>
                         </form>

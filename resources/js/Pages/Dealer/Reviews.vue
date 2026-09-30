@@ -97,7 +97,7 @@ function send(review: ReviewRow) {
                     <form v-if="replying === r.ulid" class="flex flex-col gap-2" @submit.prevent="send(r)">
                         <label class="field-label">
                             Reply publicly (once)
-                            <textarea v-model="form.reply" rows="3" maxlength="1000" class="field h-auto py-2" placeholder="Thank the buyer, or explain what you've done about a problem." />
+                            <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.reply" rows="3" class="field h-auto py-2" placeholder="Thank the buyer, or explain what you've done about a problem." />
                             <InputError :message="form.errors.reply" />
                         </label>
                         <div class="flex gap-2">

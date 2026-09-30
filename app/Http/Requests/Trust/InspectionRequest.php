@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Trust;
 
+use App\Domain\Support\Fields;
 use App\Domain\Trust\Enums\CheckResult;
 use App\Domain\Trust\Models\Inspection;
 use App\Domain\Trust\Support\InspectionChecklist;
@@ -19,9 +20,9 @@ class InspectionRequest extends FormRequest
         $rules = [
             'checklist' => ['required', 'array'],
             'summary' => ['nullable', 'string', 'max:1000'],
-            'inspector_name' => ['nullable', 'string', 'max:120'],
-            'photos' => ['nullable', 'array'],
-            'photos.*' => ['array'],
+            'inspector_name' => Fields::businessName(required: false),
+            'photos' => ['nullable', 'array', 'max:40'],
+            'photos.*' => ['array', 'max:4'],
             'photos.*.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:12288'],
         ];
 

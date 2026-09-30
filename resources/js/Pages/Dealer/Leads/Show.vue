@@ -153,7 +153,7 @@ const whatsapp = computed(() =>
                         </select>
                     </label>
                     <form v-if="askLost" class="flex flex-col gap-2 rounded-xl bg-cream p-3" @submit.prevent="update({ stage: 'lost', lost_reason: lostReason })">
-                        <label class="field-label">Why was it lost?<input v-model="lostReason" class="field h-11" required maxlength="120" placeholder="Bought elsewhere" /></label>
+                        <label class="field-label">Why was it lost?<input v-field="{ kind: 'text', max: 120 }" v-model="lostReason" class="field h-11" required placeholder="Bought elsewhere" /></label>
                         <button type="submit" class="btn btn-dark h-11 text-[14px]">Mark lost</button>
                     </form>
                     <p v-else-if="lead.stage === 'lost' && lead.lost_reason" class="text-[13px] text-muted">Lost: {{ lead.lost_reason }}</p>
@@ -177,7 +177,7 @@ const whatsapp = computed(() =>
                 <section class="card flex flex-col gap-2.5 p-4" aria-labelledby="notes-heading">
                     <h2 id="notes-heading" class="font-sans text-[15px] font-bold">Notes</h2>
                     <form class="flex flex-col gap-2" @submit.prevent="note.post(route('dealer.leads.notes.store', [lot.slug, lead.ulid]), { preserveScroll: true, onSuccess: () => note.reset() })">
-                        <label><span class="sr-only">Note</span><textarea v-model="note.body" class="field h-20 py-2.5" placeholder="Only your team sees notes" maxlength="2000" /></label>
+                        <label><span class="sr-only">Note</span><textarea v-field="{ kind: 'text', max: 2000 }" v-model="note.body" class="field h-20 py-2.5" placeholder="Only your team sees notes" /></label>
                         <button type="submit" class="btn btn-outline h-10 self-start px-3 text-[13px]" :disabled="note.processing || !note.body">Add note</button>
                     </form>
                     <div v-for="(n, i) in notes" :key="i" class="flex flex-col gap-0.5 border-t border-divider pt-2">

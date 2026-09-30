@@ -7,6 +7,7 @@ use App\Domain\Accounts\Actions\SendOtp;
 use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Controller;
@@ -91,7 +92,7 @@ class AuthController extends Controller
     /** PATCH /api/v1/me: the name new accounts add (the web asks on /welcome). */
     public function update(Request $request): JsonResponse
     {
-        $request->user()->update($request->validate(['name' => ['required', 'string', 'max:80']]));
+        $request->user()->update($request->validate(['name' => Fields::personName()]));
 
         return response()->json(['data' => ApiPresenter::user($request->user())]);
     }
@@ -114,10 +115,10 @@ class AuthController extends Controller
     private function destination(Request $request): array
     {
         if ($request->input('method') === 'email') {
-            return ['email', Str::lower(trim((string) $request->validate(['email' => ['required', 'email:rfc', 'max:190']])['email']))];
+            return ['email', Str::lower(trim((string) $request->validate(['email' => Fields::email()])['email']))];
         }
 
-        $request->validate(['phone' => ['required', 'string', 'max:32']]);
+        $request->validate(['phone' => Fields::phone()]);
         try {
             return ['whatsapp', PhoneNumber::normalize((string) $request->input('phone'))];
         } catch (InvalidArgumentException $e) {

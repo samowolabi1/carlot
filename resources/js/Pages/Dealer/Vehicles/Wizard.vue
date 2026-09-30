@@ -5,7 +5,7 @@ import PhotoUploader, { type MediaItem } from '@/components/vehicles/PhotoUpload
 import StepBar from '@/components/vehicles/StepBar.vue';
 import { useShared } from '@/composables/useShared';
 import WizardLayout from '@/layouts/WizardLayout.vue';
-import { formatNaira, formatNumber, parseAmount } from '@/lib/format';
+import { formatNaira, formatNumber, parseAmount, typedAmount } from '@/lib/format';
 import { json } from '@/lib/http';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -228,7 +228,7 @@ const price = useForm({
 });
 
 function onPriceInput(e: Event) {
-    const amount = parseAmount((e.target as HTMLInputElement).value);
+    const amount = typedAmount((e.target as HTMLInputElement).value);
     price.price = amount ? formatNaira(amount) : '';
 }
 
@@ -262,7 +262,7 @@ function nextStep() {
             <label class="field-label">
                 17-character VIN
                 <span class="flex gap-2">
-                    <input
+                    <input v-field="'vin'"
                         v-model="identity.vin"
                         class="field h-[52px] min-w-0 grow border-2 border-forest text-[17px] font-semibold tracking-wider uppercase"
                         maxlength="20"
@@ -332,7 +332,7 @@ function nextStep() {
                 </label>
                 <label v-if="otherModel" class="field-label col-span-2">
                     Model name
-                    <input v-model="identity.model_name" class="field" maxlength="60" required placeholder="e.g. Venza" />
+                    <input v-field="'model'" v-model="identity.model_name" class="field" required placeholder="e.g. Venza" />
                     <InputError :message="identity.errors.model_name" />
                 </label>
                 <label class="field-label">
@@ -345,7 +345,7 @@ function nextStep() {
                 </label>
                 <label class="field-label">
                     Trim <span class="font-normal text-muted">(optional)</span>
-                    <input v-model="identity.trim" class="field" maxlength="60" placeholder="e.g. SE, XLE" />
+                    <input v-field="'model'" v-model="identity.trim" class="field" placeholder="e.g. SE, XLE" />
                     <InputError :message="identity.errors.trim" />
                 </label>
             </div>
@@ -364,13 +364,13 @@ function nextStep() {
             <div class="grid grid-cols-2 gap-3">
                 <label class="field-label col-span-2 sm:col-span-1">
                     Mileage (km)
-                    <input
+                    <input v-field="{ kind: 'count', min: 0, max: 2000000 }"
                         :value="formatNumber(details.mileage_km)"
                         class="field"
                         inputmode="numeric"
                         required
                         placeholder="e.g. 48,200"
-                        @input="details.mileage_km = parseAmount(($event.target as HTMLInputElement).value)"
+                        @input="details.mileage_km = typedAmount(($event.target as HTMLInputElement).value)"
                     />
                     <InputError :message="details.errors.mileage_km" />
                 </label>
@@ -421,11 +421,11 @@ function nextStep() {
                 </label>
                 <label class="field-label">
                     Colour
-                    <input v-model="details.colour" class="field" maxlength="40" placeholder="e.g. Silver" />
+                    <input v-field="{ kind: 'place', max: 40 }" v-model="details.colour" class="field" placeholder="e.g. Silver" />
                 </label>
                 <label class="field-label">
                     Interior colour
-                    <input v-model="details.interior_colour" class="field" maxlength="40" placeholder="e.g. Black leather" />
+                    <input v-field="{ kind: 'place', max: 40 }" v-model="details.interior_colour" class="field" placeholder="e.g. Black leather" />
                 </label>
                 <label class="col-span-2 flex h-11 items-center gap-3 text-[15px]">
                     <input v-model="details.registered" type="checkbox" class="h-5 w-5 accent-forest" />
@@ -449,7 +449,7 @@ function nextStep() {
 
             <label class="field-label">
                 Description <span class="font-normal text-muted">(optional)</span>
-                <textarea
+                <textarea v-field="{ kind: 'text', max: 3000 }"
                     v-model="details.description"
                     rows="4"
                     maxlength="3000"
@@ -473,7 +473,7 @@ function nextStep() {
         <form v-else-if="step === 'price' && vehicle" id="step-form" class="flex flex-col gap-4" @submit.prevent="savePrice(false)">
             <label class="field-label">
                 Asking price
-                <input
+                <input v-field="{ kind: 'money', min: 10000 }"
                     :value="price.price"
                     class="field h-[60px] border-2 border-forest font-display text-[26px] font-bold"
                     inputmode="numeric"

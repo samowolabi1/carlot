@@ -82,7 +82,7 @@ describe('offline sync', function () {
             ->json('results');
 
         expect(array_column($results, 'status'))->toBe(['ok', 'ok', 'ok', 'failed'])
-            ->and($results[3]['message'])->toBe('That phone number is not valid.');
+            ->and($results[3]['message'])->toBe('Phone number must look like 0803 123 4567 or +234 803 123 4567.');
 
         $order = SalesOrder::withoutGlobalScopes()->sole();
         expect($order->agreed_price)->toBe(980_000_000)

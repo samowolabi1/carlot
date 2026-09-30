@@ -134,8 +134,8 @@ function save() {
                         <div v-if="customer.notes" class="flex flex-col gap-1"><dt class="text-muted">Notes</dt><dd class="rounded-xl bg-ivory p-3 whitespace-pre-line">{{ customer.notes }}</dd></div>
                     </dl>
                     <form v-else class="flex flex-col gap-3" @submit.prevent="save">
-                        <label class="field-label">Name<input v-model="form.name" class="field" required /><InputError :message="form.errors.name" /></label>
-                        <label class="field-label">Email<input v-model="form.email" class="field" type="email" /><InputError :message="form.errors.email" /></label>
+                        <label class="field-label">Name<input v-field="'person_name'" v-model="form.name" class="field" required /><InputError :message="form.errors.name" /></label>
+                        <label class="field-label">Email<input v-field="{ kind: 'email', max: 120 }" v-model="form.email" class="field" type="email" /><InputError :message="form.errors.email" /></label>
                         <label class="field-label">
                             Source
                             <select v-model="form.source" class="field">
@@ -150,8 +150,8 @@ function save() {
                                 </label>
                             </div>
                         </fieldset>
-                        <label class="field-label">Budget (₦)<input v-model="form.budget_max" class="field" inputmode="numeric" /><InputError :message="form.errors.budget_max" /></label>
-                        <label class="field-label">Notes<textarea v-model="form.notes" class="field h-24 py-2.5" /></label>
+                        <label class="field-label">Budget (₦)<input v-field="{ kind: 'money', min: 0 }" v-model="form.budget_max" class="field" inputmode="numeric" /><InputError :message="form.errors.budget_max" /></label>
+                        <label class="field-label">Notes<textarea v-field="{ kind: 'text', max: 2000 }" v-model="form.notes" class="field h-24 py-2.5" /></label>
                         <label class="flex min-h-11 items-center gap-3 text-[14px]">
                             <input v-model="form.consent_whatsapp" type="checkbox" class="h-5 w-5 accent-forest" /> Agreed to WhatsApp messages
                         </label>

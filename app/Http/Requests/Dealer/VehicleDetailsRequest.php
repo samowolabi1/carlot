@@ -8,6 +8,7 @@ use App\Domain\Inventory\Enums\DutyStatus;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
+use App\Domain\Support\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -29,11 +30,11 @@ class VehicleDetailsRequest extends FormRequest
             'fuel' => ['required', Rule::enum(FuelType::class)],
             'engine_cc' => ['nullable', 'integer', 'between:500,10000'],
             'drivetrain' => ['nullable', Rule::enum(Drivetrain::class)],
-            'colour' => ['nullable', 'string', 'max:40'],
-            'interior_colour' => ['nullable', 'string', 'max:40'],
+            'colour' => Fields::place(required: false, max: 40),
+            'interior_colour' => Fields::place(required: false, max: 40),
             'duty_status' => ['nullable', Rule::enum(DutyStatus::class)],
             'registered' => ['boolean'],
-            'description' => ['nullable', 'string', 'max:3000'],
+            'description' => Fields::text(3000),
             'feature_ids' => ['array', 'max:60'],
             'feature_ids.*' => ['integer', 'exists:features,id'],
         ];

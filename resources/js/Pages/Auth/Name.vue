@@ -16,7 +16,7 @@ const form = useForm({ name: '' });
         <form class="flex flex-col gap-4" @submit.prevent="form.put(route('profile.name.update'))">
             <label class="field-label">
                 Your name
-                <input v-model="form.name" class="field" required maxlength="80" autocomplete="name" autofocus placeholder="e.g. Chioma Okafor" />
+                <input v-field="'person_name'" v-model="form.name" class="field" required autocomplete="name" autofocus placeholder="e.g. Chioma Okafor" />
                 <InputError :message="form.errors.name" />
             </label>
             <button type="submit" class="btn btn-primary" :disabled="form.processing">Continue</button>

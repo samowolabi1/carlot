@@ -31,7 +31,7 @@ function submit() {
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <label class="field-label">
                 Email address
-                <input v-model="form.email" type="email" inputmode="email" autocomplete="email" required autofocus class="field" placeholder="you@example.com" />
+                <input v-field="'email'" v-model="form.email" type="email" inputmode="email" autocomplete="email" required autofocus class="field" placeholder="you@example.com" />
                 <InputError :message="form.errors.email" />
             </label>
             <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ form.processing ? 'Sending…' : sentTo ? 'Send again' : 'Send reset link' }}</button>

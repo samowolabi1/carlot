@@ -51,7 +51,7 @@ class FinanceSettings extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $naira = fn (string $name, string $label) => Forms\Components\TextInput::make($name)->label($label)->prefix('₦')->numeric()->integer()->minValue(0)->required();
+        $naira = fn (string $name, string $label) => Forms\Components\TextInput::make($name)->label($label)->prefix('₦')->numeric()->integer()->minValue(0)->maxValue(100_000_000)->required();
 
         return $form->statePath('data')->schema([
             Forms\Components\Section::make('Budget and loan estimates')
@@ -79,18 +79,18 @@ class FinanceSettings extends Page implements HasForms
                         ->numeric()->minValue(0)->maxValue(20)->step(0.1)->required(),
                     $naira('papers', 'Registration and papers'),
                     $naira('fuel_price', 'Fuel price (a litre)'),
-                    Forms\Components\TextInput::make('km_per_month')->label('Distance driven a month')->suffix('km')->numeric()->integer()->minValue(0)->required(),
-                    Forms\Components\Repeater::make('km_per_litre')->label('Fuel economy by engine size')
+                    Forms\Components\TextInput::make('km_per_month')->label('Distance driven a month')->suffix('km')->numeric()->integer()->minValue(0)->maxValue(50_000)->required(),
+                    Forms\Components\Repeater::make('km_per_litre')->maxItems(12)->label('Fuel economy by engine size')
                         ->helperText('Each row covers engines up to that size; the last row covers anything bigger.')
                         ->schema([
-                            Forms\Components\TextInput::make('up_to')->label('Engine up to')->suffix('cc')->numeric()->integer()->minValue(1)->required(),
+                            Forms\Components\TextInput::make('up_to')->label('Engine up to')->suffix('cc')->numeric()->integer()->minValue(1)->maxValue(99_999)->required(),
                             Forms\Components\TextInput::make('value')->label('Km a litre')->numeric()->integer()->minValue(1)->maxValue(50)->required(),
                         ])->columns(2)->minItems(1)->reorderable(false)->addActionLabel('Add engine size'),
-                    Forms\Components\Repeater::make('servicing')->label('Servicing and repairs by car age')
+                    Forms\Components\Repeater::make('servicing')->maxItems(12)->label('Servicing and repairs by car age')
                         ->helperText('Each row covers cars up to that age; the last row covers anything older.')
                         ->schema([
-                            Forms\Components\TextInput::make('up_to')->label('Up to')->suffix('years old')->numeric()->integer()->minValue(0)->required(),
-                            Forms\Components\TextInput::make('value')->label('A year')->prefix('₦')->numeric()->integer()->minValue(0)->required(),
+                            Forms\Components\TextInput::make('up_to')->label('Up to')->suffix('years old')->numeric()->integer()->minValue(0)->maxValue(99)->required(),
+                            Forms\Components\TextInput::make('value')->label('A year')->prefix('₦')->numeric()->integer()->minValue(0)->maxValue(100_000_000)->required(),
                         ])->columns(2)->minItems(1)->reorderable(false)->addActionLabel('Add age band'),
                 ]),
             Forms\Components\Section::make('Preview')

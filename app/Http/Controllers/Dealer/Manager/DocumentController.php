@@ -7,6 +7,7 @@ use App\Domain\LotManager\Enums\DocumentStatus;
 use App\Domain\LotManager\Models\OrderDocument;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class DocumentController extends Controller
     public function store(Request $request, Lot $lot, SalesOrder $order, UpdateOrderDocument $update): RedirectResponse
     {
         Gate::authorize('changeStatus', $order);
-        $data = $request->validate(['label' => ['required', 'string', 'max:80'], 'mandatory' => ['boolean']]);
+        $data = $request->validate(['label' => Fields::text(80, required: true, min: 2), 'mandatory' => ['boolean']]);
 
         $update->add($order, $data['label'], (bool) ($data['mandatory'] ?? false));
 

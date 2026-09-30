@@ -6,6 +6,7 @@ use App\Domain\Lots\Actions\SaveLotHours;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Lots\Models\LotClosure;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dealer\LotBookingRulesRequest;
@@ -59,7 +60,7 @@ class SettingsController extends Controller
     {
         Gate::authorize('update', $lot);
 
-        $request->merge(['reservation_deposit' => preg_replace('/[^\d]/', '', (string) $request->input('reservation_deposit')) ?: null]);
+        $request->merge(['reservation_deposit' => Fields::cleanMoney($request->input('reservation_deposit'))]);
 
         $data = $request->validate([
             'accepts_offers' => ['required', 'boolean'],

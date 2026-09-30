@@ -7,6 +7,8 @@ use App\Domain\Lots\Actions\OnboardLot;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Regions;
 use App\Filament\Resources\LotResource;
+use App\Rules\FieldPattern;
+use App\Rules\PhoneNumberRule;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -28,21 +30,21 @@ class ListLots extends ListRecords
                 ->modalWidth('2xl')
                 ->form([
                     Forms\Components\Section::make('Owner')->columns(2)->schema([
-                        Forms\Components\TextInput::make('owner_name')->label('Full name')->required()->maxLength(120)->columnSpanFull(),
+                        Forms\Components\TextInput::make('owner_name')->label('Full name')->required()->maxLength(80)->rules([new FieldPattern('person_name')])->columnSpanFull(),
                         Forms\Components\Radio::make('sign_in')->label('They will sign in with')->required()->default('whatsapp')->inline()->live()
                             ->options(['whatsapp' => 'WhatsApp number', 'email' => 'Email address'])->columnSpanFull(),
-                        Forms\Components\TextInput::make('phone')->label('WhatsApp number')->tel()->placeholder('0803 123 4567')
+                        Forms\Components\TextInput::make('phone')->label('WhatsApp number')->tel()->maxLength(20)->rules(['nullable', new FieldPattern('phone'), new PhoneNumberRule])->placeholder('0803 123 4567')
                             ->required(fn (Get $get) => $get('sign_in') === 'whatsapp'),
-                        Forms\Components\TextInput::make('email')->label('Email')->email()->maxLength(190)
+                        Forms\Components\TextInput::make('email')->label('Email')->email()->rule('email:rfc,strict')->maxLength(190)
                             ->required(fn (Get $get) => $get('sign_in') === 'email'),
                     ]),
                     Forms\Components\Section::make('Lot')->columns(2)->schema([
-                        Forms\Components\TextInput::make('lot_name')->label('Lot name')->required()->maxLength(120)->columnSpanFull(),
+                        Forms\Components\TextInput::make('lot_name')->label('Lot name')->required()->maxLength(120)->rules([new FieldPattern('business_name')])->columnSpanFull(),
                         Forms\Components\Select::make('state')->options(collect(Regions::options())->mapWithKeys(fn (array $r) => [$r['value'] => $r['label']]))
                             ->required()->searchable(),
-                        Forms\Components\TextInput::make('city')->label('Area / city')->required()->maxLength(80),
+                        Forms\Components\TextInput::make('city')->label('Area / city')->required()->maxLength(80)->rules([new FieldPattern('place')]),
                         Forms\Components\TextInput::make('address')->label('Street address')->maxLength(255)->columnSpanFull(),
-                        Forms\Components\TextInput::make('lot_phone')->label('Phone buyers call')->tel()->helperText('Leave empty to use the WhatsApp number.'),
+                        Forms\Components\TextInput::make('lot_phone')->label('Phone buyers call')->tel()->maxLength(20)->rules(['nullable', new FieldPattern('phone'), new PhoneNumberRule])->helperText('Leave empty to use the WhatsApp number.'),
                         Forms\Components\Select::make('plan_id')->label('Plan')->options(Plan::query()->orderBy('sort')->pluck('name', 'id'))->placeholder('Default (trial)'),
                         Forms\Components\Toggle::make('approve')->label('Approve the lot now')->helperText('Only if you have met the lot. Otherwise it waits in "Lots" for approval like any other.')->columnSpanFull(),
                     ]),

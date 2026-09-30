@@ -82,14 +82,14 @@ function submitPassword() {
                     Your WhatsApp number
                     <span class="flex gap-2">
                         <span class="flex h-12 items-center rounded-xl border border-line-strong bg-white px-3 text-[15px] font-medium">+234</span>
-                        <input ref="phoneInput" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" required autofocus class="field" placeholder="0803 123 4567" />
+                        <input v-field="'phone'" ref="phoneInput" v-model="form.phone" type="tel" inputmode="tel" autocomplete="tel" required autofocus class="field" placeholder="0803 123 4567" />
                     </span>
                     <span class="font-normal text-muted">The code comes as a WhatsApp message, so there's no SMS charge.</span>
                     <InputError :message="form.errors.phone" />
                 </label>
                 <label v-else class="field-label">
                     Your email address
-                    <input ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required class="field" placeholder="you@example.com" />
+                    <input v-field="'email'" ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required class="field" placeholder="you@example.com" />
                     <span class="font-normal text-muted">Check your inbox (and spam folder) for the code.</span>
                     <InputError :message="form.errors.email" />
                 </label>
@@ -109,7 +109,7 @@ function submitPassword() {
             <form class="flex flex-col gap-4" @submit.prevent="submitPassword">
                 <label class="field-label">
                     Email or WhatsApp number
-                    <input ref="loginInput" v-model="passwordForm.login" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus class="field" placeholder="you@example.com or 0803 123 4567" />
+                    <input v-field="{ kind: 'text', max: 190 }" ref="loginInput" v-model="passwordForm.login" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus class="field" placeholder="you@example.com or 0803 123 4567" />
                     <InputError :message="passwordForm.errors.login" />
                 </label>
                 <label class="field-label">
@@ -118,7 +118,7 @@ function submitPassword() {
                         <Link :href="route('password.request', passwordForm.login.includes('@') ? { email: passwordForm.login.trim() } : {})" class="-my-2 flex min-h-11 items-center text-[14px] font-semibold text-forest hover:text-clay">Forgot password?</Link>
                     </span>
                     <span class="relative flex">
-                        <input v-model="passwordForm.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required class="field pr-12" />
+                        <input v-field="{ kind: 'text', max: 200 }" v-model="passwordForm.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required class="field pr-12" />
                         <button
                             type="button"
                             class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted hover:text-ink"

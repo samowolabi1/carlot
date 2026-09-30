@@ -9,6 +9,7 @@ use App\Domain\LotManager\Enums\NextStep;
 use App\Domain\LotManager\Enums\PaymentMethod;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Fields;
 use App\Domain\Support\Money;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -81,6 +82,13 @@ class SyncOfflineItems
      */
     private function validate(array $data, array $rules): array
     {
+        // Offline forms send amounts as typed ("₦1,500,000"), like the online ones.
+        foreach (['amount', 'budget_max', 'agreed_price', 'discount', 'trade_in_value', 'deposit_required'] as $key) {
+            if (array_key_exists($key, $data)) {
+                $data[$key] = Fields::cleanMoney($data[$key]);
+            }
+        }
+
         return Validator::make($data, $rules)->validate();
     }
 
@@ -104,18 +112,18 @@ class SyncOfflineItems
     public static function walkInRules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:80'],
-            'phone' => ['required', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:120'],
+            'name' => Fields::personName(),
+            'phone' => Fields::phone(),
+            'email' => Fields::email(required: false, max: 120),
             'source' => ['nullable', Rule::enum(CustomerSource::class)],
             'interest' => ['nullable', Rule::enum(Interest::class)],
             'next_step' => ['nullable', Rule::enum(NextStep::class)],
             'vehicles' => ['nullable', 'array', 'max:5'],
-            'vehicles.*' => ['string', 'size:26'],
-            'budget_max' => ['nullable', 'numeric', 'min:0'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'vehicles.*' => Fields::ulid(),
+            'budget_max' => Fields::money(required: false, min: 0),
+            'notes' => Fields::text(1000),
             'consent_whatsapp' => ['nullable', 'boolean'],
-            'visited_at' => ['nullable', 'date'],
+            'visited_at' => ['nullable', 'date', 'before_or_equal:tomorrow'],
         ];
     }
 
@@ -123,10 +131,10 @@ class SyncOfflineItems
     public static function paymentRules(): array
     {
         return [
-            'amount' => ['required', 'numeric', 'min:1'],
+            'amount' => Fields::money(),
             'method' => ['required', Rule::enum(PaymentMethod::class)],
-            'reference' => ['nullable', 'string', 'max:64'],
-            'paid_at' => ['nullable', 'date'],
+            'reference' => Fields::reference(),
+            'paid_at' => ['nullable', 'date', 'before_or_equal:tomorrow'],
         ];
     }
 
@@ -134,18 +142,18 @@ class SyncOfflineItems
     public static function orderRules(): array
     {
         return [
-            'customer' => ['nullable', 'string', 'size:26'],
-            'name' => ['required_without:customer', 'nullable', 'string', 'max:80'],
-            'phone' => ['required_without:customer', 'nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:120'],
+            'customer' => Fields::ulid(required: false),
+            'name' => ['required_without:customer', ...Fields::personName(required: false)],
+            'phone' => ['required_without:customer', ...Fields::phone(required: false)],
+            'email' => Fields::email(required: false, max: 120),
             'consent_whatsapp' => ['nullable', 'boolean'],
-            'vehicle' => ['required', 'string', 'size:26'],
-            'agreed_price' => ['nullable', 'numeric', 'min:1'],
-            'discount' => ['nullable', 'numeric', 'min:0'],
-            'trade_in_value' => ['nullable', 'numeric', 'min:0'],
-            'trade_in' => ['nullable', 'string', 'size:26'],
-            'deposit_required' => ['nullable', 'numeric', 'min:0'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'vehicle' => Fields::ulid(),
+            'agreed_price' => Fields::money(required: false),
+            'discount' => Fields::money(required: false, min: 0),
+            'trade_in_value' => Fields::money(required: false, min: 0),
+            'trade_in' => Fields::ulid(required: false),
+            'deposit_required' => Fields::money(required: false, min: 0),
+            'notes' => Fields::text(1000),
         ];
     }
 }

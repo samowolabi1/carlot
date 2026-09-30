@@ -86,19 +86,19 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
                 <form v-if="editing" class="flex flex-col gap-3 border-t border-divider p-4" @submit.prevent="save">
                     <label v-if="hasPassword" class="field-label">
                         Current password
-                        <input v-model="form.current_password" :type="show ? 'text' : 'password'" autocomplete="current-password" required class="field" />
+                        <input v-field="{ kind: 'text', max: 200 }" v-model="form.current_password" :type="show ? 'text' : 'password'" autocomplete="current-password" required class="field" />
                         <InputError :message="form.errors.current_password" />
                         <Link v-if="email" :href="route('password.request', { email })" class="self-start text-[13px] font-semibold text-forest hover:text-clay">Forgot it? Reset it by email</Link>
                     </label>
                     <label class="field-label">
                         New password
-                        <input v-model="form.password" :type="show ? 'text' : 'password'" autocomplete="new-password" required minlength="8" class="field" />
+                        <input v-field="'new_password'" v-model="form.password" :type="show ? 'text' : 'password'" autocomplete="new-password" required minlength="8" class="field" />
                         <span class="font-normal text-muted">At least 8 characters, with letters and numbers.</span>
                         <InputError :message="form.errors.password" />
                     </label>
                     <label class="field-label">
                         Type it again
-                        <input v-model="form.password_confirmation" :type="show ? 'text' : 'password'" autocomplete="new-password" required class="field" />
+                        <input v-field="{ kind: 'text', max: 72 }" v-model="form.password_confirmation" :type="show ? 'text' : 'password'" autocomplete="new-password" required class="field" />
                     </label>
                     <label class="flex min-h-11 cursor-pointer items-center gap-3 text-[14px]"><input v-model="show" type="checkbox" class="h-5 w-5 accent-forest" />Show passwords</label>
                     <div class="flex gap-2">
@@ -113,7 +113,7 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
                         <p class="text-[14px] text-muted">You'll sign in with a one-time code{{ google.connected ? ' or Google' : '' }} instead.</p>
                         <label class="field-label">
                             Current password
-                            <input v-model="removeForm.current_password" type="password" autocomplete="current-password" required class="field" />
+                            <input v-field="{ kind: 'text', max: 200 }" v-model="removeForm.current_password" type="password" autocomplete="current-password" required class="field" />
                             <InputError :message="removeForm.errors.current_password" />
                         </label>
                         <div class="flex gap-2">

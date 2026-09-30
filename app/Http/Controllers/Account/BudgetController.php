@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Account;
 
 use App\Domain\Finance\Actions\SaveBudget;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +49,7 @@ class BudgetController extends Controller
     /** How many live cars a price covers, for "Show 31 cars within budget". */
     public function count(Request $request): JsonResponse
     {
-        $max = (int) $request->validate(['max' => ['required', 'integer', 'min:0']])['max'];
+        $max = (int) $request->validate(['max' => Fields::money(min: 0)])['max'];
 
         return response()->json([
             'count' => Vehicle::query()->marketplace()->whereNotNull('vehicles.price')->where('vehicles.price', '<=', $max * 100)->count(),

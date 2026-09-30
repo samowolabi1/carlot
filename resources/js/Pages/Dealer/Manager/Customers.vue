@@ -60,7 +60,7 @@ watch(search, () => {
             <label class="relative lg:w-80">
                 <span class="sr-only">Search customers</span>
                 <Icon name="search" class="absolute top-3.5 left-3 text-muted" :size="18" />
-                <input v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
+                <input v-field="{ kind: 'text', max: 60 }" v-model="search" type="search" class="field h-11 pl-10" placeholder="Search name or phone" />
             </label>
         </div>
 

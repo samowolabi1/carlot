@@ -3,7 +3,7 @@ import InputError from '@/components/InputError.vue';
 import type { FilterOptions, Filters } from '@/components/marketplace/types';
 import { useLocation } from '@/composables/useLocation';
 import { useShared } from '@/composables/useShared';
-import { formatNaira, parseAmount } from '@/lib/format';
+import { formatNaira, typedAmount } from '@/lib/format';
 import { reactive } from 'vue';
 
 const props = defineProps<{ filters: Filters; options: FilterOptions }>();
@@ -25,7 +25,7 @@ function toggle<T>(list: T[], value: T) {
 }
 
 function money(field: 'price_min' | 'price_max', e: Event) {
-    state[field] = parseAmount((e.target as HTMLInputElement).value);
+    state[field] = typedAmount((e.target as HTMLInputElement).value);
 }
 
 async function setRadius(km: number | null) {
@@ -46,9 +46,9 @@ defineExpose({ state });
         <div class="flex flex-col gap-2.5 border-b border-divider pb-4">
             <h3 class="font-sans text-[15px] font-semibold">Price</h3>
             <div class="flex items-center gap-2.5">
-                <input :value="formatNaira(state.price_min)" class="field h-[46px]" inputmode="numeric" placeholder="Min" aria-label="Minimum price" @input="money('price_min', $event)" />
+                <input v-field="{ kind: 'money', min: 0 }" :value="formatNaira(state.price_min)" class="field h-[46px]" inputmode="numeric" placeholder="Min" aria-label="Minimum price" @input="money('price_min', $event)" />
                 <span class="text-muted">–</span>
-                <input :value="formatNaira(state.price_max)" class="field h-[46px]" inputmode="numeric" placeholder="Max" aria-label="Maximum price" @input="money('price_max', $event)" />
+                <input v-field="{ kind: 'money', min: 0 }" :value="formatNaira(state.price_max)" class="field h-[46px]" inputmode="numeric" placeholder="Max" aria-label="Maximum price" @input="money('price_max', $event)" />
             </div>
         </div>
 

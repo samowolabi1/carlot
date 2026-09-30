@@ -100,7 +100,7 @@ function submit() {
                 </fieldset>
                 <label class="field-label">
                     More details <span class="font-normal text-muted">(optional)</span>
-                    <textarea v-model="form.details" rows="3" maxlength="500" class="field h-auto py-2" />
+                    <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.details" rows="3" class="field h-auto py-2" />
                     <InputError :message="form.errors.details || form.errors.id" />
                 </label>
                 <button type="submit" class="btn btn-primary h-[52px] rounded-[14px]" :disabled="form.processing || !form.reason">Send report</button>

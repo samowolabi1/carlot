@@ -8,6 +8,8 @@ use App\Domain\Messaging\Messenger;
 use App\Domain\Messaging\Models\MessageTemplate;
 use App\Domain\Support\PhoneNumber;
 use App\Filament\Resources\MessageTemplateResource;
+use App\Rules\FieldPattern;
+use App\Rules\PhoneNumberRule;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -41,7 +43,7 @@ class EditMessageTemplate extends EditRecord
             Action::make('test')->label('Send a test')->icon('heroicon-o-paper-airplane')->color('gray')
                 ->modalDescription('Sends this message with sample values, as saved (save your changes first). WhatsApp first, then SMS.')
                 ->form([
-                    Forms\Components\TextInput::make('phone')->label('Phone number')->tel()->required()->placeholder('0803 123 4567'),
+                    Forms\Components\TextInput::make('phone')->label('Phone number')->tel()->required()->maxLength(20)->rules([new FieldPattern('phone'), new PhoneNumberRule])->placeholder('0803 123 4567'),
                     Forms\Components\Toggle::make('sms')->label('Send as SMS only'),
                 ])
                 ->action(function (array $data, Messenger $messenger): void {

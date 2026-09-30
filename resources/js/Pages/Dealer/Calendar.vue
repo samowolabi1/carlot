@@ -413,7 +413,7 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
                     <form v-else class="flex flex-col gap-2" @submit.prevent="cancel">
                         <label class="field-label">
                             Reason for the buyer
-                            <input v-model="cancelForm.reason" class="field" maxlength="200" placeholder="e.g. The car has been sold" />
+                            <input v-field="{ kind: 'text', max: 200 }" v-model="cancelForm.reason" class="field" placeholder="e.g. The car has been sold" />
                         </label>
                         <button type="submit" class="btn btn-primary h-11 text-[14px]" :disabled="cancelForm.processing">Cancel and tell the buyer</button>
                     </form>

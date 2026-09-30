@@ -66,7 +66,7 @@ function submit() {
                 <h3 v-if="waiting" class="font-sans text-[15px] font-bold">Replace the documents</h3>
                 <label class="field-label max-w-xs">
                     CAC registration number
-                    <input v-model="form.cac_number" class="field" placeholder="RC 1234567" autocomplete="off" inputmode="text" maxlength="14" required />
+                    <input v-field="{ kind: 'text', max: 20 }" v-model="form.cac_number" class="field" placeholder="RC 1234567" autocomplete="off" inputmode="text" required />
                     <InputError :message="form.errors.cac_number" />
                 </label>
                 <div class="grid gap-4 md:grid-cols-2">

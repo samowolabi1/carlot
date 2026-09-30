@@ -72,6 +72,6 @@ it('does not record a payment against another lot\'s order through sync', functi
 it('does not let one lot order another lot\'s car', function () {
     $car = Vehicle::factory()->available()->create(['lot_id' => $this->theirs->id]);
 
-    $this->actingAs($this->mine->owner)->post(route('dealer.manager.orders.store', $this->mine), ['vehicle' => $car->ulid, 'name' => 'X', 'phone' => '08035550999'])
+    $this->actingAs($this->mine->owner)->post(route('dealer.manager.orders.store', $this->mine), ['vehicle' => $car->ulid, 'name' => 'Xavier', 'phone' => '08035550999'])
         ->assertSessionHasErrors('vehicle');
 });

@@ -101,7 +101,7 @@ const tone: Record<string, string> = {
 
                     <label class="field-label">
                         Subject
-                        <input v-model="form.subject" class="field h-11" maxlength="160" required placeholder="e.g. Deposit from a buyer hasn't reached our account" />
+                        <input v-field="{ kind: 'text', min: 4, max: 160 }" v-model="form.subject" class="field h-11" required placeholder="e.g. Deposit from a buyer hasn't reached our account" />
                         <InputError :message="form.errors.subject" />
                     </label>
 
@@ -122,7 +122,7 @@ const tone: Record<string, string> = {
 
                     <label class="field-label">
                         Message
-                        <textarea
+                        <textarea v-field="{ kind: 'text', min: 10, max: 5000 }"
                             v-model="form.body"
                             rows="6"
                             maxlength="5000"

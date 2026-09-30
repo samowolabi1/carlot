@@ -7,6 +7,7 @@ use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotInvitation;
 use App\Domain\Lots\Models\LotMember;
+use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -57,7 +58,7 @@ class StaffController extends Controller
         Gate::authorize('manageStaff', $lot);
 
         $data = $request->validate([
-            'contact' => ['required', 'string', 'max:255'],
+            'contact' => ['required', 'string', 'max:190'],
             'role' => ['required', Rule::enum(LotRole::class)->only(LotRole::invitable())],
             'onboarding' => ['sometimes', 'boolean'],
         ]);
@@ -65,7 +66,7 @@ class StaffController extends Controller
         $contact = trim($data['contact']);
 
         if (str_contains($contact, '@')) {
-            validator(['contact' => $contact], ['contact' => ['email']])->validate();
+            validator(['contact' => $contact], ['contact' => Fields::email()])->validate();
             $contact = strtolower($contact);
         } else {
             $contact = PhoneNumber::tryNormalize($contact)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Account;
 use App\Domain\Accounts\Actions\SetPassword;
 use App\Domain\Accounts\Actions\SignInWithGoogle;
 use App\Domain\Audit\AuditLog;
+use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Controller;
@@ -12,7 +13,6 @@ use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -46,7 +46,7 @@ class SecurityController extends Controller
         $user = $request->user();
         $data = $request->validate([
             'current_password' => [$user->password !== null ? 'required' : 'nullable', 'string', 'max:200'],
-            'password' => ['required', 'string', 'max:200', 'confirmed', Password::min(8)->letters()->numbers()],
+            'password' => Fields::newPassword(),
         ]);
 
         $first = $user->password === null;

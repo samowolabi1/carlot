@@ -67,7 +67,7 @@ class LocationSessionController extends Controller
         $data = $request->validate([
             'lat' => ['required', 'numeric', 'between:-90,90'],
             'lng' => ['required', 'numeric', 'between:-180,180'],
-            'accuracy' => ['nullable', 'numeric', 'min:0'],
+            'accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
         ]);
 
         $update->run($session, $request->user(), (float) $data['lat'], (float) $data['lng'], isset($data['accuracy']) ? (int) round((float) $data['accuracy']) : null);

@@ -157,12 +157,12 @@ const submit = () => form.post(route('dealer.ads.store', lotSlug.value), { force
 
                     <label class="field-label">
                         Headline <span class="font-normal text-muted">{{ form.headline.length }}/60</span>
-                        <input v-model="form.headline" class="field h-11" maxlength="60" required placeholder="e.g. December deals on Toyota SUVs" />
+                        <input v-field="{ kind: 'text', min: 4, max: 60 }" v-model="form.headline" class="field h-11" required placeholder="e.g. December deals on Toyota SUVs" />
                         <InputError :message="form.errors.headline" />
                     </label>
                     <label class="field-label">
                         Short line <span class="font-normal text-muted">(optional) {{ form.subtext.length }}/120</span>
-                        <input v-model="form.subtext" class="field h-11" maxlength="120" placeholder="e.g. Foreign-used, duty paid, inspected. Ikeja." />
+                        <input v-field="{ kind: 'text', max: 120 }" v-model="form.subtext" class="field h-11" placeholder="e.g. Foreign-used, duty paid, inspected. Ikeja." />
                         <InputError :message="form.errors.subtext" />
                     </label>
                     <label class="field-label">
@@ -195,7 +195,7 @@ const submit = () => form.post(route('dealer.ads.store', lotSlug.value), { force
                         </label>
                         <label class="field-label">
                             City
-                            <input v-model="form.city" class="field h-11" maxlength="60" placeholder="e.g. Lagos" />
+                            <input v-field="{ kind: 'place', max: 60 }" v-model="form.city" class="field h-11" placeholder="e.g. Lagos" />
                         </label>
                     </div>
                 </section>

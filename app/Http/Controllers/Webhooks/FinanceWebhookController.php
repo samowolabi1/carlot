@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Domain\Finance\Actions\UpdateFinanceApplication;
 use App\Domain\Finance\Models\FinanceApplication;
+use App\Domain\Support\Fields;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class FinanceWebhookController extends Controller
             'reference' => ['required', 'string', 'max:100'],
             'status' => ['required', 'in:received,pre_approved,declined'],
             'message' => ['nullable', 'string', 'max:255'],
-            'approved_amount' => ['nullable', 'integer', 'min:0'],
+            'approved_amount' => ['nullable', 'integer', 'min:0', 'max:'.(Fields::MONEY_MAX * 100)],
         ]);
 
         $application = FinanceApplication::where('partner', config('lotlink.finance_partner.code'))->where('external_ref', $data['reference'])->firstOrFail();
