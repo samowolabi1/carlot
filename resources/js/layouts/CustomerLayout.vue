@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LegalFooter from '@/components/LegalFooter.vue';
+import DashboardMenu from '@/components/DashboardMenu.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import SupportViewBar from '@/components/SupportViewBar.vue';
 import Icon, { type IconName } from '@/components/Icon.vue';
@@ -51,12 +52,7 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
                             <Icon name="bell" :size="20" />
                             <span v-if="unread?.notifications" class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-clay" />
                         </Link>
-                        <Link
-                            v-if="user.role === 'staff'"
-                            :href="route('dealer.home')"
-                            class="hidden h-11 items-center rounded-full border border-line bg-white px-4 text-[14px] font-semibold text-forest no-underline md:inline-flex"
-                            >Dealer dashboard</Link
-                        >
+                        <DashboardMenu />
                         <Link :href="route('logout')" method="post" as="button" class="flex h-11 items-center gap-2 rounded-full border border-line bg-white px-4 text-[14px] font-medium">
                             <Icon name="logout" :size="18" />
                             <span class="hidden sm:inline">Sign out</span>
