@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureProfileComplete;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetCurrentLender;
 use App\Http\Middleware\SetCurrentLot;
 use App\Http\Middleware\TouchLastSeen;
 use Illuminate\Foundation\Application;
@@ -35,10 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [TouchLastSeen::class]);
 
         // Payment providers can't send a CSRF token; the webhooks check their signature or secret hash instead.
-        $middleware->validateCsrfTokens(except: ['webhooks/paystack', 'webhooks/flutterwave', 'webhooks/finance']);
+        $middleware->validateCsrfTokens(except: ['webhooks/paystack', 'webhooks/flutterwave', 'webhooks/finance/*']);
 
         $middleware->alias([
             'lot.member' => SetCurrentLot::class,
+            'lender.member' => SetCurrentLender::class,
             'profile.complete' => EnsureProfileComplete::class,
         ]);
 

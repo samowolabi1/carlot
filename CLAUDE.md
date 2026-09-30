@@ -122,10 +122,18 @@ Run all four before pushing.
   per car and account, JPEG copy for Instagram, tracked share link in the caption). Tokens use the `encrypted` cast.
 - Custom domains: `CustomDomains` (TXT `_lotlink.{domain}` = `lotlink-verify={token}`, `DnsLookup` faked in tests);
   a verified domain's `/` renders the mini-site; Caddy asks `/internal/domains/allowed`. Enterprise (`custom_domain`).
-- Finance hand-off: `FinancePartner` (log | http). `SubmitFinanceApplication` needs consent; applicant data is
-  encrypted and never shown to lots; partner updates arrive at `/webhooks/finance` (HMAC-SHA256). The lot hears only through
-  `FinanceLeadNotice`: a `LeadSource::Finance` ("Car loan") lead, a chat line and a `DealAlert` when the buyer applies (not when the
-  partner can't be reached) and when they're pre-approved (with the amount). Never income, commitments, employer or declines.
+- Car loans (`app/Domain/Finance`): lenders are accounts (`Lender`, team in `lender_members`, `LenderRole` admin/officer). They sign up
+  at `/lenders` (`ApplyToBeLender`, licence on the private disk) or an admin onboards them (`OnboardLender`); only `DecideLender` changes
+  their status and only active lenders are offered to buyers (`Lender::lendsFor()`: state, amount, deposit, term). Profile/product/API
+  settings only through `SaveLender` (rules in `LenderRules`). The buyer picks a lender and consents to that one (`SubmitFinanceApplication`);
+  it reaches the lender through `LenderConnections::for()` (portal | api | demo). Every status change goes through
+  `UpdateFinanceApplication` (row lock, `FinanceStatus::canMoveTo()`, thread line, audit, buyer `FinanceUpdate` / lender `LenderAlert`),
+  whether from the portal, the lender's signed webhook `/webhooks/finance/{lender}` (its own `webhook_secret`) or a buyer withdrawing.
+  Messages and documents only through `SendFinanceMessage` (private disk, signed `finance.file` links). The portal is `/lender/{lender}`
+  (`lender.member` → `SetCurrentLender`, `scopeBindings()`); admins see it only in /admin (Car loans). Applicant data is encrypted, shown
+  only to the chosen lender (`FinancePresenter` with the lender side), never to lots, never in /admin. The lot hears only through
+  `FinanceLeadNotice`: a `LeadSource::Finance` lead, chat lines and `DealAlert`s when the buyer applies, is pre-approved, approved
+  and paid for. Never income, commitments, employer, messages, declines or withdrawals.
 - `SecurityHeaders` sets CSP (nonce via `Vite::useCspNonce()`; keep inline scripts out of Blade), HSTS and framing
   rules; `/l/*` stays embeddable. Admin 2FA: `RequireAdminTwoFactor` + `Totp`. Config: `LOTLINK_CSP`, `ADMIN_2FA`.
 - Account deletion: `DeleteAccount` (soft delete, 30-day grace, sign-in restores) then `AnonymiseAccount`.

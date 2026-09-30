@@ -9,9 +9,6 @@ use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Appointments\Policies\AppointmentPolicy;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Gateways\PaymentGateways;
-use App\Domain\Finance\Partners\FinancePartner;
-use App\Domain\Finance\Partners\HttpFinancePartner;
-use App\Domain\Finance\Partners\LogFinancePartner;
 use App\Domain\Finance\Support\FinanceRates;
 use App\Domain\Helpdesk\Models\SupportTicket;
 use App\Domain\Inventory\Models\Vehicle;
@@ -96,10 +93,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PushGateway::class, fn () => filled(config('services.webpush.public_key')) && filled(config('services.webpush.private_key'))
             ? new WebPushGateway((string) config('services.webpush.subject'), (string) config('services.webpush.public_key'), (string) config('services.webpush.private_key'))
             : new LogPushGateway);
-
-        $this->app->bind(FinancePartner::class, fn () => config('lotlink.finance_partner.driver') === 'http'
-            ? new HttpFinancePartner((string) config('lotlink.finance_partner.code'), (string) config('lotlink.finance_partner.name'), (string) config('lotlink.finance_partner.url'), (string) config('lotlink.finance_partner.key'))
-            : new LogFinancePartner);
 
         $this->app->bind(VinDecoder::class, fn () => new NhtsaVinDecoder(config('services.nhtsa.base_url')));
 

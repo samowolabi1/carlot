@@ -56,6 +56,8 @@ class DemoMarketplaceSeeder extends Seeder
         config(['queue.default' => 'sync', 'scout.queue' => false]);
         Queue::setDefaultDriver('sync');
 
+        $this->call(DemoLenderSeeder::class);
+
         $lots = array_map(fn (array $data) => $this->lot($data), self::LOTS);
 
         foreach (self::CARS as $i => [$lotIndex, $make, $model, $year, $trim, $naira, $km, $rgb]) {

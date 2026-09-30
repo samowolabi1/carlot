@@ -14,8 +14,9 @@ use Illuminate\Support\Facades\Notification;
 
 /**
  * Tells the lot about a car loan application on one of its cars, without the private part: that the buyer
- * applied (a "Car loan" lead with a line in the chat), and later that they were pre-approved and for how much.
- * Income, commitments, employer and declines are never shared with the lot.
+ * applied (a "Car loan" lead with a line in the chat), and later that they were pre-approved or approved and for
+ * how much, and when the lender paid the lot. Income, commitments, employer, declines and withdrawals are never
+ * shared with the lot.
  */
 class FinanceLeadNotice
 {
@@ -38,6 +39,29 @@ class FinanceLeadNotice
 
         $this->timeline->post($lead, "Pre-approved for a car loan{$amount} on the {$car}.");
         $this->alert($application, $lead, Name::short($application->user->name)." is pre-approved for a car loan{$amount} on the {$car}.");
+    }
+
+    public function approved(FinanceApplication $application): void
+    {
+        $lead = $this->lead($application);
+        $car = $application->vehicle->title();
+        $amount = $application->approved_amount ? ' of '.Money::format($application->approved_amount, $application->currency) : '';
+        $lender = $application->lenderName();
+
+        $this->timeline->post($lead, "{$lender} approved a car loan{$amount} for the {$car}. They'll arrange payment to the lot.");
+        $this->alert($application, $lead, Name::short($application->user->name)."'s car loan{$amount} for the {$car} is approved by {$lender}.");
+    }
+
+    public function disbursed(FinanceApplication $application): void
+    {
+        $lead = $this->lead($application);
+        $car = $application->vehicle->title();
+        $amount = Money::format($application->disbursed_amount ?? $application->approved_amount ?? $application->amount, $application->currency);
+        $ref = $application->disbursed_reference ? " (reference {$application->disbursed_reference})" : '';
+        $lender = $application->lenderName();
+
+        $this->timeline->post($lead, "{$lender} says it paid {$amount} to the lot for the {$car}{$ref}.");
+        $this->alert($application, $lead, "{$lender} says it paid {$amount} to your lot for ".Name::short($application->user->name)."'s {$car}{$ref}. Check your account.");
     }
 
     private function lead(FinanceApplication $application): Lead

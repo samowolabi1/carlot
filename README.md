@@ -20,7 +20,7 @@ Stack: Laravel 12 · PHP 8.3+ · Inertia 2 + Vue 3 + TypeScript · Tailwind CSS 
 | --- | --- |
 | Facebook and Instagram | Settings → **Social media**: connect a Facebook Page (and the Instagram Business account linked to it) through Meta. Every newly published car is posted once to each, with its cover photo (a JPEG copy for Instagram), price, key specs and a tracked link, so clicks show in Analytics by platform. Auto-post can be turned off per account; failed posts show why and can be retried. `SOCIAL_DRIVER=log` (default) gives a demo Page and writes posts to the log. |
 | Custom domains | Mini-site & QR → **Custom domain** (Enterprise, owners): enter a domain, add a CNAME and a TXT record, press Check. Once verified, the domain opens the lot's mini-site. For HTTPS, Caddy's on-demand TLS asks `/internal/domains/allowed` before issuing a certificate, so only LotLink and verified lot domains get one. |
-| Finance pre-qualification | On a car's "Pay monthly" card, **Check if you qualify**: deposit, term, income, commitments and work, plus an explicit consent box naming the lender. The details go to the finance partner (`FINANCE_PARTNER_DRIVER=log` is a demo lender using the budget rule; `http` posts to a partner API). The buyer sees the answer under Account → Finance applications and gets a notification; later updates arrive by signed webhook. Lots never see the buyer's financial details. |
+| Car loans | On a car's "Pay monthly" card, **Apply for a car loan**: deposit, term, income, commitments and work, a choice of the lenders that lend for that car (with each one's monthly estimate) and a consent box naming the one picked. Lenders sign up at `/lenders` (an admin approves them) or are onboarded by an admin, and work applications in the lender portal (`/lender`): review, ask for documents, pre-approve, approve, record payment to the lot, decline, and message the buyer; or they connect their own system by API and signed webhook (`docs/api.md`). Buyers follow each application, reply and upload documents under Account → Car loan applications. Lots hear only that the buyer applied, was approved and was paid for, never the financial details or a decline. Admins see every lender and application in /admin → Car loans. |
 | Security | New security headers (CSP with per-request nonces in production, HSTS, no framing except mini-sites, nosniff, referrer and permissions policies), secure session cookies in production, trusted-proxy support, and **two-step sign-in for admins** with an authenticator app and recovery codes. Full write-up in `docs/security-review.md`. |
 | Privacy | Account → Privacy and my data → **Delete my account**: closes it now; personal data is removed after 30 days (`accounts:anonymise`, daily); signing in before then cancels it. Lots keep their own sales records. |
 | Load test | `loadtest/marketplace.js` (k6) ramps 100 buyers through home, search, landing pages, cars, lots and slots with the TDD's thresholds; `loadtest/smoke.mjs` is a quick check without k6. Results: see `loadtest/README.md`. |
@@ -295,6 +295,12 @@ components; run `php artisan optimize:clear` and `php artisan filament:optimize-
   and an inspection at Demo Lot Ikeja, and an independent inspector: sign in as `08000000200`
   and open any car to add a signed report. Verification files and inspection PDFs are stored
   under `storage/app/private`.
+- **Car loans and lenders**: `php artisan db:seed --class=DemoLenderSeeder` (also run by DemoMarketplaceSeeder) adds
+  "Demo Finance" (answers at once, nothing is sent anywhere) and "Kobo Motor Finance", which works in the lender portal:
+  sign in with the password option as `lender@lotlink.test` / `password` and open `/lender`. As a buyer, open a car →
+  Apply for a car loan → pick Kobo; then review, ask for documents, approve and record payment in the portal, and follow it
+  under Account → Car loan applications. New lenders sign up at `/lenders`; approve them (or onboard one yourself) in
+  `/admin` → Car loans → Lenders, where Applications shows every application across lenders.
 - **Map**: set `GOOGLE_MAPS_BROWSER_KEY` for the interactive Google map with a draggable pin.
   Without it, "Use my current location" (phone GPS) and manual coordinates still work.
   Geolocation needs HTTPS or localhost; enable SSL in Laragon to test on a phone.
@@ -342,8 +348,8 @@ same variables and button, then enter its name in `/admin` → Message templates
 1. `APP_ENV=production`, `APP_DEBUG=false`, a real `APP_URL` on HTTPS, `TRUSTED_PROXIES` for your proxy.
 2. `PAYMENT_DRIVER=live`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
 3. Optional integrations: `SOCIAL_DRIVER=meta` with `META_APP_ID`/`META_APP_SECRET` (redirect URL
-   `https://your-domain/dealer/social/callback`); `FINANCE_PARTNER_DRIVER=http` with the partner's URL, key and
-   `FINANCE_PARTNER_WEBHOOK_SECRET` (webhook `https://your-domain/webhooks/finance`); `COMPANY_REGISTRY_DRIVER=dojah` with
+   `https://your-domain/dealer/social/callback`); car loan lenders are set up in /admin → Car loans → Lenders (no env
+   settings: each API lender's URL, key and webhook secret live on the lender); `COMPANY_REGISTRY_DRIVER=dojah` with
    `DOJAH_APP_ID` / `DOJAH_SECRET_KEY` (and `DOJAH_BASE_URL=https://sandbox.dojah.io` while testing) to look up each CAC
    number a lot sends: the verification queue then shows the registered name, status and date, how well the name matches
    the lot's, and flags numbers that aren't found, inactive companies and names that don't match. Admins still approve.

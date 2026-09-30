@@ -61,6 +61,12 @@ use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\Lender\ApplicationController as LenderApplicationController;
+use App\Http\Controllers\Lender\JoinController;
+use App\Http\Controllers\Lender\LicenceController;
+use App\Http\Controllers\Lender\PortalController;
+use App\Http\Controllers\Lender\SettingsController as LenderSettingsController;
+use App\Http\Controllers\Lender\TeamController as LenderTeamController;
 use App\Http\Controllers\Location\LocationSessionController;
 use App\Http\Controllers\Marketplace\AdController;
 use App\Http\Controllers\Marketplace\CarController;
@@ -100,11 +106,12 @@ Route::get('/car/{ref}', CarController::class)->where('ref', '[0-9A-Za-z]{26}(-[
 Route::get('/compare', CompareController::class)->name('compare');
 Route::get('/l/{lot:slug}', LotSiteController::class)->name('lots.show');
 Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
+Route::get('/lenders', [JoinController::class, 'show'])->name('lenders.join');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
 // Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
 Route::post('/webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
 Route::post('/webhooks/flutterwave', FlutterwaveWebhookController::class)->name('webhooks.flutterwave');
-Route::post('/webhooks/finance', FinanceWebhookController::class)->middleware('throttle:60,1')->name('webhooks.finance');
+Route::post('/webhooks/finance/{lender:slug}', FinanceWebhookController::class)->middleware('throttle:60,1')->name('webhooks.finance');
 
 // Local stand-in for Paystack's checkout (PAYMENT_DRIVER=sandbox).
 Route::middleware('signed')->group(function () {
@@ -254,7 +261,34 @@ Route::middleware(['auth', 'profile.complete'])->group(function () {
     // Finance pre-qualification (M10)
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/car/{car}/finance', [FinanceController::class, 'create'])->name('finance.create');
-    Route::post('/vehicles/{car}/finance', [FinanceController::class, 'store'])->middleware('throttle:5,60')->name('finance.store');
+    Route::post('/vehicles/{car}/finance', [FinanceController::class, 'store'])->middleware('throttle:10,60')->name('finance.store');
+    Route::get('/finance/{application}', [FinanceController::class, 'show'])->name('finance.show');
+    Route::post('/finance/{application}/messages', [FinanceController::class, 'message'])->middleware('throttle:20,1')->name('finance.message');
+    Route::post('/finance/{application}/withdraw', [FinanceController::class, 'withdraw'])->name('finance.withdraw');
+    Route::get('/finance-files/{message}', [FinanceController::class, 'file'])->middleware('signed')->name('finance.file');
+
+    // Lender portal: lenders sign up, an admin approves them, and their team works buyers' car loan applications.
+    Route::post('/lenders', [JoinController::class, 'store'])->middleware('throttle:5,60')->name('lenders.store');
+    Route::get('/lender', [PortalController::class, 'home'])->name('lender.home');
+    Route::get('/lender-licences/{lender}', LicenceController::class)->middleware('signed')->name('lenders.licence');
+    Route::prefix('/lender/{lender}')
+        ->middleware('lender.member')
+        ->name('lender.')
+        ->scopeBindings()
+        ->group(function () {
+            Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
+            Route::get('/applications', [LenderApplicationController::class, 'index'])->name('applications.index');
+            Route::get('/applications/{application}', [LenderApplicationController::class, 'show'])->name('applications.show');
+            Route::post('/applications/{application}/status', [LenderApplicationController::class, 'status'])->middleware('throttle:30,1')->name('applications.status');
+            Route::post('/applications/{application}/assign', [LenderApplicationController::class, 'assign'])->name('applications.assign');
+            Route::post('/applications/{application}/messages', [LenderApplicationController::class, 'message'])->middleware('throttle:30,1')->name('applications.message');
+            Route::get('/team', [LenderTeamController::class, 'index'])->name('team');
+            Route::post('/team', [LenderTeamController::class, 'store'])->middleware('throttle:20,60')->name('team.store');
+            Route::delete('/team/{member}', [LenderTeamController::class, 'destroy'])->name('team.destroy');
+            Route::get('/settings', [LenderSettingsController::class, 'edit'])->name('settings');
+            Route::put('/settings', [LenderSettingsController::class, 'update'])->name('settings.update');
+            Route::post('/settings/secret', [LenderSettingsController::class, 'secret'])->middleware('throttle:10,60')->name('settings.secret');
+        });
     Route::get('/reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
     Route::post('/reservations/{reservation}/sent', [ReservationController::class, 'sent'])->middleware('throttle:10,1')->name('reservations.sent');
 

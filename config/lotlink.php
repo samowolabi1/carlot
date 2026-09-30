@@ -72,15 +72,6 @@ return [
         ],
     ],
 
-    'finance_partner' => [
-        'driver' => env('FINANCE_PARTNER_DRIVER', 'log'),
-        'code' => env('FINANCE_PARTNER_CODE', 'demo'),
-        'name' => env('FINANCE_PARTNER_NAME', 'Demo Finance'),
-        'url' => env('FINANCE_PARTNER_URL'),
-        'key' => env('FINANCE_PARTNER_KEY'),
-        'webhook_secret' => env('FINANCE_PARTNER_WEBHOOK_SECRET'),
-    ],
-
     'invitation_ttl_days' => 7,
 
     // Billing (TDD M16). "sandbox" fakes the Paystack checkout so plans and spotlights can be

@@ -64,3 +64,22 @@ The lots come from `GET /me`. Every path checks membership (`403` otherwise) and
 
 Push notifications for the app are not part of v1 (the web uses Web Push); the app can poll `/notifications`.
 Adding and editing cars, Lot Manager and billing stay on the website for now.
+
+## Lenders' systems (car loans)
+
+A lender that chooses "Our own system (API)" in the lender portal (Settings) or is set up that way by an admin gets each
+application posted to it instead of waiting in the portal. There is no token: LotLink calls the lender, and the lender calls back.
+
+**LotLink → lender**: `POST {api_url}/applications` with `Authorization: Bearer {api_key}` and JSON:
+`reference` (LotLink's id for the application), `amount`, `deposit` (whole naira), `currency`, `tenor_months`,
+`vehicle {title, year, price}`, `lot {name, city, state}`, `applicant {name, phone, email, monthly_income, monthly_commitments,
+employment, employer}`, `consented_at`, `callback_url`. Answer `2xx` with `{reference, status?, message?, approved_amount?}`
+(`status`: `received` by default, or `pre_approved` / `declined` straight away). Any other answer marks the application
+"Couldn't send" and nothing is kept on your side.
+
+**Lender → LotLink**: `POST /webhooks/finance/{lender slug}` (the `callback_url`) with a JSON body signed with HMAC-SHA256 of the
+raw body using the lender's webhook secret, in `X-LotLink-Signature`. Fields: `reference` (LotLink's or yours), `status`
+(`received`, `documents_requested`, `pre_approved`, `approved`, `disbursed`, `declined`), optional `message` (shown to the buyer),
+`approved_amount`, `rate` (% a year), `tenor_months`, `disbursed_amount`, `disbursed_reference`. Replies are JSON: `200 {ok, status}`,
+`401` bad signature, `404` not your application, `422 {errors}` invalid or not allowed from the current status (for example
+`disbursed` before `approved`). Repeating the current status only updates the message.

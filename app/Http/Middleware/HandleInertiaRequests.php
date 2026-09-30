@@ -9,6 +9,7 @@ use App\Domain\Deals\Enums\TradeInStatus;
 use App\Domain\Deals\Models\Offer;
 use App\Domain\Deals\Models\Reservation;
 use App\Domain\Deals\Models\TradeIn;
+use App\Domain\Finance\Models\Lender;
 use App\Domain\Helpdesk\Models\SupportTicket;
 use App\Domain\Leads\Enums\LeadStage;
 use App\Domain\Leads\Models\Conversation;
@@ -55,6 +56,10 @@ class HandleInertiaRequests extends Middleware
                     'role' => $lot->pivot->role->value,
                 ])
                 : [],
+            // Lenders this person works for (the link to the lender portal) and, inside the portal, the one open.
+            'lenders' => fn () => $user ? $user->lenders()->orderBy('name')->get(['lenders.id', 'slug', 'name', 'status'])
+                ->map(fn (Lender $l) => ['slug' => $l->slug, 'name' => $l->name, 'status' => $l->status->value])->all() : [],
+            'currentLender' => fn () => value($request->attributes->get('currentLender')),
             'currentLot' => function () use ($request) {
                 $lot = app(CurrentLot::class)->get();
 

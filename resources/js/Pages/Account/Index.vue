@@ -5,7 +5,8 @@ import { usePwaInstall } from '@/composables/usePwaInstall';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import { formatNaira } from '@/lib/format';
 import InputError from '@/components/InputError.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import type { SharedProps } from '@/types';
 import { useShared } from '@/composables/useShared';
 import { computed, ref } from 'vue';
 
@@ -18,6 +19,8 @@ const props = defineProps<{
 }>();
 
 const { unread } = useShared();
+const page = usePage<SharedProps>();
+const lenders = computed(() => page.props.lenders ?? []);
 const local = useBudget();
 const install = usePwaInstall();
 // A budget worked out before signing in still shows until it is saved to the account.
@@ -51,8 +54,11 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
                 <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
                 <Link :href="`${route('bookings.index')}#offers`" :class="row">Offers and trade-ins<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <Link :href="route('finance.index')" :class="row">Finance applications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
+                <Link :href="route('finance.index')" :class="row">Car loan applications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('following')" :class="row">Lots I follow<span class="text-[13px] text-muted">{{ counts.following || '' }}</span></Link>
+                <Link v-for="l in lenders" :key="l.slug" :href="route('lender.dashboard', l.slug)" :class="row"
+                    >Lender portal<span class="text-[13px] text-muted">{{ l.name }}</span></Link
+                >
             </nav>
 
             <section v-if="orders.length" class="card overflow-hidden" aria-labelledby="orders-heading">
@@ -74,6 +80,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
                 <Link :href="route('account.security')" :class="row">Sign-in and security<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
+                <Link v-if="!lenders.length" :href="route('lenders.join')" :class="row">Lend with LotLink (banks and finance companies)<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <button type="button" :class="row" class="w-full text-left" :aria-expanded="deleting" @click="deleting = !deleting">Privacy and my data<Icon name="chevronDown" :size="18" class="text-muted" :class="{ 'rotate-180': deleting }" /></button>
             </nav>
 

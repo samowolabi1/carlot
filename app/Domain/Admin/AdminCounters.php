@@ -4,6 +4,8 @@ namespace App\Domain\Admin;
 
 use App\Domain\Advertising\Enums\AdStatus;
 use App\Domain\Advertising\Models\AdCampaign;
+use App\Domain\Finance\Enums\LenderStatus;
+use App\Domain\Finance\Models\Lender;
 use App\Domain\Helpdesk\Enums\TicketPriority;
 use App\Domain\Helpdesk\Enums\TicketStatus;
 use App\Domain\Helpdesk\Models\SupportTicket;
@@ -27,11 +29,11 @@ final class AdminCounters
     private static ?array $memo = null;
 
     /**
-     * @return array{lots_waiting: int, verifications: int, signals: int, reports: int, reviews: int, adverts: int, tickets: int, urgent_tickets: bool, models: int}
+     * @return array{lots_waiting: int, verifications: int, signals: int, reports: int, reviews: int, adverts: int, tickets: int, urgent_tickets: bool, models: int, lenders_waiting: int}
      */
     public static function all(): array
     {
-        /** @var array{lots_waiting: int, verifications: int, signals: int, reports: int, reviews: int, adverts: int, tickets: int, urgent_tickets: bool, models: int} */
+        /** @var array{lots_waiting: int, verifications: int, signals: int, reports: int, reviews: int, adverts: int, tickets: int, urgent_tickets: bool, models: int, lenders_waiting: int} */
         return self::$memo ??= Cache::remember(self::KEY, self::SECONDS, fn (): array => [
             ...PlatformMetrics::queue(),
             'lots_waiting' => Lot::where('status', LotStatus::Pending)->whereNotNull('submitted_at')->count(),
@@ -39,6 +41,7 @@ final class AdminCounters
             'tickets' => SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->count(),
             'urgent_tickets' => SupportTicket::withoutGlobalScopes()->where('status', TicketStatus::Open)->where('priority', TicketPriority::Urgent)->exists(),
             'models' => VehicleModel::whereNull('approved_at')->count(),
+            'lenders_waiting' => Lender::where('status', LenderStatus::Pending)->count(),
         ]);
     }
 

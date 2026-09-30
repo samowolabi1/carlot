@@ -65,7 +65,7 @@ const loan = computed(() => loanFor(props.finance.price, depositPercent.value, m
             </div>
         </dl>
         <p class="text-[12px] text-muted">Estimate only, not a loan offer. Interest over the loan: about {{ formatNaira(loan.interest) }}.</p>
-        <Link v-if="applyHref" :href="applyHref" class="btn btn-outline h-11 self-start no-underline">Check if you qualify</Link>
+        <Link v-if="applyHref" :href="applyHref" class="btn btn-outline h-11 self-start no-underline">Apply for a car loan</Link>
     </section>
 
     <section class="card flex flex-col gap-3 p-4" aria-labelledby="costs-heading">

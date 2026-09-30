@@ -5,6 +5,7 @@ namespace App\Domain\Accounts\Models;
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Notifications\ResetPasswordLink;
 use App\Domain\Finance\Models\Budget;
+use App\Domain\Finance\Models\Lender;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
@@ -107,6 +108,12 @@ class User extends Authenticatable implements FilamentUser, HasName
             ->using(LotMember::class)
             ->withPivot(['role', 'accepted_at'])
             ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Lender, $this> lenders whose portal this person works in */
+    public function lenders(): BelongsToMany
+    {
+        return $this->belongsToMany(Lender::class, 'lender_members')->withPivot('role')->withTimestamps();
     }
 
     /** @return BelongsToMany<Vehicle, $this> */

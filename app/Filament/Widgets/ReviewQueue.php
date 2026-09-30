@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Domain\Admin\AdminCounters;
 use App\Filament\Resources\AdCampaignResource;
 use App\Filament\Resources\FraudSignalResource;
+use App\Filament\Resources\LenderResource;
 use App\Filament\Resources\LotResource;
 use App\Filament\Resources\LotVerificationResource;
 use App\Filament\Resources\ReportResource;
@@ -22,7 +23,7 @@ class ReviewQueue extends StatsOverviewWidget
 
     protected ?string $heading = 'Review queue';
 
-    /** Seven counts: four across. */
+    /** Eight counts: four across. */
     protected function getColumns(): int
     {
         return 4;
@@ -44,6 +45,7 @@ class ReviewQueue extends StatsOverviewWidget
             $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl()),
             $stat('Adverts to check', $q['adverts'], AdCampaignResource::getUrl()),
             $stat('Support tickets', $q['tickets'], SupportTicketResource::getUrl()),
+            $stat('Lenders to approve', $q['lenders_waiting'], LenderResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending']]])),
         ];
     }
 }

@@ -43,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Review queue'),
                 NavigationGroup::make('Marketplace'),
+                NavigationGroup::make('Car loans'),
                 NavigationGroup::make('Support'),
                 NavigationGroup::make('Engagement'),
                 NavigationGroup::make('Billing'),

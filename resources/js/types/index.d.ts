@@ -72,11 +72,24 @@ export interface LotSettings {
     invitations?: { id: number; contact: string; role: LotRole }[];
 }
 
+export interface CurrentLender {
+    slug: string;
+    name: string;
+    initials: string;
+    status: 'pending' | 'active' | 'suspended' | 'rejected';
+    status_label: string;
+    role: 'admin' | 'officer';
+    new_badge: number;
+    unread_badge: number;
+}
+
 export interface SharedProps {
     [key: string]: unknown;
     auth: { user: AuthUser | null };
     lots: LotSummary[];
     currentLot: CurrentLot | null;
+    lenders?: { slug: string; name: string; status: string }[];
+    currentLender?: CurrentLender | null;
     budget: number | null;
     unread: { notifications: number; messages: number } | null;
     regions?: { value: string; label: string }[];

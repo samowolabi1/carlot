@@ -2,6 +2,7 @@
 
 use App\Domain\Accounts\Models\User;
 use App\Domain\Deals\Models\TradeIn;
+use App\Domain\Finance\Enums\LenderIntegration;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\VehicleModel;
@@ -11,9 +12,10 @@ use App\Domain\Lots\Models\LotMember;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Support\LenderFixtures;
 use Tests\Support\MarketplaceFixtures;
 
-uses(MarketplaceFixtures::class);
+uses(MarketplaceFixtures::class, LenderFixtures::class);
 
 /* Owners choose whether buyers can send trade-ins and car loan applications (Settings → Offers and deals). */
 
@@ -36,7 +38,7 @@ beforeEach(function () {
     ]);
     $this->apply = fn () => $this->actingAs($this->buyer)->post(route('finance.store', $this->car->ulid), [
         'monthly_income' => '₦1,500,000', 'monthly_commitments' => '100000', 'employment' => 'salaried',
-        'deposit' => '3000000', 'tenor_months' => 36, 'consent' => true,
+        'deposit' => '3000000', 'tenor_months' => 36, 'consent' => true, 'lender' => $this->lender(['integration' => LenderIntegration::Demo])->slug,
     ]);
     $this->carPage = fn () => $this->actingAs($this->buyer)->get($this->car->publicPath());
 });
