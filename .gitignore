@@ -25,3 +25,6 @@ Thumbs.db
 /public/css/filament
 /public/js/filament
 /public/fonts/filament
+
+# cPanel package output (scripts/build-cpanel.sh)
+/build/
