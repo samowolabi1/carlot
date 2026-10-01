@@ -294,7 +294,7 @@ Run all four before pushing.
   writes `vehicle_price_history` once a car has been listed and fires `VehiclePriceDropped`.
 - Photos (max `Vehicle::MAX_PHOTOS` = 12): browser → `MediaUploads` target (pre-signed R2 PUT, or the app's upload endpoint on a
   local disk) → `AttachVehicleMedia` → `ProcessVehicleMedia` (queue `media`) → WebP 1600/800/400
-  on the media disk. Originals never reach the public disk.
+  on the media disk (`public/media` by default). Originals never reach the public disk.
   `RotateVehicleMedia` writes renditions under new names (`{media}-{rand}-{w}.webp`, the CDN caches forever),
   so always derive files from `VehicleMedia::variantPaths()` / `urls()`, not `variantPath()`. Buyers see photos in
   `PhotoViewer.vue` (quick look via `cars.photos`, zoom on the car page), using the `full` (1600) URL.
@@ -356,6 +356,14 @@ rather than fake data.
 S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
 S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
+
+Hosting: cPanel shared hosting is the target (docs/deploy-cpanel.md, `.env.cpanel.example`, `scripts/build-cpanel.sh`, GitHub
+action "cPanel package"). Nothing may require an always-running process: `QUEUE_VIA_CRON=true` makes the scheduler (one cron
+job) run `queue:work --stop-when-empty` each minute (queues `lotlink.queue_names`; add new queue names there); search falls back to
+MySQL, chat polls, cache/sessions use the database. Public images go only to the `media` disk (= `public/media`, `MEDIA_ROOT`/`MEDIA_URL`;
+`.htaccess` there blocks scripts), always through `config('lotlink.media_disk')`; never the `public` disk or `storage:link`. Private
+files stay on `local`. `ServerHealth` backs `lotlink:doctor` and /admin → System health: add a check when you add a server requirement.
+`lotlink:deploy` is the post-upload command. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
 
 Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in
 `AppServiceProvider`; `HorizonServiceProvider` gates `/horizon` to admins with no local bypass; supervisors `app` and `media` in

@@ -44,7 +44,7 @@ it('gives each lot a unique slug', function () {
 });
 
 it('walks through the wizard steps', function () {
-    Storage::fake('public');
+    Storage::fake(config('lotlink.media_disk'));
     $lot = Lot::factory()->create(['latitude' => null, 'longitude' => null]);
     $owner = $lot->owner;
 
@@ -56,7 +56,7 @@ it('walks through the wizard steps', function () {
         ])
         ->assertRedirect(route('dealer.onboarding.show', [$lot, 'location']));
 
-    Storage::disk('public')->assertExists($lot->fresh()->logo_path);
+    Storage::disk(config('lotlink.media_disk'))->assertExists($lot->fresh()->logo_path);
 
     $this->actingAs($owner)
         ->put(route('dealer.settings.location', $lot), [

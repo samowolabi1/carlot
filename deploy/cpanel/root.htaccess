@@ -1,0 +1,20 @@
+# Only for "method D" in docs/deploy-cpanel.md, when the whole lotlink folder had to be uploaded into the web root
+# (public_html). Copy this file to that folder as .htaccess. It sends every request to public/ and refuses the app's
+# own files (.env, storage, vendor...). Prefer pointing the domain's document root at lotlink/public instead.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Never serve the app's own files.
+    RewriteRule ^(\.env.*|\.git.*|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml)$ - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|deploy|lang|resources|routes|scripts|storage|tests|vendor|node_modules)(/|$) - [F,L,NC]
+
+    # Everything else is served from public/.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

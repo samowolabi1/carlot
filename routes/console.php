@@ -2,11 +2,16 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Proof the cron job runs (shown in /admin → System health and `php artisan lotlink:doctor`). In-process, so it works
+// even where the host blocks starting processes.
+Schedule::call(fn () => Cache::forever('lotlink:cron-heartbeat', now()->toIso8601String()))->everyMinute()->name('cron-heartbeat');
 
 // Appointments (TDD: Scheduled tasks). Needs `php artisan schedule:work` locally, or a
 // cron entry for `php artisan schedule:run` every minute in production.
@@ -58,4 +63,13 @@ Schedule::command('accounts:anonymise')->dailyAt('02:30')->withoutOverlapping();
 // Horizon's dashboard graphs (Redis queue only).
 if (config('queue.default') === 'redis') {
     Schedule::command('horizon:snapshot')->everyFiveMinutes();
+}
+
+// cPanel / shared hosting (QUEUE_VIA_CRON=true): no always-on worker, so each minute's cron run works through the queue
+// for up to ~50 seconds and stops when it is empty. It's last so the tasks above run first. Long jobs (broadcasts)
+// finish even if they run past that; withoutOverlapping keeps the next minute's run from starting a second worker.
+if (config('lotlink.queue_via_cron')) {
+    Schedule::command('queue:work', [
+        '--queue='.config('lotlink.queue_names'), '--stop-when-empty', '--max-time=50', '--tries=3', '--sleep=1', '--memory=256',
+    ])->everyMinute()->withoutOverlapping(20)->name('queue-via-cron');
 }

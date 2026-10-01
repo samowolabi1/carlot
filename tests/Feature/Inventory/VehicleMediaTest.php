@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     Storage::fake('local');
-    Storage::fake('public');
+    Storage::fake(config('lotlink.media_disk'));
     $this->vehicle = Vehicle::factory()->create();
     $this->lot = $this->vehicle->lot;
     $this->actingAs($this->lot->owner);
@@ -47,8 +47,8 @@ it('turns an upload into WebP renditions and removes the original', function () 
 
     foreach ([1600, 800, 400] as $width) {
         $path = VehicleMedia::variantPath($this->vehicle->ulid, $record->ulid, $width);
-        Storage::disk('public')->assertExists($path);
-        expect(getimagesizefromstring(Storage::disk('public')->get($path))['mime'])->toBe('image/webp');
+        Storage::disk(config('lotlink.media_disk'))->assertExists($path);
+        expect(getimagesizefromstring(Storage::disk(config('lotlink.media_disk'))->get($path))['mime'])->toBe('image/webp');
     }
 
     expect(Storage::disk('local')->allFiles('uploads'))->toBeEmpty();
@@ -108,7 +108,7 @@ it('deletes a photo and its files, promoting the next one to cover', function ()
 
     $this->deleteJson(route('dealer.vehicles.media.destroy', [$this->lot, $this->vehicle, $a['ulid']]))->assertOk();
 
-    Storage::disk('public')->assertMissing(VehicleMedia::variantPath($this->vehicle->ulid, $a['ulid'], 1600));
+    Storage::disk(config('lotlink.media_disk'))->assertMissing(VehicleMedia::variantPath($this->vehicle->ulid, $a['ulid'], 1600));
     expect(VehicleMedia::where('ulid', $b['ulid'])->sole()->is_cover)->toBeTrue();
 });
 
@@ -164,11 +164,11 @@ it('rotates a photo into new files and removes the old ones', function () {
         ->and($response['thumb_url'])->toContain(basename((string) $record->thumb_path));
 
     foreach ($record->variantPaths() as $width => $path) {
-        Storage::disk('public')->assertExists($path);
-        expect(getimagesizefromstring(Storage::disk('public')->get($path))[0])->toBeLessThanOrEqual($width);
+        Storage::disk(config('lotlink.media_disk'))->assertExists($path);
+        expect(getimagesizefromstring(Storage::disk(config('lotlink.media_disk'))->get($path))[0])->toBeLessThanOrEqual($width);
     }
     foreach ($old as $path) {
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk(config('lotlink.media_disk'))->assertMissing($path);
     }
 
     // A second turn works from the renamed files.

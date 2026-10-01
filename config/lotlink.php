@@ -13,8 +13,14 @@ return [
     // the launch offer of 3 months free on Starter for the first lots.
     'default_plan' => env('LOTLINK_DEFAULT_PLAN', 'starter'),
 
-    // Disk for logos, covers and (later) car photos. Cloudflare R2 in production.
-    'media_disk' => env('LOTLINK_MEDIA_DISK', 'public'),
+    // The image repository (logos, covers, car photos, adverts, chat photos, share cards): `media` = public/media,
+    // served as plain files. Set to an s3-style disk (e.g. r2) to use a CDN bucket instead.
+    'media_disk' => env('LOTLINK_MEDIA_DISK', 'media'),
+
+    // Shared hosting (cPanel) has no always-running queue worker: the scheduler, run by the one-minute cron job,
+    // works through queued jobs (photo processing, notifications, broadcasts) and stops when the queue is empty.
+    'queue_via_cron' => (bool) env('QUEUE_VIA_CRON', false),
+    'queue_names' => 'critical,media,notifications,default',
 
     // Private disk for original uploads before processing. When it is an s3 disk (R2),
     // browsers upload directly with pre-signed URLs; otherwise through the app.

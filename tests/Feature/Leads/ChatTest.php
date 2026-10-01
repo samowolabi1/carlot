@@ -118,14 +118,14 @@ it('sends preset replies with the lot location and similar cars', function () {
 });
 
 it('re-encodes chat photos and keeps them off the original upload', function () {
-    Storage::fake('public');
-    config(['lotlink.media_disk' => 'public']);
+    Storage::fake(config('lotlink.media_disk'));
     $conversation = ($this->start)();
 
     $this->actingAs($this->buyer)->post(route('conversations.reply', $conversation), ['photo' => UploadedFile::fake()->image('car.jpg', 1200, 900)])->assertRedirect();
 
     $message = $conversation->messages()->sole();
     expect($message->attachment_path)->toEndWith('.webp');
+    Storage::disk(config('lotlink.media_disk'))->assertExists($message->attachment_path);
 });
 
 it('counts unread messages for the buyer and the lot badge', function () {

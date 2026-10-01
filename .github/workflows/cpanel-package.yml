@@ -1,0 +1,40 @@
+name: cPanel package
+
+# Builds lotlink-cpanel.zip (app + production vendor + built front end + admin assets) to download from the run's
+# "Artifacts" and upload to cPanel. Run it from Actions → "cPanel package" → Run workflow, or push a tag like v1.0.0.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_mysql, gd, zip
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dev dependencies (to publish the admin assets)
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build the package
+        run: ./scripts/build-cpanel.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lotlink-cpanel
+          path: build/lotlink-cpanel.zip
+          retention-days: 30

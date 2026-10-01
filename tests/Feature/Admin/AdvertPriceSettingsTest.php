@@ -60,7 +60,7 @@ it('lets an admin change banner and spotlight prices and banner slots', function
 });
 
 it('charges new bookings the new price and keeps what was already booked', function () {
-    Storage::fake('public');
+    Storage::fake(config('lotlink.media_disk'));
     $owner = User::factory()->staff()->create();
     $lot = app(CreateLot::class)->run($owner, ['name' => 'Prime Motors', 'phone' => '+2348021112233']);
     $lot->update(['status' => 'active']);

@@ -38,6 +38,21 @@ return [
             'report' => false,
         ],
 
+        // The image repository: car photos, lot logos and covers, adverts, chat photos, share cards and inspection
+        // photos, written straight into the web root (public/media) so they're served as plain files: no `storage:link`
+        // symlink (often blocked on cPanel) and no PHP per image. Private files (CAC certificates, licences, loan
+        // documents, receipts) never go here: they stay on the `local` disk behind signed links.
+        // On cPanel with the site's files copied into public_html, set MEDIA_ROOT to that folder's media directory.
+        'media' => [
+            'driver' => 'local',
+            'root' => env('MEDIA_ROOT', public_path('media')),
+            'url' => rtrim((string) env('MEDIA_URL', rtrim((string) env('APP_URL', 'http://localhost'), '/').'/media'), '/'),
+            'visibility' => 'public',
+            'permissions' => ['file' => ['public' => 0644, 'private' => 0600], 'dir' => ['public' => 0755, 'private' => 0700]],
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

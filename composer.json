@@ -87,6 +87,9 @@
         "lint": [
             "pint --test",
             "phpstan analyse --memory-limit=1G"
+        ],
+        "pre-autoload-dump": [
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices"
         ]
     },
     "extra": {
@@ -94,7 +97,10 @@
             "dont-discover": [
                 "laravel/horizon"
             ]
-        }
+        },
+        "aws/aws-sdk-php": [
+            "S3"
+        ]
     },
     "config": {
         "optimize-autoloader": true,
@@ -108,7 +114,8 @@
             "php": "8.3.0",
             "ext-pcntl": "8.3",
             "ext-posix": "8.3"
-        }
+        },
+        "platform-check": "php-only"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

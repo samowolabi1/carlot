@@ -284,7 +284,8 @@ components; run `php artisan optimize:clear` and `php artisan filament:optimize-
   default) "Choose Pro" opens a test checkout; press Pay and you're back on Pro. Try the code
   `LAUNCH3`, then Stock → Spotlight. To take real payments, see "Paystack in production" below.
 - **Budget and sharing**: open `/budget`, then any car page. Share cards are saved under
-  `storage/app/public/share-cards`, so run `php artisan storage:link` once if images don't load.
+  `public/media/share-cards` (all public images live in `public/media`, the image repository; no `storage:link` needed).
+  Upgrading from an older copy? Run `php artisan media:move-to-public` once to copy images from `storage/app/public`.
 - **Install the app**: the service worker only runs over HTTPS or on `localhost`/`127.0.0.1`,
   and only with the built files (`npm run build`), not `npm run dev`. On `http://carlot.test`
   the site works normally without it; enable SSL in Laragon to try installing on a phone.
@@ -346,10 +347,19 @@ same variables and button, then enter its name in `/admin` → Message templates
 | `saved_search_match` | Marketing | search name, car, price, lot | see the car |
 | `price_drop` | Marketing | car, new price, amount off, lot | see the car |
 
+### Hosting on cPanel
+
+Everything needed is in [docs/deploy-cpanel.md](docs/deploy-cpanel.md): build the zip (`./scripts/build-cpanel.sh` or the
+**cPanel package** GitHub Action), upload, `.env` from `.env.cpanel.example`, `php artisan lotlink:deploy --seed`, and one
+cron job (`* * * * * cd ~/lotlink && php artisan schedule:run`). Check the server any time at /admin → System health or
+with `php artisan lotlink:doctor`.
+
 ### Going live checklist
 
 1. `APP_ENV=production`, `APP_DEBUG=false`, a real `APP_URL` on HTTPS, `TRUSTED_PROXIES` for your proxy.
-2. `PAYMENT_DRIVER=live`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`, `SCOUT_DRIVER=meilisearch`, R2 disks.
+2. `PAYMENT_DRIVER=live`, `WHATSAPP_DRIVER=meta`, `SMS_DRIVER=termii`. On a VPS: `SCOUT_DRIVER=meilisearch` and optionally R2 for
+   images. **On cPanel shared hosting follow [docs/deploy-cpanel.md](docs/deploy-cpanel.md)** (`.env.cpanel.example`: MySQL queue run by
+   the cron job, images in `public/media`, no Redis, Meilisearch or Reverb).
 3. Optional integrations: `SOCIAL_DRIVER=meta` with `META_APP_ID`/`META_APP_SECRET` (redirect URL
    `https://your-domain/dealer/social/callback`); car loan lenders are set up in /admin → Car loans → Lenders (no env
    settings: each API lender's URL, key and webhook secret live on the lender); `COMPANY_REGISTRY_DRIVER=dojah` with
@@ -411,7 +421,11 @@ are left out of results (the error is logged) rather than breaking search. If Me
 MySQL instead and dealers can still save cars; once it is back, run `php artisan scout:import "App\Domain\Inventory\Models\Vehicle"`
 to catch the index up with changes made in the meantime.
 
-### Photos in production (Cloudflare R2)
+### Photos in production
+
+By default images are files in `public/media` (`LOTLINK_MEDIA_DISK=media`), which suits cPanel. To serve them from a CDN bucket instead:
+
+#### Cloudflare R2 (optional)
 
 1. Create two R2 buckets: `lotlink-uploads` (private) and `lotlink-media` (public, connected to a
    custom domain such as `media.yourdomain.com`), plus an API token with read/write on both.

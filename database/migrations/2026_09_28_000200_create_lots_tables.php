@@ -42,9 +42,10 @@ return new class extends Migration
             $table->index(['city', 'status']);
         });
 
-        // "Lots near me" needs a spatial index, which only MySQL provides. The POINT is
+        // "Lots near me" can use a spatial index, which only MySQL 8 provides (MariaDB, common on cPanel, has no
+        // SRID columns, so it is skipped there; search uses the latitude/longitude columns either way). The POINT is
         // generated from latitude/longitude so application code only ever writes decimals.
-        if (DB::getDriverName() === 'mysql') {
+        if (DB::getDriverName() === 'mysql' && ! str_contains((string) DB::connection()->getPdo()->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
             DB::statement('ALTER TABLE lots ADD location POINT GENERATED ALWAYS AS (ST_SRID(POINT(COALESCE(longitude, 0), COALESCE(latitude, 0)), 4326)) STORED NOT NULL SRID 4326');
             DB::statement('ALTER TABLE lots ADD SPATIAL INDEX lots_location_spatial (location)');
         }

@@ -24,7 +24,7 @@ use Tests\Support\MarketplaceFixtures;
 uses(MarketplaceFixtures::class);
 
 beforeEach(function () {
-    Storage::fake('public');
+    Storage::fake(config('lotlink.media_disk'));
     $this->travelTo(CarbonImmutable::parse('2026-10-05 09:00', 'UTC')); // Mon 10:00 Lagos
     $this->owner = User::factory()->staff()->create(['email' => 'owner@example.com']);
     $this->lot = app(CreateLot::class)->run($this->owner, ['name' => 'Prime Motors', 'city' => 'Ikeja']);
@@ -58,7 +58,7 @@ it('books a homepage banner: paid to LotLink, then checked before it runs', func
         ->and($payment->description)->toBe('Homepage banner · 7 days');
 
     // The creative is cropped to the banner size and re-encoded.
-    [$w, $h] = getimagesizefromstring(Storage::disk('public')->get($campaign->image_path));
+    [$w, $h] = getimagesizefromstring(Storage::disk(config('lotlink.media_disk'))->get($campaign->image_path));
     expect([$w, $h])->toBe([1600, 600]);
 
     ($this->pay)()->assertRedirect(route('dealer.ads.index', $this->lot));

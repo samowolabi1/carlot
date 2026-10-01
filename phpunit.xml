@@ -38,6 +38,6 @@
         <env name="SCOUT_DRIVER" value="null" force="true"/>
         <env name="SCOUT_QUEUE" value="false" force="true"/>
         <env name="LOTLINK_UPLOAD_DISK" value="local" force="true"/>
-        <env name="LOTLINK_MEDIA_DISK" value="public" force="true"/>
+        <env name="LOTLINK_MEDIA_DISK" value="media" force="true"/>
     </php>
 </phpunit>
