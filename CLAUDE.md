@@ -104,7 +104,7 @@ Run all four before pushing.
   always one joined owner; all audit-logged). Every resource declares `adminAreas()` (default owner-only), every page uses
   `Pages\Concerns\AdminPage`, and sensitive actions inside shared screens add `->authorize(fn () => X::allows(AdminArea::…))`.
   Admins aren't edited in Users. Non-panel admin checks use `adminCan()` too (Horizon = System, lender licences = Approvals,
-  support attachments = Support); loan documents never open for staff.
+  support attachments = Support); loan documents never open for staff; the platform figures widget (`PlatformStats`: sales, MRR, churn) is Billing = Owner + Finance.
 - Every admin resource uses `Concerns\AdminsOnly`: authorisation by admin role (never the dealer-side model policies, which
   gave admins 403s and a membership query per row) and record URLs built from the resource's `$recordRouteKeyName`.
   Put new admin pages in one of the panel's navigation groups (order set in `AdminPanelProvider`). Menu badges and the review

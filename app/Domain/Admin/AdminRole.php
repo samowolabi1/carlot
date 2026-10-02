@@ -32,8 +32,8 @@ enum AdminRole: string
             self::Owner => 'Everything, including the admin team, settings and prices.',
             self::Operations => 'Approves lots, lenders and verifications; moderates listings, reports, reviews and adverts; keeps the car catalogue.',
             self::Support => 'Answers support tickets, looks up users and lots, uses "Log in as" and sends broadcasts.',
-            self::Finance => 'Payments, plans, coupons, finance rates and the car loan overview.',
-            self::Viewer => 'Read-only dashboard and review queue.',
+            self::Finance => 'Payments, plans, coupons, finance rates, the car loan overview and the platform figures (sales, MRR, churn).',
+            self::Viewer => 'Read-only review queue on the dashboard.',
         };
     }
 

@@ -2,13 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\PlatformMetrics;
 use App\Domain\Support\Money;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
-/** Platform metrics (TDD M17) over the last 30 days. */
+/** Platform metrics (TDD M17) over the last 30 days: business figures (sales, MRR, churn), so Owners and Finance only. */
 class PlatformStats extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
@@ -18,6 +21,13 @@ class PlatformStats extends StatsOverviewWidget
     protected ?string $heading = 'Platform, last 30 days';
 
     protected ?string $description = 'Updated every 5 minutes.';
+
+    public static function canView(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->adminCan(AdminArea::Billing);
+    }
 
     protected function getStats(): array
     {

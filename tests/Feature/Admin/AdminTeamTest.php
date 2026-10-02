@@ -142,3 +142,14 @@ it('notifies only the admins who look after that work', function () {
 
     expect(User::query()->adminsFor(AdminArea::Support)->pluck('id')->all())->toContain($support->id, $this->owner->id)->not->toContain($finance->id);
 });
+
+it('shows the platform figures (sales, MRR, churn) to owners and finance only', function () {
+    foreach ([AdminRole::Owner, AdminRole::Finance] as $role) {
+        $this->flushSession();
+        $this->actingAs(User::factory()->adminAs($role)->create())->get('/admin')->assertOk()->assertSee('MRR')->assertSee('Review queue');
+    }
+    foreach ([AdminRole::Operations, AdminRole::Support, AdminRole::Viewer] as $role) {
+        $this->flushSession();
+        $this->actingAs(User::factory()->adminAs($role)->create())->get('/admin')->assertOk()->assertDontSee('MRR')->assertDontSee('Platform, last 30 days')->assertSee('Review queue');
+    }
+});

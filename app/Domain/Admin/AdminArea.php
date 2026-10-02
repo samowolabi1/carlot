@@ -29,7 +29,7 @@ enum AdminArea: string
             self::Catalogue => 'Car makes and models',
             self::Support => 'Support tickets, users and "Log in as"',
             self::Communication => 'Broadcasts to lots',
-            self::Billing => 'Payments, plans, coupons and finance rates',
+            self::Billing => 'Payments, plans, coupons, finance rates and the platform figures',
             self::Loans => 'Car loan overview',
         };
     }
