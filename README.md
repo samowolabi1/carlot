@@ -422,7 +422,9 @@ sold, and when a lot is approved or suspended. Run `php artisan scout:sync-index
 (it is quick and safe): new search filters only work once Meilisearch knows about them. Until then sponsored cars
 are left out of results (the error is logged) rather than breaking search. If Meilisearch itself is down, search runs on
 MySQL instead and dealers can still save cars; once it is back, run `php artisan scout:import "App\Domain\Inventory\Models\Vehicle"`
-to catch the index up with changes made in the meantime.
+to catch the index up with changes made in the meantime. Also run `scout:import` once after an update adds fields to the
+index (the features, drive, colour, loans/trade-ins/offers/inspected/verified filters did): until then those filters match nothing
+on Meilisearch. Without Meilisearch (`SCOUT_DRIVER=null`, cPanel) there is nothing to do.
 
 ### Photos in production
 

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
- * A lot's name, city, pin or approval changed: refresh its cars in the search index,
+ * A lot's name, place, pin, approval, plan or buyer settings (loans, trade-ins, offers, verified) changed: refresh its cars in the search index,
  * adding them when the lot goes live and removing them when it is suspended.
  */
 class SyncLotVehiclesToSearch implements ShouldQueue
@@ -22,7 +22,7 @@ class SyncLotVehiclesToSearch implements ShouldQueue
         Vehicle::withoutGlobalScopes()
             ->where('lot_id', $this->lotId)
             ->whereIn('status', ['available', 'reserved'])
-            ->with(['make', 'model', 'lot'])
+            ->with(['make', 'model', 'lot.plan', 'features'])
             ->chunkById(200, function ($vehicles): void {
                 $index = new Vehicle;
                 $index->queueMakeSearchable($vehicles->filter(fn (Vehicle $v) => $v->shouldBeSearchable())->values());

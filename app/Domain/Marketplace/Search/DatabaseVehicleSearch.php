@@ -3,9 +3,11 @@
 namespace App\Domain\Marketplace\Search;
 
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Lots\Models\Plan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Search straight from MySQL, for local development (no Meilisearch needed) and as
@@ -69,11 +71,13 @@ class DatabaseVehicleSearch implements VehicleSearch
 
         $query
             ->when($c->makeIds, fn (Builder $q) => $q->whereIn('vehicles.make_id', $c->makeIds))
-            ->when($c->modelId, fn (Builder $q) => $q->where('vehicles.vehicle_model_id', $c->modelId))
+            ->when($c->modelIds, fn (Builder $q) => $q->whereIn('vehicles.vehicle_model_id', $c->modelIds))
             ->when($c->bodyTypes, fn (Builder $q) => $q->whereIn('vehicles.body_type', $c->bodyTypes))
             ->when($c->conditions, fn (Builder $q) => $q->whereIn('vehicles.condition', $c->conditions))
             ->when($c->transmission, fn (Builder $q) => $q->where('vehicles.transmission', $c->transmission))
             ->when($c->fuels, fn (Builder $q) => $q->whereIn('vehicles.fuel', $c->fuels))
+            ->when($c->drivetrains, fn (Builder $q) => $q->whereIn('vehicles.drivetrain', $c->drivetrains))
+            ->when($c->colours, fn (Builder $q) => $q->whereIn(DB::raw('LOWER(TRIM(vehicles.colour))'), $c->colours))
             ->when($c->priceMin, fn (Builder $q) => $q->where('vehicles.price', '>=', $c->priceMin))
             ->when($c->priceMax, fn (Builder $q) => $q->where('vehicles.price', '<=', $c->priceMax))
             ->when($c->yearMin, fn (Builder $q) => $q->where('vehicles.year', '>=', $c->yearMin))
@@ -82,6 +86,26 @@ class DatabaseVehicleSearch implements VehicleSearch
             ->when($c->city, fn (Builder $q) => $q->where('lots.city', $c->city))
             ->when($c->state, fn (Builder $q) => $q->where('lots.state', $c->state))
             ->when($c->lotId, fn (Builder $q) => $q->where('vehicles.lot_id', $c->lotId));
+
+        // Cars must have every feature asked for.
+        foreach ($c->featureIds as $featureId) {
+            $query->whereExists(fn ($q) => $q->selectRaw('1')->from('vehicle_features')
+                ->whereColumn('vehicle_features.vehicle_id', 'vehicles.id')->where('vehicle_features.feature_id', $featureId));
+        }
+
+        foreach ($c->extras as $extra) {
+            match ($extra) {
+                'loans' => $query->where('lots.accepts_finance', true),
+                'trade_ins' => $query->where('lots.accepts_trade_ins', true),
+                'offers' => $this->whereTakesOffers($query),
+                'negotiable' => $query->where('vehicles.negotiable', true),
+                'inspected' => $query->whereNotNull('vehicles.inspection_id'),
+                'verified_lot' => $query->whereNotNull('lots.verified_at'),
+                'duty_paid' => $query->where('vehicles.duty_status', 'paid'),
+                'registered' => $query->where('vehicles.registered', true),
+                default => null,
+            };
+        }
 
         if ($c->hasLocation() && $c->radiusKm !== null) {
             // Bounding box first (uses the lat/lng columns), then the exact radius.
@@ -92,6 +116,21 @@ class DatabaseVehicleSearch implements VehicleSearch
                 ->whereBetween('lots.longitude', [$c->lng - $dLng, $c->lng + $dLng])
                 ->whereRaw($this->distanceSquaredSql($c).' <= ?', [$c->radiusKm ** 2]);
         }
+    }
+
+    /**
+     * Lot::takesOffers() in SQL: the lot takes offers and its plan (or the default plan, when it has none) includes them.
+     *
+     * @param  Builder<Vehicle>  $query
+     */
+    private function whereTakesOffers(Builder $query): void
+    {
+        $plans = Plan::query()->get()->filter(fn (Plan $p) => $p->allows('offers'));
+        $defaultAllows = $plans->contains('code', config('lotlink.default_plan'));
+
+        $query->where('lots.accepts_offers', true)->where(fn (Builder $q) => $q
+            ->whereIn('lots.plan_id', $plans->pluck('id')->all())
+            ->when($defaultAllows, fn (Builder $q) => $q->orWhereNull('lots.plan_id')));
     }
 
     /** @param Builder<Vehicle> $query */

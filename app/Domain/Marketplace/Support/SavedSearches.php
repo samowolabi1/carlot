@@ -12,6 +12,7 @@ use App\Domain\Inventory\Models\VehicleModel;
 use App\Domain\Marketplace\Models\SavedSearch;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 /**
  * Turning searches into saved filters and back. The buyer's location is never saved
@@ -63,7 +64,7 @@ final class SavedSearches
     {
         $c = self::criteria($filters);
         $make = count($c->makeIds) === 1 ? Make::whereKey($c->makeIds[0])->value('name') : (count($c->makeIds) > 1 ? count($c->makeIds).' makes' : null);
-        $model = $c->modelId ? VehicleModel::whereKey($c->modelId)->value('name') : null;
+        $model = count($c->modelIds) === 1 ? VehicleModel::whereKey($c->modelIds[0])->value('name') : null;
         $body = count($c->bodyTypes) === 1 ? BodyType::from($c->bodyTypes[0])->label().'s' : 'cars';
 
         $parts = [trim(implode(' ', array_filter([$c->query ? '"'.$c->query.'"' : null, $make, $model, $model ? null : $body])))];
@@ -79,6 +80,7 @@ final class SavedSearches
         $parts[] = count($c->fuels) === 1 ? strtolower(FuelType::from($c->fuels[0])->label()) : null;
         $parts[] = $c->mileageMax ? 'under '.number_format($c->mileageMax).' km' : null;
         $parts[] = $c->city ? 'in '.$c->city : ($c->state ? 'in '.($c->state === 'FCT' ? 'Abuja (FCT)' : $c->state.' State') : null);
+        $parts[] = $c->extras !== [] ? '· '.Str::lower(implode(', ', array_map(fn (string $e) => SearchCriteria::EXTRAS[$e], $c->extras))) : null;
 
         return ucfirst(mb_substr(implode(' ', array_filter($parts)), 0, 120));
     }

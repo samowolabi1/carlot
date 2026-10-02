@@ -4,18 +4,15 @@ namespace App\Http\Controllers\Marketplace;
 
 use App\Domain\Advertising\Support\AdServer;
 use App\Domain\Inventory\Enums\BodyType;
-use App\Domain\Inventory\Enums\FuelType;
-use App\Domain\Inventory\Enums\Transmission;
-use App\Domain\Inventory\Enums\VehicleCondition;
 use App\Domain\Inventory\Models\Make;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Marketplace\Search\SearchCriteria;
+use App\Domain\Marketplace\Search\SearchFacets;
 use App\Domain\Marketplace\Search\VehicleSearch;
 use App\Domain\Marketplace\Support\SavedSearches;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,21 +57,10 @@ class SearchController extends Controller
         ])->withViewData(['meta' => $meta]);
     }
 
-    /** Filter choices. Makes are limited to those with cars on the marketplace. */
+    /** Filter choices from what is on sale, with counts (SearchFacets). */
     public static function filterOptions(): array
     {
-        return [
-            'makes' => Cache::remember('marketplace:makes', now()->addMinutes(10), fn () => Make::query()
-                ->whereIn('id', Vehicle::query()->marketplace()->select('make_id'))
-                ->orderBy('name')
-                ->get(['id', 'name'])
-                ->toArray()),
-            'body_types' => BodyType::options(),
-            'conditions' => VehicleCondition::options(),
-            'transmissions' => Transmission::options(),
-            'fuels' => FuelType::options(),
-            'radii' => SearchCriteria::RADII_KM,
-        ];
+        return SearchFacets::options();
     }
 
     private static function title(SearchCriteria $c): string

@@ -1,10 +1,16 @@
 <?php
 
+use App\Domain\Accounts\Models\User;
+use App\Domain\Inventory\Models\Feature;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Lots\Models\Plan;
 use App\Domain\Marketplace\Search\MeilisearchVehicleSearch;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
+use App\Domain\Trust\Actions\SaveInspection;
+use App\Domain\Trust\Enums\InspectorType;
+use App\Domain\Trust\Support\InspectionChecklist;
 use Laravel\Scout\EngineManager;
 use Meilisearch\Client;
 use Tests\Support\MarketplaceFixtures;
@@ -69,6 +75,49 @@ it('filters by make, body type, transmission and ranges', function (string $engi
         ->and(run(['state' => 'Lagos']))->toEqualCanonicalizing(['Camry', 'RAV4'])
         ->and(run(['state' => 'FCT']))->toBe(['Accord'])
         ->and(run(['state' => 'Kano']))->toBe([]);
+})->with('engines');
+
+it('filters by models, drive, colour and features (cars must have every feature ticked)', function (string $engine) {
+    $this->useSearchEngine($engine);
+    $cars = seedCars();
+    $camera = Feature::firstOrCreate(['slug' => 'reverse-camera'], ['name' => 'Reverse camera', 'group' => 'safety']);
+    $sunroof = Feature::firstOrCreate(['slug' => 'sunroof'], ['name' => 'Sunroof', 'group' => 'comfort']);
+    $cars['camry']->features()->sync([$camera->id, $sunroof->id]);
+    $cars['camry']->unsetRelation('features')->forceFill(['colour' => 'Silver ', 'drivetrain' => 'fwd'])->save();
+    $cars['rav4']->features()->sync([$camera->id]);
+    $cars['rav4']->unsetRelation('features')->forceFill(['colour' => 'silver', 'drivetrain' => 'awd'])->save();
+    $cars['accord']->forceFill(['colour' => 'Black', 'drivetrain' => 'fwd'])->save();
+
+    expect(run(['modelIds' => [$cars['camry']->vehicle_model_id, $cars['accord']->vehicle_model_id]]))->toEqualCanonicalizing(['Camry', 'Accord'])
+        ->and(run(['drivetrains' => ['awd']]))->toBe(['RAV4'])
+        ->and(run(['colours' => ['silver']]))->toEqualCanonicalizing(['Camry', 'RAV4'])
+        ->and(run(['featureIds' => [$camera->id]]))->toEqualCanonicalizing(['Camry', 'RAV4'])
+        ->and(run(['featureIds' => [$camera->id, $sunroof->id]]))->toBe(['Camry']);
+})->with('engines');
+
+it('filters by what lots and cars offer: car loans, trade-ins, offers, inspection, verified lot, duty and registration', function (string $engine) {
+    $this->useSearchEngine($engine);
+    $cars = seedCars();
+    $cars['camry']->forceFill(['negotiable' => true, 'duty_status' => 'paid', 'registered' => false])->save();
+    $cars['rav4']->forceFill(['negotiable' => false, 'duty_status' => 'unpaid', 'registered' => true])->save();
+    $cars['accord']->forceFill(['negotiable' => false, 'duty_status' => null, 'registered' => true])->save();
+    $checklist = collect(InspectionChecklist::keys())->mapWithKeys(fn ($k) => [$k => ['status' => 'pass', 'note' => null]])->all();
+    app(SaveInspection::class)->run($cars['accord'], User::factory()->create(), InspectorType::Dealer, $checklist);
+
+    // Ikeja: verified, on Pro (offers), no loans. Lekki: no trade-ins. Abuja: Starter (no offers on that plan).
+    $this->ikeja->forceFill(['verified_at' => now(), 'plan_id' => Plan::where('code', 'pro')->value('id'), 'accepts_finance' => false])->save();
+    $this->lekki->forceFill(['verified_at' => null, 'accepts_trade_ins' => false, 'plan_id' => Plan::where('code', 'pro')->value('id'), 'accepts_offers' => false])->save();
+    $this->abuja->forceFill(['verified_at' => null, 'plan_id' => Plan::where('code', 'starter')->value('id')])->save();
+
+    expect(run(['extras' => ['loans']]))->toEqualCanonicalizing(['RAV4', 'Accord'])
+        ->and(run(['extras' => ['trade_ins']]))->toEqualCanonicalizing(['Camry', 'Accord'])
+        ->and(run(['extras' => ['offers']]))->toBe(['Camry'])
+        ->and(run(['extras' => ['verified_lot']]))->toBe(['Camry'])
+        ->and(run(['extras' => ['negotiable']]))->toBe(['Camry'])
+        ->and(run(['extras' => ['inspected']]))->toBe(['Accord'])
+        ->and(run(['extras' => ['duty_paid']]))->toBe(['Camry'])
+        ->and(run(['extras' => ['registered']]))->toEqualCanonicalizing(['RAV4', 'Accord'])
+        ->and(run(['extras' => ['loans', 'registered', 'inspected']]))->toBe(['Accord']);
 })->with('engines');
 
 it('matches words in the make, model and lot name', function (string $engine) {

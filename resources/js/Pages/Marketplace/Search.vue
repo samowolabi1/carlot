@@ -98,18 +98,31 @@ const chips = computed(() => {
     if (budgetApplied.value) out.push({ label: `Within my budget (${shortNaira(f.price_max!)})`, remove: { price_min: null, price_max: null } });
     else if (f.price_min || f.price_max) out.push({ label: `${f.price_min ? formatNaira(f.price_min) : 'Any'} – ${f.price_max ? formatNaira(f.price_max) : 'Any'}`, remove: { price_min: null, price_max: null } });
     if (f.radius) out.push({ label: `Within ${f.radius} km`, remove: { radius: null } });
-    f.make.forEach((id) => out.push({ label: props.options.makes.find((m) => m.id === id)?.name ?? 'Make', remove: { make: f.make.filter((m) => m !== id) } }));
+    f.make.forEach((id) => {
+        // Removing a make also drops its models.
+        const models = f.model.filter((m) => props.options.models.find((x) => x.id === m)?.make_id !== id);
+        out.push({ label: props.options.makes.find((m) => m.id === id)?.name ?? 'Make', remove: { make: f.make.filter((m) => m !== id), model: models } });
+    });
+    f.model.forEach((id) => out.push({ label: props.options.models.find((m) => m.id === id)?.name ?? 'Model', remove: { model: f.model.filter((m) => m !== id) } }));
     f.body.forEach((b) => out.push({ label: label(props.options.body_types, b), remove: { body: f.body.filter((x) => x !== b) } }));
     if (f.transmission) out.push({ label: label(props.options.transmissions, f.transmission), remove: { transmission: null } });
     f.condition.forEach((c) => out.push({ label: label(props.options.conditions, c), remove: { condition: f.condition.filter((x) => x !== c) } }));
     f.fuel.forEach((c) => out.push({ label: label(props.options.fuels, c), remove: { fuel: f.fuel.filter((x) => x !== c) } }));
+    f.drive.forEach((c) => out.push({ label: label(props.options.drivetrains, c), remove: { drive: f.drive.filter((x) => x !== c) } }));
+    f.colour.forEach((c) => out.push({ label: label(props.options.colours, c), remove: { colour: f.colour.filter((x) => x !== c) } }));
+    f.feature.forEach((id) => out.push({ label: props.options.features.find((x) => x.id === id)?.name ?? 'Feature', remove: { feature: f.feature.filter((x) => x !== id) } }));
+    f.has.forEach((c) => out.push({ label: label(props.options.extras, c), remove: { has: f.has.filter((x) => x !== c) } }));
     if (f.year_min || f.year_max) out.push({ label: `${f.year_min ?? 'Any'}–${f.year_max ?? 'now'}`, remove: { year_min: null, year_max: null } });
-    if (f.state) out.push({ label: f.state === 'FCT' ? 'FCT (Abuja)' : `${f.state} State`, remove: { state: null } });
+    if (f.state) out.push({ label: f.state === 'FCT' ? 'FCT (Abuja)' : `${f.state} State`, remove: { state: null, city: null } });
+    if (f.city) out.push({ label: f.city, remove: { city: null } });
     if (f.mileage_max) out.push({ label: `≤${f.mileage_max.toLocaleString('en-NG')} km`, remove: { mileage_max: null } });
     return out;
 });
 
-const empty: Partial<Filters> = { make: [], body: [], condition: [], fuel: [], transmission: null, price_min: null, price_max: null, year_min: null, year_max: null, mileage_max: null, radius: null, model: null, city: null, state: null };
+const empty: Partial<Filters> = {
+    make: [], model: [], body: [], condition: [], fuel: [], drive: [], colour: [], feature: [], has: [], transmission: null,
+    price_min: null, price_max: null, year_min: null, year_max: null, mileage_max: null, radius: null, city: null, state: null,
+};
 
 const heading = computed(() => {
     const n = props.results.total;
@@ -143,7 +156,7 @@ const heading = computed(() => {
 
         <div class="mx-auto flex max-w-6xl gap-8 px-5 py-4 lg:py-6">
             <aside class="hidden w-72 shrink-0 lg:block" aria-label="Filters">
-                <div class="sticky top-4 card p-4">
+                <div class="sticky top-4 card max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain px-4 py-2">
                     <FiltersPanel live :filters="filters" :options="options" @apply="(f) => apply(f, false)">
                         <template #actions>
                             <button v-if="activeFilters" type="button" class="btn btn-outline mt-2 w-full" @click="apply(empty)">Clear all filters</button>

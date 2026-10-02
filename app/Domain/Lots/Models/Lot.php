@@ -148,7 +148,7 @@ class Lot extends Model
     protected static function booted(): void
     {
         static::updated(function (Lot $lot): void {
-            if ($lot->wasChanged(['status', 'name', 'city', 'latitude', 'longitude'])) {
+            if ($lot->wasChanged(['status', 'name', 'city', 'state', 'latitude', 'longitude', 'plan_id', 'verified_at', 'accepts_offers', 'accepts_trade_ins', 'accepts_finance'])) {
                 SyncLotVehiclesToSearch::dispatch($lot->id);
             }
 

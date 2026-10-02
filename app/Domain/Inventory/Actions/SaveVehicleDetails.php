@@ -13,8 +13,10 @@ class SaveVehicleDetails
     public function run(Vehicle $vehicle, array $data): Vehicle
     {
         return DB::transaction(function () use ($vehicle, $data): Vehicle {
-            $vehicle->fill(Arr::except($data, ['feature_ids']))->save();
+            // Features first, so the save below indexes the car with them (search filters by feature).
             $vehicle->features()->sync($data['feature_ids'] ?? []);
+            $vehicle->unsetRelation('features');
+            $vehicle->fill(Arr::except($data, ['feature_ids']))->save();
             RenderShareCard::refresh($vehicle->id);
 
             return $vehicle;

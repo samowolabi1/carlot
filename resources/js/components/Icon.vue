@@ -24,6 +24,7 @@ const paths = {
     chevronLeft: 'M15 6l-6 6 6 6',
     plus: 'M12 5v14M5 12h14',
     close: 'M6 6l12 12M18 6L6 18',
+    chevron: 'M6 9l6 6 6-6',
     logout: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
     locate: 'M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8M12 2v3M12 19v3M2 12h3M19 12h3',
     upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',

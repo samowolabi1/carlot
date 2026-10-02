@@ -319,7 +319,7 @@ class Vehicle extends Model
     /** @return array<string, mixed> */
     public function toSearchableArray(): array
     {
-        $this->loadMissing(['make', 'model', 'lot']);
+        $this->loadMissing(['make', 'model', 'lot.plan', 'features']);
 
         return [
             'id' => $this->id,
@@ -339,7 +339,18 @@ class Vehicle extends Model
             'condition' => $this->condition?->value,
             'transmission' => $this->transmission?->value,
             'fuel' => $this->fuel?->value,
-            'colour' => $this->colour ? Str::lower($this->colour) : null,
+            'drivetrain' => $this->drivetrain?->value,
+            'colour' => $this->colour ? Str::lower(trim($this->colour)) : null,
+            'feature_ids' => $this->features->pluck('id')->all(),
+            'negotiable' => $this->negotiable,
+            'inspected' => $this->inspection_id !== null,
+            'duty_status' => $this->duty_status?->value,
+            'registered' => $this->registered,
+            // What the lot offers (kept fresh by SyncLotVehiclesToSearch when the lot's settings change).
+            'lot_loans' => $this->lot->takesFinance(),
+            'lot_trade_ins' => $this->lot->takesTradeIns(),
+            'lot_offers' => $this->lot->takesOffers(),
+            'lot_verified' => $this->lot->isVerified(),
             'year' => $this->year,
             'price' => $this->price,
             'mileage_km' => $this->mileage_km,
@@ -353,7 +364,7 @@ class Vehicle extends Model
     /** @param Builder<Vehicle> $query */
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
-        return $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot']);
+        return $query->withoutGlobalScope('lot')->with(['make', 'model', 'lot.plan', 'features']);
     }
 
     /** "2018 Toyota Camry SE". Needs make and model loaded to avoid extra queries in lists. */

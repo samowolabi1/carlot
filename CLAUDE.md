@@ -325,6 +325,10 @@ Run all four before pushing.
   `VehicleSearch`; `throttle:suggest`); the search page and `FiltersPanel live` apply typing and filter changes with partial reloads
   (`only` the result props). Dealer lists use `composables/useLiveReload` (partial reloads, 250 ms pause). Wrap props a live reload
   doesn't need in closures so they aren't computed; Filament tables and global search wait 250 ms.
+- Filter choices come only from `SearchFacets::options()` (what is on sale, with counts; cached, `forget()`), never enum lists.
+  Yes/no filters are `SearchCriteria::EXTRAS` (`has[]`: loans, trade-ins, offers, negotiable, inspected, verified lot, duty, registered);
+  lot-side ones are indexed per car, so `Lot::booted()` re-syncs the lot's cars when those settings or the plan change.
+  The panel is `FiltersPanel` → `FilterSection` (folding groups) + `FacetList` (popular few, "Show all" with search).
 - Share previews: controllers pass `->withViewData(['meta' => [...]])`; `app.blade.php` renders
   the Open Graph tags on the server.
 - The buyer's location lives in localStorage (`useLocation`) and is only sent as query params

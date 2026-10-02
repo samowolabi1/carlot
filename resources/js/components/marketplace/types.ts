@@ -1,22 +1,38 @@
 export type Option = { value: string; label: string };
 
+/** A filter choice with how many cars on sale have it (SearchFacets). */
+export type Facet = { value: string; label: string; count: number };
+
 export interface FilterOptions {
-    makes: { id: number; name: string }[];
-    body_types: Option[];
-    conditions: Option[];
-    transmissions: Option[];
-    fuels: Option[];
+    makes: { id: number; name: string; count: number }[];
+    models: { id: number; name: string; make_id: number; count: number }[];
+    body_types: Facet[];
+    conditions: Facet[];
+    transmissions: Facet[];
+    fuels: Facet[];
+    drivetrains: Facet[];
+    colours: Facet[];
+    states: Facet[];
+    cities: (Facet & { state: string | null })[];
+    features: { id: number; name: string; group: string; count: number }[];
+    extras: Facet[];
+    years: { min: number | null; max: number | null };
+    prices: { min: number | null; max: number | null };
     radii: number[];
 }
 
 export interface Filters {
     q: string | null;
     make: number[];
-    model: number | null;
+    model: number[];
     body: string[];
     condition: string[];
     transmission: string | null;
     fuel: string[];
+    drive: string[];
+    colour: string[];
+    feature: number[];
+    has: string[];
     price_min: number | null;
     price_max: number | null;
     year_min: number | null;

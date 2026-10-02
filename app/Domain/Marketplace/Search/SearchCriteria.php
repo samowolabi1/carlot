@@ -3,6 +3,7 @@
 namespace App\Domain\Marketplace\Search;
 
 use App\Domain\Inventory\Enums\BodyType;
+use App\Domain\Inventory\Enums\Drivetrain;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
@@ -22,19 +23,46 @@ final class SearchCriteria
     public const PER_PAGE = 24;
 
     /**
+     * Yes/no filters from what lots and their cars offer (?has[]=loans&has[]=inspected), with buyer-facing labels.
+     * Lot settings (loans, trade-ins, offers, verified) and car details (negotiable, inspected, duty, registration).
+     */
+    public const EXTRAS = [
+        'loans' => 'Car loans available',
+        'trade_ins' => 'Takes trade-ins',
+        'offers' => 'Open to offers',
+        'negotiable' => 'Price negotiable',
+        'inspected' => 'Inspected',
+        'verified_lot' => 'Verified lot',
+        'duty_paid' => 'Customs duty paid',
+        'registered' => 'Registered in Nigeria',
+    ];
+
+    /** Most choices one list filter takes (keeps URLs and queries small). */
+    private const MAX_CHOICES = 20;
+
+    /**
      * @param  list<int>  $makeIds
+     * @param  list<int>  $modelIds
      * @param  list<string>  $bodyTypes
      * @param  list<string>  $conditions
      * @param  list<string>  $fuels
+     * @param  list<string>  $drivetrains
+     * @param  list<string>  $colours  lower case
+     * @param  list<int>  $featureIds  cars must have all of them
+     * @param  list<string>  $extras  keys of EXTRAS
      */
     public function __construct(
         public readonly ?string $query = null,
         public readonly array $makeIds = [],
-        public readonly ?int $modelId = null,
+        public readonly array $modelIds = [],
         public readonly array $bodyTypes = [],
         public readonly array $conditions = [],
         public readonly ?string $transmission = null,
         public readonly array $fuels = [],
+        public readonly array $drivetrains = [],
+        public readonly array $colours = [],
+        public readonly array $featureIds = [],
+        public readonly array $extras = [],
         public readonly ?int $priceMin = null,
         public readonly ?int $priceMax = null,
         public readonly ?int $yearMin = null,
@@ -53,11 +81,17 @@ final class SearchCriteria
 
     public static function fromRequest(Request $request, ?int $lotId = null): self
     {
-        $ints = fn (string $key): array => array_values(array_filter(array_map('intval', (array) $request->input($key, [])), fn (int $v) => $v > 0));
-        $enums = fn (string $key, string $enum): array => array_values(array_filter(
-            array_map('strval', (array) $request->input($key, [])),
+        $list = fn (string $key): array => array_slice(array_filter((array) $request->input($key, []), 'is_scalar'), 0, self::MAX_CHOICES);
+        $ints = fn (string $key): array => array_values(array_unique(array_filter(array_map('intval', $list($key)), fn (int $v) => $v > 0)));
+        $enums = fn (string $key, string $enum): array => array_values(array_unique(array_filter(
+            array_map('strval', $list($key)),
             fn (string $v) => $enum::tryFrom($v) !== null,
-        ));
+        )));
+        $colours = array_values(array_unique(array_filter(
+            array_map(fn ($v) => mb_strtolower(trim((string) $v)), $list('colour')),
+            fn (string $v) => $v !== '' && mb_strlen($v) <= 40,
+        )));
+        $extras = array_values(array_intersect(array_keys(self::EXTRAS), array_map('strval', $list('has'))));
         $int = fn (string $key): ?int => is_numeric($request->input($key)) && (int) $request->input($key) > 0 ? (int) $request->input($key) : null;
         $naira = fn (string $key): ?int => $int($key) !== null ? $int($key) * 100 : null;
 
@@ -76,11 +110,15 @@ final class SearchCriteria
         return new self(
             query: filled($request->input('q')) ? mb_substr(trim((string) $request->input('q')), 0, 80) : null,
             makeIds: $ints('make'),
-            modelId: $int('model'),
+            modelIds: $ints('model'),
             bodyTypes: $enums('body', BodyType::class),
             conditions: $enums('condition', VehicleCondition::class),
             transmission: Transmission::tryFrom((string) $request->input('transmission'))?->value,
             fuels: $enums('fuel', FuelType::class),
+            drivetrains: $enums('drive', Drivetrain::class),
+            colours: $colours,
+            featureIds: $ints('feature'),
+            extras: $extras,
             priceMin: $naira('price_min'),
             priceMax: $naira('price_max'),
             yearMin: $int('year_min'),
@@ -108,11 +146,15 @@ final class SearchCriteria
         return [
             'q' => $this->query,
             'make' => $this->makeIds,
-            'model' => $this->modelId,
+            'model' => $this->modelIds,
             'body' => $this->bodyTypes,
             'condition' => $this->conditions,
             'transmission' => $this->transmission,
             'fuel' => $this->fuels,
+            'drive' => $this->drivetrains,
+            'colour' => $this->colours,
+            'feature' => $this->featureIds,
+            'has' => $this->extras,
             'price_min' => $this->priceMin !== null ? intdiv($this->priceMin, 100) : null,
             'price_max' => $this->priceMax !== null ? intdiv($this->priceMax, 100) : null,
             'year_min' => $this->yearMin,
@@ -131,8 +173,9 @@ final class SearchCriteria
     public function activeFilterCount(): int
     {
         return count(array_filter([
-            $this->makeIds, $this->modelId, $this->bodyTypes, $this->conditions, $this->transmission, $this->fuels,
-            $this->priceMin || $this->priceMax, $this->yearMin || $this->yearMax, $this->mileageMax, $this->city, $this->state, $this->radiusKm,
-        ]));
+            $this->makeIds, $this->modelIds, $this->bodyTypes, $this->conditions, $this->transmission, $this->fuels, $this->drivetrains,
+            $this->colours, $this->priceMin || $this->priceMax, $this->yearMin || $this->yearMax, $this->mileageMax, $this->city,
+            $this->state, $this->radiusKm,
+        ])) + count($this->featureIds) + count($this->extras);
     }
 }

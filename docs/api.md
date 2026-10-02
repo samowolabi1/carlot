@@ -26,8 +26,8 @@ JSON API for the LotLink mobile app, at `/api/v1`. Authentication is a Sanctum b
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/cars` | Search. Query: `q`, `make`, `model`, `body`, `condition`, `transmission`, `fuel`, `price_min`, `price_max`, `year_min`, `year_max`, `mileage_max`, `city`, `state`, `lat`, `lng`, `radius`, `sort` (`newest`, `nearest`, …), `page` (the same as the website's /search). `{data: [card], sponsored: [card], filters, meta}` |
-| GET | `/cars/filters` | Filter choices (makes with stock, body types, …). |
+| GET | `/cars` | Search. Query: `q`, `make[]`, `model[]`, `body[]`, `condition[]`, `transmission`, `fuel[]`, `drive[]`, `colour[]`, `feature[]` (cars with all of them), `has[]` (`loans`, `trade_ins`, `offers`, `negotiable`, `inspected`, `verified_lot`, `duty_paid`, `registered`), `price_min`, `price_max`, `year_min`, `year_max`, `mileage_max`, `city`, `state`, `lat`, `lng`, `radius`, `sort` (`newest`, `nearest`, …), `page` (the same as the website's /search). `{data: [card], sponsored: [card], filters, meta}` |
+| GET | `/cars/filters` | Filter choices from what is on sale, each with a `count`: `makes`, `models` (with `make_id`), `body_types`, `conditions`, `transmissions`, `fuels`, `drivetrains`, `colours`, `states`, `cities` (with `state`), `features` (with `group`), `extras` (the `has[]` values), `years` and `prices` ranges, `radii`. Cached for a few minutes. |
 | GET | `/cars/{ulid}` | Car details, photos (`src`, `full`), specs, features, inspection summary, `lot`, `saved`, `from_monthly`. |
 | GET | `/lots/{slug}` | Lot page: details, opening hours, rating, `following`, and its cars (`?page=`). |
 | GET | `/lots/{slug}/slots` | Bookable times for 14 days (`starts_at` in UTC). |

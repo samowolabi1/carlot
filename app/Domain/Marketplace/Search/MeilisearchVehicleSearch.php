@@ -64,11 +64,13 @@ class MeilisearchVehicleSearch implements VehicleSearch
 
         $filters = [];
         $c->makeIds && $filters[] = $in('make_id', $c->makeIds);
-        $c->modelId && $filters[] = "vehicle_model_id = {$c->modelId}";
+        $c->modelIds && $filters[] = $in('vehicle_model_id', $c->modelIds);
         $c->bodyTypes && $filters[] = $in('body_type', $c->bodyTypes);
         $c->conditions && $filters[] = $in('condition', $c->conditions);
         $c->transmission && $filters[] = 'transmission = '.json_encode($c->transmission);
         $c->fuels && $filters[] = $in('fuel', $c->fuels);
+        $c->drivetrains && $filters[] = $in('drivetrain', $c->drivetrains);
+        $c->colours && $filters[] = $in('colour', $c->colours);
         $c->priceMin && $filters[] = "price >= {$c->priceMin}";
         $c->priceMax && $filters[] = "price <= {$c->priceMax}";
         $c->yearMin && $filters[] = "year >= {$c->yearMin}";
@@ -77,6 +79,23 @@ class MeilisearchVehicleSearch implements VehicleSearch
         $c->city && $filters[] = 'city = '.json_encode($c->city);
         $c->state && $filters[] = 'state = '.json_encode($c->state);
         $c->lotId && $filters[] = "lot_id = {$c->lotId}";
+        foreach ($c->featureIds as $featureId) {
+            $filters[] = "feature_ids = {$featureId}"; // an array attribute: matches when it contains the id
+        }
+        foreach ($c->extras as $extra) {
+            $filter = match ($extra) {
+                'loans' => 'lot_loans = true',
+                'trade_ins' => 'lot_trade_ins = true',
+                'offers' => 'lot_offers = true',
+                'negotiable' => 'negotiable = true',
+                'inspected' => 'inspected = true',
+                'verified_lot' => 'lot_verified = true',
+                'duty_paid' => 'duty_status = "paid"',
+                'registered' => 'registered = true',
+                default => null,
+            };
+            $filter !== null && $filters[] = $filter;
+        }
 
         if ($c->hasLocation() && $c->radiusKm !== null) {
             $filters[] = sprintf('_geoRadius(%F, %F, %d)', $c->lat, $c->lng, $c->radiusKm * 1000);

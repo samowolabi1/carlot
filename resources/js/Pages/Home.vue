@@ -59,7 +59,7 @@ const chips = computed(() => [
     { label: 'SUVs', href: route('cars.index', { body: ['suv'] }) },
     { label: 'Under ₦10m', href: route('cars.index', { price_max: 10000000 }) },
     { label: 'Foreign used', href: route('cars.index', { condition: ['foreign_used'] }) },
-    ...props.options.makes.slice(0, 4).map((m) => ({ label: m.name, href: route('cars.index', { make: [m.id] }) })),
+    ...[...props.options.makes].sort((a, b) => b.count - a.count).slice(0, 4).map((m) => ({ label: m.name, href: route('cars.index', { make: [m.id] }) })),
 ]);
 </script>
 
