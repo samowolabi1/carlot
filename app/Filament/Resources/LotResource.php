@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Admin\Impersonation;
 use App\Domain\Audit\AuditLog;
@@ -29,6 +30,11 @@ use Illuminate\Support\Facades\Auth;
 class LotResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Approvals, AdminArea::Support, AdminArea::Billing];
+    }
 
     // Global search (Ctrl/⌘ K): a lot by name, slug, city or owner's phone.
     protected static ?string $recordTitleAttribute = 'name';
@@ -94,7 +100,7 @@ class LotResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\Action::make('approve')
+                Tables\Actions\Action::make('approve')->authorize(fn () => self::allows(AdminArea::Approvals))
                     ->icon('heroicon-o-check-circle')->color('success')
                     ->visible(fn (Lot $lot) => $lot->status !== LotStatus::Active)
                     ->requiresConfirmation()
@@ -106,7 +112,7 @@ class LotResource extends Resource
                 // Everything but View/Approve under "More", so the row fits (Log in as is also on the lot's page).
                 Tables\Actions\ActionGroup::make([
                     // Support (TDD M17): see the dashboard as the owner does; logged in the audit log.
-                    Tables\Actions\Action::make('impersonate')->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
+                    Tables\Actions\Action::make('impersonate')->authorize(fn () => self::allows(AdminArea::Support))->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
                         ->visible(fn (Lot $lot) => $lot->owner !== null && ! $lot->owner->isAdmin())
                         ->requiresConfirmation()->modalDescription('You will see LotLink as the lot owner. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
                         ->action(function (Lot $lot) {
@@ -114,7 +120,7 @@ class LotResource extends Resource
 
                             return redirect()->route('dealer.dashboard', $lot);
                         }),
-                    Tables\Actions\Action::make('suspend')
+                    Tables\Actions\Action::make('suspend')->authorize(fn () => self::allows(AdminArea::Approvals))
                         ->icon('heroicon-o-no-symbol')->color('danger')
                         ->visible(fn (Lot $lot) => $lot->status === LotStatus::Active)
                         ->requiresConfirmation()
@@ -122,7 +128,7 @@ class LotResource extends Resource
                             $lot->update(['status' => LotStatus::Suspended]);
                             AuditLog::record('admin.lot_suspended', $lot, [], self::admin(), $lot->id);
                         }),
-                    Tables\Actions\Action::make('revoke')->label('Remove badge')->icon('heroicon-o-shield-exclamation')->color('danger')
+                    Tables\Actions\Action::make('revoke')->authorize(fn () => self::allows(AdminArea::Approvals))->label('Remove badge')->icon('heroicon-o-shield-exclamation')->color('danger')
                         ->visible(fn (Lot $lot) => $lot->isVerified())
                         ->form([Forms\Components\TextInput::make('reason')->required()->maxLength(160)])
                         ->action(function (Lot $lot, array $data): void {
@@ -130,7 +136,7 @@ class LotResource extends Resource
                             Notification::make()->title('Verified badge removed')->success()->send();
                         }),
                     // Enterprise isn't self-serve: admins put a lot on it (or any plan) here.
-                    Tables\Actions\Action::make('plan')->label('Set plan')->icon('heroicon-o-rectangle-stack')->color('gray')
+                    Tables\Actions\Action::make('plan')->authorize(fn () => self::allows(AdminArea::Billing))->label('Set plan')->icon('heroicon-o-rectangle-stack')->color('gray')
                         ->fillForm(fn (Lot $lot) => ['plan_id' => $lot->plan_id])
                         ->form([Forms\Components\Select::make('plan_id')->label('Plan')->options(fn () => Plan::orderBy('sort')->pluck('name', 'id'))->required()
                             ->helperText('Changes what the lot can use straight away. Billing stays as it is in Payments.')])

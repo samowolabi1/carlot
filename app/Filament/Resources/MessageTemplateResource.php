@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Messaging\MessageCatalogue;
 use App\Domain\Messaging\Models\MessageTemplate;
 use App\Filament\Resources\Concerns\AdminsOnly;
@@ -23,6 +24,11 @@ use Illuminate\Support\HtmlString;
 class MessageTemplateResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Settings];
+    }
 
     protected static ?string $model = MessageTemplate::class;
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LotResource\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Lots\Actions\OnboardLot;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Regions;
@@ -24,7 +25,7 @@ class ListLots extends ListRecords
     {
         return [
             // Field sales: sign a lot up for its owner from any state; the owner signs in and finishes setting up.
-            Action::make('onboard')->label('Onboard a lot')->icon('heroicon-o-plus-circle')
+            Action::make('onboard')->authorize(fn () => LotResource::allows(AdminArea::Approvals))->label('Onboard a lot')->icon('heroicon-o-plus-circle')
                 ->modalHeading('Onboard a car lot')
                 ->modalDescription('Creates the owner\'s account and the lot. The owner signs in with the email or WhatsApp number you enter (a one-time code, no password) and adds cars, photos and bank details.')
                 ->modalWidth('2xl')

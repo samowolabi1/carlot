@@ -3,11 +3,12 @@
 namespace App\Filament\Resources\Concerns;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * The admin panel authorises by role, not by the dealer-side model policies. `LotPolicy::view` means
+ * The admin panel authorises by admin role (AdminRole → AdminArea), not by the dealer-side model policies. `LotPolicy::view` means
  * "member of this lot", so letting Filament use it hid "View" and gave admins 403 on every lot, and ran
  * a membership query per row. Only admins reach /admin (`User::canAccessPanel`); each resource still
  * narrows what's possible with its own canCreate()/actions.
@@ -19,7 +20,26 @@ trait AdminsOnly
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->isAdmin();
+        return $user instanceof User && $user->adminCan(...static::adminAreas());
+    }
+
+    /**
+     * The parts of /admin this resource belongs to: admins whose role opens any of them can use it (AdminRole::areas()).
+     * Owner-only unless the resource says otherwise. Sensitive actions inside also check their own area (allows()).
+     *
+     * @return list<AdminArea>
+     */
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Settings];
+    }
+
+    /** For actions inside a resource that need a particular area (approve, "Log in as", set plan...). */
+    public static function allows(AdminArea $area): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->adminCan($area);
     }
 
     /**

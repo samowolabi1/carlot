@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Audit\AuditLog;
 use App\Filament\Resources\AuditLogResource\Pages;
 use App\Filament\Resources\Concerns\AdminsOnly;
@@ -14,6 +15,11 @@ use Illuminate\Database\Eloquent\Builder;
 class AuditLogResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::System];
+    }
 
     protected static ?string $model = AuditLog::class;
 

@@ -2,8 +2,8 @@
 
 namespace App\Domain\Advertising\Actions;
 
-use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Advertising\Enums\AdStatus;
 use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Advertising\Notifications\AdSubmitted;
@@ -19,7 +19,7 @@ class SubmitAdCampaign
         }
 
         $campaign->forceFill(['status' => AdStatus::InReview])->save();
-        Notification::send(User::query()->where('role', UserRole::Admin)->get(), new AdSubmitted($campaign));
+        Notification::send(User::query()->adminsFor(AdminArea::Moderation)->get(), new AdSubmitted($campaign));
 
         return $campaign;
     }

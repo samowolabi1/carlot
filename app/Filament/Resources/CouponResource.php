@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Billing\Models\Coupon;
 use App\Domain\Billing\Models\Subscription;
@@ -28,6 +29,11 @@ use Illuminate\Support\Str;
 class CouponResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Billing];
+    }
 
     protected static ?string $model = Coupon::class;
 

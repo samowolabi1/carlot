@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Account\PushSubscriptionController;
 use App\Http\Controllers\Account\SecurityController;
+use App\Http\Controllers\Admin\AdminInvitationController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\OtpLoginController;
@@ -112,6 +113,9 @@ Route::get('/budget', [BudgetController::class, 'show'])->name('budget');
 Route::get('/{document}', [LegalController::class, 'show'])->whereIn('document', array_keys(LegalDocuments::TITLES))->name('legal.show');
 Route::get('/.well-known/security.txt', [LegalController::class, 'securityTxt'])->name('security.txt');
 Route::get('/lenders', [JoinController::class, 'show'])->name('lenders.join');
+// Joining the admin team from the emailed invitation (signed, 7 days).
+Route::get('/admin-invitation/{user:ulid}', [AdminInvitationController::class, 'show'])->middleware('signed')->name('admin.invitation');
+Route::post('/admin-invitation/{user:ulid}', [AdminInvitationController::class, 'store'])->middleware(['signed', 'throttle:10,1'])->name('admin.invitation.store');
 Route::get('/budget/count', [BudgetController::class, 'count'])->middleware('throttle:120,1')->name('budget.count');
 // Paystack webhooks (CSRF-exempt in bootstrap/app.php; the signature is checked instead).
 Route::post('/webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');

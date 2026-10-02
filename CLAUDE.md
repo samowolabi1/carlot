@@ -97,6 +97,14 @@ Run all four before pushing.
   can't be published; only `ModerateListing` (admin) clears them. Fraud signals come from `DetectFraudSignals`
   (on publish and price drops) and never hide anything themselves.
 - Filament closures are injected by parameter name: use `$query`, `$record`, `$state`, `$search`.
+- Admin team: `users.admin_role` (`Admin\AdminRole`: owner, operations, support, finance, viewer), each opening a set of
+  `Admin\AdminArea`s (`AdminRole::areas()`; `User::adminCan()`, `scopeAdminsFor()` for who to notify). Owners run the team in
+  /admin → System → Admin team only through `Admin\Actions\ManageAdminTeam` (invite = new account for a work email + `AdminInvitation`
+  signed 7-day link to `/admin-invitation/{user}`; change role; resend; remove = no password/2FA/tokens/sessions; never yourself;
+  always one joined owner; all audit-logged). Every resource declares `adminAreas()` (default owner-only), every page uses
+  `Pages\Concerns\AdminPage`, and sensitive actions inside shared screens add `->authorize(fn () => X::allows(AdminArea::…))`.
+  Admins aren't edited in Users. Non-panel admin checks use `adminCan()` too (Horizon = System, lender licences = Approvals,
+  support attachments = Support); loan documents never open for staff.
 - Every admin resource uses `Concerns\AdminsOnly`: authorisation by admin role (never the dealer-side model policies, which
   gave admins 403s and a membership query per row) and record URLs built from the resource's `$recordRouteKeyName`.
   Put new admin pages in one of the panel's navigation groups (order set in `AdminPanelProvider`). Menu badges and the review

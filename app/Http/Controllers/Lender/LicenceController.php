@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Lender;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Models\Lender;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class LicenceController extends Controller
 {
     public function __invoke(Request $request, Lender $lender): StreamedResponse
     {
-        abort_unless($request->user()->isAdmin(), 404);
+        abort_unless($request->user()->adminCan(AdminArea::Approvals), 404);
         $disk = Storage::disk(Lender::DISK);
         abort_unless($lender->licence_path && $disk->exists($lender->licence_path), 404);
 

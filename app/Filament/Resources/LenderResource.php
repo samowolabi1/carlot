@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Finance\Actions\DecideLender;
 use App\Domain\Finance\Actions\SaveLender;
@@ -33,6 +34,11 @@ use Throwable;
 class LenderResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Approvals, AdminArea::Loans];
+    }
 
     protected static ?string $model = Lender::class;
 
@@ -130,16 +136,16 @@ class LenderResource extends Resource
                 Tables\Actions\Action::make('licence')->label('Licence')->icon('heroicon-o-document-text')->color('gray')
                     ->visible(fn (Lender $l) => $l->licence_path !== null)
                     ->url(fn (Lender $l) => $l->licenceUrl(), shouldOpenInNewTab: true),
-                Tables\Actions\Action::make('approve')->icon('heroicon-o-check-circle')->color('success')
+                Tables\Actions\Action::make('approve')->authorize(fn () => self::allows(AdminArea::Approvals))->icon('heroicon-o-check-circle')->color('success')
                     ->visible(fn (Lender $l) => in_array($l->status, [LenderStatus::Pending, LenderStatus::Rejected], true))
                     ->requiresConfirmation()->modalDescription('Check the licence number with the CBN list and the licence copy first. Buyers will see this lender straight away.')
                     ->action(fn (Lender $l) => self::decide($l, 'approve', null, 'Lender approved')),
-                Tables\Actions\Action::make('reject')->icon('heroicon-o-x-circle')->color('danger')
+                Tables\Actions\Action::make('reject')->authorize(fn () => self::allows(AdminArea::Approvals))->icon('heroicon-o-x-circle')->color('danger')
                     ->visible(fn (Lender $l) => $l->status === LenderStatus::Pending)
                     ->form([Forms\Components\Textarea::make('note')->label('Why? (the lender sees this)')->required()->rows(3)->maxLength(500)])
                     ->action(fn (Lender $l, array $data) => self::decide($l, 'reject', $data['note'], 'Lender told')),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('edit')->icon('heroicon-o-pencil-square')->modalWidth('3xl')
+                    Tables\Actions\Action::make('edit')->authorize(fn () => self::allows(AdminArea::Approvals))->icon('heroicon-o-pencil-square')->modalWidth('3xl')
                         ->fillForm(fn (Lender $l) => [
                             'name' => $l->name, 'licence_type' => $l->licence_type->value, 'licence_number' => $l->licence_number,
                             'contact_name' => $l->contact_name, 'contact_phone' => PhoneNumber::display($l->contact_phone), 'contact_email' => $l->contact_email,
@@ -158,12 +164,12 @@ class LenderResource extends Resource
                                 Notification::make()->title($e->getMessage())->danger()->send();
                             }
                         }),
-                    Tables\Actions\Action::make('suspend')->icon('heroicon-o-pause-circle')->color('danger')
+                    Tables\Actions\Action::make('suspend')->authorize(fn () => self::allows(AdminArea::Approvals))->icon('heroicon-o-pause-circle')->color('danger')
                         ->visible(fn (Lender $l) => $l->status === LenderStatus::Active)
                         ->form([Forms\Components\Textarea::make('note')->label('Why? (the lender sees this)')->required()->rows(3)->maxLength(500)])
                         ->modalDescription('Buyers stop seeing this lender and it gets no new applications. Open applications stay with it.')
                         ->action(fn (Lender $l, array $data) => self::decide($l, 'suspend', $data['note'], 'Lender paused')),
-                    Tables\Actions\Action::make('reactivate')->icon('heroicon-o-play-circle')->color('success')
+                    Tables\Actions\Action::make('reactivate')->authorize(fn () => self::allows(AdminArea::Approvals))->icon('heroicon-o-play-circle')->color('success')
                         ->visible(fn (Lender $l) => $l->status === LenderStatus::Suspended)->requiresConfirmation()
                         ->action(fn (Lender $l) => self::decide($l, 'reactivate', null, 'Lender active again')),
                     Tables\Actions\Action::make('applications')->label('Applications')->icon('heroicon-o-document-duplicate')

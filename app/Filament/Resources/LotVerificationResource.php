@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\CheckCompanyRegistry;
 use App\Domain\Trust\Actions\DecideLotVerification;
@@ -25,6 +26,11 @@ use Throwable;
 class LotVerificationResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Approvals];
+    }
 
     protected static ?string $model = LotVerification::class;
 

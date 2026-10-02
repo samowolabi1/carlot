@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Enums\FinanceStatus;
 use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Models\FinanceMessage;
@@ -24,6 +25,11 @@ use Illuminate\Support\Carbon;
 class FinanceApplicationResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Loans];
+    }
 
     protected static ?string $model = FinanceApplication::class;
 

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminRole;
 use App\Domain\Legal\LegalDocuments;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -44,9 +45,16 @@ class UserFactory extends Factory
     {
         return $this->state([
             'role' => UserRole::Admin,
+            'admin_role' => AdminRole::Owner,
             'email' => fake()->unique()->safeEmail(),
             'password' => 'password',
         ]);
+    }
+
+    /** An admin with a particular role in the team. */
+    public function adminAs(AdminRole $role): static
+    {
+        return $this->admin()->state(['admin_role' => $role]);
     }
 
     public function unnamed(): static

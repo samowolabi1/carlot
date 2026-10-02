@@ -3,10 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Billing\Enums\SubscriptionStatus;
 use App\Domain\Billing\Gateways\PaymentGateways;
 use App\Domain\Billing\Models\Subscription;
 use App\Domain\Lots\Models\Plan;
+use App\Filament\Pages\Concerns\AdminPage;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -24,6 +26,13 @@ use Illuminate\Support\HtmlString;
  */
 class PaymentSettings extends Page implements HasForms
 {
+    use AdminPage;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Settings];
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';

@@ -4,6 +4,8 @@ namespace App\Domain\Accounts\Models;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Notifications\ResetPasswordLink;
+use App\Domain\Admin\AdminArea;
+use App\Domain\Admin\AdminRole;
 use App\Domain\Finance\Models\Budget;
 use App\Domain\Finance\Models\Lender;
 use App\Domain\Inventory\Models\Vehicle;
@@ -15,8 +17,10 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -47,6 +51,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $phone_verified_at
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $last_seen_at
+ * @property AdminRole|null $admin_role role in the admin team (admins only)
+ * @property int|null $invited_by
+ * @property Carbon|null $invited_at when an owner invited this admin
  * @property string|null $terms_version Terms + Privacy version last accepted (LegalDocuments::userVersion())
  * @property Carbon|null $terms_accepted_at
  * @property Carbon|null $deleted_at
@@ -87,6 +94,8 @@ class User extends Authenticatable implements FilamentUser, HasName
             'password' => 'hashed',
             'password_changed_at' => 'datetime',
             'role' => UserRole::class,
+            'admin_role' => AdminRole::class,
+            'invited_at' => 'datetime',
             'inspector_since' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'deletion_requested_at' => 'datetime',
@@ -111,6 +120,12 @@ class User extends Authenticatable implements FilamentUser, HasName
             ->using(LotMember::class)
             ->withPivot(['role', 'accepted_at'])
             ->withTimestamps();
+    }
+
+    /** @return BelongsTo<User, $this> the owner who invited this admin */
+    public function inviter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invited_by');
     }
 
     /** @return BelongsToMany<Lender, $this> lenders whose portal this person works in */
@@ -171,6 +186,31 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
+    }
+
+    /** The admin's role in the team (Viewer if an admin somehow has none, so nobody gets more than they should). */
+    public function adminRole(): ?AdminRole
+    {
+        return $this->isAdmin() ? ($this->admin_role ?? AdminRole::Viewer) : null;
+    }
+
+    /** May this person use that part of /admin? */
+    public function adminCan(AdminArea ...$areas): bool
+    {
+        $role = $this->adminRole();
+
+        return $role !== null && collect($areas)->contains(fn (AdminArea $area) => $role->allows($area));
+    }
+
+    /**
+     * Admins who look after that part of /admin (who to notify about it).
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeAdminsFor(Builder $query, AdminArea $area): void
+    {
+        $roles = collect(AdminRole::cases())->filter(fn (AdminRole $r) => $r->allows($area))->map->value->all();
+        $query->where('role', UserRole::Admin)->whereIn('admin_role', $roles);
     }
 
     /** A registered independent inspector (TDD M14); set by an admin. */

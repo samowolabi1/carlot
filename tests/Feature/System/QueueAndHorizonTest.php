@@ -1,7 +1,7 @@
 <?php
 
-use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminRole;
 use Laravel\Horizon\HorizonServiceProvider;
 
 /* Horizon runs the Redis queue in production; with the database queue (Laragon, tests) it isn't loaded. */
@@ -21,7 +21,8 @@ it('lets only admins open Horizon, even when the app runs locally', function () 
 
     $this->get('/horizon')->assertRedirect(route('login'));
     $this->actingAs(User::factory()->create())->get('/horizon')->assertForbidden();
-    $this->actingAs(User::factory()->create(['role' => UserRole::Admin]))->get('/horizon')->assertOk();
+    $this->actingAs(User::factory()->adminAs(AdminRole::Support)->create())->get('/horizon')->assertForbidden(); // owners only
+    $this->actingAs(User::factory()->adminAs(AdminRole::Owner)->create())->get('/horizon')->assertOk();
 });
 
 it('gives slow jobs time to finish before a queue hands them to another worker', function () {

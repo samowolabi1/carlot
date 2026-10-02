@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Billing\Actions\RefundPayment;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Billing\Gateways\PaymentGateways;
@@ -20,6 +21,11 @@ use Throwable;
 class PaymentResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Billing];
+    }
 
     protected static ?string $model = Payment::class;
 

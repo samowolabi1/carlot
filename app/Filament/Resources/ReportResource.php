@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Leads\Models\Message;
@@ -30,6 +31,11 @@ use Illuminate\Support\Str;
 class ReportResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Moderation];
+    }
 
     protected static ?string $model = Report::class;
 

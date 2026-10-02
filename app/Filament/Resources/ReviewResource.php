@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\ModerateReview;
 use App\Domain\Trust\Enums\ReportStatus;
@@ -22,6 +23,11 @@ use Illuminate\Support\Str;
 class ReviewResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Moderation];
+    }
 
     protected static ?string $model = Review::class;
 

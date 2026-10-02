@@ -32,20 +32,21 @@ class ReviewQueue extends StatsOverviewWidget
     protected function getStats(): array
     {
         $q = AdminCounters::all();
-        $stat = fn (string $label, int $count, string $url) => Stat::make($label, (string) $count)
+        // Counts for everyone on the team; links only to the queues their role can open.
+        $stat = fn (string $label, int $count, string $url, string $resource) => Stat::make($label, (string) $count)
             ->color($count > 0 ? 'warning' : 'success')
             ->description($count > 0 ? 'Needs a look' : 'All clear')
-            ->url($url);
+            ->url($resource::canViewAny() ? $url : null);
 
         return [
-            $stat('Lots to approve', $q['lots_waiting'], LotResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending'], 'submitted_at' => ['value' => '1']]])),
-            $stat('Lots to verify', $q['verifications'], LotVerificationResource::getUrl()),
-            $stat('Flagged listings', $q['signals'], FraudSignalResource::getUrl()),
-            $stat('Reports', $q['reports'], ReportResource::getUrl()),
-            $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl()),
-            $stat('Adverts to check', $q['adverts'], AdCampaignResource::getUrl()),
-            $stat('Support tickets', $q['tickets'], SupportTicketResource::getUrl()),
-            $stat('Lenders to approve', $q['lenders_waiting'], LenderResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending']]])),
+            $stat('Lots to approve', $q['lots_waiting'], LotResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending'], 'submitted_at' => ['value' => '1']]]), LotResource::class),
+            $stat('Lots to verify', $q['verifications'], LotVerificationResource::getUrl(), LotVerificationResource::class),
+            $stat('Flagged listings', $q['signals'], FraudSignalResource::getUrl(), FraudSignalResource::class),
+            $stat('Reports', $q['reports'], ReportResource::getUrl(), ReportResource::class),
+            $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl(), ReviewResource::class),
+            $stat('Adverts to check', $q['adverts'], AdCampaignResource::getUrl(), AdCampaignResource::class),
+            $stat('Support tickets', $q['tickets'], SupportTicketResource::getUrl(), SupportTicketResource::class),
+            $stat('Lenders to approve', $q['lenders_waiting'], LenderResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending']]]), LenderResource::class),
         ];
     }
 }

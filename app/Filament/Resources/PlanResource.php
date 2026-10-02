@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Billing\Actions\ChangePlanPrice;
 use App\Domain\Billing\Enums\SubscriptionStatus;
 use App\Domain\Billing\Gateways\PaymentGateways;
@@ -25,6 +26,11 @@ use Throwable;
 class PlanResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Billing];
+    }
 
     protected static ?string $model = Plan::class;
 

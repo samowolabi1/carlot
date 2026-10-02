@@ -3,9 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Engagement\Actions\RunEngagementRules;
 use App\Domain\Engagement\Models\EngagementMessage;
 use App\Domain\Engagement\Support\EngagementRules;
+use App\Filament\Pages\Concerns\AdminPage;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -24,6 +26,13 @@ use Illuminate\Support\Facades\Auth;
  */
 class EngagementSettings extends Page implements HasForms
 {
+    use AdminPage;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Settings];
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope';

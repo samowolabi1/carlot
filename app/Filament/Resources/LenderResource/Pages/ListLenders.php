@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LenderResource\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Actions\OnboardLender;
 use App\Filament\Resources\LenderResource;
 use Filament\Actions\Action;
@@ -20,7 +21,7 @@ class ListLenders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('onboard')->label('Onboard a lender')->icon('heroicon-o-plus-circle')
+            Action::make('onboard')->authorize(fn () => LenderResource::allows(AdminArea::Approvals))->label('Onboard a lender')->icon('heroicon-o-plus-circle')
                 ->modalHeading('Onboard a lender')
                 ->modalDescription('Creates the lender (active straight away) and its first admin\'s account, and emails them how to sign in to the lender portal.')
                 ->modalWidth('3xl')

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Engagement\Actions\SendBroadcast;
 use App\Domain\Engagement\Models\Broadcast;
 use App\Domain\Engagement\Models\EngagementMessage;
@@ -31,6 +32,11 @@ use Illuminate\Validation\ValidationException;
 class BroadcastResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Communication];
+    }
 
     protected static ?string $model = Broadcast::class;
 

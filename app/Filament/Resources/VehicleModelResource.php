@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Inventory\Enums\BodyType;
 use App\Domain\Inventory\Models\VehicleModel;
@@ -21,6 +22,11 @@ use Illuminate\Database\Eloquent\Builder;
 class VehicleModelResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Catalogue];
+    }
 
     protected static ?string $model = VehicleModel::class;
 

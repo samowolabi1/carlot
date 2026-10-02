@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dealer;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Helpdesk\Models\SupportMessage;
 use App\Domain\Lots\Models\Lot;
 use App\Http\Controllers\Controller;
@@ -18,7 +19,7 @@ class SupportAttachmentController extends Controller
         $ticket = $message->ticket;
         $lot = Lot::withoutGlobalScopes()->findOrFail($ticket->lot_id);
 
-        $allowed = $user->isAdmin() || (! $message->internal && $user->roleIn($lot) !== null);
+        $allowed = $user->adminCan(AdminArea::Support) || (! $message->internal && $user->roleIn($lot) !== null);
         abort_unless($allowed, 404);
 
         $disk = Storage::disk(SupportMessage::DISK);

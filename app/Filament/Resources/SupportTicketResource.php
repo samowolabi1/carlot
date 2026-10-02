@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Helpdesk\Actions\ChangeTicketStatus;
 use App\Domain\Helpdesk\Enums\TicketCategory;
@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Auth;
 class SupportTicketResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Support];
+    }
 
     // Global search (Ctrl/⌘ K): a ticket by reference or subject.
 
@@ -130,7 +135,7 @@ class SupportTicketResource extends Resource
     /** @return array<int|string, string> */
     public static function adminOptions(): array
     {
-        return User::query()->where('role', UserRole::Admin)->orderBy('name')->pluck('name', 'id')->all();
+        return User::query()->adminsFor(AdminArea::Support)->orderBy('name')->pluck('name', 'id')->all();
     }
 
     public static function getPages(): array

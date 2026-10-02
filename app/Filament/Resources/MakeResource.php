@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\Inventory\Models\Make;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\MakeResource\Pages;
@@ -16,6 +17,11 @@ use Illuminate\Support\Str;
 class MakeResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Catalogue];
+    }
 
     protected static ?string $model = Make::class;
 

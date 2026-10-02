@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\AdminCounters;
 use App\Domain\Trust\Actions\ModerateListing;
 use App\Domain\Trust\Enums\FraudSignalType;
@@ -23,6 +24,11 @@ use Illuminate\Support\Facades\Auth;
 class FraudSignalResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Moderation];
+    }
 
     protected static ?string $model = FraudSignal::class;
 

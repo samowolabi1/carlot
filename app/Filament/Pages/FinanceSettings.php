@@ -3,8 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Finance\Support\FinanceRates;
+use App\Filament\Pages\Concerns\AdminPage;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -23,6 +25,13 @@ use Illuminate\Validation\ValidationException;
  */
 class FinanceSettings extends Page implements HasForms
 {
+    use AdminPage;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Billing];
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';

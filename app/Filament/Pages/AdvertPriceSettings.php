@@ -3,10 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Advertising\Enums\AdPlacement;
 use App\Domain\Advertising\Enums\AdStatus;
 use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Advertising\Support\AdvertPricing;
+use App\Filament\Pages\Concerns\AdminPage;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -23,6 +25,13 @@ use Filament\Pages\Page;
  */
 class AdvertPriceSettings extends Page implements HasForms
 {
+    use AdminPage;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Settings];
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';

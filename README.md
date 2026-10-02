@@ -274,7 +274,10 @@ components; run `php artisan optimize:clear` and `php artisan filament:optimize-
   a production build). Never regenerate the keys once people use push: every device would have to turn it on again.
   Optional but faster: enable PHP's `gmp` extension (Laragon: Menu → PHP → Extensions → gmp; servers: `php8.3-gmp`).
 - **List a lot**: after signing in, open `/dealer` and follow the onboarding wizard.
-- **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password`. Change these in `.env`
+- **Admin**: `/admin`, signing in with `admin@lotlink.test` / `password` (an Owner). Invite the rest of your team in
+  /admin → System → **Admin team** with a role each: Owner, Operations (approvals and moderation), Support (tickets, users,
+  "Log in as", broadcasts), Finance (payments, plans, coupons, finance rates, car loans) or Viewer (dashboard only). With
+  `MAIL_MAILER=log` the invitation link is in `storage/logs/laravel.log`. Change these in `.env`
   (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) before seeding anywhere public.
 - **Lot Manager**: Dealer dashboard → Lot Manager → Today. Record a walk-in, then Stock → "Mark sold"
   on an available car to start an order and record payments. Receipts and messages are written to

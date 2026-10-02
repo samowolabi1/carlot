@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Trust\Actions\ModerateListing;
@@ -21,6 +22,11 @@ use Illuminate\Support\Facades\Auth;
 class VehicleResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Moderation];
+    }
 
     protected static ?string $model = Vehicle::class;
 
@@ -47,10 +53,12 @@ class VehicleResource extends Resource
         return false;
     }
 
-    /** The dealer-side VehiclePolicy is per lot; in the admin panel, only platform admins get here. */
+    /** The dealer-side VehiclePolicy is per lot; in the admin panel: read-only, for roles with Moderation. */
     public static function can(string $action, ?Model $record = null): bool
     {
-        return in_array($action, ['viewAny', 'view'], true) && (Auth::user()?->isAdmin() ?? false);
+        $user = Auth::user();
+
+        return in_array($action, ['viewAny', 'view'], true) && $user instanceof User && $user->adminCan(...static::adminAreas());
     }
 
     public static function table(Table $table): Table

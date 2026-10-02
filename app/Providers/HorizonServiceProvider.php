@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\Horizon;
@@ -17,7 +18,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     /** Platform admins only, after the same two-factor check as the admin panel (config/horizon.php middleware). */
     protected function gate(): void
     {
-        Gate::define('viewHorizon', fn (?User $user = null): bool => $user?->isAdmin() ?? false);
+        Gate::define('viewHorizon', fn (?User $user = null): bool => $user?->adminCan(AdminArea::System) ?? false);
     }
 
     /** Always the gate. Horizon's default also lets everyone in when APP_ENV=local, which a Laragon box running Redis would be. */

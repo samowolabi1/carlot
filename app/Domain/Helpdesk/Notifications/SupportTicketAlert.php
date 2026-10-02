@@ -2,8 +2,8 @@
 
 namespace App\Domain\Helpdesk\Notifications;
 
-use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Helpdesk\Enums\TicketPriority;
 use App\Domain\Helpdesk\Models\SupportTicket;
 use Illuminate\Bus\Queueable;
@@ -31,9 +31,9 @@ class SupportTicketAlert extends Notification implements ShouldQueue
      */
     public static function recipients(SupportTicket $ticket): Collection
     {
-        $assignee = $ticket->assigned_to ? User::query()->where('role', UserRole::Admin)->whereKey($ticket->assigned_to)->get() : new Collection;
+        $assignee = $ticket->assigned_to ? User::query()->adminsFor(AdminArea::Support)->whereKey($ticket->assigned_to)->get() : new Collection;
 
-        return $assignee->isNotEmpty() ? $assignee : User::query()->where('role', UserRole::Admin)->get();
+        return $assignee->isNotEmpty() ? $assignee : User::query()->adminsFor(AdminArea::Support)->get();
     }
 
     /** @return list<string> */

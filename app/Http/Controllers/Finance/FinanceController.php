@@ -128,12 +128,13 @@ class FinanceController extends Controller
         return back()->with('success', 'Application withdrawn. '.$application->lenderName().' has been told.');
     }
 
-    /** A document on an application: the buyer, the lender's team or a LotLink admin, through a short-lived signed link. */
+    /** A document on an application: only the buyer and the lender's team, through a short-lived signed link. */
     public function file(Request $request, FinanceMessage $message): StreamedResponse
     {
         $user = $request->user();
         $application = $message->application;
-        $allowed = $user->isAdmin() || $application->user_id === $user->id || ($application->lender && $application->lender->roleOf($user) !== null);
+        // Only the buyer and the lender they chose: never the lot or LotLink staff (Privacy Policy).
+        $allowed = $application->user_id === $user->id || ($application->lender && $application->lender->roleOf($user) !== null);
         abort_unless($allowed, 404);
 
         $disk = Storage::disk(FinanceMessage::DISK);

@@ -18,6 +18,9 @@ class Impersonation
 
     public function start(User $admin, User $target): void
     {
+        if (! $admin->adminCan(AdminArea::Support)) {
+            throw ValidationException::withMessages(['user' => 'Only Owners and Support can use "Log in as".']);
+        }
         if (! $admin->isAdmin() || $target->isAdmin() || session()->has(self::SESSION_KEY)) {
             throw ValidationException::withMessages(['user' => 'You can only log in as a non-admin user, one at a time.']);
         }

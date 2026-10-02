@@ -2,12 +2,21 @@
 
 namespace App\Filament\Pages;
 
+use App\Domain\Admin\AdminArea;
 use App\Domain\System\ServerHealth;
+use App\Filament\Pages\Concerns\AdminPage;
 use Filament\Pages\Page;
 
 /** The server checks from `php artisan lotlink:doctor`, for hosts without SSH (cPanel): PHP, folders, images, cron, queue, mail. */
 class SystemHealth extends Page
 {
+    use AdminPage;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::System];
+    }
+
     protected static ?string $navigationIcon = 'heroicon-o-heart';
 
     protected static ?string $navigationGroup = 'System';

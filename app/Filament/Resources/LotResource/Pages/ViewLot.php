@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LotResource\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\Impersonation;
 use App\Domain\Lots\Models\Lot;
 use App\Filament\Resources\LotResource;
@@ -23,7 +24,7 @@ class ViewLot extends ViewRecord
         return [
             Action::make('public')->label('Public page')->icon('heroicon-o-arrow-top-right-on-square')->color('gray')
                 ->url(route('lots.show', $lot), shouldOpenInNewTab: true),
-            Action::make('impersonate')->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')
+            Action::make('impersonate')->authorize(fn () => LotResource::allows(AdminArea::Support))->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')
                 ->visible($lot->owner !== null && ! $lot->owner->isAdmin())
                 ->requiresConfirmation()
                 ->modalDescription('You will see LotLink as the lot owner. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')

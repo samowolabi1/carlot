@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminArea;
 use App\Domain\Admin\Impersonation;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\UserResource\Pages;
@@ -19,6 +20,11 @@ use Illuminate\Support\Facades\Auth;
 class UserResource extends Resource
 {
     use AdminsOnly;
+
+    public static function adminAreas(): array
+    {
+        return [AdminArea::Support];
+    }
 
     // Global search (Ctrl/⌘ K): a person by name, email or phone.
     protected static ?string $recordTitleAttribute = 'name';
@@ -52,8 +58,9 @@ class UserResource extends Resource
             Forms\Components\TextInput::make('name')->maxLength(80)->rules(['nullable', new FieldPattern('person_name')]),
             Forms\Components\TextInput::make('phone')->disabled(),
             Forms\Components\TextInput::make('email')->email()->rule('email:rfc,strict')->maxLength(190),
+            // Admins are managed in System → Admin team (invites, roles, removal), never here.
             Forms\Components\Select::make('role')
-                ->options(collect(UserRole::cases())->mapWithKeys(fn ($r) => [$r->value => ucfirst($r->value)]))
+                ->options([UserRole::Customer->value => 'Customer', UserRole::Staff->value => 'Staff'])
                 ->required(),
             // Registered independent inspectors sign reports that show "Independently inspected" (TDD M14).
             Forms\Components\Section::make('Independent inspector')->columns(2)->schema([
@@ -82,7 +89,7 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('role')->options(collect(UserRole::cases())->mapWithKeys(fn ($r) => [$r->value => ucfirst($r->value)])),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn (User $u) => $u->isAdmin()),
                 Tables\Actions\Action::make('impersonate')->label('Log in as')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
                     ->visible(fn (User $u) => ! $u->isAdmin())
                     ->requiresConfirmation()->modalDescription('You will see LotLink as this user. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
@@ -94,6 +101,12 @@ class UserResource extends Resource
                         return redirect($u->lots()->exists() ? route('dealer.home') : route('home'));
                     }),
             ]);
+    }
+
+    /** Admins are edited in the Admin team page (owners only). */
+    public static function canEdit(Model $record): bool
+    {
+        return static::can('update', $record) && ! ($record instanceof User && $record->isAdmin());
     }
 
     public static function canCreate(): bool

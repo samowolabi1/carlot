@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\AdminRole;
 use App\Domain\Messaging\MessageCatalogue;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +16,7 @@ class DatabaseSeeder extends Seeder
         MessageCatalogue::sync();
 
         // Platform admin for the Filament panel at /admin.
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@lotlink.test')],
             [
                 'name' => 'LotLink Admin',
@@ -25,6 +26,8 @@ class DatabaseSeeder extends Seeder
                 'phone_verified_at' => now(),
             ],
         );
+        // The first admin owns the admin team (invites the rest from /admin → System → Admin team).
+        $admin->forceFill(['role' => UserRole::Admin, 'admin_role' => $admin->admin_role ?? AdminRole::Owner])->save();
 
         // On a local install (Laragon), the demo lenders too, so the lender portal can be tried straight away
         // (lender@lotlink.test / password). Never in production.
