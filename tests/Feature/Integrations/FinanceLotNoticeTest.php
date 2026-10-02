@@ -99,3 +99,19 @@ it('tells the lot nothing when the partner could not be reached', function () {
     expect(FinanceApplication::sole()->status)->toBe(FinanceStatus::Failed)->and(Lead::withoutGlobalScopes()->count())->toBe(0);
     Notification::assertNotSentTo($this->owner, DealAlert::class);
 });
+
+it('still takes the application when the live-update server (Reverb) is configured but not running', function () {
+    // Like a Laragon .env with BROADCAST_CONNECTION=reverb and no `php artisan reverb:start`: nothing listens on the port.
+    config([
+        'broadcasting.default' => 'reverb',
+        'broadcasting.connections.reverb' => [...config('broadcasting.connections.reverb'), 'key' => 'k', 'secret' => 's', 'app_id' => 'lotlink',
+            'options' => ['host' => '127.0.0.1', 'port' => 1, 'scheme' => 'http', 'useTLS' => false]],
+    ]);
+    app('Illuminate\Broadcasting\BroadcastManager')->forgetDrivers();
+
+    ($this->apply)()->assertRedirect();
+
+    expect(FinanceApplication::count())->toBe(1)
+        ->and(Lead::withoutGlobalScopes()->count())->toBe(1)
+        ->and(Message::query()->where('side', Message::SYSTEM)->count())->toBeGreaterThan(0);
+});

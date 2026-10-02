@@ -10,6 +10,7 @@ use App\Domain\Leads\Models\Lead;
 use App\Domain\Leads\Models\Message;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Push\Notifications\ChatMessagePush;
+use App\Domain\Support\Realtime;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -60,7 +61,7 @@ class SendMessage
             return $message;
         });
 
-        broadcast(new MessageSent($message->load('sender'), $conversation))->toOthers();
+        Realtime::send(new MessageSent($message->load('sender'), $conversation), toOthers: true);
         $this->push($conversation, $message);
 
         return $message;

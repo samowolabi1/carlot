@@ -224,6 +224,8 @@ Run all four before pushing.
 - Chat messages only go through `SendMessage`: it updates read markers, moves a new lead to
   contacted on the lot's first reply and broadcasts `MessageSent`. Chat must keep working without
   Reverb (`useChat` polls when `VITE_REVERB_APP_KEY` is empty).
+- Broadcast only through `Support\Realtime::send($event, toOthers: …)`: a websocket server that is down or not started is
+  reported, never a 500 (the request's work is already saved). Never call `broadcast()` or `ShouldBroadcast` events' `dispatch()` directly.
 - Channel rules in `routes/channels.php` must match the page policies (`ConversationPolicy`).
 - Notifications that go by WhatsApp/SMS or email pass their channels through
   `NotificationPreferences::filter()` with their type, and add `database` with a `toArray()`

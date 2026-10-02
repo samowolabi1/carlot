@@ -5,6 +5,7 @@ namespace App\Domain\Location\Actions;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Location\Events\LocationUpdated;
 use App\Domain\Location\Models\LocationSession;
+use App\Domain\Support\Realtime;
 
 class EndLocationSession
 {
@@ -22,7 +23,7 @@ class EndLocationSession
             'accuracy_m' => null,
         ])->save();
 
-        broadcast(new LocationUpdated($session));
+        Realtime::send(new LocationUpdated($session));
     }
 
     /** The visit completed, was a no-show or was cancelled. */

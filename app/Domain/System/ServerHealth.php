@@ -134,7 +134,18 @@ final class ServerHealth
             $add('Services', 'Search', self::OK, 'MySQL (no search server needed)');
         }
         $broadcast = (string) config('broadcasting.default');
-        $add('Services', 'Live chat', self::OK, $broadcast === 'reverb' ? 'Reverb (needs a running reverb:start)' : 'polling every few seconds (no websocket server needed)');
+        if (in_array($broadcast, ['reverb', 'pusher'], true) && config("broadcasting.connections.{$broadcast}.options.host")) {
+            // The server side sends to Reverb/Pusher over HTTP; if nothing answers, live updates are lost (chat still polls).
+            $host = (string) config("broadcasting.connections.{$broadcast}.options.host");
+            $port = (int) config("broadcasting.connections.{$broadcast}.options.port", 443);
+            $socket = @fsockopen($host, $port, $errno, $error, 1.0);
+            $up = $socket !== false;
+            $up && fclose($socket);
+            $add('Services', 'Live chat', $up ? self::OK : self::WARN, $up ? ucfirst($broadcast)." at {$host}:{$port}"
+                : ucfirst($broadcast)." not reachable at {$host}:{$port}: start it (php artisan reverb:start) or set BROADCAST_CONNECTION=log. Chat keeps working by polling.");
+        } else {
+            $add('Services', 'Live chat', self::OK, 'polling every few seconds (no websocket server needed)');
+        }
         foreach (['cache.default' => 'Cache', 'session.driver' => 'Sessions'] as $key => $label) {
             $value = (string) config($key);
             $add('Services', $label, $value === 'redis' && ! extension_loaded('redis') ? self::FAIL : self::OK, $value);

@@ -13,6 +13,7 @@ use App\Domain\Leads\Notifications\NewLeadAlert;
 use App\Domain\LotManager\Enums\CustomerSource;
 use App\Domain\LotManager\Support\CustomerBook;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Realtime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -66,7 +67,7 @@ class CaptureLead
 
         if ($lead->wasRecentlyCreated) {
             Tracker::record('lead', $lot->id, $vehicle?->id, $source->value);
-            LeadCreated::dispatch($lead);
+            Realtime::send(new LeadCreated($lead));
             Notification::send($lot->members()->get(), new NewLeadAlert($lead));
         }
 

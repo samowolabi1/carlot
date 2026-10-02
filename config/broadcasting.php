@@ -42,7 +42,9 @@ return [
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Fail fast when the websocket server isn't running, so a request isn't held up (Realtime reports it).
+                'connect_timeout' => 1,
+                'timeout' => 3,
             ],
         ],
 

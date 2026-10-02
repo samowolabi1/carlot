@@ -5,6 +5,7 @@ namespace App\Domain\Location\Actions;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Location\Events\LocationUpdated;
 use App\Domain\Location\Models\LocationSession;
+use App\Domain\Support\Realtime;
 use Illuminate\Validation\ValidationException;
 
 class UpdateLocation
@@ -25,7 +26,7 @@ class UpdateLocation
             'last_seen_at' => now(),
         ])->save();
 
-        broadcast(new LocationUpdated($session))->toOthers();
+        Realtime::send(new LocationUpdated($session), toOthers: true);
 
         return $session;
     }
