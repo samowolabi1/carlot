@@ -14,7 +14,7 @@ export interface AdBanner {
 
 const sent = new Set<string>();
 
-/** Counts a banner view once per page (the server also dedupes per visit and ignores bots and the lot's staff). */
+/** Counts a banner view once per page (the server also dedupes per visit and ignores bots and the seller's staff). */
 export function markSeen(ad: AdBanner): void {
     if (sent.has(ad.ulid)) return;
     sent.add(ad.ulid);

@@ -39,7 +39,7 @@ class DemoTrustSeeder extends Seeder
         config(['queue.default' => 'sync']);
         Queue::setDefaultDriver('sync');
 
-        $lot = Lot::where('name', 'Demo Lot Ikeja')->first() ?? throw new RuntimeException('Run DemoMarketplaceSeeder first.');
+        $lot = Lot::where('name', 'Demo Seller Ikeja')->first() ?? throw new RuntimeException('Run DemoMarketplaceSeeder first.');
 
         foreach (self::REVIEWS as $i => [$phone, $name, $rating, $tags, $body]) {
             $buyer = User::firstOrCreate(['phone' => $phone], ['name' => $name, 'phone_verified_at' => now()]);

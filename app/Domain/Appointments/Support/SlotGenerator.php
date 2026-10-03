@@ -9,9 +9,9 @@ use App\Domain\Lots\Models\LotHour;
 use Carbon\CarbonImmutable;
 
 /**
- * Bookable slots (TDD M7): the lot's opening hours cut into slot_minutes pieces, minus
- * closures, slots already at slot_capacity, past times and anything inside the lot's
- * minimum notice. Worked out in the lot's timezone; starts_at values are UTC.
+ * Bookable slots (TDD M7): the seller's opening hours cut into slot_minutes pieces, minus
+ * closures, slots already at slot_capacity, past times and anything inside the seller's
+ * minimum notice. Worked out in the seller's timezone; starts_at values are UTC.
  */
 class SlotGenerator
 {

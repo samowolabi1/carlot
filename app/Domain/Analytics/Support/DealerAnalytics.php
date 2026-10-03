@@ -17,7 +17,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
- * The dealer analytics page (TDD M15, design D8): totals with the change on the previous
+ * The seller analytics page (TDD M15, design D8): totals with the change on the previous
  * period, the funnel, daily trend, lead sources, shares by platform, cars with ageing flags,
  * and staff performance. Views, saves, shares, leads and bookings come from the rollups.
  */

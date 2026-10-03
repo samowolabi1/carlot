@@ -1,4 +1,4 @@
-// A tiny IndexedDB store for Lot Manager items saved without a connection
+// A tiny IndexedDB store for Sales Manager items saved without a connection
 // (TDD M19: Offline mode). Each item keeps the client_uuid the server de-duplicates on.
 
 export type OfflineType = 'walk_in' | 'order' | 'payment';

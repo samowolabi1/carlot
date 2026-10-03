@@ -25,7 +25,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Announcements, tips and promos to lot owners: pick the lots (state, plan, status, verified,
+ * Announcements, tips and promos to sellers: pick the sellers (state, plan, status, verified,
  * activity), how it goes (in-app always; email, push, WhatsApp), then send now or schedule.
  * Shows how many it reached and how many opened the link.
  */
@@ -59,7 +59,7 @@ class BroadcastResource extends Resource
                 Forms\Components\Grid::make(2)->schema([
                     Forms\Components\TextInput::make('cta_label')->label('Button')->maxLength(40)->placeholder('Try it now'),
                     Forms\Components\TextInput::make('cta_url')->label('Button link')->url()->maxLength(500)
-                        ->placeholder(url('/dealer'))->helperText('Empty: the lot\'s dashboard.'),
+                        ->placeholder(url('/dealer'))->helperText('Empty: the seller\'s dashboard.'),
                 ]),
             ]),
             Forms\Components\Section::make('Who gets it')->columns(2)->schema([
@@ -67,8 +67,8 @@ class BroadcastResource extends Resource
                     ->options(collect(Regions::options())->mapWithKeys(fn (array $r) => [$r['value'] => $r['label']]))->placeholder('All states'),
                 Forms\Components\Select::make('audience.plans')->label('Plans')->multiple()->live()
                     ->options(fn () => Plan::query()->orderBy('sort')->pluck('name', 'id'))->placeholder('All plans'),
-                Forms\Components\Select::make('audience.status')->label('Lot status')->live()->default('active')->selectablePlaceholder(false)
-                    ->options(['active' => 'Live lots', 'pending' => 'Waiting for approval', 'any' => 'Any (not suspended)']),
+                Forms\Components\Select::make('audience.status')->label('Seller status')->live()->default('active')->selectablePlaceholder(false)
+                    ->options(['active' => 'Live sellers', 'pending' => 'Waiting for approval', 'any' => 'Any (not suspended)']),
                 Forms\Components\Select::make('audience.verified')->label('Verified (CAC)')->live()->placeholder('Any')
                     ->options(['yes' => 'Verified only', 'no' => 'Not verified']),
                 Forms\Components\Select::make('audience.activity')->label('Activity')->live()->placeholder('Any')->options(BroadcastAudience::ACTIVITY),
@@ -80,7 +80,7 @@ class BroadcastResource extends Resource
             Forms\Components\Section::make('How it goes')->schema([
                 Forms\Components\CheckboxList::make('channels')->label('As well as the notification centre')->default(['mail', 'push'])->columns(3)
                     ->options(['mail' => 'Email', 'push' => 'Push (phones that turned it on)', 'whatsapp' => 'WhatsApp'])
-                    ->helperText('WhatsApp costs per message and needs the approved "lot_announcement" template. Everyone can turn LotLink news off in their settings.'),
+                    ->helperText('WhatsApp costs per message and needs the approved "lot_announcement" template. Everyone can turn CarYard news off in their settings.'),
             ]),
         ]);
     }
@@ -187,7 +187,7 @@ class BroadcastResource extends Resource
                 .e($m->clicked_at ? 'Opened '.$m->clicked_at->diffForHumans() : 'Not yet').'</td></tr>')->implode('');
 
         return '<table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr style="text-align:left;opacity:.7">'
-            .'<th style="padding:6px 8px">Person</th><th style="padding:6px 8px">Lot</th><th style="padding:6px 8px">Where</th><th style="padding:6px 8px">Link</th></tr></thead><tbody>'
+            .'<th style="padding:6px 8px">Person</th><th style="padding:6px 8px">Seller</th><th style="padding:6px 8px">Where</th><th style="padding:6px 8px">Link</th></tr></thead><tbody>'
             .($rows ?: '<tr><td colspan="4" style="padding:6px 8px">Nobody yet.</td></tr>').'</tbody></table>';
     }
 

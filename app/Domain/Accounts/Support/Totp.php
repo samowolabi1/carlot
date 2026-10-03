@@ -45,7 +45,7 @@ final class Totp
     }
 
     /** otpauth:// link for the QR code authenticator apps scan. */
-    public static function uri(string $secret, string $account, string $issuer = 'LotLink Admin'): string
+    public static function uri(string $secret, string $account, string $issuer = 'CarYard Admin'): string
     {
         return 'otpauth://totp/'.rawurlencode($issuer.':'.$account).'?'.http_build_query(['secret' => $secret, 'issuer' => $issuer, 'digits' => 6, 'period' => 30]);
     }

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** A ticket attachment, for the lot's staff (not internal notes) and LotLink admins. */
+/** A ticket attachment, for the seller's staff (not internal notes) and CarYard admins. */
 class SupportAttachmentController extends Controller
 {
     public function __invoke(Request $request, SupportMessage $message): StreamedResponse

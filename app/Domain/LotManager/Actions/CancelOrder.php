@@ -25,7 +25,7 @@ class CancelOrder
     /**
      * Cancels an order before delivery and frees its car. Money already paid is either
      * refunded (a negative payment with a method) or kept as the customer's credit, as
-     * the lot chooses (TDD M19: Orders).
+     * the seller chooses (TDD M19: Orders).
      */
     public function run(SalesOrder $order, User $user, string $reason, ?string $money = null, ?string $refundMethod = null): SalesOrder
     {

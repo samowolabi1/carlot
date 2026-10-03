@@ -9,7 +9,7 @@ use App\Domain\Leads\Models\Lead;
 use App\Domain\Leads\Models\Message;
 
 /**
- * Offers, trade-ins and reservations show in the lead's chat as system lines, so the lot
+ * Offers, trade-ins and reservations show in the lead's chat as system lines, so the seller
  * and the buyer see one history (design D6), and they move the lead along the funnel.
  */
 class DealTimeline

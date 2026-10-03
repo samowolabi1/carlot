@@ -65,10 +65,10 @@
 @endif
 
 <div class="foot">
-    <strong>Track your order on LotLink</strong><br>
+    <strong>Track your order on CarYard</strong><br>
     {{-- dompdf can't break long words, so the signed link is printed in chunks. --}}
     <a href="{{ $trackUrl }}">{!! collect(str_split($trackUrl, 64))->map(fn ($part) => e($part))->implode('<br>') !!}</a>
-    <p class="muted" style="margin-top: 8px;">Powered by <a href="{{ $poweredBy }}">LotLink</a>. {{ $lot->name }} issued this receipt; LotLink does not handle the money.</p>
+    <p class="muted" style="margin-top: 8px;">Powered by <a href="{{ $poweredBy }}">CarYard</a>. {{ $lot->name }} issued this receipt; CarYard does not handle the money.</p>
 </div>
 </body>
 </html>

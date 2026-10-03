@@ -8,7 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
- * "Open until 6pm" / "Closed · opens Mon 8am", in the lot's own timezone.
+ * "Open until 6pm" / "Closed · opens Mon 8am", in the seller's own timezone.
  */
 final class OpeningHours
 {
@@ -20,7 +20,7 @@ final class OpeningHours
         return new self($lot->hours()->withoutGlobalScopes()->get(), $lot->timezone);
     }
 
-    /** @return array{open: bool, label: string}|null null when the lot hasn't set hours */
+    /** @return array{open: bool, label: string}|null null when the seller hasn't set hours */
     public function status(?CarbonImmutable $at = null): ?array
     {
         if ($this->hours->isEmpty()) {

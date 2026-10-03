@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * A buyer's car loan application to one lender (TDD M10). What the buyer agreed to share is encrypted;
- * the lender sees it, the lot never does. LotLink doesn't lend: the lender decides, in the lender portal
+ * the lender sees it, the seller never does. CarYard doesn't lend: the lender decides, in the lender portal
  * or through its own API. Status changes only through UpdateFinanceApplication.
  *
  * @property int $id

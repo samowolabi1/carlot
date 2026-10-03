@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\URL;
 
 /**
  * A buyer's car offered in part-exchange (TDD M12). Photos live on the private disk and are
- * shown through short-lived signed URLs; the lot replies with a low–high estimate.
+ * shown through short-lived signed URLs; the seller replies with a low–high estimate.
  *
  * @property int $id
  * @property string $ulid

@@ -19,7 +19,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Live location for a booking (TDD M8, design 14), for the buyer and the lot's team. */
+/** Live location for a booking (TDD M8, design 14), for the buyer and the seller's team. */
 class LocationSessionController extends Controller
 {
     public function start(Request $request, Appointment $appointment, StartLocationSession $start): RedirectResponse
@@ -37,9 +37,9 @@ class LocationSessionController extends Controller
         $lot = Lot::withTrashed()->findOrFail($session->lot_id);
         $customer = $appointment->customer;
         $sharerIsCustomer = $session->sharer_side === LocationSession::CUSTOMER;
-        // The buyer's pages for the buyer, the calendar for the lot's team.
+        // The buyer's pages for the buyer, the calendar for the seller's team.
         $userIsCustomer = $sharerIsCustomer === ($role === 'sharer');
-        $lotPhone = $lot->phone ? ['label' => 'Call the lot', 'phone' => $lot->phone, 'display' => PhoneNumber::display($lot->phone)] : null;
+        $lotPhone = $lot->phone ? ['label' => 'Call the seller', 'phone' => $lot->phone, 'display' => PhoneNumber::display($lot->phone)] : null;
 
         return Inertia::render('Location/Live', [
             'role' => $role,

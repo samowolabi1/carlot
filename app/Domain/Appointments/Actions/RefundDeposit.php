@@ -14,7 +14,7 @@ class RefundDeposit
     public function __construct(private readonly RefundPayment $refund) {}
 
     /**
-     * The test-drive deposit goes back when the buyer arrives, when the lot cancels, or when
+     * The test-drive deposit goes back when the buyer arrives, when the seller cancels, or when
      * the buyer cancels before the slot. It is kept only for a no-show.
      */
     public function run(Appointment $appointment, ?User $by = null): void

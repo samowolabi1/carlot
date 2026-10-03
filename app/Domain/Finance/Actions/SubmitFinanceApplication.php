@@ -19,7 +19,7 @@ use Throwable;
 /**
  * A buyer applies for a car loan with the lender they picked (TDD M10). Nothing is sent without consent, and only to
  * that lender, which must be active and lend for this car. Portal lenders' teams are told; API lenders get it posted
- * and the demo lender answers at once. The lot gets a "Car loan" lead (FinanceLeadNotice) without the buyer's income
+ * and the demo lender answers at once. The seller gets a "Car loan" lead (FinanceLeadNotice) without the buyer's income
  * or employer.
  */
 class SubmitFinanceApplication
@@ -92,7 +92,7 @@ class SubmitFinanceApplication
             $application->update(['external_ref' => $answer['reference']]);
         }
 
-        // The lot learns that the buyer applied; the lender's team hears about it in the portal.
+        // The seller learns that the buyer applied; the lender's team hears about it in the portal.
         $this->notice->applied($application);
         Notification::send($lender->members()->get(), new LenderAlert(
             'New car loan application: '.Name::short($buyer->name).' for the '.$vehicle->title().' ('.$application->money().", {$application->tenor_months} months).",

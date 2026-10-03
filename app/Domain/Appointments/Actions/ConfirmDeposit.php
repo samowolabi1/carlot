@@ -13,7 +13,7 @@ class ConfirmDeposit
 
     /**
      * Runs from FulfilPayment: the deposit is in, so the booking goes ahead as a normal one
-     * (confirmed or waiting for the lot). If the hold ran out first, the deposit goes back.
+     * (confirmed or waiting for the seller). If the hold ran out first, the deposit goes back.
      *
      * @return bool false when the deposit must be refunded
      */

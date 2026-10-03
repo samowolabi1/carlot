@@ -41,7 +41,7 @@ class LotFactory extends Factory
         return $this->state(['status' => LotStatus::Active, 'submitted_at' => now(), 'verified_at' => now()]);
     }
 
-    /** Attach the owner as a lot member, as CreateLot does. */
+    /** Attach the owner as a seller member, as CreateLot does. */
     public function configure(): static
     {
         return $this->afterCreating(function (Lot $lot): void {

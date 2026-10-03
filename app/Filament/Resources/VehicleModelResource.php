@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Seeded models plus the ones dealers typed in. Those arrive unapproved: check the name,
+ * Seeded models plus the ones sellers typed in. Those arrive unapproved: check the name,
  * fix typos, then approve.
  */
 class VehicleModelResource extends Resource

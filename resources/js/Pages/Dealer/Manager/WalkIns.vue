@@ -44,7 +44,7 @@ watch(search, () => list.later(() => ({ q: search.value.trim() || undefined })))
         <div v-if="walkIns.data.length === 0" class="card flex flex-col items-center gap-3 px-6 py-12 text-center">
             <h2 class="text-xl font-bold">{{ filters.q ? 'No matches' : 'Your walk-in register' }}</h2>
             <p class="max-w-sm text-[15px] text-muted">
-                {{ filters.q ? 'Try another name or number.' : 'Record everyone who visits the lot. Repeat visitors are matched by phone number.' }}
+                {{ filters.q ? 'Try another name or number.' : 'Record everyone who visits the seller. Repeat visitors are matched by phone number.' }}
             </p>
         </div>
 

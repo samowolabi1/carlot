@@ -5,7 +5,7 @@ namespace App\Domain\Billing\Gateways;
 use App\Domain\Billing\Models\Payment;
 
 /**
- * A payment provider behind LotLink's own charges (TDD M16): Paystack or Flutterwave in Nigeria
+ * A payment provider behind CarYard's own charges (TDD M16): Paystack or Flutterwave in Nigeria
  * (the admin picks one; `PaymentGateways`), and room for Stripe in other markets. Amounts are in minor units.
  */
 interface PaymentGateway

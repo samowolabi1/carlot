@@ -30,7 +30,7 @@ beforeEach(function () {
     $this->reserve = function (int $hours = 48, ?User $as = null) {
         return $this->actingAs($as ?? $this->buyer)->post(route('reservations.store', $this->car->ulid), ['hours' => $hours]);
     };
-    // The lot confirms the buyer's transfer reached its account.
+    // The seller confirms the buyer's transfer reached its account.
     $this->confirm = function (?Reservation $reservation = null) {
         $reservation ??= Reservation::withoutGlobalScopes()->where('customer_id', $this->buyer->id)->latest('id')->firstOrFail();
 
@@ -47,11 +47,11 @@ it('explains the reserve flow with the deposit and hold times', function () {
             ->where('payWithin', 12));
 });
 
-it('shows the lot\'s bank details and only holds the car once the lot confirms the transfer', function () {
+it('shows the seller\'s bank details and only holds the car once the seller confirms the transfer', function () {
     ($this->reserve)()->assertRedirect();
     $reservation = Reservation::withoutGlobalScopes()->sole();
 
-    // No payment through LotLink: the buyer pays the lot directly.
+    // No payment through CarYard: the buyer pays the seller directly.
     expect(Payment::count())->toBe(0)
         ->and($this->payments->checkouts)->toBe([])
         ->and($reservation)->status->toBe(ReservationStatus::Pending)->reference->toStartWith('RES-')
@@ -85,7 +85,7 @@ it('shows the lot\'s bank details and only holds the car once the lot confirms t
     $this->actingAs($this->buyer)->get(route('reservations.show', $reservation))->assertInertia(fn (Assert $page) => $page->where('account', null));
     $this->actingAs(User::factory()->create())->get(route('reservations.show', $reservation))->assertNotFound();
 
-    // The Billing page is only for what the lot pays LotLink.
+    // The Billing page is only for what the seller pays CarYard.
     $this->actingAs($this->owner)->get(route('dealer.billing', $this->lot))->assertInertia(fn (Assert $page) => $page->has('payments', 0));
 });
 
@@ -105,12 +105,12 @@ it('lets one request win and tells the other buyers', function () {
     ($this->reserve)(48, User::factory()->create())->assertSessionHasErrors('hours');
 });
 
-it('lets the lot decline a request and record the refund', function () {
+it('lets the seller decline a request and record the refund', function () {
     ($this->reserve)();
     $reservation = Reservation::withoutGlobalScopes()->sole();
     $this->actingAs($this->buyer)->post(route('reservations.sent', $reservation));
 
-    $this->actingAs($this->owner)->post(route('dealer.reservations.decline', [$this->lot, $reservation]), ['reason' => 'Car sold at the lot'])->assertSessionHasNoErrors();
+    $this->actingAs($this->owner)->post(route('dealer.reservations.decline', [$this->lot, $reservation]), ['reason' => 'Car sold at the seller'])->assertSessionHasNoErrors();
     expect($reservation->fresh())->status->toBe(ReservationStatus::Failed)->refund_due->toBeTrue();
 
     $this->actingAs($this->owner)->get(route('dealer.offers.index', [$this->lot, 'tab' => 'reservations']))
@@ -123,7 +123,7 @@ it('lets the lot decline a request and record the refund', function () {
 });
 
 it('does not reserve without bank details, a deposit setting, the Pro plan, or for staff', function () {
-    ($this->reserve)(48, $this->owner)->assertSessionHasErrors(['hours' => 'You work at this lot.']);
+    ($this->reserve)(48, $this->owner)->assertSessionHasErrors(['hours' => 'You work for this seller.']);
     ($this->reserve)(12)->assertSessionHasErrors('hours');
 
     LotBankAccount::withoutGlobalScopes()->delete();
@@ -135,7 +135,7 @@ it('does not reserve without bank details, a deposit setting, the Pro plan, or f
     ($this->reserve)()->assertSessionHasErrors('hours');
 });
 
-it('expires the hold, frees the car and owes the deposit back per the lot policy', function () {
+it('expires the hold, frees the car and owes the deposit back per the seller policy', function () {
     ($this->reserve)(24);
     ($this->confirm)();
 
@@ -152,7 +152,7 @@ it('expires the hold, frees the car and owes the deposit back per the lot policy
         ->and($this->whatsapp->to('+2348035550001', 'reservation_update')[1]->params[3])->toContain('Prime Motors will refund your ₦250,000 deposit');
 });
 
-it('keeps the deposit on expiry when the lot says so', function () {
+it('keeps the deposit on expiry when the seller says so', function () {
     $this->lot->update(['reservation_refundable' => false]);
     ($this->reserve)(24);
     ($this->confirm)();
@@ -163,7 +163,7 @@ it('keeps the deposit on expiry when the lot says so', function () {
         ->and($this->whatsapp->to('+2348035550001', 'reservation_update')[1]->params[3])->toContain('deposit is kept');
 });
 
-it('lets requests the lot never confirmed lapse', function () {
+it('lets requests the seller never confirmed lapse', function () {
     ($this->reserve)();
     $this->travel(11)->hours();
     $this->artisan('reservations:expire');
@@ -176,7 +176,7 @@ it('lets requests the lot never confirmed lapse', function () {
         ->and($this->car->fresh()->status)->toBe(VehicleStatus::Available);
 });
 
-it('lets owners and managers confirm or cancel; the lot refunds directly', function () {
+it('lets owners and managers confirm or cancel; the seller refunds directly', function () {
     ($this->reserve)();
     $reservation = Reservation::withoutGlobalScopes()->sole();
     $sales = User::factory()->staff()->create();
@@ -240,7 +240,7 @@ it('keeps reservations inside their lot', function () {
     expect($reservation->fresh()->status)->toBe(ReservationStatus::Pending);
 });
 
-it('saves the lot\'s offer and reservation settings, and needs bank details for reservations', function () {
+it('saves the seller\'s offer and reservation settings, and needs bank details for reservations', function () {
     $this->actingAs($this->owner)->put(route('dealer.settings.deals', $this->lot), [
         'accepts_offers' => false, 'reservation_deposit' => '₦100,000', 'reservation_refundable' => false,
     ])->assertSessionHasNoErrors();

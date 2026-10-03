@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Domain\System\ServerHealth;
 use Illuminate\Console\Command;
 
-/** Checks the server has what LotLink needs (handy right after installing on cPanel). Exit code 1 if anything fails. */
+/** Checks the server has what CarYard needs (handy right after installing on cPanel). Exit code 1 if anything fails. */
 class LotLinkDoctor extends Command
 {
     protected $signature = 'lotlink:doctor';

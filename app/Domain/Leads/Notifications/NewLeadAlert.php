@@ -9,7 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-/** To the lot's staff, in the notification centre: a new lead arrived (TDD matrix). */
+/** To the seller's staff, in the notification centre: a new lead arrived (TDD matrix). */
 class NewLeadAlert extends Notification implements ShouldQueue
 {
     use Queueable;

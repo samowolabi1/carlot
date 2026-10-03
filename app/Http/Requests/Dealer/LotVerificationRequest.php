@@ -33,7 +33,7 @@ class LotVerificationRequest extends FormRequest
             'cac_number.regex' => 'Enter the RC or BN number from your CAC certificate, e.g. RC 1234567.',
             'certificate.required' => 'Add your CAC certificate (a PDF or a clear photo).',
             'certificate.max' => 'The certificate must be 10 MB or smaller.',
-            'frontage.required' => 'Add a photo of your lot from the road, with your sign visible.',
+            'frontage.required' => 'Add a photo of your business from the road, with your sign visible.',
             'frontage.max' => 'The photo must be 12 MB or smaller.',
         ];
     }

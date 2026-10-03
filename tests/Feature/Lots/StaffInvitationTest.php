@@ -56,7 +56,7 @@ it('only lets the owner invite', function () {
     $this->actingAs($manager)->post(route('dealer.staff.invite', $this->lot), ['contact' => '08035551234', 'role' => 'sales'])->assertForbidden();
 });
 
-it('adds the invited person to the lot when they accept', function () {
+it('adds the invited person to the seller when they accept', function () {
     invite($this->lot, '08035551234', 'manager');
     $invitation = LotInvitation::withoutGlobalScopes()->sole();
     $user = User::factory()->create(['phone' => '+2348035551234']);

@@ -66,8 +66,8 @@ class AdCampaignResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('banner')->label('')->state(fn (AdCampaign $record) => $record->imageUrl())->width(160)->height(60),
                 Tables\Columns\TextColumn::make('headline')->searchable()->weight('semibold')->wrap()
-                    ->description(fn (AdCampaign $record) => collect([$record->subtext, $record->cta->label().' → '.($record->vehicle?->title() ?? 'lot page')])->filter()->implode(' · ')),
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable(),
+                    ->description(fn (AdCampaign $record) => collect([$record->subtext, $record->cta->label().' → '.($record->vehicle?->title() ?? 'seller page')])->filter()->implode(' · ')),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable(),
                 Tables\Columns\TextColumn::make('placement')->formatStateUsing(fn (AdPlacement $state) => $state->label())->badge()->color('gray')
                     ->description(fn (AdCampaign $record) => self::targeting($record)),
                 Tables\Columns\TextColumn::make('state')->label('Status')->badge()
@@ -105,16 +105,16 @@ class AdCampaignResource extends Resource
                 Tables\Actions\Action::make('approve')->icon('heroicon-o-check-circle')->color('success')
                     ->visible(fn (AdCampaign $record) => $record->status === AdStatus::InReview)
                     ->requiresConfirmation()
-                    ->modalDescription('Check the image and words are the lot\'s own, honest and suitable for everyone. It runs from the date asked for, or the next free slot.')
+                    ->modalDescription('Check the image and words are the seller\'s own, honest and suitable for everyone. It runs from the date asked for, or the next free slot.')
                     ->action(fn (AdCampaign $record) => self::review(fn (ReviewAdCampaign $r, User $admin) => $r->approve($record, $admin), 'Advert approved')),
                 Tables\Actions\Action::make('reject')->icon('heroicon-o-x-circle')->color('danger')
                     ->visible(fn (AdCampaign $record) => $record->status === AdStatus::InReview)
-                    ->form([Forms\Components\Textarea::make('note')->label('Why? (the lot sees this)')->required()->rows(3)->maxLength(250)])
-                    ->modalDescription('The lot is refunded in full and told why.')
+                    ->form([Forms\Components\Textarea::make('note')->label('Why? (the seller sees this)')->required()->rows(3)->maxLength(250)])
+                    ->modalDescription('The seller is refunded in full and told why.')
                     ->action(fn (AdCampaign $record, array $data) => self::review(fn (ReviewAdCampaign $r, User $admin) => $r->reject($record, $admin, $data['note']), 'Rejected and refunded')),
                 Tables\Actions\Action::make('remove')->label('Take down')->icon('heroicon-o-no-symbol')->color('danger')
                     ->visible(fn (AdCampaign $record) => $record->status === AdStatus::Approved && in_array($record->state(), ['scheduled', 'live'], true))
-                    ->form([Forms\Components\Textarea::make('note')->label('Why? (the lot sees this)')->required()->rows(3)->maxLength(250)])
+                    ->form([Forms\Components\Textarea::make('note')->label('Why? (the seller sees this)')->required()->rows(3)->maxLength(250)])
                     ->modalDescription('Stops the advert now. No refund is made automatically; refund from Payments if one is owed.')
                     ->action(fn (AdCampaign $record, array $data) => self::review(fn (ReviewAdCampaign $r, User $admin) => $r->remove($record, $admin, $data['note']), 'Advert taken down')),
             ]);

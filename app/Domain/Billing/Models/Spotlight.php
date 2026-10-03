@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * A paid (or free-allowance) boost: a car at the top of search and in the home carousel,
- * or the lot in "Featured lots" (TDD M5).
+ * or the seller in "Featured lots" (TDD M5).
  *
  * @property int $id
  * @property string $ulid

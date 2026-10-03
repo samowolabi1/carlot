@@ -55,10 +55,10 @@ class TradeInController extends Controller
         $accept = $request->validate(['accept' => ['required', 'boolean']])['accept'];
         $answer->run($tradeIn, $request->user(), (bool) $accept);
 
-        return back()->with('success', $accept ? 'Great. Bring the car when you visit; the lot will confirm the price.' : 'Thanks for letting them know.');
+        return back()->with('success', $accept ? 'Great. Bring the car when you visit; the seller will confirm the price.' : 'Thanks for letting them know.');
     }
 
-    /** Photos are private: a signed link for the lot's team and the buyer. */
+    /** Photos are private: a signed link for the seller's team and the buyer. */
     public function photo(TradeIn $tradeIn, int $index): StreamedResponse
     {
         $path = $tradeIn->photos[$index] ?? abort(404);

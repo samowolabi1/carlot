@@ -60,10 +60,10 @@ class ReviewResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable(),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable(),
                 Tables\Columns\TextColumn::make('rating')->formatStateUsing(fn (int $state) => "{$state} / 5")->sortable(),
                 Tables\Columns\TextColumn::make('body')->label('Review')->wrap()->limit(160)->placeholder('No text')->searchable()
-                    ->description(fn (Review $r) => $r->authorName().($r->reply ? ' · lot replied: "'.Str::limit($r->reply, 60).'"' : '')),
+                    ->description(fn (Review $r) => $r->authorName().($r->reply ? ' · seller replied: "'.Str::limit($r->reply, 60).'"' : '')),
                 Tables\Columns\TextColumn::make('open_reports_count')->label('Open reports')->badge()->color(fn (int $state) => $state > 0 ? 'danger' : 'gray'),
                 Tables\Columns\TextColumn::make('status')->badge()->color(fn (ReviewStatus $state) => $state === ReviewStatus::Visible ? 'success' : 'warning'),
                 Tables\Columns\TextColumn::make('created_at')->label('Posted')->since()->sortable(),
@@ -76,7 +76,7 @@ class ReviewResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('restore')->label('Show again')->icon('heroicon-o-eye')->color('success')
                     ->visible(fn (Review $r) => $r->status === ReviewStatus::Hidden || $r->getAttribute('open_reports_count') > 0)
-                    ->requiresConfirmation()->modalDescription('The review goes back on the lot\'s page and its open reports are dismissed.')
+                    ->requiresConfirmation()->modalDescription('The review goes back on the seller\'s page and its open reports are dismissed.')
                     ->action(function (Review $r): void {
                         app(ModerateReview::class)->restore($r, self::admin());
                         Notification::make()->title('Review visible')->success()->send();

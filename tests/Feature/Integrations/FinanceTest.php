@@ -90,7 +90,7 @@ it('posts to an API lender and takes its signed updates, only for its own applic
     $send = function ($lender, array $body, string $secret) {
         $raw = json_encode($body);
 
-        return $this->call('POST', route('webhooks.finance', $lender), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_LOTLINK_SIGNATURE' => hash_hmac('sha256', $raw, $secret)], $raw);
+        return $this->call('POST', route('webhooks.finance', $lender), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_CARYARD_SIGNATURE' => hash_hmac('sha256', $raw, $secret)], $raw);
     };
     $body = ['reference' => 'BNK-77', 'status' => 'approved', 'message' => 'Approved after review', 'approved_amount' => 6500000, 'rate' => 23.5, 'tenor_months' => 36];
 

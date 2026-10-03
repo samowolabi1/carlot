@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * An announcement, tip or promo from LotLink to lot owners (and optionally managers), sent to a
+ * An announcement, tip or promo from CarYard to sellers (and optionally managers), sent to a
  * chosen group of lots (`BroadcastAudience`) through in-app, push, email and optionally WhatsApp.
  *
  * @property int $id

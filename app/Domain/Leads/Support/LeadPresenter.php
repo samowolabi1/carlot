@@ -8,7 +8,7 @@ use App\Domain\Leads\Models\Message;
 use App\Domain\Support\PhoneNumber;
 use Illuminate\Support\Carbon;
 
-/** Shapes leads for the dealer board and lead page. */
+/** Shapes leads for the seller board and lead page. */
 final class LeadPresenter
 {
     /** @return array<string, mixed> */
@@ -76,7 +76,7 @@ final class LeadPresenter
     }
 
     /**
-     * The buyer's number is visible once they have contacted the lot (TDD: Privacy). Every
+     * The buyer's number is visible once they have contacted the seller (TDD: Privacy). Every
      * lead source so far is the buyer reaching out; later sources (saved searches) won't be.
      */
     public static function phone(Lead $lead): ?array

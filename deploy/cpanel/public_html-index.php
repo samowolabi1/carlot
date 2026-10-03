@@ -1,7 +1,7 @@
 <?php
 
 /*
- * LotLink front controller for "method C" in docs/deploy-cpanel.md: the app lives in ~/lotlink (outside the web
+ * CarYard front controller for "method C" in docs/deploy-cpanel.md: the app lives in ~/lotlink (outside the web
  * root) and the contents of lotlink/public were copied into ~/public_html. Copy this file to
  * ~/public_html/index.php (replacing the one copied from lotlink/public) and set MEDIA_ROOT in .env to
  * /home/<cpanel user>/public_html/media. If your folder isn't ~/lotlink, change $app below.

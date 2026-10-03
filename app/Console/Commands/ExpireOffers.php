@@ -33,7 +33,7 @@ class ExpireOffers extends Command
                     'offer',
                     $offer->vehicle->title(),
                     $lot->name,
-                    $wasCounter ? 'Their counter-offer has expired. You can make a new offer.' : "Your offer of {$offer->money()} expired without a reply. You can make a new offer or message the lot.",
+                    $wasCounter ? 'Their counter-offer has expired. You can make a new offer.' : "Your offer of {$offer->money()} expired without a reply. You can make a new offer or message the seller.",
                     DealLinks::buyer(),
                 ));
                 $count++;

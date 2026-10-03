@@ -143,12 +143,12 @@ const goBack = () => window.history.back();
                         <input ref="fileInput" type="file" accept="image/*" multiple class="sr-only" @change="addPhotos" />
                     </label>
                 </div>
-                <span class="font-normal text-muted">Front, back, interior and dashboard help the lot give a closer price.</span>
+                <span class="font-normal text-muted">Front, back, interior and dashboard help the seller give a closer price.</span>
                 <InputError :message="photoError" />
             </div>
 
             <label class="field-label">
-                Anything the lot should know?
+                Anything the seller should know?
                 <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.notes" rows="3" class="field h-auto py-3 font-normal" placeholder="e.g. AC recently serviced. Papers up to date." />
             </label>
 

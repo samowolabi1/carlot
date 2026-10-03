@@ -22,11 +22,11 @@ final class OrderLinks
         return URL::signedRoute('orders.receipt', ['order' => $order->ulid, 'payment' => $payment->ulid]);
     }
 
-    /** LotLink home with UTM tags, so sign-ups can be traced to lots (TDD M19: Growth hooks). */
+    /** CarYard home with UTM tags, so sign-ups can be traced to lots (TDD M19: Growth hooks). */
     public static function poweredBy(string $medium, ?string $lotSlug = null): string
     {
         return url('/').'?'.http_build_query(array_filter([
-            'utm_source' => 'lotlink',
+            'utm_source' => 'caryard',
             'utm_medium' => $medium,
             'utm_campaign' => $lotSlug,
         ]));

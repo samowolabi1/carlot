@@ -38,7 +38,7 @@ function submit() {
     <div class="flex flex-col gap-4">
         <div v-if="verification.verified" class="flex items-start gap-3 rounded-xl bg-map p-4 text-[14px] text-forest">
             <Icon name="shield" :size="22" :stroke-width="2" class="shrink-0" />
-            <span><strong>Verified lot</strong> since {{ verification.verified_on }}. Buyers see the badge on your lot page and every car.</span>
+            <span><strong>Verified seller</strong> since {{ verification.verified_on }}. Buyers see the badge on your seller page and every car.</span>
         </div>
 
         <template v-else>
@@ -51,10 +51,10 @@ function submit() {
             </div>
             <div v-else-if="verification.current?.status === 'rejected'" class="flex items-start gap-3 rounded-xl bg-[#FDECEC] p-4 text-[14px] text-danger" role="alert">
                 <Icon name="alert" :size="20" class="mt-0.5 shrink-0" />
-                <span><strong>We couldn't verify your lot.</strong> {{ verification.current.notes }} Send the documents again below.</span>
+                <span><strong>We couldn't verify your business.</strong> {{ verification.current.notes }} Send the documents again below.</span>
             </div>
             <p v-else class="text-[14px] text-muted">
-                Verified lots get a badge on their page and every car, and buyers trust them more. We check your CAC registration and that the lot is where your pin says.
+                Verified sellers get a badge on their page and every car, and buyers trust them more. We check your CAC registration and that your yard is where your pin says.
             </p>
 
             <div v-if="verification.current" class="flex flex-wrap gap-2 text-[14px]">
@@ -78,7 +78,7 @@ function submit() {
                         <InputError :message="form.errors.certificate" />
                     </label>
                     <label class="field-label">
-                        Photo of your lot frontage
+                        Photo of your yard or shop front
                         <span class="btn btn-outline h-12 cursor-pointer text-[14px]"><Icon name="camera" :size="18" /> <span class="truncate">{{ form.frontage ? form.frontage.name : 'Take or upload a photo' }}</span></span>
                         <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" class="sr-only" required @change="pick('frontage', $event)" />
                         <span class="font-normal text-muted">From the road, with your sign in view.</span>
@@ -89,7 +89,7 @@ function submit() {
                     <button type="submit" class="btn btn-primary" :disabled="form.processing">{{ waiting ? 'Send new documents' : 'Send for verification' }}</button>
                 </div>
             </form>
-            <p v-else-if="!verification.current" class="text-[14px] text-muted">Only the lot owner can send verification documents.</p>
+            <p v-else-if="!verification.current" class="text-[14px] text-muted">Only the seller can send verification documents.</p>
         </template>
     </div>
 </template>

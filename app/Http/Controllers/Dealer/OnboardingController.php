@@ -62,13 +62,13 @@ class OnboardingController extends Controller
 
         if (! $lot->hasLocation()) {
             return redirect()->route('dealer.onboarding.show', [$lot, 'location'])
-                ->with('error', 'Pin your lot on the map before you submit.');
+                ->with('error', 'Pin your business on the map before you submit.');
         }
 
         $lot->forceFill(['submitted_at' => $lot->submitted_at ?? now()])->save();
 
         return redirect()->route('dealer.dashboard', $lot)
-            ->with('success', 'Thanks! We will review your lot and get it live shortly.');
+            ->with('success', 'Thanks! We will review your business and get it live shortly.');
     }
 
     public static function nextStep(string $current): ?string

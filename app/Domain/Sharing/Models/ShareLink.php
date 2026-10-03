@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A short, tracked link to a car or a lot: /c/{code}. Public by design, so it is not
- * scoped to a lot; dealers only ever see counts for their own lot.
+ * A short, tracked link to a car or a seller: /c/{code}. Public by design, so it is not
+ * scoped to a seller; sellers only ever see counts for their own lot.
  *
  * @property int $id
  * @property string $code

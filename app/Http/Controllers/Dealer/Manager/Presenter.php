@@ -24,8 +24,8 @@ use App\Domain\Support\PhoneNumber;
 use Illuminate\Support\Collection;
 
 /**
- * Shapes Lot Manager records for the dealer pages. Walk-in customers gave their number
- * to the lot in person, so it is shown in full. Car costs never appear here (S10).
+ * Shapes Sales Manager records for the seller pages. Walk-in customers gave their number
+ * to the seller in person, so it is shown in full. Car costs never appear here (S10).
  */
 final class Presenter
 {
@@ -161,7 +161,7 @@ final class Presenter
             ])->all();
     }
 
-    /** Valued trade-ins the lot can take against an order. @return list<array<string, mixed>> */
+    /** Valued trade-ins the seller can take against an order. @return list<array<string, mixed>> */
     public static function tradeIns(): array
     {
         $tradeIns = TradeIn::query()->whereIn('status', [TradeInStatus::Valued, TradeInStatus::Accepted])

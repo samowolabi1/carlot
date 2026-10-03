@@ -9,7 +9,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
- * Hourly (TDD: stats:rollup): today's and yesterday's numbers in each lot's timezone go into
+ * Hourly (TDD: stats:rollup): today's and yesterday's numbers in each seller's timezone go into
  * daily_vehicle_stats, so yesterday is final after 01:00 lot time. Raw events older than 90
  * days are removed; the rollups stay.
  */

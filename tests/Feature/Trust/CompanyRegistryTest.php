@@ -37,7 +37,7 @@ beforeEach(function () {
     ]]);
 });
 
-it('looks the number up after the lot sends it and shows the admin what the registry says', function () {
+it('looks the number up after the seller sends it and shows the admin what the registry says', function () {
     $this->answer = ($this->found)();
 
     ($this->send)();

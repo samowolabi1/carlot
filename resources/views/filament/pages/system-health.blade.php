@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <p class="text-sm text-gray-600 dark:text-gray-400">
-        What this server has and what LotLink needs. The same checks run with <code>php artisan lotlink:doctor</code>. Fix anything marked
+        What this server has and what CarYard needs. The same checks run with <code>php artisan lotlink:doctor</code>. Fix anything marked
         <strong>Needs fixing</strong>; <em>Check</em> items work but could be better.
     </p>
     @foreach ($this->groups() as $group => $checks)

@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * A bank or finance company signs up from the app: the lender (waiting for approval), its licence on the private
- * disk, and the person who applied as its first admin. A LotLink admin approves it (DecideLender) before any buyer
+ * disk, and the person who applied as its first admin. A CarYard admin approves it (DecideLender) before any buyer
  * sees it.
  */
 class ApplyToBeLender
@@ -32,7 +32,7 @@ class ApplyToBeLender
     public function run(User $user, array $data, ?UploadedFile $licence): Lender
     {
         if ($user->isAdmin()) {
-            throw ValidationException::withMessages(['name' => 'LotLink admins onboard lenders from the admin panel.']);
+            throw ValidationException::withMessages(['name' => 'CarYard admins onboard lenders from the admin panel.']);
         }
         $waiting = Lender::where('status', LenderStatus::Pending)->whereHas('memberships', fn ($q) => $q->where('user_id', $user->id))->exists();
         if ($waiting) {

@@ -41,7 +41,7 @@ it('hides another lot\'s customers, orders, payments and tasks behind 404s', fun
     'task' => ['patch', 'dealer.manager.tasks.update', fn ($t) => ['task' => $t->task]],
 ]);
 
-it('forbids another lot\'s Lot Manager pages outright', function (string $name) {
+it('forbids another lot\'s Sales Manager pages outright', function (string $name) {
     $this->actingAs($this->mine->owner)->get(route($name, $this->theirs))->assertForbidden();
 })->with(['dealer.manager.today', 'dealer.manager.walk-ins.index', 'dealer.manager.customers.index', 'dealer.manager.orders.index', 'dealer.manager.orders.create']);
 
@@ -54,7 +54,7 @@ it('scopes lists and queries to the current lot', function () {
         ->and(FollowUpTask::count())->toBe(0);
 });
 
-it('does not sync into a lot the user is not a member of', function () {
+it('does not sync into a seller the user is not a member of', function () {
     $this->actingAs($this->mine->owner)->postJson(route('dealer.manager.sync', $this->theirs), [
         'items' => [['type' => 'walk_in', 'client_uuid' => (string) Str::uuid(), 'data' => ['name' => 'X', 'phone' => '08035550999']]],
     ])->assertForbidden();

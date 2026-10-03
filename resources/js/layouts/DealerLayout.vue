@@ -36,7 +36,7 @@ const nav: NavItem[] = [
     { label: 'Settings', icon: 'settings', route: 'dealer.settings' },
 ];
 
-// Lot Manager (M19): the everyday tools for walk-ins, orders and payments.
+// Sales Manager (M19): the everyday tools for walk-ins, orders and payments.
 const manager: NavItem[] = [
     { label: 'Today', icon: 'sun', route: 'dealer.manager.today' },
     { label: 'Walk-ins', icon: 'walkIn', route: 'dealer.manager.walk-ins.index' },
@@ -96,7 +96,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                         :href="route('dealer.onboarding.start')"
                         class="flex h-10 items-center gap-2.5 rounded-lg px-2 text-[14px] text-peach no-underline hover:bg-forest-700 hover:text-white"
                     >
-                        <Icon name="plus" :size="16" /> Add another lot
+                        <Icon name="plus" :size="16" /> Add another business
                     </Link>
                 </div>
             </div>
@@ -121,7 +121,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             </div>
 
             <div class="flex flex-col gap-0.5">
-                <span class="px-2.5 pb-1 text-[11px] font-semibold tracking-wider text-sage uppercase">Lot Manager</span>
+                <span class="px-2.5 pb-1 text-[11px] font-semibold tracking-wider text-sage uppercase">Sales Manager</span>
                 <Link
                     v-for="item in manager.filter(visible)"
                     :key="item.label"
@@ -191,12 +191,12 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
             <div v-if="showPendingBanner" class="border-b border-apricot bg-cream px-5 py-3 text-[14px] text-clay-dark lg:px-8">
                 <strong>{{ lot.status_label }}.</strong>
                 <template v-if="lot.status === 'suspended'">
-                    Your lot is hidden from buyers.
-                    <Link :href="route('dealer.support.index', lot.slug)" class="font-semibold">Contact LotLink support</Link>
+                    Your business is hidden from buyers.
+                    <Link :href="route('dealer.support.index', lot.slug)" class="font-semibold">Contact CarYard support</Link>
                 </template>
-                <template v-else-if="lot.submitted"> We are reviewing your lot. You can keep setting up while you wait.</template>
+                <template v-else-if="lot.submitted"> We are reviewing your business. You can keep setting up while you wait.</template>
                 <template v-else>
-                    Finish setting up and submit your lot so buyers can find it.
+                    Finish setting up and submit your business so buyers can find it.
                     <Link :href="route('dealer.onboarding.show', [lot.slug, 'submit'])" class="font-semibold">Continue setup</Link>
                 </template>
             </div>

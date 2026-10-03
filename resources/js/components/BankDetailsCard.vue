@@ -5,8 +5,8 @@ import { computed, ref } from 'vue';
 export type BankDetails = { bank_name: string; account_number: string; account_name: string };
 
 /**
- * A lot's bank details with one-tap copy, for customers paying the lot directly
- * (LotLink never takes payment for cars). Optional amount and reference for the transfer.
+ * A seller's bank details with one-tap copy, for customers paying the seller directly
+ * (CarYard never takes payment for cars). Optional amount and reference for the transfer.
  */
 const props = withDefaults(
     defineProps<{ account: BankDetails; amount?: string | null; reference?: string | null; shareText?: string | null; title?: string; whatsapp?: string | null }>(),

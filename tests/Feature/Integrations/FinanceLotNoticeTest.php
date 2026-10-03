@@ -15,7 +15,7 @@ use Tests\Support\MarketplaceFixtures;
 
 uses(MarketplaceFixtures::class, LenderFixtures::class);
 
-/* The lot hears that a buyer applied for a car loan on its car, and about a pre-approval; never the private details. */
+/* The seller hears that a buyer applied for a car loan on its car, and about a pre-approval; never the private details. */
 
 beforeEach(function () {
     $this->owner = User::factory()->staff()->create(['phone' => '+2348020000001']);
@@ -36,11 +36,11 @@ beforeEach(function () {
     $this->webhook = function (array $body) {
         $raw = json_encode($body);
 
-        return $this->call('POST', route('webhooks.finance', $this->bank), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_LOTLINK_SIGNATURE' => hash_hmac('sha256', $raw, 'shh')], $raw);
+        return $this->call('POST', route('webhooks.finance', $this->bank), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_CARYARD_SIGNATURE' => hash_hmac('sha256', $raw, 'shh')], $raw);
     };
 });
 
-it('gives the lot a car-loan lead, a line in the chat and an alert, without the private details', function () {
+it('gives the seller a car-loan lead, a line in the chat and an alert, without the private details', function () {
     Notification::fake();
 
     ($this->apply)();
@@ -55,7 +55,7 @@ it('gives the lot a car-loan lead, a line in the chat and an alert, without the 
         && $n->url === route('dealer.leads.show', [$this->lot, $lead]));
 });
 
-it('tells the lot about a pre-approval, but not about a decline', function () {
+it('tells the seller about a pre-approval, but not about a decline', function () {
     ($this->apply)();
     $application = FinanceApplication::sole();
     Notification::fake();
@@ -77,7 +77,7 @@ it('tells the lot about a pre-approval, but not about a decline', function () {
     expect(Message::query()->where('body', 'like', '%declined%')->exists())->toBeFalse();
 });
 
-it('tells the lot straight away when the partner pre-approves on the spot', function () {
+it('tells the seller straight away when the partner pre-approves on the spot', function () {
     ($this->partner)('pre_approved', 700_000_000);
     Notification::fake();
 
@@ -90,7 +90,7 @@ it('tells the lot straight away when the partner pre-approves on the spot', func
     Notification::assertSentToTimes($this->owner, DealAlert::class, 2);
 });
 
-it('tells the lot nothing when the partner could not be reached', function () {
+it('tells the seller nothing when the partner could not be reached', function () {
     $this->lenderAnswers(fn () => throw new RuntimeException('down'));
     Notification::fake();
 

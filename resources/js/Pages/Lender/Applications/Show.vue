@@ -62,7 +62,7 @@ const labels: Record<Action, string> = {
     documents: 'Ask for documents',
     pre_approve: 'Pre-approve',
     approve: 'Approve',
-    disburse: 'Record payment to the lot (optional)',
+    disburse: 'Record payment to the seller (optional)',
     decline: 'Decline',
 };
 const open = ref<Action | null>(null);
@@ -168,7 +168,7 @@ function assign() {
                                 class="field h-auto py-2.5"
                                 placeholder="e.g. Visit any branch with your ID, BVN and 6 months of statements, or call 0700 000 0000. We'll complete the loan agreement and checks there."
                             />
-                            <span class="text-[12px] font-normal text-muted">The buyer finishes the loan with you: agreement, identity and credit checks, and payment all happen with you, outside LotLink.</span>
+                            <span class="text-[12px] font-normal text-muted">The buyer finishes the loan with you: agreement, identity and credit checks, and payment all happen with you, outside CarYard.</span>
                             <InputError :message="form.errors.next_steps" />
                         </label>
                         <div v-if="open === 'disburse'" class="grid gap-3 sm:grid-cols-2">
@@ -201,7 +201,7 @@ function assign() {
                             <button type="submit" class="btn btn-primary h-11" :disabled="form.processing">{{ form.processing ? 'Saving…' : labels[open] }}</button>
                             <button type="button" class="btn btn-outline h-11" @click="open = null">Cancel</button>
                         </div>
-                        <p class="text-[12px] text-muted">The buyer is told straight away. {{ open === 'decline' ? 'The car lot is never told about a decline.' : '' }}</p>
+                        <p class="text-[12px] text-muted">The buyer is told straight away. {{ open === 'decline' ? 'The seller is never told about a decline.' : '' }}</p>
                     </form>
                     <InputError v-if="!open" :message="(form.errors as Record<string, string>).status" />
                 </section>
@@ -235,7 +235,7 @@ function assign() {
                     <a v-if="a.car_url" :href="a.car_url" target="_blank" rel="noopener" class="text-[15px] font-semibold">{{ a.car }}</a>
                     <span v-else class="text-[15px] font-semibold">{{ a.car }}</span>
                     <dl class="flex flex-col gap-1.5 text-[14px]">
-                        <div class="flex justify-between gap-3"><dt class="text-muted">Lot</dt><dd class="text-right font-semibold">{{ a.lot }}<br /><span class="font-normal text-muted">{{ a.lot_city }}</span></dd></div>
+                        <div class="flex justify-between gap-3"><dt class="text-muted">Seller</dt><dd class="text-right font-semibold">{{ a.lot }}<br /><span class="font-normal text-muted">{{ a.lot_city }}</span></dd></div>
                         <div class="flex justify-between gap-3"><dt class="text-muted">Price</dt><dd class="font-semibold">{{ a.price }}</dd></div>
                         <div class="flex justify-between gap-3"><dt class="text-muted">Deposit</dt><dd class="font-semibold">{{ a.deposit }}</dd></div>
                         <div class="flex justify-between gap-3"><dt class="text-muted">Loan asked for</dt><dd class="font-semibold">{{ a.amount }}</dd></div>

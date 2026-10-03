@@ -101,7 +101,7 @@ onMounted(async () => {
         fullscreenControl: false,
         clickableIcons: false,
     });
-    marker = new g.Marker({ map, position: start, draggable: true, title: 'Your lot' });
+    marker = new g.Marker({ map, position: start, draggable: true, title: 'Your sales' });
     geocoder = new g.Geocoder();
 
     marker.addListener('dragend', () => {
@@ -148,7 +148,7 @@ watch([latitude, longitude], ([lat, lng]) => {
         </div>
 
         <p v-if="locateError" class="text-[13px] font-medium text-danger" role="alert">{{ locateError }}</p>
-        <p v-else-if="apiKey && !mapsFailed" class="text-[13px] text-muted">Tap the map or drag the pin to the lot gate.</p>
+        <p v-else-if="apiKey && !mapsFailed" class="text-[13px] text-muted">Tap the map or drag the pin to the seller gate.</p>
 
         <details v-if="!apiKey || mapsFailed" class="text-[13px] text-muted">
             <summary class="cursor-pointer font-semibold text-forest">Enter coordinates by hand</summary>

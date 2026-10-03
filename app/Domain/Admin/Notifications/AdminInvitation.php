@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-/** An owner invited someone to the LotLink admin team: a 7-day link to set their password, then 2FA in /admin. */
+/** An owner invited someone to the CarYard admin team: a 7-day link to set their password, then 2FA in /admin. */
 class AdminInvitation extends Notification
 {
     use Queueable;
@@ -30,9 +30,9 @@ class AdminInvitation extends Notification
         $url = URL::temporarySignedRoute('admin.invitation', now()->addDays(self::DAYS), ['user' => $notifiable->ulid]);
 
         return (new MailMessage)
-            ->subject('You\'re invited to the LotLink admin team')
+            ->subject('You\'re invited to the CarYard admin team')
             ->greeting('Hello'.($notifiable->name ? ' '.strtok((string) $notifiable->name, ' ') : '').',')
-            ->line("{$this->invitedBy->name} added you to the LotLink admin team as **{$this->role->label()}**: {$this->role->description()}")
+            ->line("{$this->invitedBy->name} added you to the CarYard admin team as **{$this->role->label()}**: {$this->role->description()}")
             ->action('Set your password', $url)
             ->line('The link works for '.self::DAYS.' days. After setting a password you\'ll turn on two-step sign-in with an authenticator app.')
             ->line('If you weren\'t expecting this, ignore this email.');

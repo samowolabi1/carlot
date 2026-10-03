@@ -48,7 +48,7 @@ it('counts platform metrics for the last 30 days', function () {
     expect($m)->active_lots->toBe(1)->live_listings->toBe(1)->bookings->toBe(1)->mrr->toBe($pro->price)->churn->toEqual(0.0);
 });
 
-it('lets an admin log in as a lot owner for support, and switch back, with both in the audit log', function () {
+it('lets an admin log in as a seller for support, and switch back, with both in the audit log', function () {
     $this->actingAs($this->admin);
     Livewire::test(ListLots::class)->callTableAction('impersonate', $this->lot)->assertRedirect(route('dealer.dashboard', $this->lot));
 
@@ -76,7 +76,7 @@ it('registers independent inspectors from the user page', function () {
         ->and(AuditLog::where('action', 'admin.inspector_added')->exists())->toBeTrue();
 });
 
-it('lets admins put a lot on any plan, such as Enterprise', function () {
+it('lets admins put a seller on any plan, such as Enterprise', function () {
     $this->actingAs($this->admin);
     Livewire::test(ListLots::class)->callTableAction('plan', $this->lot, ['plan_id' => Plan::where('code', 'enterprise')->value('id')]);
 

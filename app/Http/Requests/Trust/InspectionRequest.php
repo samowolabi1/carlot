@@ -11,7 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-/** The 40-point checklist, from the dealer's form or a registered inspector's. */
+/** The 40-point checklist, from the seller's form or a registered inspector's. */
 class InspectionRequest extends FormRequest
 {
     /** @return array<string, mixed> */

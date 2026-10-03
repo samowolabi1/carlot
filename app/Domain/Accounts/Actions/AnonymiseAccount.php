@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Removes a deleted account's personal data (TDD Privacy). The row stays so bookings, reviews
- * and chats keep their shape, shown as "Deleted user". A lot's own customer-book entry is the
+ * and chats keep their shape, shown as "Deleted user". A seller's own customer-book entry is the
  * lot's record (it is the data controller), so only the link to the account is removed.
  */
 class AnonymiseAccount

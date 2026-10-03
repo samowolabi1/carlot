@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-// Stroke icons drawn for the LotLink designs (24×24 grid).
+// Stroke icons drawn for the CarYard designs (24×24 grid).
 const paths = {
     home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z',
     search: 'M11 4a7 7 0 1 1 0 14a7 7 0 0 1 0-14M20 20l-4-4',

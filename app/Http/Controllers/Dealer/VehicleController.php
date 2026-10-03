@@ -71,7 +71,7 @@ class VehicleController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        // Cars on an open Lot Manager order link to it instead of offering "Mark sold".
+        // Cars on an open Sales Manager order link to it instead of offering "Mark sold".
         $orders = SalesOrder::query()->whereIn('vehicle_id', collect($vehicles->items())->pluck('id'))
             ->whereIn('status', OrderStatus::open())
             ->get(['ulid', 'order_no', 'vehicle_id'])
@@ -89,14 +89,14 @@ class VehicleController extends Controller
             'ageing' => $v->isAgeing(),
             'new_arrival' => $v->isNewArrival(),
             'order' => ($o = $orders->get($v->id)) ? ['ulid' => $o->ulid, 'order_no' => $o->order_no] : null,
-            // Shareable once buyers can see it (the lot is approved and the car is live).
+            // Shareable once buyers can see it (the seller is approved and the car is live).
             'spotlight_until' => $v->spotlight_until?->isFuture() ? $v->spotlight_until->copy()->setTimezone($lot->timezone)->format('j M') : null,
             'share_url' => $lot->status === LotStatus::Active && in_array($v->status, VehicleStatus::live(), true) && ! $v->isHeld() ? url($v->publicPath()) : null,
             'inspected' => $v->inspection_id !== null,
-            // Off the marketplace while LotLink looks at reports or signals (TDD M14).
-            'held' => $v->isHeld() ? ($v->held_reason ?: 'Held for review by LotLink') : null,
+            // Off the marketplace while CarYard looks at reports or signals (TDD M14).
+            'held' => $v->isHeld() ? ($v->held_reason ?: 'Held for review by CarYard') : null,
             // Quick actions on the stock list. Drafts are finished in the add-car flow,
-            // and selling goes through Lot Manager, so neither appears here.
+            // and selling goes through Sales Manager, so neither appears here.
             'next_statuses' => $v->status === VehicleStatus::Draft || $v->isHeld() ? [] : array_map(fn (VehicleStatus $s) => $s->value, array_values(array_filter(
                 $stateMachine->allowedFrom($v->status),
                 fn (VehicleStatus $s) => $s !== VehicleStatus::Sold,
@@ -209,7 +209,7 @@ class VehicleController extends Controller
             'makes' => fn () => $step === 'identity' ? $this->catalogue() : [],
             'options' => fn () => $step === 'details' ? $this->detailOptions() : [],
             'missing' => fn () => $vehicle && $step === 'price' ? app(PublishVehicle::class)->missing($vehicle) : [],
-            // TDD M15: what similar cars are listed for across LotLink (whole naira).
+            // TDD M15: what similar cars are listed for across CarYard (whole naira).
             'guide' => fn () => $vehicle && $step === 'price' && ($g = PricingGuide::for($vehicle)) ? [
                 'low' => intdiv($g['low'], 100), 'median' => intdiv($g['median'], 100), 'high' => intdiv($g['high'], 100), 'count' => $g['count'],
             ] : null,
@@ -232,7 +232,7 @@ class VehicleController extends Controller
         return back()->with('success', 'Saved.');
     }
 
-    /** Makes with their models, for the make/model pickers. Includes unreviewed models so a dealer sees what they added. */
+    /** Makes with their models, for the make/model pickers. Includes unreviewed models so a seller sees what they added. */
     private function catalogue(): array
     {
         return Make::query()

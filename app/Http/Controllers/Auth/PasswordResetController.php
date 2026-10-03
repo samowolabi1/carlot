@@ -22,7 +22,7 @@ use Inertia\Response;
  */
 class PasswordResetController extends Controller
 {
-    public const SENT = 'If that email has a LotLink account, we\'ve sent a link to reset the password. Check your inbox and spam folder.';
+    public const SENT = 'If that email has a CarYard account, we\'ve sent a link to reset the password. Check your inbox and spam folder.';
 
     public function create(Request $request): Response
     {

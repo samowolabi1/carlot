@@ -92,7 +92,7 @@ class UserResource extends Resource
                 Tables\Actions\EditAction::make()->hidden(fn (User $u) => $u->isAdmin()),
                 Tables\Actions\Action::make('impersonate')->label('Log in as')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
                     ->visible(fn (User $u) => ! $u->isAdmin())
-                    ->requiresConfirmation()->modalDescription('You will see LotLink as this user. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
+                    ->requiresConfirmation()->modalDescription('You will see CarYard as this user. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
                     ->action(function (User $u) {
                         /** @var User $admin */
                         $admin = Auth::user();

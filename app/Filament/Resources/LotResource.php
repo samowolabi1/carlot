@@ -37,8 +37,10 @@ class LotResource extends Resource
         return [AdminArea::Approvals, AdminArea::Support, AdminArea::Billing];
     }
 
-    // Global search (Ctrl/⌘ K): a lot by name, slug, city or owner's phone.
+    // Global search (Ctrl/⌘ K): a seller by name, slug, city or owner's phone.
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'seller';
 
     /** @return list<string> */
     public static function getGloballySearchableAttributes(): array
@@ -95,7 +97,7 @@ class LotResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(collect(LotStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])),
                 Tables\Filters\SelectFilter::make('state')->options(collect(Regions::options())->mapWithKeys(fn (array $r) => [$r['value'] => $r['label']]))->searchable(),
-                Tables\Filters\TernaryFilter::make('onboarded_by')->label('Onboarded by LotLink')->nullable(),
+                Tables\Filters\TernaryFilter::make('onboarded_by')->label('Onboarded by CarYard')->nullable(),
                 Tables\Filters\TernaryFilter::make('submitted_at')->label('Submitted')->nullable(),
                 Tables\Filters\TernaryFilter::make('verified_at')->label('Verified')->nullable(),
             ])
@@ -110,12 +112,12 @@ class LotResource extends Resource
                         $lot->update(['status' => LotStatus::Active]);
                         AuditLog::record('admin.lot_approved', $lot, ['from' => $from], self::admin(), $lot->id);
                     }),
-                // Everything but View/Approve under "More", so the row fits (Log in as is also on the lot's page).
+                // Everything but View/Approve under "More", so the row fits (Log in as is also on the seller's page).
                 Tables\Actions\ActionGroup::make([
                     // Support (TDD M17): see the dashboard as the owner does; logged in the audit log.
                     Tables\Actions\Action::make('impersonate')->authorize(fn () => self::allows(AdminArea::Support))->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')->color('gray')
                         ->visible(fn (Lot $lot) => $lot->owner !== null && ! $lot->owner->isAdmin())
-                        ->requiresConfirmation()->modalDescription('You will see LotLink as the lot owner. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
+                        ->requiresConfirmation()->modalDescription('You will see CarYard as the seller. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
                         ->action(function (Lot $lot) {
                             app(Impersonation::class)->start(self::admin(), $lot->owner);
 
@@ -136,11 +138,11 @@ class LotResource extends Resource
                             app(DecideLotVerification::class)->revoke($lot, self::admin(), $data['reason']);
                             Notification::make()->title('Verified badge removed')->success()->send();
                         }),
-                    // Enterprise isn't self-serve: admins put a lot on it (or any plan) here.
+                    // Enterprise isn't self-serve: admins put a seller on it (or any plan) here.
                     Tables\Actions\Action::make('plan')->authorize(fn () => self::allows(AdminArea::Billing))->label('Set plan')->icon('heroicon-o-rectangle-stack')->color('gray')
                         ->fillForm(fn (Lot $lot) => ['plan_id' => $lot->plan_id])
                         ->form([Forms\Components\Select::make('plan_id')->label('Plan')->options(fn () => Plan::orderBy('sort')->pluck('name', 'id'))->required()
-                            ->helperText('Changes what the lot can use straight away. Billing stays as it is in Payments.')])
+                            ->helperText('Changes what the seller can use straight away. Billing stays as it is in Payments.')])
                         ->action(function (Lot $lot, array $data): void {
                             $from = $lot->plan?->code;
                             $lot->forceFill(['plan_id' => (int) $data['plan_id']])->save();

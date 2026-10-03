@@ -135,7 +135,7 @@ const submit = () => form.post(route('dealer.ads.store', lotSlug.value), { force
                     <label class="field-label">
                         What does it open?
                         <select v-model="form.vehicle" class="field h-11">
-                            <option value="">My lot page</option>
+                            <option value="">My seller page</option>
                             <option v-for="c in cars" :key="c.value" :value="c.value">{{ c.label }}</option>
                         </select>
                         <InputError :message="form.errors.vehicle" />
@@ -245,7 +245,7 @@ const submit = () => form.post(route('dealer.ads.store', lotSlug.value), { force
                     <div class="flex items-baseline justify-between border-t border-divider pt-2"><span>Total</span><strong class="font-display text-[22px]">{{ formatNaira(price) }}</strong></div>
                     <p class="flex gap-2 rounded-xl bg-map px-3 py-2 text-[12px] text-forest">
                         <Icon name="shield" :size="16" class="mt-0.5 shrink-0" />
-                        LotLink checks every banner before it runs, usually within a working day. If it isn't approved you're refunded in full. If the check finishes after your start date, you still get all {{ form.days }} days.
+                        CarYard checks every banner before it runs, usually within a working day. If it isn't approved you're refunded in full. If the check finishes after your start date, you still get all {{ form.days }} days.
                     </p>
                     <button type="submit" class="btn btn-primary h-12 w-full" :disabled="form.processing || !form.headline.trim()">
                         {{ form.processing ? 'Opening payment…' : `Pay ${formatNaira(price)} and send for review` }}

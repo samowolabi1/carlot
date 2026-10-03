@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * A bank account the lot shares with customers so they pay the lot directly. LotLink never
- * receives money for cars; its only payments are the lot's subscription. Owner-managed
+ * A bank account the seller shares with customers so they pay the seller directly. CarYard never
+ * receives money for cars; its only payments are the seller's subscription. Owner-managed
  * through `SaveBankAccount` (audit-logged, the owner is told of every change).
  *
  * @property int $id

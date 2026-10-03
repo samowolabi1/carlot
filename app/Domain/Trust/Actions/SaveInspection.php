@@ -16,7 +16,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
 /**
- * Records a 40-point inspection and makes it the car's current report (TDD M14). The lot's own
+ * Records a 40-point inspection and makes it the car's current report (TDD M14). The seller's own
  * inspections show "Inspected"; a registered inspector's are signed and show "Independently
  * inspected". Photos are re-encoded to WebP, which drops EXIF location.
  */
@@ -53,7 +53,7 @@ class SaveInspection
 
             $inspection->forceFill(['photos' => $this->storePhotos($inspection, $photos) ?: null])->save();
 
-            // A lot's own check never hides a signed independent report; it stays in the history.
+            // A seller's own check never hides a signed independent report; it stays in the history.
             $current = $vehicle->inspection_id ? Inspection::withoutGlobalScopes()->find($vehicle->inspection_id) : null;
             if ($independent || ! $current?->isIndependent()) {
                 // save() so the search index picks up the "Inspected" badge.

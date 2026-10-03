@@ -11,7 +11,7 @@ use App\Domain\Trust\Notifications\VerificationDecided;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/** An admin approves (the lot gets verified_at and the badge) or rejects with a note. */
+/** An admin approves (the seller gets verified_at and the badge) or rejects with a note. */
 class DecideLotVerification
 {
     public function approve(LotVerification $verification, User $admin, ?string $notes = null): LotVerification
@@ -22,7 +22,7 @@ class DecideLotVerification
     public function reject(LotVerification $verification, User $admin, string $notes): LotVerification
     {
         if (trim($notes) === '') {
-            throw ValidationException::withMessages(['notes' => 'Tell the lot what to fix.']);
+            throw ValidationException::withMessages(['notes' => 'Tell the seller what to fix.']);
         }
 
         return $this->decide($verification, $admin, VerificationStatus::Rejected, $notes);

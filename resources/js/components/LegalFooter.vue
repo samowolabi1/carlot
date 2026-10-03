@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 
-/** The platform's legal links and the one-line disclaimer, on every layout (marketplace, dealer, lender, sign-in, mini-sites). */
+/** The platform's legal links and the one-line disclaimer, on every layout (marketplace, seller, lender, sign-in, mini-sites). */
 withDefaults(defineProps<{ tone?: 'light' | 'dark'; compact?: boolean }>(), { tone: 'light', compact: false });
 
 const links = [
@@ -25,7 +25,7 @@ const links = [
             >
         </nav>
         <p v-if="!compact" class="max-w-3xl leading-snug">
-            LotLink is a marketplace: car lots sell the cars and lenders make the loans. LotLink never asks you to pay for a car, a deposit or a loan fee into a LotLink account.
+            CarYard is a marketplace: sellers sell the cars and lenders make the loans. CarYard never asks you to pay for a car, a deposit or a loan fee into a CarYard account.
             Never share your sign-in code.
         </p>
     </footer>

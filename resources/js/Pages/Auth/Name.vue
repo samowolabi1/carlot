@@ -10,8 +10,8 @@ const form = useForm({ name: '' });
     <Head title="Welcome" />
     <AuthLayout>
         <div class="flex flex-col gap-2">
-            <h1 class="text-[30px] leading-[1.1] font-bold">Welcome to LotLink</h1>
-            <p class="text-[15px] text-muted">What should lots call you when you book a visit or send an enquiry?</p>
+            <h1 class="text-[30px] leading-[1.1] font-bold">Welcome to CarYard</h1>
+            <p class="text-[15px] text-muted">What should sellers call you when you book a visit or send an enquiry?</p>
         </div>
         <form class="flex flex-col gap-4" @submit.prevent="form.put(route('profile.name.update'))">
             <label class="field-label">

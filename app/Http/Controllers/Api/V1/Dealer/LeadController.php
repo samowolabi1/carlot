@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * The lot's leads for staff in the app (`lot.member` checks membership and scopes queries to the lot).
+ * The seller's leads for staff in the app (`lot.member` checks membership and scopes queries to the seller).
  * Buyers' numbers stay masked until they engage, as on the web (`LeadPresenter::phone`).
  */
 class LeadController extends Controller

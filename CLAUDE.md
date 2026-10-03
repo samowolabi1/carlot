@@ -1,9 +1,14 @@
 # CLAUDE.md
 
-LotLink: a multi-dealer car lot platform for Nigeria first (NGN, Paystack/Flutterwave, WhatsApp), configurable
-for the UK later. Three faces: customer marketplace, dealer dashboard (with Lot Manager for walk-ins),
-and a per-lot mini-site. The Product Spec, Technical Design Document (TDD) and "LotLink — MVP
+CarYard: a multi-seller car platform for Nigeria first (NGN, Paystack/Flutterwave, WhatsApp), configurable
+for the UK later. Three faces: customer marketplace, seller dashboard (with Sales Manager for walk-ins),
+and a per-seller mini-site. The Product Spec, Technical Design Document (TDD) and "LotLink — MVP
 Screens" design canvas are the source of truth; build what they say, sprint by sprint.
+
+**Names**: the brand is **CarYard** (caryardng.com). On screen, in emails, legal pages and docs the three sides are **sellers**
+(car lots and dealers), **buyers** and **lenders**; never "lot", "dealer" or "LotLink" in user-facing text. Code keeps its internal
+names: the `Lot` model and `lots` table are sellers, `/dealer/...` routes and `dealer.*` route names are the seller dashboard,
+"Sales Manager" is the `LotManager` domain, and `config('lotlink...')`, `LOTLINK_*` and `lotlink:*` commands are unchanged.
 
 ## Stack
 
@@ -43,7 +48,7 @@ Run all four before pushing.
 - **Time**: stored UTC, shown in `lots.timezone` (default Africa/Lagos).
 - **Public IDs**: ULIDs (`ulid` column) in URLs; lots route by `slug`. Never expose auto-increment
   ids (models hide `id`).
-- **Phone numbers**: always E.164 via `App\Domain\Support\PhoneNumber`; mask them in dealer UI
+- **Phone numbers**: always E.164 via `App\Domain\Support\PhoneNumber`; mask them in seller UI
   until the customer engages. Users (and lot customers from the marketplace) may have **no phone** when they
   signed up by email: never assume `$user->phone`; `PhoneNumber::display()/mask()` accept null.
 - **Sign-in**: one-time codes by WhatsApp (`SendOtp::run`, no SMS fallback unless `otp.sms_fallback`) or email
@@ -55,7 +60,7 @@ Run all four before pushing.
 - **States**: lots' `state` is one of `config('lotlink.regions')` (36 states + FCT); normalise input with `Regions::normalize()`.
   Admins create lots for owners with `OnboardLot`.
 
-## Lot Manager (S5)
+## Sales Manager (S5)
 
 - Sales are `SalesOrder`s; every payment, void, status change and cancel goes through its Action,
   which locks the order row. `OrderLedger` recalculates totals from `order_payments` and keeps the
@@ -66,7 +71,7 @@ Run all four before pushing.
 - Offline-capable writes (walk-ins, orders, payments) take a `client_uuid` and must stay idempotent.
 - Customers are only messaged with `consent_whatsapp`. Changes to money or status go in `AuditLog`.
 
-## Lot Manager Pro (S10)
+## Sales Manager Pro (S10)
 
 - Instalments are a schedule, not money: `SetInstalmentPlan` creates them and `InstalmentSchedule::apply()`
   recomputes paid amounts and status from `total_paid − instalments_from_paid` (oldest first). It is
@@ -76,7 +81,7 @@ Run all four before pushing.
 - Costs and profit (`VehicleCost`, `Profit`) are gated by `LotPolicy::viewCosts` (owner/manager + Pro).
   Never add them to customer pages, receipts, presenters for buyers or API resources.
 - Reports come from `ManagerReports` (one shape for the page and `ReportExport` to Excel).
-- Time-of-day jobs (reminders 09:00, summary 19:00) run hourly and check each lot's local time.
+- Time-of-day jobs (reminders 09:00, summary 19:00) run hourly and check each seller's local time.
 
 ## Location and analytics (S11)
 
@@ -96,7 +101,7 @@ Run all four before pushing.
   `SubmitLotVerification` as `LookUpCompany` (retries when the registry is down). It stores the registry's answer and a
   `NameMatch` score on the verification (`registrySummary()` / `registryConcern()` in the admin queue) and never decides.
 - Inspections: `SaveInspection` (40 checks in `InspectionChecklist`, score = pass 1 / advisory ½ / fail 0)
-  sets `vehicles.inspection_id`; a dealer check never replaces a signed independent one. PDFs via `InspectionPdf`.
+  sets `vehicles.inspection_id`; a seller check never replaces a signed independent one. PDFs via `InspectionPdf`.
 - Reviews only through `SubmitReview` (completed visits, one per appointment, 14-day edits) and `ReplyToReview`
   (once). Call `RefreshLotRating::run()` whenever a review's visibility changes; ratings show from 3 reviews.
 - Reports only through `SubmitReport`. Held cars (`vehicles.held_at`) are off `Vehicle::marketplace()` and
@@ -134,7 +139,7 @@ Run all four before pushing.
 
 - Social auto-post: `SocialPublisher` (log | meta Graph API). Posts only through `PublishToSocial` (first publish, once
   per car and account, JPEG copy for Instagram, tracked share link in the caption). Tokens use the `encrypted` cast.
-- Custom domains: `CustomDomains` (TXT `_lotlink.{domain}` = `lotlink-verify={token}`, `DnsLookup` faked in tests);
+- Custom domains: `CustomDomains` (TXT `_caryard.{domain}` = `caryard-verify={token}`, `DnsLookup` faked in tests);
   a verified domain's `/` renders the mini-site; Caddy asks `/internal/domains/allowed`. Enterprise (`custom_domain`).
 - Car loans (`app/Domain/Finance`): lenders are accounts (`Lender`, team in `lender_members`, `LenderRole` admin/officer). They sign up
   at `/lenders` (`ApplyToBeLender`, licence on the private disk) or an admin onboards them (`OnboardLender`); only `DecideLender` changes
@@ -145,11 +150,11 @@ Run all four before pushing.
   whether from the portal, the lender's signed webhook `/webhooks/finance/{lender}` (its own `webhook_secret`) or a buyer withdrawing.
   Messages and documents only through `SendFinanceMessage` (private disk, signed `finance.file` links). The portal is `/lender/{lender}`
   (`lender.member` → `SetCurrentLender`, `scopeBindings()`); admins see it only in /admin (Car loans). Applicant data is encrypted, shown
-  only to the chosen lender (`FinancePresenter` with the lender side), never to lots, never in /admin. The lot hears only through
+  only to the chosen lender (`FinancePresenter` with the lender side), never to lots, never in /admin. The seller hears only through
   `FinanceLeadNotice`: a `LeadSource::Finance` lead, chat lines and `DealAlert`s when the buyer applies, is pre-approved, approved
   and paid for. Never income, commitments, employer, messages, declines or withdrawals.
 - Lenders may be commercial banks, microfinance banks, finance companies, licensed money lenders or individuals (`LenderType`); say
-  "lender", not "bank", in the UI. Loans start on LotLink and continue with the lender: after a pre-approval/approval the buyer sees
+  "lender", not "bank", in the UI. Loans start on CarYard and continue with the lender: after a pre-approval/approval the buyer sees
   the lender's `next_steps` (application's, else the lender's default) and contact details; KYC, agreement and payment happen off-platform.
   `finance:prune` (daily) clears applicants' details, messages and documents 24 months after an application closes (the Privacy Policy says so).
 - `SecurityHeaders` sets CSP (nonce via `Vite::useCspNonce()`; keep inline scripts out of Blade), HSTS and framing
@@ -171,11 +176,11 @@ Run all four before pushing.
 
 ## Support desk
 
-- Lots' tickets to LotLink live in `app/Domain/Helpdesk` (`SupportTicket` is lot-owned; `SupportMessage` hangs off it).
+- Lots' tickets to CarYard live in `app/Domain/Helpdesk` (`SupportTicket` is lot-owned; `SupportMessage` hangs off it).
   Open with `OpenTicket`, add messages only with `ReplyToTicket::fromLot()` / `fromAdmin()` (internal notes never
-  reach the lot), change status/assignee with `ChangeTicketStatus` (audit-logged). Dealer routes bind `{supportTicket}`
+  reach the seller), change status/assignee with `ChangeTicketStatus` (audit-logged). Seller routes bind `{supportTicket}`
   through `Lot::supportTickets()`. Attachments use the private `local` disk behind signed `support.attachment` links.
-- Admins show to lots as "{first name}, LotLink Support". Unread = `lot_read_at` / `admin_read_at` cleared by the other side's reply.
+- Admins show to lots as "{first name}, CarYard Support". Unread = `lot_read_at` / `admin_read_at` cleared by the other side's reply.
 
 ## Sharing and budgets (S6)
 
@@ -189,12 +194,12 @@ Run all four before pushing.
   recomputes `max_price`; never trust the browser's. Rates are in `config('lotlink.finance')`: the
   file holds defaults and `FinanceRates::apply()` lays the admin's overrides (/admin → Finance rates,
   `platform_settings`) over it at boot and before each queued job, so keep reading config.
-- The service worker (`public/sw.js`) caches only built assets and Lot Manager pages; bump its
+- The service worker (`public/sw.js`) caches only built assets and Sales Manager pages; bump its
   `VERSION` when changing caching rules.
 
 ## Billing and spotlight (S7)
 
-- Money paid through Paystack or Flutterwave is `Billing\Models\Payment` (not Lot Manager's `OrderPayment`). It only
+- Money paid through Paystack or Flutterwave is `Billing\Models\Payment` (not Sales Manager's `OrderPayment`). It only
   changes state in `FulfilPayment`, which re-verifies with the provider that took it and checks the
   amount; never mark a payment paid from a redirect or webhook body. Webhooks are stored in
   `webhook_events` (unique body hash), so each delivery is handled once.
@@ -203,7 +208,7 @@ Run all four before pushing.
   verify, refund or cancel an existing record. Renewals are recorded only through `RecordRenewal` (both webhooks); Flutterwave
   charges are always verified with its API (its webhook only has a shared hash). Plans: `Plan::codeFor($provider)`.
 - Plan prices change only through `ChangePlanPrice` (updates each provider's plan first, then the plan; optionally notifies
-  current subscribers). Never edit `plans.price` directly, or the providers and LotLink will disagree and checkouts fail.
+  current subscribers). Never edit `plans.price` directly, or the providers and CarYard will disagree and checkouts fail.
 - `lots.plan_id` is the effective plan used by limits; `subscriptions` says how it's paid for.
   Downgrades go through `DowngradeToFree` (hides extra cars via the state machine, never deletes).
 - Spotlights set `vehicles.spotlight_until` / `lots.featured_until` via `ActivateSpotlight`; use
@@ -224,11 +229,11 @@ Run all four before pushing.
 ## Leads and chat (S8)
 
 - Every enquiry goes through `CaptureLead` (dedupes lot + buyer + car over 30 days, adds the buyer to
-  the customer book, alerts the lot). New lead sources (offers, trade-ins, reservations) call it too.
+  the customer book, alerts the seller). New lead sources (offers, trade-ins, reservations) call it too.
 - Lead quick replies (`LeadController::message()` presets: location, similar, bank, inspection) build the text on the server
   from live data (the inspection one uses the car's current `inspection` and the public `inspections.pdf` link).
 - Chat messages only go through `SendMessage`: it updates read markers, moves a new lead to
-  contacted on the lot's first reply and broadcasts `MessageSent`. Chat must keep working without
+  contacted on the seller's first reply and broadcasts `MessageSent`. Chat must keep working without
   Reverb (`useChat` polls when `VITE_REVERB_APP_KEY` is empty).
 - Broadcast only through `Support\Realtime::send($event, toOthers: …)`: a websocket server that is down or not started is
   reported, never a 500 (the request's work is already saved). Never call `broadcast()` or `ShouldBroadcast` events' `dispatch()` directly.
@@ -247,15 +252,15 @@ Run all four before pushing.
 - Offers, trade-ins and reservations live in `app/Domain/Deals`. Each goes through its Action
   (`MakeOffer`, `RespondToOffer`, `AnswerCounterOffer`, `SubmitTradeIn`, `ValueTradeIn`,
   `StartReservation`, `ActivateReservation`, `EndReservation`). These capture a lead, post a line
-  into the lead's chat via `DealTimeline`, and notify the buyer (`DealUpdate`) or the lot (`DealAlert`).
-- **LotLink never receives money for car transactions.** Buyers pay the lot directly (transfer, cash, POS). The only
-  payments to LotLink are the lot's own: subscriptions/renewals, spotlights and featured-lot promotions (`PaymentPurpose::billing()`).
+  into the lead's chat via `DealTimeline`, and notify the buyer (`DealUpdate`) or the seller (`DealAlert`).
+- **CarYard never receives money for car transactions.** Buyers pay the seller directly (transfer, cash, POS). The only
+  payments to CarYard are the seller's own: subscriptions/renewals, spotlights and featured-lot promotions (`PaymentPurpose::billing()`).
   Never add a buyer checkout; `PaymentPurpose::Reservation`/`Deposit` exist only for legacy payments in `FulfilPayment`.
 - Bank details: `LotBankAccount` (owner-managed via `SaveBankAccount`: audit-logged, owner and managers notified). Share them with
   `shareText()` / `components/BankDetailsCard.vue` (orders, order tracking, chat preset, reservation page).
-- Reservations: `StartReservation` records a pending request (reference `RES-…`, `pay_by` 12h); the buyer transfers to the lot;
+- Reservations: `StartReservation` records a pending request (reference `RES-…`, `pay_by` 12h); the buyer transfers to the seller;
   owners/managers confirm with `ActivateReservation` (holds the car, lapses rival requests). `ReservationDeposits` records
-  buyer-sent, decline, lapse and refunded; the lot refunds from its own account (`refund_due`). One active reservation per car;
+  buyer-sent, decline, lapse and refunded; the seller refunds from its own account (`refund_due`). One active reservation per car;
   `OrderLedger` never frees a car that has one. `CreateOrder` converts it for the same buyer and records the deposit as a transfer.
 - No test-drive deposits: bookings are confirmed or pending, never `awaiting_deposit` (kept only for old rows).
 - Offers and reservations are plan features (`Lot::takesOffers()`, `reservationDeposit()`, which also needs a bank
@@ -263,14 +268,14 @@ Run all four before pushing.
 - Owners can switch off buyer trade-ins and car loan applications (`lots.accepts_trade_ins` / `accepts_finance`, Settings → Offers and
   deals). Check `Lot::takesTradeIns()` / `takesFinance()`: `SubmitTradeIn` and `SubmitFinanceApplication` refuse, the pages hide the
   buttons (`DealsPresenter` `trade_ins`/`finance`, `MarketplacePresenter::lot()` `trade_ins`). The monthly estimate always shows;
-  dealer-entered trade-ins on Lot Manager orders are unaffected.
+  dealer-entered trade-ins on Sales Manager orders are unaffected.
 
 ## Engagement (lots)
 
 - `app/Domain/Engagement`. Admin broadcasts (`Broadcast`, Filament `BroadcastResource`): audience from `BroadcastAudience` (one message per
   person), sent only through `SendBroadcast` (queued `DeliverBroadcast`, idempotent; scheduled ones by `engagement:send-broadcasts`).
   Automated emails: rules and defaults in `EngagementRules::RULES`, admin overrides in `platform_settings` (/admin → Automated emails),
-  run hourly by `RunEngagementRules` (`engagement:run`) at each lot's local send hour, with per-lot cooldowns.
+  run hourly by `RunEngagementRules` (`engagement:run`) at each seller's local send hour, with per-lot cooldowns.
 - Every message is an `EngagementMessage` (cooldown record and click tracking via `/e/{ulid}`) delivered by `EngagementNotice`
   (types `news` / `nudges` in `NotificationPreferences`; emails carry a signed unsubscribe link). Add new rules there, never ad-hoc mailers.
 - `users.last_seen_at` is kept by `TouchLastSeen` (web + API, 15-minute granularity, not while impersonating).
@@ -280,17 +285,17 @@ Run all four before pushing.
 - `/api/v1` (`routes/api.php`, `app/Http/Controllers/Api/V1`), Sanctum bearer tokens (`sanctum.expiration`, 90 days). Documented in
   `docs/api.md`; keep it in step. Controllers call the same Actions as the web (`SaveCar`, `StartConversation`, `SendMessage`,
   `BookAppointment`, `UpdateLead`, `LogInWithPassword::attempt()`…) and shape output with `MarketplacePresenter` / `ApiPresenter` /
-  `LeadPresenter` / `VehicleResource`: never `toArray()`, internal ids, costs or profit. Dealer routes use `lot.member` + `scopeBindings()`
+  `LeadPresenter` / `VehicleResource`: never `toArray()`, internal ids, costs or profit. Seller routes use `lot.member` + `scopeBindings()`
   like the web, and every new one needs a tenancy test (`tests/Feature/Api`). `api/*` always renders JSON errors.
 - Conversation `messages()` is ordered oldest first: use `reorder()` before asking for the latest.
 
 ## Multi-lot tenancy
 
-- Dealer routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
+- Seller routes live under `/dealer/{lot}` with the `lot.member` middleware (`SetCurrentLot`),
   which checks membership and sets `CurrentLot`.
-- Every lot-owned model uses the `BelongsToLot` trait: it stamps `lot_id` on create and scopes
+- Every seller-owned model uses the `BelongsToLot` trait: it stamps `lot_id` on create and scopes
   queries to the current lot. Use `withoutGlobalScopes()` only in cross-lot code (admin, public
-  marketplace) and in Actions that are given the lot explicitly.
+  marketplace) and in Actions that are given the seller explicitly.
 - Nested route params use `scopeBindings()`, so `{invitation}` must belong to `{lot}`.
 - **Every new lot-owned model needs a tenancy test** (member of lot A gets 403/404 on lot B).
 
@@ -304,7 +309,7 @@ Run all four before pushing.
 ## Inventory (S2)
 
 - `Vehicle` status changes go through `VehicleStateMachine`; never set `status` directly.
-  `PublishVehicle` checks completeness and the plan listing limit; selling happens via Lot Manager
+  `PublishVehicle` checks completeness and the plan listing limit; selling happens via Sales Manager
   orders (S5), not the stock list.
 - Prices are kobo on the model; forms and `VehicleResource` use whole naira. `SaveVehiclePrice`
   writes `vehicle_price_history` once a car has been listed and fires `VehiclePriceDropped`.
@@ -325,17 +330,17 @@ Run all four before pushing.
   production) or `DatabaseVehicleSearch` (SCOUT_DRIVER=null, Laragon). Any new filter must be
   added to both and to the shared engine tests in `tests/Feature/Marketplace/VehicleSearchTest.php`
   (set `MEILISEARCH_TEST_HOST` to run the Meilisearch side locally).
-  Meilisearch must never take the marketplace or dealers down: `MeilisearchVehicleSearch` falls back to
+  Meilisearch must never take the marketplace or sellers down: `MeilisearchVehicleSearch` falls back to
   `DatabaseVehicleSearch` on any Meilisearch error (sponsored cars are just left out), and `Vehicle::syncMakeSearchable()` /
   `syncRemoveFromSearch()` report index failures instead of failing the save (`scout:import` catches the index up).
 - Search is live everywhere. The marketplace box (`components/marketplace/LiveSearchInput.vue`) suggests as people type from
   `/search/suggest` (`SearchSuggestions`: makes/models/places/lots from a small cached catalogue of what's on sale, plus cars from
   `VehicleSearch`; `throttle:suggest`); the search page and `FiltersPanel live` apply typing and filter changes with partial reloads
-  (`only` the result props). Dealer lists use `composables/useLiveReload` (partial reloads, 250 ms pause). Wrap props a live reload
+  (`only` the result props). Seller lists use `composables/useLiveReload` (partial reloads, 250 ms pause). Wrap props a live reload
   doesn't need in closures so they aren't computed; Filament tables and global search wait 250 ms.
 - Filter choices come only from `SearchFacets::options()` (what is on sale, with counts; cached, `forget()`), never enum lists.
-  Yes/no filters are `SearchCriteria::EXTRAS` (`has[]`: loans, trade-ins, offers, negotiable, inspected, verified lot, duty, registered);
-  lot-side ones are indexed per car, so `Lot::booted()` re-syncs the lot's cars when those settings or the plan change.
+  Yes/no filters are `SearchCriteria::EXTRAS` (`has[]`: loans, trade-ins, offers, negotiable, inspected, verified seller, duty, registered);
+  lot-side ones are indexed per car, so `Lot::booted()` re-syncs the seller's cars when those settings or the plan change.
   The panel is `FiltersPanel` → `FilterSection` (folding groups) + `FacetList` (popular few, "Show all" with search).
 - Share previews: controllers pass `->withViewData(['meta' => [...]])`; `app.blade.php` renders
   the Open Graph tags on the server.
@@ -345,7 +350,7 @@ Run all four before pushing.
 ## Appointments (S4)
 
 - Slots come only from `SlotGenerator` (lot timezone in, UTC `starts_at` out). Bookings and moves go
-  through `BookAppointment` / `RescheduleAppointment`, which lock the lot row before checking
+  through `BookAppointment` / `RescheduleAppointment`, which lock the seller row before checking
   capacity; never insert appointments directly.
 - `Appointment::fromDateTime()` stores dates as UTC; keep it that way for any new date column.
 - Messages to buyers and lots use `App\Domain\Messaging\Message` (a Meta template name plus SMS
@@ -366,16 +371,16 @@ Paystack, WhatsApp Cloud API and others follow the same pattern. Tests bind fake
 
 Follow the MVP Screens canvas. Tokens are in `resources/css/app.css` (`@theme`): ivory `#F6F4EF`
 background, forest `#16302B`, clay `#C2410C` primary actions, DM Sans body text, Bricolage Grotesque
-headings. Customer screens are phone-first (390 px) with a bottom tab bar; dealer screens use the
+headings. Customer screens are phone-first (390 px) with a bottom tab bar; seller screens use the
 forest sidebar. Use real `<button>`/`<a>`/`<label>` elements, 44 px touch targets and no emoji
 icons (use `components/Icon.vue`). Features from later sprints appear as disabled "Soon" items
 rather than fake data.
 
 ## Sprint plan (TDD)
 
-S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Lot Manager lite ✅ ·
+S1 Foundations ✅ · S2 Inventory ✅ · S3 Marketplace ✅ · S4 Appointments ✅ · S5 Sales Manager lite ✅ ·
 S6 Sharing + budgeting (MVP launch) ✅ · S7 Billing + spotlight ✅ · S8 Leads + chat ✅ · S9 Offers ✅ ·
-S10 Lot Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
+S10 Sales Manager pro ✅ · S11 Location + analytics ✅ · S12 Trust + admin ✅ · S13 SEO ✅ · S14 Integrations ✅ (full release).
 
 Hosting: cPanel shared hosting is the target (docs/deploy-cpanel.md, `.env.cpanel.example`, `scripts/build-cpanel.sh`, GitHub
 action "cPanel package"). Nothing may require an always-running process: `QUEUE_VIA_CRON=true` makes the scheduler (one cron

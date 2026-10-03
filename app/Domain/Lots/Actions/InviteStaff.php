@@ -21,7 +21,7 @@ class InviteStaff
     public function run(Lot $lot, User $inviter, string $contact, LotRole $role): LotInvitation
     {
         if ($role === LotRole::Owner) {
-            throw ValidationException::withMessages(['role' => 'Each lot has one owner.']);
+            throw ValidationException::withMessages(['role' => 'Each seller has one owner.']);
         }
 
         $limit = $lot->plan?->staff_limit;
@@ -38,7 +38,7 @@ class InviteStaff
             ->exists();
 
         if ($alreadyMember) {
-            throw ValidationException::withMessages(['contact' => 'That person already works at this lot.']);
+            throw ValidationException::withMessages(['contact' => 'That person already works for this seller.']);
         }
 
         // Re-inviting the same contact replaces the old invitation.
@@ -76,7 +76,7 @@ class InviteStaff
         $this->messenger->send($invitation->phone_or_email, new Message(
             template: 'staff_invitation',
             params: [$lot->name, $invitation->role->label()],
-            text: "{$lot->name} has invited you to join their team on LotLink as {$invitation->role->label()}. Accept: {$url}",
+            text: "{$lot->name} has invited you to join their team on CarYard as {$invitation->role->label()}. Accept: {$url}",
             buttonSuffix: Message::suffix($url),
         ));
     }

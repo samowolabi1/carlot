@@ -19,7 +19,7 @@ beforeEach(function () {
     $this->existing = $this->car($this->lot, 'Toyota', 'RAV4', ['year' => 2017, 'price' => 1_450_000_000]);
     $this->buyer = User::factory()->create(['name' => 'Tunde Adebayo', 'phone' => '+2348035550777']);
 
-    // A draft RAV4 the lot will publish.
+    // A draft RAV4 the seller will publish.
     $this->draft = function (int $naira = 14_000_000): Vehicle {
         $v = Vehicle::factory()->withPhoto()->create([
             'lot_id' => $this->lot->id, 'make_id' => $this->existing->make_id, 'vehicle_model_id' => $this->existing->vehicle_model_id,
@@ -52,7 +52,7 @@ it('saves a search with a readable name, never the buyer\'s location', function 
 it('alerts matching saved searches when a car is published, at most every 6 hours', function () {
     ($this->save)(['make' => [$this->existing->make_id], 'price_max' => 15000000]);
     ($this->save)(['price_max' => 5000000], User::factory()->create(['phone' => '+2348035550778'])); // doesn't match
-    ($this->save)(['make' => [$this->existing->make_id]], $this->owner); // the lot's own team
+    ($this->save)(['make' => [$this->existing->make_id]], $this->owner); // the seller's own team
 
     app(PublishVehicle::class)->run(($this->draft)());
 

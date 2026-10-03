@@ -4,9 +4,9 @@ namespace App\Domain\Helpdesk\Enums;
 
 enum TicketStatus: string
 {
-    /** Waiting on LotLink. */
+    /** Waiting on CarYard. */
     case Open = 'open';
-    /** LotLink replied and is waiting on the lot. */
+    /** CarYard replied and is waiting on the seller. */
     case Pending = 'pending';
     case Resolved = 'resolved';
     case Closed = 'closed';
@@ -16,17 +16,17 @@ enum TicketStatus: string
     {
         return match ($this) {
             self::Open => 'Needs a reply',
-            self::Pending => 'Waiting on the lot',
+            self::Pending => 'Waiting on the seller',
             self::Resolved => 'Resolved',
             self::Closed => 'Closed',
         };
     }
 
-    /** How the lot sees it. */
+    /** How the seller sees it. */
     public function lotLabel(): string
     {
         return match ($this) {
-            self::Open => 'With LotLink',
+            self::Open => 'With CarYard',
             self::Pending => 'Waiting for you',
             self::Resolved => 'Resolved',
             self::Closed => 'Closed',

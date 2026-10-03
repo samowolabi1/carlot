@@ -6,7 +6,7 @@ use App\Domain\Lots\Models\Lot;
 use App\Domain\Trust\Enums\ReviewStatus;
 use App\Domain\Trust\Models\Review;
 
-/** Lot rating = mean of visible reviews (TDD M14), cached on the lot for listings and search. */
+/** Lot rating = mean of visible reviews (TDD M14), cached on the seller for listings and search. */
 class RefreshLotRating
 {
     public static function run(int $lotId): void

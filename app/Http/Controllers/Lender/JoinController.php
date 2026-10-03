@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** "Lend with LotLink": what lenders get, and the sign-up form (an admin approves each lender). */
+/** "Lend with CarYard": what lenders get, and the sign-up form (an admin approves each lender). */
 class JoinController extends Controller
 {
     public function show(Request $request): Response
@@ -29,8 +29,8 @@ class JoinController extends Controller
             'licence' => ['max_kb' => ApplyToBeLender::LICENCE_KB, 'mimes' => ApplyToBeLender::LICENCE_MIMES],
             'min_loan' => LenderRules::MIN_LOAN,
         ])->withViewData(['meta' => [
-            'title' => 'Lend with LotLink — car loans for buyers across Nigeria',
-            'description' => 'Banks and finance companies: receive car loan applications from buyers on LotLink, with their consent, and work them in one place.',
+            'title' => 'Lend with CarYard — car loans for buyers across Nigeria',
+            'description' => 'Banks and finance companies: receive car loan applications from buyers on CarYard, with their consent, and work them in one place.',
         ]]);
     }
 

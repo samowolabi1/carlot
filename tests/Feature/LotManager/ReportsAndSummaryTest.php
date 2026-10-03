@@ -65,7 +65,7 @@ it('exports to Excel on Pro', function () {
     $response = $this->actingAs($this->owner)->get(route('dealer.manager.reports', [$this->lot, 'type' => 'sales', 'export' => 'xlsx']));
 
     $response->assertOk();
-    expect($response->headers->get('content-disposition'))->toContain('lotlink-prime-motors-sales-2026-10-05.xlsx');
+    expect($response->headers->get('content-disposition'))->toContain('caryard-prime-motors-sales-2026-10-05.xlsx');
 });
 
 it('keeps reports to owners and managers, and the Pro parts to Pro', function () {

@@ -117,7 +117,7 @@ class StaffController extends Controller
         return back()->with('success', 'Removed from your team.');
     }
 
-    /** A non-owner member of this lot, by user ULID. The owner can't be changed or removed here. */
+    /** A non-owner member of this seller, by user ULID. The owner can't be changed or removed here. */
     private function member(Lot $lot, string $ulid): LotMember
     {
         return LotMember::query()

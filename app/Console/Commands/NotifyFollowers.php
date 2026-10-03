@@ -17,7 +17,7 @@ class NotifyFollowers extends Command
 {
     protected $signature = 'followers:notify';
 
-    protected $description = 'Tell followers about new stock, batched per lot';
+    protected $description = 'Tell followers about new stock, batched per seller';
 
     public function handle(): int
     {

@@ -64,10 +64,10 @@ const chips = computed(() => [
 </script>
 
 <template>
-    <Head title="Find your next car at lots near you" />
+    <Head title="Find your next car at sellers near you" />
     <CustomerLayout active="home">
         <section class="mx-auto flex max-w-6xl flex-col gap-5 px-5 pt-3 md:pt-12">
-            <h1 class="max-w-xl text-[30px] leading-[1.1] font-bold tracking-tight md:text-5xl">Find your next car at lots near you</h1>
+            <h1 class="max-w-xl text-[30px] leading-[1.1] font-bold tracking-tight md:text-5xl">Find your next car at sellers near you</h1>
             <form class="flex max-w-xl gap-2" role="search" @submit.prevent="search">
                 <div class="relative flex h-[52px] grow items-center gap-2.5 rounded-[14px] border border-line bg-white px-4 focus-within:border-forest">
                     <Icon name="search" :stroke-width="2" class="text-muted" />
@@ -103,7 +103,7 @@ const chips = computed(() => [
         </section>
 
         <section v-if="featuredLots.length" class="mx-auto mt-7 flex max-w-6xl flex-col gap-3 px-5" aria-labelledby="featured-heading">
-            <h2 id="featured-heading" class="text-xl font-bold">Featured lots</h2>
+            <h2 id="featured-heading" class="text-xl font-bold">Featured sellers</h2>
             <div class="-mr-5 flex gap-3 overflow-x-auto pr-5 pb-1 [scrollbar-width:none]">
                 <Link v-for="lot in featuredLots" :key="lot.slug" :href="lot.url" class="card flex w-[240px] shrink-0 items-center gap-3 p-3 text-ink no-underline hover:border-forest">
                     <img v-if="lot.logo_url" :src="lot.logo_url" alt="" class="h-12 w-12 rounded-xl object-cover" />
@@ -134,7 +134,7 @@ const chips = computed(() => [
             <div v-else class="card flex flex-col items-center gap-3 px-6 py-10 text-center">
                 <div class="flex h-24 w-40 items-center justify-center rounded-2xl bg-sand"><CarGlyph /></div>
                 <h3 class="text-xl font-bold">Cars are on their way</h3>
-                <p class="max-w-sm text-[15px] text-muted">Lots near you are setting up their showrooms. New arrivals will show up here.</p>
+                <p class="max-w-sm text-[15px] text-muted">Sellers near you are setting up their showrooms. New arrivals will show up here.</p>
             </div>
         </section>
 
@@ -151,9 +151,9 @@ const chips = computed(() => [
                 <Link :href="route('budget')" class="btn btn-outline mt-1 h-[46px] shrink-0 self-start md:self-center">{{ budget.maxPrice.value !== null ? 'Edit my budget' : 'Work out my budget' }}</Link>
             </div>
             <div v-if="install.available.value" class="card flex flex-col gap-2 p-5">
-                <h2 class="text-xl font-bold">Get the LotLink app</h2>
-                <p class="text-[15px] text-muted">Add LotLink to your home screen. It opens like an app and uses less data.</p>
-                <button v-if="install.canPrompt.value" type="button" class="btn btn-dark mt-1 h-[46px] self-start" @click="install.prompt()">Install LotLink</button>
+                <h2 class="text-xl font-bold">Get the CarYard app</h2>
+                <p class="text-[15px] text-muted">Add CarYard to your home screen. It opens like an app and uses less data.</p>
+                <button v-if="install.canPrompt.value" type="button" class="btn btn-dark mt-1 h-[46px] self-start" @click="install.prompt()">Install CarYard</button>
                 <p v-else class="text-[14px] text-ink">{{ install.hint.value }}</p>
             </div>
         </section>
@@ -161,14 +161,14 @@ const chips = computed(() => [
         <section class="mx-auto mt-3 mb-10 max-w-6xl px-5">
             <div class="flex flex-col justify-between gap-4 rounded-2xl bg-forest p-6 text-white md:flex-row md:items-center">
                 <div class="flex flex-col gap-2">
-                    <span class="text-[13px] font-semibold tracking-wide text-peach uppercase">For car lots</span>
-                    <h2 class="text-2xl font-bold">Own a car lot?</h2>
+                    <span class="text-[13px] font-semibold tracking-wide text-peach uppercase">For sellers</span>
+                    <h2 class="text-2xl font-bold">Selling cars?</h2>
                     <p class="max-w-lg text-[15px] text-mist">
                         Put your stock online, get your own mini-site, and send buyers straight to your gate.
-                        <template v-if="lotCount > 0"> {{ lotCount }} {{ lotCount === 1 ? 'lot is' : 'lots are' }} already on LotLink.</template>
+                        <template v-if="lotCount > 0"> {{ lotCount }} {{ lotCount === 1 ? 'seller is' : 'sellers are' }} already on CarYard.</template>
                     </p>
                 </div>
-                <Link :href="route('dealer.home')" class="btn btn-primary shrink-0 self-start md:self-auto">List your lot</Link>
+                <Link :href="route('dealer.home')" class="btn btn-primary shrink-0 self-start md:self-auto">Start selling</Link>
             </div>
         </section>
     </CustomerLayout>

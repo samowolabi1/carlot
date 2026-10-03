@@ -21,8 +21,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * "Reserve this car" (design 11). The buyer pays the lot's own bank account; LotLink never
- * handles the money. The lot confirms the transfer and the car is held from then.
+ * "Reserve this car" (design 11). The buyer pays the seller's own bank account; CarYard never
+ * handles the money. The seller confirms the transfer and the car is held from then.
  */
 class ReservationController extends Controller
 {
@@ -56,7 +56,7 @@ class ReservationController extends Controller
         return redirect()->route('reservations.show', $reservation);
     }
 
-    /** How to pay: the lot's bank details, the amount and the reference, then where things stand. */
+    /** How to pay: the seller's bank details, the amount and the reference, then where things stand. */
     public function show(Request $request, Reservation $reservation): Response
     {
         abort_unless($reservation->customer_id === $request->user()->id, 404);
@@ -88,6 +88,6 @@ class ReservationController extends Controller
         abort_unless($reservation->customer_id === $request->user()->id, 404);
         $deposits->sent($reservation, $request->user());
 
-        return back(); // The page itself now says the lot has been told.
+        return back(); // The page itself now says the seller has been told.
     }
 }

@@ -45,7 +45,7 @@
             <strong style="font-size: 14px;">{{ $car }}</strong><br>
             @if ($vinTail)<span class="muted">VIN ···{{ $vinTail }}</span><br>@endif
             @if ($mileage)<span class="muted">{{ $mileage }}</span><br>@endif
-            <span class="muted">{{ $inspection->isIndependent() ? 'Independently inspected' : 'Inspected by the lot' }} · {{ $inspection->inspector_name }}</span>
+            <span class="muted">{{ $inspection->isIndependent() ? 'Independently inspected' : 'Inspected by the seller' }} · {{ $inspection->inspector_name }}</span>
         </td>
         <td style="text-align: right; width: 120px;">
             <span class="score">{{ $inspection->score }}</span><span class="muted"> / 100</span>
@@ -71,7 +71,7 @@
 
 @if ($inspection->isIndependent())
     <div class="signed">
-        Signed by <strong>{{ $inspection->inspector_name }}</strong>, a registered LotLink inspector, on {{ $signedAt }}.
+        Signed by <strong>{{ $inspection->inspector_name }}</strong>, a registered CarYard inspector, on {{ $signedAt }}.
     </div>
 @endif
 

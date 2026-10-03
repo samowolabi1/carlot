@@ -119,7 +119,7 @@ class DatabaseVehicleSearch implements VehicleSearch
     }
 
     /**
-     * Lot::takesOffers() in SQL: the lot takes offers and its plan (or the default plan, when it has none) includes them.
+     * Lot::takesOffers() in SQL: the seller takes offers and its plan (or the default plan, when it has none) includes them.
      *
      * @param  Builder<Vehicle>  $query
      */

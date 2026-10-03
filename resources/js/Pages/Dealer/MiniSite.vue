@@ -40,11 +40,11 @@ async function copy() {
     <DealerLayout>
         <div>
             <h1 class="text-[30px] font-bold">Mini-site and QR codes</h1>
-            <p class="text-[14px] text-muted">Your own page to share anywhere, plus printables for the lot</p>
+            <p class="text-[14px] text-muted">Your own page to share anywhere, plus printables for the seller</p>
         </div>
 
         <p v-if="!site.live" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">
-            Your lot isn't live yet, so only your team can open the page and the QR codes. They start working for buyers once we approve the lot.
+            Your business isn't live yet, so only your team can open the page and the QR codes. They start working for buyers once we approve the seller.
         </p>
 
         <div class="grid gap-4 xl:grid-cols-[1fr_1fr_250px]">
@@ -89,7 +89,7 @@ async function copy() {
                         <span v-if="!domain.allowed" class="rounded-lg bg-forest px-2 py-0.5 text-[11px] font-semibold text-white">Enterprise</span>
                         <span v-else-if="domain.verified" class="rounded-lg bg-map px-2 py-0.5 text-[12px] font-semibold text-forest">Live</span>
                     </div>
-                    <p v-if="!domain.allowed" class="text-[13px] text-muted">Use your own address, like primemotors.ng, instead of the LotLink link. Available on Enterprise.</p>
+                    <p v-if="!domain.allowed" class="text-[13px] text-muted">Use your own address, like primemotors.ng, instead of the CarYard link. Available on Enterprise.</p>
                     <template v-else-if="domain.can_manage">
                         <form class="flex gap-2" @submit.prevent="saveDomain">
                             <label class="grow">
@@ -110,13 +110,13 @@ async function copy() {
                         <p v-else-if="domain.verified" class="text-[13px] text-muted"><a :href="`https://${domain.name}`" target="_blank" rel="noopener">{{ domain.name }}</a> opens your mini-site.</p>
                         <button v-if="domain.name" type="button" class="min-h-11 self-start text-[13px] font-semibold text-muted hover:text-danger" @click="removeDomain">Remove domain</button>
                     </template>
-                    <p v-else class="text-[13px] text-muted">{{ domain.name ? `${domain.name}${domain.verified ? ' is live' : ' is being set up'}.` : 'The lot owner can set this up.' }}</p>
+                    <p v-else class="text-[13px] text-muted">{{ domain.name ? `${domain.name}${domain.verified ? ' is live' : ' is being set up'}.` : 'The seller can set this up.' }}</p>
                 </section>
             </div>
 
             <div class="flex flex-col gap-4">
                 <section class="card flex flex-col gap-3 p-5" aria-labelledby="poster-heading">
-                    <h2 id="poster-heading" class="font-sans text-[15px] font-bold">Lot poster</h2>
+                    <h2 id="poster-heading" class="font-sans text-[15px] font-bold">Seller poster</h2>
                     <div class="flex gap-4">
                         <div class="flex h-[170px] w-[120px] shrink-0 flex-col items-center gap-2 rounded-lg border border-line bg-white p-2.5" aria-hidden="true">
                             <span class="h-5 w-full rounded" :style="{ background: site.brand_color }" />

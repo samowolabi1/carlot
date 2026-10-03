@@ -217,7 +217,7 @@ defineExpose({ state });
         </FilterSection>
 
         <FilterSection v-if="features.length" title="Features" :selected="state.feature.length">
-            <p class="pb-1 text-[13px] text-muted">Cars with every feature you tick, as listed by the lot.</p>
+            <p class="pb-1 text-[13px] text-muted">Cars with every feature you tick, as listed by the seller.</p>
             <FacetList label="Features" :options="features" :selected="state.feature" :limit="8" :groups="featureGroups" @toggle="(v) => toggle(state.feature, Number(v))" />
         </FilterSection>
 

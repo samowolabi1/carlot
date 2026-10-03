@@ -10,7 +10,7 @@ class GenerateSitemap extends Command
 {
     protected $signature = 'sitemap:generate';
 
-    protected $description = 'Rebuild sitemap.xml from live lots, cars and landing pages';
+    protected $description = 'Rebuild sitemap.xml from live sellers, cars and landing pages';
 
     public function handle(): int
     {

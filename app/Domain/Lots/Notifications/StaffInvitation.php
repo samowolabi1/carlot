@@ -30,7 +30,7 @@ class StaffInvitation extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Join {$this->lot->name} on LotLink")
+            ->subject("Join {$this->lot->name} on CarYard")
             ->line("{$this->lot->name} has invited you to join their team as {$this->invitation->role->label()}.")
             ->action('Accept invitation', $this->url)
             ->line('This invitation expires in '.config('lotlink.invitation_ttl_days').' days.');

@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** The customer book: one row per person, with a timeline of everything at this lot. */
+/** The customer book: one row per person, with a timeline of everything at this seller. */
 class CustomerController extends Controller
 {
     public function index(Request $request, Lot $lot): Response
@@ -67,7 +67,7 @@ class CustomerController extends Controller
         $tasks = $customer->tasks()->with('assignee')->get();
         $cars = Vehicle::query()->with(['make', 'model'])->whereIn('id', $walkIns->pluck('vehicles_viewed')->flatten()->unique()->all())->get()->keyBy('id');
 
-        // Marketplace bookings by the same phone number (the buyer's LotLink account).
+        // Marketplace bookings by the same phone number (the buyer's CarYard account).
         $userIds = User::query()->where(fn ($q) => $q->when($customer->phone, fn ($q) => $q->where('phone', $customer->phone))
             ->when($customer->email, fn ($q) => $q->orWhere('email', $customer->email)))
             ->when(! $customer->phone && ! $customer->email, fn ($q) => $q->whereRaw('1 = 0'))->pluck('id');
@@ -78,7 +78,7 @@ class CustomerController extends Controller
         $timeline = collect()
             ->concat($walkIns->map(fn (WalkIn $w) => [
                 'kind' => 'walk_in', 'at' => $w->visited_at,
-                'title' => 'Visited the lot',
+                'title' => 'Visited the seller',
                 'detail' => collect([$w->interest->label(), collect($w->vehicles_viewed ?? [])->map(fn ($id) => $cars->get($id)?->title())->filter()->implode(', '), $w->notes])->filter()->implode(' · '),
                 'by' => $w->staff?->name,
             ]))
@@ -101,7 +101,7 @@ class CustomerController extends Controller
             ]))
             ->concat($bookings->map(fn (Appointment $a) => [
                 'kind' => 'booking', 'at' => $a->starts_at,
-                'title' => $a->type->label().' booked on LotLink',
+                'title' => $a->type->label().' booked on CarYard',
                 'detail' => collect([$a->vehicle?->title(), $a->status->label()])->filter()->implode(' · '),
             ]))
             ->sortByDesc(fn ($item) => $item['at']->getTimestamp())

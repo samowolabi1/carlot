@@ -21,7 +21,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Support desk for lots: open tickets with LotLink, message the team, mark them solved. Any team member. */
+/** Support desk for lots: open tickets with CarYard, message the team, mark them solved. Any team member. */
 class SupportController extends Controller
 {
     public function index(Request $request, Lot $lot): Response
@@ -111,7 +111,7 @@ class SupportController extends Controller
 
         $reply->fromLot($supportTicket, $request->user(), $data['body'], $request->file('attachment'));
 
-        return back()->with('success', 'Message sent to LotLink Support.');
+        return back()->with('success', 'Message sent to CarYard Support.');
     }
 
     public function status(Request $request, Lot $lot, SupportTicket $supportTicket, ChangeTicketStatus $change): RedirectResponse
@@ -130,12 +130,12 @@ class SupportController extends Controller
         return ['nullable', 'file', 'max:'.TicketAttachment::MAX_KB, 'mimes:'.implode(',', TicketAttachment::MIMES)];
     }
 
-    /** Admins sign with their first name, e.g. "Ada, LotLink Support". */
+    /** Admins sign with their first name, e.g. "Ada, CarYard Support". */
     private static function supportName(SupportMessage $m): string
     {
         $first = trim((string) strtok((string) ($m->author->name ?? ''), ' '));
 
-        return $first !== '' ? "{$first}, LotLink Support" : 'LotLink Support';
+        return $first !== '' ? "{$first}, CarYard Support" : 'CarYard Support';
     }
 
     /** @return array<string, mixed> */

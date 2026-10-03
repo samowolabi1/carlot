@@ -36,9 +36,9 @@ class CarController extends Controller
         abort_if($vehicle === null, 404);
 
         $lotLive = $vehicle->lot->status === LotStatus::Active;
-        // Held cars (reported, or hidden by an admin) are off LotLink until the review is done.
+        // Held cars (reported, or hidden by an admin) are off CarYard until the review is done.
         $public = $lotLive && in_array($vehicle->status, [...VehicleStatus::live(), VehicleStatus::Sold], true) && ! $vehicle->isHeld();
-        // Lot staff can preview drafts and cars at a lot that isn't approved yet.
+        // Lot staff can preview drafts and cars at a seller that isn't approved yet.
         $preview = ! $public && $request->user()?->hasLotRole($vehicle->lot);
 
         abort_unless($public || $preview, 404);
@@ -49,7 +49,7 @@ class CarController extends Controller
 
         $user = $request->user();
 
-        // TDD M15: count the view (not the lot's own staff), attributed to a share link if it came from one.
+        // TDD M15: count the view (not the seller's own staff), attributed to a share link if it came from one.
         if ($public && ! $user?->hasLotRole($vehicle->lot)) {
             $channel = $request->filled('ref') ? ShareLink::where('code', (string) $request->query('ref'))->first()?->platform->value : null;
             Tracker::view($request, $vehicle, $channel);
@@ -64,7 +64,7 @@ class CarController extends Controller
             'car' => MarketplacePresenter::vehicle($vehicle),
             'lot' => MarketplacePresenter::lot($vehicle->lot),
             'sold' => $vehicle->status === VehicleStatus::Sold,
-            'preview' => $preview ? ($vehicle->status === VehicleStatus::Draft ? 'This is a draft only your team can see.' : 'Only your team can see this until the car and lot are live.') : null,
+            'preview' => $preview ? ($vehicle->status === VehicleStatus::Draft ? 'This is a draft only your team can see.' : 'Only your team can see this until the car and seller are live.') : null,
             'saved' => $user ? $user->favourites()->whereKey($vehicle->id)->exists() : false,
             'similar' => $this->similar($vehicle),
             'deals' => $public ? DealsPresenter::forCar($vehicle, $user) : null,

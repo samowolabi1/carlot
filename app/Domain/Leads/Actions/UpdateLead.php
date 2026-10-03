@@ -36,7 +36,7 @@ class UpdateLead
         if (array_key_exists('assigned_to', $data)) {
             $lead->assigned_to = $data['assigned_to'] === null ? null
                 : (LotMember::query()->where('lot_id', $lead->lot_id)->whereHas('user', fn ($q) => $q->where('ulid', $data['assigned_to']))->value('user_id')
-                    ?? throw ValidationException::withMessages(['assigned_to' => 'Pick someone who works at this lot.']));
+                    ?? throw ValidationException::withMessages(['assigned_to' => 'Pick someone who works for this seller.']));
         }
 
         if (array_key_exists('next_follow_up_at', $data)) {

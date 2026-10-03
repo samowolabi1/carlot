@@ -11,7 +11,7 @@ use RuntimeException;
 
 /**
  * Flutterwave's v3 API (https://developer.flutterwave.com). Amounts there are in major units
- * (naira), so they're converted at the edge; LotLink keeps kobo. Webhooks carry the secret hash
+ * (naira), so they're converted at the edge; CarYard keeps kobo. Webhooks carry the secret hash
  * set in the dashboard (`verif-hash`), which is only a shared secret, so every charge is still
  * verified here before anything is delivered.
  */
@@ -33,7 +33,7 @@ class FlutterwaveGateway implements PaymentGateway
             'redirect_url' => $callbackUrl,
             'payment_plan' => $planCode,
             'customer' => ['email' => $email],
-            'customizations' => ['title' => 'LotLink', 'description' => $payment->description, 'logo' => url('/icons/icon-192.png')],
+            'customizations' => ['title' => 'CarYard', 'description' => $payment->description, 'logo' => url('/icons/icon-192.png')],
             'meta' => ['payment' => $payment->ulid, 'purpose' => $payment->purpose->value],
         ], fn ($v) => $v !== null));
 
@@ -95,11 +95,11 @@ class FlutterwaveGateway implements PaymentGateway
     public function updatePlan(string $code, int $amount, bool $existing): string
     {
         if ($existing) {
-            throw new RuntimeException('Flutterwave can\'t change the price for current subscribers. Choose "Only lots that subscribe from now on", or ask them to resubscribe.');
+            throw new RuntimeException('Flutterwave can\'t change the price for current subscribers. Choose "Only sellers that subscribe from now on", or ask them to resubscribe.');
         }
         $old = $this->send('get', '/payment-plans/'.rawurlencode($code));
 
-        return $this->createPlan((string) ($old['name'] ?? 'LotLink plan'), $amount, (string) ($old['interval'] ?? 'monthly'));
+        return $this->createPlan((string) ($old['name'] ?? 'CarYard plan'), $amount, (string) ($old['interval'] ?? 'monthly'));
     }
 
     /** The subscription Flutterwave created for a plan payment (for cancelling it later). */

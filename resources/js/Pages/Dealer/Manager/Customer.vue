@@ -66,7 +66,7 @@ function save() {
                     <span class="rounded-full px-2.5 py-0.5 text-[12px] font-semibold" :class="customer.consent_whatsapp ? 'bg-[#E3F1E8] text-success' : 'bg-sand text-muted'">
                         {{ customer.consent_whatsapp ? 'Agreed to WhatsApp' : 'No WhatsApp consent' }}
                     </span>
-                    <span v-if="customer.has_account" class="rounded-full bg-forest px-2.5 py-0.5 text-[12px] font-semibold text-white">On LotLink</span>
+                    <span v-if="customer.has_account" class="rounded-full bg-forest px-2.5 py-0.5 text-[12px] font-semibold text-white">On CarYard</span>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2">

@@ -484,7 +484,7 @@ function nextStep() {
                 />
                 <InputError :message="price.errors.price" />
                 <span v-if="guide" class="rounded-xl bg-ivory px-3 py-2.5 font-normal">
-                    <strong>Pricing guide:</strong> {{ guide.count }} similar cars on LotLink are listed from {{ formatNaira(guide.low) }} to {{ formatNaira(guide.high) }}, median
+                    <strong>Pricing guide:</strong> {{ guide.count }} similar cars on CarYard are listed from {{ formatNaira(guide.low) }} to {{ formatNaira(guide.high) }}, median
                     <strong>{{ formatNaira(guide.median) }}</strong>.
                     <template v-if="parseAmount(price.price) && parseAmount(price.price)! > guide.median * 1.15"> Yours is above most of them.</template>
                     <template v-else-if="parseAmount(price.price) && parseAmount(price.price)! < guide.median * 0.85"> Yours is below most of them.</template>
@@ -515,7 +515,7 @@ function nextStep() {
             <InputError :message="(price.errors as Record<string, string>).publish" />
 
             <p v-if="lot.status !== 'active'" class="text-[13px] text-muted">
-                Your lot is still being reviewed. Published cars go on the marketplace as soon as it's approved.
+                Your business is still being reviewed. Published cars go on the marketplace as soon as it's approved.
             </p>
         </form>
 

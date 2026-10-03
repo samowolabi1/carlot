@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\URL;
 
 /**
  * One message on a support ticket. Attachments stay on the private `local` disk and open
- * through short-lived signed links (`support.attachment`) for the lot's staff and admins.
+ * through short-lived signed links (`support.attachment`) for the seller's staff and admins.
  *
  * @property int $id
  * @property string $ulid
@@ -66,9 +66,9 @@ class SupportMessage extends Model
         return $this->attachment_path ? URL::temporarySignedRoute('support.attachment', now()->addMinutes(30), ['message' => $this->ulid]) : null;
     }
 
-    /** Admins show as "LotLink Support" to lots, so staff names stay internal. */
+    /** Admins show as "CarYard Support" to lots, so staff names stay internal. */
     public function authorLabel(): string
     {
-        return $this->from_admin ? 'LotLink Support' : ($this->author->name ?? 'Your team');
+        return $this->from_admin ? 'CarYard Support' : ($this->author->name ?? 'Your team');
     }
 }

@@ -57,7 +57,7 @@ class SettingsController extends Controller
         ]);
     }
 
-    /** Offers and reservations (TDD M12): whether buyers can make offers, and the reservation deposit they pay the lot directly. */
+    /** Offers and reservations (TDD M12): whether buyers can make offers, and the reservation deposit they pay the seller directly. */
     public function updateDeals(Request $request, Lot $lot): RedirectResponse
     {
         Gate::authorize('update', $lot);
@@ -74,7 +74,7 @@ class SettingsController extends Controller
             'reservation_deposit.min' => 'A reservation deposit starts at ₦1,000.',
         ]);
 
-        // Buyers pay the lot directly, so reservations need somewhere to pay.
+        // Buyers pay the seller directly, so reservations need somewhere to pay.
         if (isset($data['reservation_deposit']) && ! $lot->bankAccounts()->exists()) {
             return back()->withErrors(['reservation_deposit' => 'Add your bank details first so buyers know where to send the deposit.']);
         }
@@ -85,7 +85,7 @@ class SettingsController extends Controller
             'accepts_finance' => $data['accepts_finance'] ?? $lot->accepts_finance,
             'reservation_deposit' => isset($data['reservation_deposit']) ? Money::fromMajor((int) $data['reservation_deposit']) : null,
             'reservation_refundable' => $data['reservation_refundable'],
-            'test_drive_deposit' => null, // LotLink doesn't take test-drive deposits: the lot is paid directly
+            'test_drive_deposit' => null, // CarYard doesn't take test-drive deposits: the seller is paid directly
         ]);
 
         return back()->with('success', 'Offers and deals settings saved.');

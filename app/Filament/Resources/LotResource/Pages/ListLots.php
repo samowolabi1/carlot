@@ -24,10 +24,10 @@ class ListLots extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Field sales: sign a lot up for its owner from any state; the owner signs in and finishes setting up.
-            Action::make('onboard')->authorize(fn () => LotResource::allows(AdminArea::Approvals))->label('Onboard a lot')->icon('heroicon-o-plus-circle')
-                ->modalHeading('Onboard a car lot')
-                ->modalDescription('Creates the owner\'s account and the lot. The owner signs in with the email or WhatsApp number you enter (a one-time code, no password) and adds cars, photos and bank details.')
+            // Field sales: sign a seller up for its owner from any state; the owner signs in and finishes setting up.
+            Action::make('onboard')->authorize(fn () => LotResource::allows(AdminArea::Approvals))->label('Onboard a seller')->icon('heroicon-o-plus-circle')
+                ->modalHeading('Onboard a seller')
+                ->modalDescription('Creates the owner\'s account and the seller. The owner signs in with the email or WhatsApp number you enter (a one-time code, no password) and adds cars, photos and bank details.')
                 ->modalWidth('2xl')
                 ->form([
                     Forms\Components\Section::make('Owner')->columns(2)->schema([
@@ -39,15 +39,15 @@ class ListLots extends ListRecords
                         Forms\Components\TextInput::make('email')->label('Email')->email()->rule('email:rfc,strict')->maxLength(190)
                             ->required(fn (Get $get) => $get('sign_in') === 'email'),
                     ]),
-                    Forms\Components\Section::make('Lot')->columns(2)->schema([
-                        Forms\Components\TextInput::make('lot_name')->label('Lot name')->required()->maxLength(120)->rules([new FieldPattern('business_name')])->columnSpanFull(),
+                    Forms\Components\Section::make('Seller')->columns(2)->schema([
+                        Forms\Components\TextInput::make('lot_name')->label('Seller name')->required()->maxLength(120)->rules([new FieldPattern('business_name')])->columnSpanFull(),
                         Forms\Components\Select::make('state')->options(collect(Regions::options())->mapWithKeys(fn (array $r) => [$r['value'] => $r['label']]))
                             ->required()->searchable(),
                         Forms\Components\TextInput::make('city')->label('Area / city')->required()->maxLength(80)->rules([new FieldPattern('place')]),
                         Forms\Components\TextInput::make('address')->label('Street address')->maxLength(255)->columnSpanFull(),
                         Forms\Components\TextInput::make('lot_phone')->label('Phone buyers call')->tel()->maxLength(20)->rules(['nullable', new FieldPattern('phone'), new PhoneNumberRule])->helperText('Leave empty to use the WhatsApp number.'),
                         Forms\Components\Select::make('plan_id')->label('Plan')->options(Plan::query()->orderBy('sort')->pluck('name', 'id'))->placeholder('Default (trial)'),
-                        Forms\Components\Toggle::make('approve')->label('Approve the lot now')->helperText('Only if you have met the lot. Otherwise it waits in "Lots" for approval like any other.')->columnSpanFull(),
+                        Forms\Components\Toggle::make('approve')->label('Approve the seller now')->helperText('Only if you have met the seller. Otherwise it waits in "Sellers" for approval like any other.')->columnSpanFull(),
                     ]),
                 ])
                 ->action(function (array $data, OnboardLot $onboard): void {
@@ -70,7 +70,7 @@ class ListLots extends ListRecords
                     $notice = Notification::make()->title("{$result['lot']->name} is set up");
                     ($result['welcomed']
                         ? $notice->body('We sent the owner a welcome with how to sign in.')->success()
-                        : $notice->body('We couldn\'t send the welcome message. Tell the owner to sign in at LotLink with the '.($data['sign_in'] === 'email' ? 'email' : 'WhatsApp number').' you entered.')->warning())
+                        : $notice->body('We couldn\'t send the welcome message. Tell the owner to sign in at CarYard with the '.($data['sign_in'] === 'email' ? 'email' : 'WhatsApp number').' you entered.')->warning())
                         ->send();
                 }),
         ];

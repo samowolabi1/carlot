@@ -33,7 +33,7 @@ defineProps<{
             </div>
             <p class="rounded-xl bg-map px-4 py-3 text-[14px] text-forest">
                 <Icon name="shield" :size="18" class="mr-1 inline align-[-3px]" /> You're signing this report as <strong>{{ inspector }}</strong>. The car will show
-                <strong>Independently inspected</strong>, and the lot can't replace your report with their own.
+                <strong>Independently inspected</strong>, and the seller can't replace your report with their own.
             </p>
             <InspectionForm :groups="groups" :results="results" :previous="previous" :max-photos="maxPhotos" :action="route('inspector.store', car.ulid)" submit-label="Sign and publish report" />
         </div>

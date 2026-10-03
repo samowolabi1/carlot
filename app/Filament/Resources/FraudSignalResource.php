@@ -91,17 +91,17 @@ class FraudSignalResource extends Resource
                     }),
                 Tables\Actions\Action::make('hide')->icon('heroicon-o-eye-slash')->color('danger')
                     ->visible(fn (FraudSignal $s) => $s->status === SignalStatus::Open)
-                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the lot will see')->required()->maxLength(160)->default(fn (FraudSignal $s) => $s->label())])
+                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the seller will see')->required()->maxLength(160)->default(fn (FraudSignal $s) => $s->label())])
                     ->action(function (FraudSignal $s, array $data): void {
                         app(ModerateListing::class)->hide($s->vehicle, self::admin(), $data['reason']);
                         Notification::make()->title('Listing hidden')->success()->send();
                     }),
-                Tables\Actions\Action::make('message')->label('Message lots')->icon('heroicon-o-chat-bubble-left-right')
-                    ->form([Forms\Components\Textarea::make('note')->label('Note to the lot(s)')->required()->rows(3)->maxLength(500)
-                        ->default(fn (FraudSignal $s) => $s->type === FraudSignalType::DuplicateVin ? 'Please confirm which lot currently holds this car.' : null)])
+                Tables\Actions\Action::make('message')->label('Message sellers')->icon('heroicon-o-chat-bubble-left-right')
+                    ->form([Forms\Components\Textarea::make('note')->label('Note to the seller(s)')->required()->rows(3)->maxLength(500)
+                        ->default(fn (FraudSignal $s) => $s->type === FraudSignalType::DuplicateVin ? 'Please confirm which seller currently holds this car.' : null)])
                     ->action(function (FraudSignal $s, array $data): void {
                         collect([$s->vehicle->lot, $s->related?->lot])->filter()->unique('id')
-                            ->each(fn ($lot) => $lot->owner->notify(new ModerationNotice($lot, 'From LotLink about '.$s->vehicle->title().': '.$data['note'])));
+                            ->each(fn ($lot) => $lot->owner->notify(new ModerationNotice($lot, 'From CarYard about '.$s->vehicle->title().': '.$data['note'])));
                         Notification::make()->title('Message sent')->success()->send();
                     }),
             ]);

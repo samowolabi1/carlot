@@ -31,8 +31,8 @@ it('signs with VAPID, encrypts the payload, and reports devices that are gone', 
         return new PushSubscription(['endpoint' => $endpoint, 'public_key' => $keys['p256dh'], 'auth_token' => $keys['auth'], 'content_encoding' => 'aes128gcm']);
     });
 
-    $gateway = new WebPushGateway('mailto:support@lotlink.ng', $vapid['publicKey'], $vapid['privateKey'], new Client(['handler' => $stack]));
-    $gone = $gateway->send($devices, ['title' => 'Prime Motors', 'body' => 'Yes, come and see it', 'url' => 'https://lotlink.ng/c/1', 'tag' => 'chat-1']);
+    $gateway = new WebPushGateway('mailto:support@caryardng.com', $vapid['publicKey'], $vapid['privateKey'], new Client(['handler' => $stack]));
+    $gone = $gateway->send($devices, ['title' => 'Prime Motors', 'body' => 'Yes, come and see it', 'url' => 'https://caryardng.com/c/1', 'tag' => 'chat-1']);
 
     expect($gone)->toBe(['https://fcm.googleapis.com/fcm/send/gone'])->and($sent)->toHaveCount(2);
 

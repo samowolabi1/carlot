@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
-it('sends users without a lot to onboarding', function () {
+it('sends users without a seller to onboarding', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dealer.home'))
         ->assertRedirect(route('dealer.onboarding.start'));
@@ -35,7 +35,7 @@ it('creates a pending lot with the user as owner', function () {
         ->and($lot->hours()->count())->toBe(7);
 });
 
-it('gives each lot a unique slug', function () {
+it('gives each seller a unique slug', function () {
     Lot::factory()->create(['slug' => 'prime-motors']);
 
     $this->actingAs(User::factory()->create())->post(route('dealer.lots.store'), ['name' => 'Prime Motors', 'phone' => '08021112233']);
@@ -77,7 +77,7 @@ it('walks through the wizard steps', function () {
         ->and($lot->fresh()->status)->toBe(LotStatus::Pending);
 });
 
-it('will not submit a lot without a map pin', function () {
+it('will not submit a seller without a map pin', function () {
     $lot = Lot::factory()->create(['latitude' => null, 'longitude' => null]);
 
     $this->actingAs($lot->owner)->post(route('dealer.onboarding.submit', $lot))

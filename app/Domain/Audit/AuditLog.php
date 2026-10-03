@@ -55,7 +55,7 @@ class AuditLog extends Model
     {
         return self::create([
             'user_id' => ($user ?? auth()->user())?->getKey(),
-            // During "Log in as", the admin behind it (so support actions are never mistaken for the dealer's own).
+            // During "Log in as", the admin behind it (so support actions are never mistaken for the seller's own).
             // (Queued jobs and commands have no session, so nothing is picked up there.)
             'impersonator_id' => request()->hasSession() ? request()->session()->get(Impersonation::SESSION_KEY) : null,
             'lot_id' => $lotId ?? $subject?->getAttribute('lot_id'),

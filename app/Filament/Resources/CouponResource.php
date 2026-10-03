@@ -50,7 +50,7 @@ class CouponResource extends Resource
                 Forms\Components\TextInput::make('code')->required()->maxLength(32)->unique(ignoreRecord: true)->placeholder('LAUNCH3')
                     ->helperText(fn (?Coupon $record) => $record && $record->redeemed > 0
                         ? 'Already used '.$record->redeemed.' '.str('time')->plural($record->redeemed).'. A new code works from now; the old one stops working.'
-                        : 'Letters, numbers and dashes. Lots type it on their Billing page.')
+                        : 'Letters, numbers and dashes. Sellers type it on their Billing page.')
                     ->dehydrateStateUsing(fn (?string $state) => strtoupper(trim((string) $state)))
                     ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail): void {
                         if (! preg_match(Coupon::PATTERN, strtoupper(trim((string) $value)))) {
@@ -61,8 +61,8 @@ class CouponResource extends Resource
                         ->action(fn (Set $set) => $set('code', 'LL-'.Str::upper(Str::random(6))))),
                 Forms\Components\Select::make('plan_id')->label('Trial on plan')->relationship('plan', 'name')->required(),
                 Forms\Components\TextInput::make('trial_days')->label('Free days')->numeric()->integer()->minValue(1)->maxValue(365)->required()->default(90)
-                    ->helperText('Changing this only affects lots that use the code from now on.'),
-                Forms\Components\TextInput::make('max_redemptions')->label('How many lots can use it')->numeric()->integer()->maxValue(1_000_000)
+                    ->helperText('Changing this only affects sellers that use the code from now on.'),
+                Forms\Components\TextInput::make('max_redemptions')->label('How many sellers can use it')->numeric()->integer()->maxValue(1_000_000)
                     ->minValue(fn (?Coupon $record) => max(1, (int) $record?->redeemed))
                     ->helperText(fn (?Coupon $record) => 'Empty for no limit.'.($record && $record->redeemed ? " Used {$record->redeemed} so far." : '')),
                 Forms\Components\DateTimePicker::make('expires_at')->label('Stops working on')->seconds(false)
@@ -70,7 +70,7 @@ class CouponResource extends Resource
                 Forms\Components\Toggle::make('active')->label('Can be used')->default(true)->inline(false)
                     ->helperText('Off pauses the code without deleting it.'),
                 Forms\Components\TextInput::make('note')->label('What it\'s for (only admins see this)')->maxLength(160)->columnSpanFull()
-                    ->placeholder('e.g. Kano dealer meetup, January'),
+                    ->placeholder('e.g. Kano seller meetup, January'),
             ]),
         ]);
     }
@@ -118,7 +118,7 @@ class CouponResource extends Resource
                     }),
                 Tables\Actions\Action::make('used')->label('Who used it')->icon('heroicon-o-users')->color('gray')
                     ->visible(fn (Coupon $record) => (int) $record->redeemed > 0)
-                    ->modalHeading(fn (Coupon $record) => "Lots that used {$record->code}")
+                    ->modalHeading(fn (Coupon $record) => "Sellers that used {$record->code}")
                     ->modalContent(fn (Coupon $record) => new HtmlString(self::redemptions($record)))
                     ->modalSubmitAction(false),
                 Tables\Actions\DeleteAction::make()
@@ -154,12 +154,12 @@ class CouponResource extends Resource
         $rows = $subs->map(function (Subscription $s) use ($lots) {
             $lot = $lots->get($s->lot_id);
 
-            return '<tr><td style="padding:6px 8px">'.e($lot->name ?? 'Deleted lot').'</td><td style="padding:6px 8px">'.e(collect([$lot?->city, $lot?->state])->filter()->implode(', '))
+            return '<tr><td style="padding:6px 8px">'.e($lot->name ?? 'Deleted seller').'</td><td style="padding:6px 8px">'.e(collect([$lot?->city, $lot?->state])->filter()->implode(', '))
                 .'</td><td style="padding:6px 8px">'.e($s->status->label()).'</td><td style="padding:6px 8px">'.e($s->trial_ends_at?->format('j M Y') ?? '—').'</td></tr>';
         })->implode('');
 
         return '<table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr style="text-align:left;opacity:.7">'
-            .'<th style="padding:6px 8px">Lot</th><th style="padding:6px 8px">Where</th><th style="padding:6px 8px">Now</th><th style="padding:6px 8px">Trial ends</th></tr></thead><tbody>'
-            .($rows ?: '<tr><td colspan="4" style="padding:6px 8px">No lots yet.</td></tr>').'</tbody></table>';
+            .'<th style="padding:6px 8px">Seller</th><th style="padding:6px 8px">Where</th><th style="padding:6px 8px">Now</th><th style="padding:6px 8px">Trial ends</th></tr></thead><tbody>'
+            .($rows ?: '<tr><td colspan="4" style="padding:6px 8px">No sellers yet.</td></tr>').'</tbody></table>';
     }
 }

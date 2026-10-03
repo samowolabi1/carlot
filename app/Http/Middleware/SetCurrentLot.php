@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * For /dealer/{lot}/... routes: checks the user belongs to the lot, then makes it
+ * For /dealer/{lot}/... routes: checks the user belongs to the seller, then makes it
  * the current lot so BelongsToLot scopes every query to it.
  */
 class SetCurrentLot

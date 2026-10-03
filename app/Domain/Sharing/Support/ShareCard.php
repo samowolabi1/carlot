@@ -16,7 +16,7 @@ use Throwable;
 
 /**
  * Branded images for sharing a car (TDD M9): 1080×1080 for feeds and 1080×1920 for
- * WhatsApp Status and Stories. Cover photo, price, title, key specs, the lot and a QR
+ * WhatsApp Status and Stories. Cover photo, price, title, key specs, the seller and a QR
  * code that opens the car. Stored on the media disk under a content hash, so a changed
  * price or cover gives new URLs and caches never show stale prices.
  */
@@ -113,11 +113,11 @@ class ShareCard
             $image->drawRectangle(0, $photoHeight - $fade + $i, fn ($r) => $r->size($width, 1)->background("rgba(22, 48, 43, {$alpha})"));
         }
 
-        // LotLink wordmark, top right.
-        $wordmark = $this->measure('LotLink', 'bold', 38);
+        // CarYard wordmark, top right.
+        $wordmark = $this->measure('CarYard', 'bold', 38);
         $image->drawRectangle($width - 36 - $wordmark - 48, 36, fn ($r) => $r->size($wordmark + 48, 64)->background('rgba(22, 48, 43, 0.85)'));
-        $this->text($image, 'Lot', $width - 36 - $wordmark - 24, 68, 'bold', 38, '#FFFFFF', 'left', 'middle');
-        $this->text($image, 'Link', $width - 36 - $wordmark - 24 + $this->measure('Lot', 'bold', 38), 68, 'bold', 38, '#F28C4B', 'left', 'middle');
+        $this->text($image, 'Car', $width - 36 - $wordmark - 24, 68, 'bold', 38, '#FFFFFF', 'left', 'middle');
+        $this->text($image, 'Yard', $width - 36 - $wordmark - 24 + $this->measure('Car', 'bold', 38), 68, 'bold', 38, '#F28C4B', 'left', 'middle');
 
         $pad = 64;
         $qrSize = $story ? 300 : 230;
@@ -160,7 +160,7 @@ class ShareCard
 
         if ($story) {
             $middle = $qrTop + intdiv($qrSize, 2);
-            $this->text($image, 'Find it on LotLink', $pad, $middle - 50, 'semibold', 44, '#FFFFFF', 'left', 'middle');
+            $this->text($image, 'Find it on CarYard', $pad, $middle - 50, 'semibold', 44, '#FFFFFF', 'left', 'middle');
             $this->text($image, 'Scan the code to see every photo', $pad, $middle + 14, 'regular', 32, self::MIST, 'left', 'middle');
             $this->text($image, 'and book a viewing.', $pad, $middle + 60, 'regular', 32, self::MIST, 'left', 'middle');
         }

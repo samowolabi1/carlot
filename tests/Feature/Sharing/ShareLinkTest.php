@@ -41,7 +41,7 @@ it('reuses one link per person, car and platform', function () {
         ->and(ShareLink::where('user_id', $buyer->id)->count())->toBe(1);
 });
 
-it('shares a lot page too', function () {
+it('shares a seller page too', function () {
     ($this->share)(['lot' => $this->lot->slug, 'platform' => 'native'])->assertOk()->assertJsonPath('cards', null);
 
     expect(ShareLink::sole()->vehicle_id)->toBeNull();
@@ -74,7 +74,7 @@ it('redirects to the car with the ref and counts real clicks only', function () 
         ->and($link->last_clicked_at)->not->toBeNull();
 });
 
-it('sends people to the lot or search when the car is gone', function () {
+it('sends people to the seller or search when the car is gone', function () {
     $code = ($this->share)(['vehicle' => $this->camry->ulid, 'platform' => 'copy'])->json('code');
 
     $this->camry->delete();

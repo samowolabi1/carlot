@@ -45,7 +45,7 @@ it('sends guests to sign in first', function () {
     $this->get(route('bookings.create', ['lot' => $this->lot->slug]))->assertRedirect(route('login'));
 });
 
-it('books and confirms straight away when the lot auto-confirms', function () {
+it('books and confirms straight away when the seller auto-confirms', function () {
     book()->assertRedirect();
 
     $a = Appointment::withoutGlobalScopes()->sole();
@@ -61,7 +61,7 @@ it('books and confirms straight away when the lot auto-confirms', function () {
         ->and($this->whatsapp->to('+2348021112233', 'dealer_booking_alert')[0]->params[0])->toBe('New booking');
 });
 
-it('waits for the lot when it confirms manually', function () {
+it('waits for the seller when it confirms manually', function () {
     $this->lot->update(['booking_auto_confirm' => false]);
 
     book();
@@ -88,7 +88,7 @@ it('emails a calendar file when the buyer has an email address', function () {
     Notification::assertSentTo($this->buyer, BookingNotice::class, function (BookingNotice $n, array $channels) {
         $mail = $n->toMail($this->buyer);
 
-        return $channels === ['phone', 'mail', 'database'] && $mail->rawAttachments[0]['name'] === 'lotlink-visit.ics';
+        return $channels === ['phone', 'mail', 'database'] && $mail->rawAttachments[0]['name'] === 'caryard-visit.ics';
     });
 });
 
@@ -99,7 +99,7 @@ it('refuses a full slot', function () {
     expect(Appointment::withoutGlobalScopes()->count())->toBe(2);
 });
 
-it('refuses times that are not slots, and cars from other lots', function () {
+it('refuses times that are not slots, and cars from other sellers', function () {
     book(['starts_at' => CarbonImmutable::parse('2026-10-06 10:10', 'Africa/Lagos')->toIso8601String()])->assertSessionHasErrors('starts_at');
     book(['vehicle' => Vehicle::factory()->withPhoto()->available()->create()->ulid])->assertSessionHasErrors('vehicle');
 });
@@ -145,7 +145,7 @@ it('downloads a calendar file', function () {
     expect($ics)->toContain('BEGIN:VEVENT')
         ->toContain('DTSTART:20261006T093000Z')
         ->toContain('DTEND:20261006T100000Z')
-        ->toContain('UID:'.$a->ulid.'@lotlink');
+        ->toContain('UID:'.$a->ulid.'@caryardng.com');
 });
 
 it('lets the buyer move a booking to another free slot', function () {

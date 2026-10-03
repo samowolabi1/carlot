@@ -21,7 +21,7 @@
 <body>
 <table class="head">
     <tr>
-        <td><span class="brand">Lot<span>Link</span></span><br><span class="muted">{{ config('app.url') }}</span></td>
+        <td><span class="brand">Car<span>Yard</span></span><br><span class="muted">{{ config('app.url') }}</span></td>
         <td class="r"><strong style="font-size: 16px;">{{ $payment->status->value === 'refunded' ? 'Refunded invoice' : 'Invoice and receipt' }}</strong><br>{{ $payment->invoiceNumber() }}<br><span class="muted">{{ $paidAt }}</span></td>
     </tr>
 </table>

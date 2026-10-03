@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To the LotLink team: a lot opened, replied to or reopened a ticket (in-app and email). */
+/** To the CarYard team: a seller opened, replied to or reopened a ticket (in-app and email). */
 class SupportTicketAlert extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -65,7 +65,7 @@ class SupportTicketAlert extends Notification implements ShouldQueue
 
         return [
             'kind' => 'support',
-            'text' => ($lot->name ?? 'A lot')." {$what} {$this->ticket->reference}: {$this->ticket->subject}",
+            'text' => ($lot->name ?? 'A seller')." {$what} {$this->ticket->reference}: {$this->ticket->subject}",
             'url' => route('filament.admin.resources.support-tickets.view', $this->ticket->ulid),
         ];
     }

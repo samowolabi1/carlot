@@ -14,18 +14,18 @@ class IcsCalendar
         $location = implode(', ', array_filter([$lot->name, $lot->address, $lot->city, $lot->state]));
         $description = trim(implode('\n', array_filter([
             $lot->directionsUrl() ? 'Directions: '.$lot->directionsUrl() : null,
-            $lot->phone ? 'Lot phone: '.$lot->phone : null,
+            $lot->phone ? 'Seller phone: '.$lot->phone : null,
             'Manage your booking: '.route('bookings.show', $appointment),
         ])));
 
         $lines = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
-            'PRODID:-//LotLink//Appointments//EN',
+            'PRODID:-//CarYard//Appointments//EN',
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'BEGIN:VEVENT',
-            'UID:'.$appointment->ulid.'@lotlink',
+            'UID:'.$appointment->ulid.'@caryardng.com',
             'DTSTAMP:'.$fmt(now()),
             'DTSTART:'.$fmt($appointment->starts_at),
             'DTEND:'.$fmt($appointment->ends_at),

@@ -1,6 +1,6 @@
 <?php
 
-// Only the keys LotLink changes; the rest come from Filament. The remember cookie lasts
+// Only the keys CarYard changes; the rest come from Filament. The remember cookie lasts
 // auth.guards.web.remember (a week by default).
 return [
     'form' => [

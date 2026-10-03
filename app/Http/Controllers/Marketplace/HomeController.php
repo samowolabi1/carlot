@@ -18,7 +18,7 @@ class HomeController extends Controller
 {
     public function __invoke(Request $request, VehicleSearch $search): Response
     {
-        // A lot's own domain (TDD M6, Enterprise) opens straight on its mini-site.
+        // A seller's own domain (TDD M6, Enterprise) opens straight on its mini-site.
         if ($lot = CustomDomains::lotFor($request->getHost())) {
             return app(LotSiteController::class)($request, $lot, $search);
         }
@@ -34,7 +34,7 @@ class HomeController extends Controller
         $savedIds = $request->user()?->favourites()->pluck('vehicles.id')->all() ?? [];
 
         return Inertia::render('Home', [
-            // Homepage banners lots pay for (checked by LotLink before they run).
+            // Homepage banners lots pay for (checked by CarYard before they run).
             'banners' => AdServer::home(),
             'arrivals' => $search->search($criteria)->getCollection()->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds)),
             // Spotlighted cars rotate on each visit; the row is hidden when there are none.
@@ -58,8 +58,8 @@ class HomeController extends Controller
             'nearMe' => $criteria->hasLocation(),
             'options' => SearchController::filterOptions(),
         ])->withViewData(['meta' => [
-            'title' => 'LotLink: cars for sale at lots near you',
-            'description' => 'Find your next car at car lots near you. Browse stock, compare prices and get directions to the lot.',
+            'title' => 'CarYard: cars for sale at sellers near you',
+            'description' => 'Find your next car at sellers near you. Browse stock, compare prices and get directions to the seller.',
         ]]);
     }
 }

@@ -59,7 +59,7 @@ class EditMessageTemplate extends EditRecord
 
                     $sample = MessageCatalogue::sample($template->key);
                     $label = MessageTemplateResource::info($template->key)['label'];
-                    $message = $sample->with($sample->template, null, "LotLink test: {$label} (".implode(', ', $sample->params).').');
+                    $message = $sample->with($sample->template, null, "CarYard test: {$label} (".implode(', ', $sample->params).').');
 
                     try {
                         $channel = $messenger->send($phone, $message, preferWhatsApp: ! ($data['sms'] ?? false));

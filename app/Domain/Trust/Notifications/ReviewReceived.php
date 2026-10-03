@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To the lot's owner and managers: a buyer reviewed their visit (in-app and email). */
+/** To the seller's owner and managers: a buyer reviewed their visit (in-app and email). */
 class ReviewReceived extends Notification implements ShouldQueue
 {
     use Queueable;

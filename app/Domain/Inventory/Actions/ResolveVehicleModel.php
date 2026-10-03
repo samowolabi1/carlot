@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class ResolveVehicleModel
 {
     /**
-     * Finds a model of this make by name, or adds it for admin review. Dealers can list
+     * Finds a model of this make by name, or adds it for admin review. Sellers can list
      * a model we haven't seeded without waiting; an admin tidies the name later.
      */
     public function run(Make $make, string $name, ?User $user = null, ?BodyType $bodyType = null): VehicleModel

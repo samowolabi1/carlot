@@ -30,7 +30,7 @@ class UserFactory extends Factory
         ];
     }
 
-    /** Someone who hasn't accepted the current Terms and Privacy Policy (older account, or made by an admin or a lot). */
+    /** Someone who hasn't accepted the current Terms and Privacy Policy (older account, or made by an admin or a seller). */
     public function withoutTerms(): static
     {
         return $this->state(['terms_version' => null, 'terms_accepted_at' => null]);

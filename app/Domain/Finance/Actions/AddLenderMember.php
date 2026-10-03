@@ -19,7 +19,7 @@ class AddLenderMember
         $email = Str::lower(trim($email));
         $user = User::query()->where('email', $email)->first();
         if ($user?->isAdmin()) {
-            throw ValidationException::withMessages(['email' => 'That is a LotLink admin account.']);
+            throw ValidationException::withMessages(['email' => 'That is a CarYard admin account.']);
         }
         if ($user !== null && $lender->roleOf($user) !== null) {
             throw ValidationException::withMessages(['email' => "{$user->name} is already on the team."]);
@@ -30,7 +30,7 @@ class AddLenderMember
         AuditLog::record('lender.member_added', $lender, ['user' => $user->ulid, 'role' => $role->value], $by);
 
         $user->notify(new LenderAlert(
-            "{$by->name} added you to {$lender->name} on LotLink. Sign in with this email address to work car loan applications.",
+            "{$by->name} added you to {$lender->name} on CarYard. Sign in with this email address to work car loan applications.",
             route('lender.home'),
         ));
 

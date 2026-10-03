@@ -41,10 +41,10 @@ class DecideLender
         AdminCounters::forget();
 
         $text = match ($decision) {
-            'approve' => "{$lender->name} is approved on LotLink. Buyers can now apply to you for car loans.",
-            'reactivate' => "{$lender->name} is active on LotLink again.",
-            'reject' => "{$lender->name} wasn't approved on LotLink: {$note}",
-            'suspend' => "{$lender->name} is paused on LotLink and gets no new applications: {$note}",
+            'approve' => "{$lender->name} is approved on CarYard. Buyers can now apply to you for car loans.",
+            'reactivate' => "{$lender->name} is active on CarYard again.",
+            'reject' => "{$lender->name} wasn't approved on CarYard: {$note}",
+            'suspend' => "{$lender->name} is paused on CarYard and gets no new applications: {$note}",
         };
         Notification::send($lender->members()->get(), new LenderAlert($text, route('lender.home')));
 

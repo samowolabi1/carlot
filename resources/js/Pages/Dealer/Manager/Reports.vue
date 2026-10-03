@@ -39,7 +39,7 @@ const exportUrl = computed(() => route('dealer.manager.reports', { lot: lot.valu
         <div class="flex flex-wrap items-end justify-between gap-3">
             <div>
                 <h1 class="text-[30px] font-bold">Reports</h1>
-                <p class="text-[14px] text-muted">Sales, balances, walk-ins and staff from Lot Manager</p>
+                <p class="text-[14px] text-muted">Sales, balances, walk-ins and staff from Sales Manager</p>
             </div>
             <a v-if="pro" :href="exportUrl" class="btn btn-outline h-11 text-[14px]"><Icon name="download" :size="18" /> Excel</a>
             <Link v-else :href="route('dealer.billing', lot.slug)" class="text-[14px] font-semibold">Profit, staff report and Excel export come with Pro</Link>

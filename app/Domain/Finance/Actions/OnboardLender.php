@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * A LotLink admin sets up a lender directly (a signed partnership): the lender, active at once, and its first admin's
+ * A CarYard admin sets up a lender directly (a signed partnership): the lender, active at once, and its first admin's
  * account (found or made from their email), who is emailed how to sign in to the lender portal.
  */
 class OnboardLender
@@ -33,7 +33,7 @@ class OnboardLender
         $lender = DB::transaction(function () use ($admin, $data, $email) {
             $member = User::query()->where('email', $email)->first();
             if ($member?->isAdmin()) {
-                throw ValidationException::withMessages(['admin_email' => 'That is a LotLink admin account. Use the lender\'s own email.']);
+                throw ValidationException::withMessages(['admin_email' => 'That is a CarYard admin account. Use the lender\'s own email.']);
             }
             $member ??= User::query()->create(['name' => trim((string) ($data['admin_name'] ?? $data['contact_name'] ?? '')), 'email' => $email, 'role' => UserRole::Customer]);
 
@@ -46,7 +46,7 @@ class OnboardLender
         });
 
         $lender->members()->first()?->notify(new LenderAlert(
-            "{$lender->name} is set up on LotLink. Sign in with this email address to see car loan applications from buyers.",
+            "{$lender->name} is set up on CarYard. Sign in with this email address to see car loan applications from buyers.",
             route('lender.home'),
         ));
         AdminCounters::forget();

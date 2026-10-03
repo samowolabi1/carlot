@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * A lot books an advert and pays LotLink for it (one of the lot's own payments, like its plan
+ * A seller books an advert and pays CarYard for it (one of the seller's own payments, like its plan
  * and spotlights). Once paid it goes to an admin to check (SubmitAdCampaign); a rejected
  * advert is refunded.
  */
@@ -36,7 +36,7 @@ class CreateAdCampaign
     public function run(Lot $lot, User $user, array $data, ?UploadedFile $image = null): array
     {
         if ($lot->status !== LotStatus::Active) {
-            throw ValidationException::withMessages(['placement' => 'Adverts can run once LotLink has approved your lot.']);
+            throw ValidationException::withMessages(['placement' => 'Adverts can run once CarYard has approved your business.']);
         }
 
         $placement = AdPlacement::from($data['placement']);
@@ -50,7 +50,7 @@ class CreateAdCampaign
 
         $vehicle = filled($data['vehicle'] ?? null)
             ? Vehicle::query()->marketplace()->where('vehicles.lot_id', $lot->id)->where('vehicles.ulid', strtolower((string) $data['vehicle']))->with('cover')->first()
-                ?? throw ValidationException::withMessages(['vehicle' => 'Pick one of your cars that is live on LotLink.'])
+                ?? throw ValidationException::withMessages(['vehicle' => 'Pick one of your cars that is live on CarYard.'])
             : null;
 
         if ($image === null && $vehicle?->cover === null) {

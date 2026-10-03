@@ -27,7 +27,7 @@ enum FinanceStatus: string
             self::DocumentsRequested => 'Documents needed',
             self::PreApproved => 'Pre-approved',
             self::Approved => 'Approved',
-            self::Disbursed => 'Paid to the lot',
+            self::Disbursed => 'Paid to the seller',
             self::Declined => 'Not approved',
             self::Withdrawn => 'Withdrawn',
             self::Failed => "Couldn't send",

@@ -247,7 +247,7 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
         <!-- Trade-ins -->
         <section v-else-if="active === 'trade-ins'" class="flex flex-col gap-3">
             <h2 class="font-sans text-[16px] font-bold">Trade-ins waiting for a valuation</h2>
-            <p v-if="tradeIns.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">No trade-ins yet. Buyers send them from your cars and your lot page.</p>
+            <p v-if="tradeIns.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">No trade-ins yet. Buyers send them from your cars and your seller page.</p>
             <div class="grid gap-3 xl:grid-cols-2">
                 <article v-for="t in tradeIns" :key="t.ulid" class="card flex gap-4 p-4">
                     <div class="grid shrink-0 grid-cols-3 gap-1 self-start">

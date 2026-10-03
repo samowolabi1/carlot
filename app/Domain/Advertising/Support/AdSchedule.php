@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 /**
  * Prices and slots for adverts. Each placement has a fixed number of slots; a campaign in review
  * or approved holds one for its dates, so a new booking starts on the first date with room.
- * Days run from midnight in LotLink's home timezone.
+ * Days run from midnight in CarYard's home timezone.
  */
 final class AdSchedule
 {
@@ -31,7 +31,7 @@ final class AdSchedule
         return array_map(fn (int $days, int $price) => ['days' => $days, 'price' => $price], array_keys($prices), $prices);
     }
 
-    /** Midnight at the start of a date, in LotLink's timezone, as UTC. */
+    /** Midnight at the start of a date, in CarYard's timezone, as UTC. */
     public static function dayStart(Carbon|string $date): Carbon
     {
         $tz = (string) config('lotlink.timezone', 'Africa/Lagos');
@@ -39,7 +39,7 @@ final class AdSchedule
         return Carbon::parse($date instanceof Carbon ? $date->toDateString() : $date, $tz)->startOfDay()->utc();
     }
 
-    /** Today, in LotLink's timezone. */
+    /** Today, in CarYard's timezone. */
     public static function today(): Carbon
     {
         return self::dayStart(now((string) config('lotlink.timezone', 'Africa/Lagos'))->toDateString());

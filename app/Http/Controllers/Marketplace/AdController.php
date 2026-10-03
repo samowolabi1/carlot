@@ -10,10 +10,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/** Advert clicks and views: counted once per visit, never for bots or the lot's own staff. */
+/** Advert clicks and views: counted once per visit, never for bots or the seller's own staff. */
 class AdController extends Controller
 {
-    /** /ad/{ulid}: counts the click and opens the car or the lot. */
+    /** /ad/{ulid}: counts the click and opens the car or the seller. */
     public function click(Request $request, AdCampaign $campaign): RedirectResponse
     {
         if ($this->counts($request, $campaign, 'clicked')) {

@@ -19,7 +19,7 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
-it('onboards a lot owner who signs in by WhatsApp, and welcomes them there', function () {
+it('onboards a seller who signs in by WhatsApp, and welcomes them there', function () {
     Livewire::test(ListLots::class)->callAction('onboard', [
         'owner_name' => 'Musa Bello',
         'sign_in' => 'whatsapp',
@@ -84,7 +84,7 @@ it('uses an existing account for the owner and checks the details', function () 
         'owner_name' => 'X', 'sign_in' => 'email', 'lot_name' => 'No Email Cars', 'state' => 'Lagos', 'city' => 'Ikeja',
     ])->assertHasActionErrors(['email']);
 
-    // Admin accounts can't be made lot owners this way.
+    // Admin accounts can't be made sellers this way.
     Livewire::test(ListLots::class)->callAction('onboard', [
         'owner_name' => 'X', 'sign_in' => 'email', 'email' => $this->admin->email, 'lot_name' => 'Admin Cars', 'phone' => '08035551414', 'state' => 'Lagos', 'city' => 'Ikeja',
     ]);

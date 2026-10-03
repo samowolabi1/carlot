@@ -63,7 +63,7 @@ class PaymentReceipt extends Notification implements ShouldQueue
             ->greeting('Hi '.($notifiable->name ?? 'there').',')
             ->line("{$lot->name} received {$order->money($this->payment->amount)} for ".($order->vehicle?->title() ?? 'your car').'.')
             ->line($order->balance > 0 ? 'Balance to pay: '.$order->money($order->balance).'.' : 'Your order is fully paid.')
-            ->action('Track your order on LotLink', OrderLinks::track($order))
+            ->action('Track your order on CarYard', OrderLinks::track($order))
             ->attachData(ReceiptPdf::render($this->payment), "receipt-{$this->payment->receipt_no}.pdf", ['mime' => 'application/pdf']);
     }
 

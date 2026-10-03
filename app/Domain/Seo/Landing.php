@@ -56,7 +56,7 @@ final class Landing
         return isset($cities[$third]) ? new self($make, $model, $cities[$third]) : null;
     }
 
-    /** Cities with a live lot, slug => name as the lots write it ("Ikeja"). @return array<string, string> */
+    /** Cities with a live lot, slug => name as the sellers write it ("Ikeja"). @return array<string, string> */
     public static function cities(): array
     {
         return Cache::remember('seo:cities', now()->addMinutes(30), fn () => Lot::where('status', LotStatus::Active)
@@ -89,7 +89,7 @@ final class Landing
 
     public function title(): string
     {
-        return $this->heading().' | LotLink';
+        return $this->heading().' | CarYard';
     }
 
     /**
@@ -108,13 +108,13 @@ final class Landing
             : ($stats['min'] !== null ? ' at ₦'.number_format(intdiv($stats['min'], 100)) : '');
 
         return sprintf(
-            '%s %s %s for sale%s at %s %s on LotLink%s. See real photos and prices, check what you can afford, and book a viewing or test drive in two taps.',
+            '%s %s %s for sale%s at %s %s on CarYard%s. See real photos and prices, check what you can afford, and book a viewing or test drive in two taps.',
             number_format($stats['count']),
             $this->what() ?: 'used',
             $stats['count'] === 1 ? 'car' : 'cars',
             $this->city ? " in {$this->city}" : '',
             $stats['lots'],
-            $stats['lots'] === 1 ? 'lot' : 'lots',
+            $stats['lots'] === 1 ? 'seller' : 'sellers',
             $range,
         );
     }

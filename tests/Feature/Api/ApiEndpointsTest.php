@@ -56,7 +56,7 @@ it('saves cars for a signed-in buyer', function () {
     expect($this->buyer->favourites()->count())->toBe(0);
 });
 
-it('chats with a lot: the buyer starts and replies, the lot answers from the app', function () {
+it('chats with a seller: the buyer starts and replies, the seller answers from the app', function () {
     Sanctum::actingAs($this->buyer, ['app']);
     $thread = $this->postJson(route('api.conversations.store'), ['vehicle' => $this->car->ulid, 'body' => 'Is it still available?'])
         ->assertCreated()->assertJsonPath('data.lot.slug', $this->lot->slug)->json('data');
@@ -67,7 +67,7 @@ it('chats with a lot: the buyer starts and replies, the lot answers from the app
     $this->getJson(route('api.conversations.show', ['conversation' => $thread['ulid'], 'after' => $firstId]))
         ->assertJsonCount(1, 'data.messages')->assertJsonPath('data.messages.0.body', 'Can I come Saturday?');
 
-    // The lot's side.
+    // The seller's side.
     $lead = Lead::withoutGlobalScopes()->sole();
     Sanctum::actingAs($this->owner, ['app']);
     $this->getJson(route('api.dealer.leads.index', $this->lot))->assertOk()->assertJsonPath('data.0.ulid', $lead->ulid)->assertJsonPath('data.0.unread', 2);
@@ -87,7 +87,7 @@ it('keeps lot staff to their own lots (tenancy)', function () {
     $this->postJson(route('api.conversations.store'), ['vehicle' => $this->car->ulid, 'body' => 'Hi']);
     $lead = Lead::withoutGlobalScopes()->sole();
 
-    // A member of another lot: no access to this lot, and this lot's lead isn't found under theirs.
+    // A member of another lot: no access to this seller, and this seller's lead isn't found under theirs.
     Sanctum::actingAs($this->otherOwner, ['app']);
     $this->getJson(route('api.dealer.leads.index', $this->lot))->assertForbidden();
     $this->getJson(route('api.dealer.vehicles.index', $this->lot))->assertForbidden();

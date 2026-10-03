@@ -23,18 +23,18 @@ const props = defineProps<{
 const copy: Record<string, { label: string; title: (name: string) => string; intro: string }> = {
     business: {
         label: 'Business details',
-        title: () => 'Tell buyers about your lot',
-        intro: 'This is what buyers see on your lot page. You can change it any time.',
+        title: () => 'Tell buyers about your business',
+        intro: 'This is what buyers see on your seller page. You can change it any time.',
     },
     branding: {
         label: 'Logo and cover',
-        title: () => 'Make it look like your lot',
-        intro: 'A logo and a photo of your lot help buyers trust you and recognise your gate.',
+        title: () => 'Make it look like your business',
+        intro: 'A logo and a photo of your yard help buyers trust you and recognise your gate.',
     },
     location: {
         label: 'Pin your location',
         title: (name) => `Where is ${name}?`,
-        intro: 'Stand at your lot gate and tap "Use my current location", or drag the pin. Buyers get directions to this exact spot.',
+        intro: 'Stand at your gate and tap "Use my current location", or drag the pin. Buyers get directions to this exact spot.',
     },
     hours: {
         label: 'Opening hours',
@@ -49,7 +49,7 @@ const copy: Record<string, { label: string; title: (name: string) => string; int
     submit: {
         label: 'Verify with CAC',
         title: () => 'Verify and go live',
-        intro: 'We check every lot before it appears on LotLink. Add your CAC documents for the Verified lot badge: you can list cars while we check.',
+        intro: 'We check every seller before it appears on CarYard. Add your CAC documents for the Verified seller badge: you can list cars while we check.',
     },
 };
 
@@ -68,7 +68,7 @@ const submitForm = useForm({});
     <OnboardingLayout :steps="stepList" :current="step">
         <div class="flex flex-col gap-1.5">
             <span class="text-[13px] font-semibold text-muted">Step {{ index + 1 }} of {{ steps.length }}</span>
-            <h1 class="text-[32px] leading-tight font-bold">{{ info.title(lot?.name ?? 'your lot') }}</h1>
+            <h1 class="text-[32px] leading-tight font-bold">{{ info.title(lot?.name ?? 'your business') }}</h1>
             <p class="max-w-2xl text-[15px] text-muted">{{ info.intro }}</p>
         </div>
 
@@ -110,7 +110,7 @@ const submitForm = useForm({});
 
                 <div v-else-if="step === 'submit'" class="flex flex-col gap-5">
                     <section v-if="verification" class="card flex flex-col gap-3 p-5" aria-labelledby="verify-heading">
-                        <h2 id="verify-heading" class="font-sans text-[16px] font-bold">Verified lot badge <span class="font-normal text-muted">(optional now)</span></h2>
+                        <h2 id="verify-heading" class="font-sans text-[16px] font-bold">Verified seller badge <span class="font-normal text-muted">(optional now)</span></h2>
                         <VerificationForm :lot-slug="lot.slug" :verification="verification" />
                     </section>
                     <div class="card flex flex-col gap-3 p-5">
@@ -126,7 +126,7 @@ const submitForm = useForm({});
                             <Icon name="check" class="text-success" :stroke-width="2.5" /> Opening hours set
                         </div>
                     </div>
-                    <p v-if="lot.submitted" class="rounded-xl bg-cream p-4 text-[14px] text-clay-dark">You've already submitted. We'll let you know when your lot is live.</p>
+                    <p v-if="lot.submitted" class="rounded-xl bg-cream p-4 text-[14px] text-clay-dark">You've already submitted. We'll let you know when your business is live.</p>
                     <div class="flex justify-between">
                         <Link :href="route('dealer.onboarding.show', [lot.slug, previous!])" class="btn btn-outline">Back</Link>
                         <button

@@ -27,11 +27,11 @@ const status = computed(
     () =>
         ({
             checking: 'Checking this device…',
-            'not-configured': 'Push notifications aren\'t switched on for LotLink yet.',
+            'not-configured': 'Push notifications aren\'t switched on for CarYard yet.',
             unsupported: 'This browser can\'t get push notifications. Try Chrome, Edge, Firefox or Safari over a secure (https) connection.',
-            'needs-install': 'On iPhone, add LotLink to your Home Screen first (Share → Add to Home Screen), open it from there, then turn this on.',
-            denied: 'Notifications are blocked for LotLink in this browser. Allow them in the site settings (the icon next to the address), then come back.',
-            off: 'Get alerts on this device the moment something happens, even when LotLink is closed. Free, and no data used when nothing happens.',
+            'needs-install': 'On iPhone, add CarYard to your Home Screen first (Share → Add to Home Screen), open it from there, then turn this on.',
+            denied: 'Notifications are blocked for CarYard in this browser. Allow them in the site settings (the icon next to the address), then come back.',
+            off: 'Get alerts on this device the moment something happens, even when CarYard is closed. Free, and no data used when nothing happens.',
             on: 'On for this device.',
         })[device.state.value],
 );

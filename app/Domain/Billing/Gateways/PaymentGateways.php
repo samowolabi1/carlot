@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * The payment providers LotLink can take its own payments through (Paystack, Flutterwave) and
+ * The payment providers CarYard can take its own payments through (Paystack, Flutterwave) and
  * which one new payments use: an admin picks it in /admin → Settings → Payments. A payment or
  * subscription always goes back to the provider that took it (`for($payment->provider)`), so
  * switching never strands refunds, cancellations or renewals.

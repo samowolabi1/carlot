@@ -10,13 +10,13 @@
         <x-slot name="heading">Details</x-slot>
         <dl style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
             <div>
-                <dt style="font-size: .75rem; opacity: .7;">Lot</dt>
+                <dt style="font-size: .75rem; opacity: .7;">Seller</dt>
                 <dd style="font-weight: 600;">
                     @if ($lot)
                         <a href="{{ \App\Filament\Resources\LotResource::getUrl('view', ['record' => $lot]) }}" style="text-decoration: underline;">{{ $lot->name }}</a>
                         <div style="font-weight: 400; font-size: .875rem;">{{ collect([$lot->city, $lot->phone])->filter()->implode(' · ') }}</div>
                     @else
-                        Deleted lot
+                        Deleted seller
                     @endif
                 </dd>
             </div>
@@ -63,11 +63,11 @@
                 compact
             >
                 <x-slot name="heading">
-                    {{ $message->author->name ?? ($message->from_admin ? 'LotLink Support' : 'Lot staff') }}
+                    {{ $message->author->name ?? ($message->from_admin ? 'CarYard Support' : 'Seller') }}
                     @if ($message->internal)
                         <x-filament::badge color="warning" style="display: inline-flex; margin-left: .375rem;">Internal note</x-filament::badge>
                     @elseif ($message->from_admin)
-                        <x-filament::badge color="primary" style="display: inline-flex; margin-left: .375rem;">LotLink</x-filament::badge>
+                        <x-filament::badge color="primary" style="display: inline-flex; margin-left: .375rem;">CarYard</x-filament::badge>
                     @endif
                 </x-slot>
                 <x-slot name="description">{{ $message->created_at->setTimezone('Africa/Lagos')->format('j M Y, g:ia') }}</x-slot>

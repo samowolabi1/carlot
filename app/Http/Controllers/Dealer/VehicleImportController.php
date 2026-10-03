@@ -45,7 +45,7 @@ class VehicleImportController extends Controller
     {
         Gate::authorize('update', $lot);
 
-        return Excel::download(new ImportTemplate, 'lotlink-stock-template.xlsx');
+        return Excel::download(new ImportTemplate, 'caryard-stock-template.xlsx');
     }
 
     public function store(Request $request, Lot $lot): RedirectResponse

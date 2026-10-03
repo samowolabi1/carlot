@@ -21,7 +21,7 @@ class CaptureLead
 {
     /**
      * CaptureLead (TDD M11): every enquiry becomes a lead, de-duplicated by lot, buyer and
-     * car within 30 days, and the buyer lands in the lot's customer book (matched by phone).
+     * car within 30 days, and the buyer lands in the seller's customer book (matched by phone).
      */
     public function run(Lot $lot, User $customer, LeadSource $source, ?Vehicle $vehicle = null): Lead
     {

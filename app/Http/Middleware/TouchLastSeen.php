@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Records when a signed-in person last used LotLink (web or app), at most every 15 minutes,
+ * Records when a signed-in person last used CarYard (web or app), at most every 15 minutes,
  * for the "haven't signed in for a while" emails and admin reports. A plain update: no events.
  */
 class TouchLastSeen
@@ -18,7 +18,7 @@ class TouchLastSeen
         $response = $next($request);
 
         $user = $request->user() ?? $request->user('sanctum');
-        // An admin's "Log in as" isn't the person using LotLink.
+        // An admin's "Log in as" isn't the person using CarYard.
         if ($user !== null && $request->hasSession() && Impersonation::active()) {
             return $response;
         }

@@ -66,7 +66,7 @@ const tone: Record<string, string> = {
         <div class="flex flex-wrap items-end justify-between gap-3">
             <div>
                 <h1 class="text-[30px] font-bold">Help & support</h1>
-                <p class="text-[14px] text-muted">Message the LotLink team about anything: billing, listings, bookings, payouts or something that isn't working.</p>
+                <p class="text-[14px] text-muted">Message the CarYard team about anything: billing, listings, bookings, payouts or something that isn't working.</p>
             </div>
             <button v-if="!composing" type="button" class="btn btn-primary h-11" @click="composing = true"><Icon name="plus" :size="18" /> New ticket</button>
         </div>
@@ -144,13 +144,13 @@ const tone: Record<string, string> = {
                                 </button>
                             </span>
                         </div>
-                        <span class="text-[12px] text-muted">Up to {{ props.form.max_mb }} MB. Only your team and LotLink Support can open it.</span>
+                        <span class="text-[12px] text-muted">Up to {{ props.form.max_mb }} MB. Only your team and CarYard Support can open it.</span>
                         <InputError :message="form.errors.attachment" />
                     </div>
 
                     <div class="flex gap-2">
                         <button type="submit" class="btn btn-primary h-11" :disabled="form.processing">
-                            <Icon name="send" :size="18" /> {{ form.processing ? 'Sending…' : 'Send to LotLink' }}
+                            <Icon name="send" :size="18" /> {{ form.processing ? 'Sending…' : 'Send to CarYard' }}
                         </button>
                     </div>
                 </form>
@@ -179,7 +179,7 @@ const tone: Record<string, string> = {
                 </div>
 
                 <p v-if="counts.waiting && filter === 'active'" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">
-                    LotLink is waiting for your reply on {{ counts.waiting }} {{ counts.waiting === 1 ? 'ticket' : 'tickets' }}.
+                    CarYard is waiting for your reply on {{ counts.waiting }} {{ counts.waiting === 1 ? 'ticket' : 'tickets' }}.
                 </p>
 
                 <div v-if="!tickets.data.length" class="card flex flex-col items-center gap-2 p-10 text-center">

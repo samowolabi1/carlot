@@ -15,7 +15,7 @@ enum TicketPriority: string
             self::Low => 'Low: whenever you can',
             self::Normal => 'Normal',
             self::High => 'High: affecting sales',
-            self::Urgent => 'Urgent: lot can\'t work',
+            self::Urgent => 'Urgent: seller can\'t work',
         };
     }
 

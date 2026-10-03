@@ -69,7 +69,7 @@ function sent() {
 
                 <p class="flex gap-2 rounded-xl bg-map px-3.5 py-3 text-[13px] text-forest">
                     <Icon name="shield" :size="18" class="shrink-0" />
-                    <span>You pay {{ lot.name }} directly; LotLink never takes payment for cars. Check the account name matches the lot, and never pay anyone who contacts you with different details.</span>
+                    <span>You pay {{ lot.name }} directly; CarYard never takes payment for cars. Check the account name matches the seller, and never pay anyone who contacts you with different details.</span>
                 </p>
 
                 <button v-if="!reservation.sent" type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="sending" @click="sent">

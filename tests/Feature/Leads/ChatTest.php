@@ -80,7 +80,7 @@ it('shows the thread to the buyer and keeps it private', function () {
     $this->actingAs($this->owner)->getJson(route('conversations.poll', $conversation))->assertOk()->assertJsonCount(1, 'messages');
 });
 
-it('moves a new lead to contacted and assigns it when the lot first replies', function () {
+it('moves a new lead to contacted and assigns it when the seller first replies', function () {
     $conversation = ($this->start)(['body' => 'Hello']);
     $lead = Lead::withoutGlobalScopes()->sole();
     $this->travel(3)->minutes();
@@ -103,7 +103,7 @@ it('moves a new lead to contacted and assigns it when the lot first replies', fu
     expect($conversation->fresh()->unreadFor(Message::CUSTOMER))->toBe(0);
 });
 
-it('sends preset replies with the lot location and similar cars', function () {
+it('sends preset replies with the seller location and similar cars', function () {
     ($this->start)(['body' => 'Where are you?']);
     $lead = Lead::withoutGlobalScopes()->sole();
     $this->actingAs($this->owner)->post(route('dealer.leads.messages.store', [$this->lot, $lead]), ['preset' => 'similar'])->assertSessionHasErrors('preset');
@@ -128,7 +128,7 @@ it('re-encodes chat photos and keeps them off the original upload', function () 
     Storage::disk(config('lotlink.media_disk'))->assertExists($message->attachment_path);
 });
 
-it('counts unread messages for the buyer and the lot badge', function () {
+it('counts unread messages for the buyer and the seller badge', function () {
     $conversation = ($this->start)(['body' => 'Hello']);
     $lead = Lead::withoutGlobalScopes()->sole();
 
@@ -159,7 +159,7 @@ it('texts the other side once when a message stays unread for 10 minutes', funct
     expect($sent)->toHaveCount(1)
         ->and($sent[0]->params)->toBe(['Chioma Okafor', 'Is the price negotiable?']);
 
-    // The lot replies; the buyer doesn't read it.
+    // The seller replies; the buyer doesn't read it.
     $this->actingAs($this->owner)->post(route('dealer.leads.messages.store', [$this->lot, Lead::withoutGlobalScopes()->sole()]), ['body' => 'A little']);
     $this->travel(11)->minutes();
     $this->artisan('chat:notify-unread');

@@ -40,7 +40,7 @@ it('shows the offer sheet with similar listings', function () {
         ->assertInertia(fn (Assert $page) => $page->where('deals.offers', true));
 });
 
-it('takes an offer, captures a lead and tells the lot', function () {
+it('takes an offer, captures a lead and tells the seller', function () {
     ($this->offer)()->assertRedirect(route('bookings.index').'#offers');
 
     $offer = Offer::withoutGlobalScopes()->sole();
@@ -60,7 +60,7 @@ it('keeps offers between half and the full asking price', function () {
     ($this->offer)('6,250,000')->assertSessionHasNoErrors();
 });
 
-it('only takes offers where the lot and the car allow them', function () {
+it('only takes offers where the seller and the car allow them', function () {
     $this->lot->update(['plan_id' => Plan::where('code', 'starter')->value('id')]);
     ($this->offer)()->assertSessionHasErrors(['amount' => 'This car is not taking offers.']);
     $this->actingAs($this->buyer)->get(route('offers.create', $this->car->ulid))->assertNotFound();
@@ -73,7 +73,7 @@ it('only takes offers where the lot and the car allow them', function () {
     ($this->offer)()->assertSessionHasErrors('amount');
 
     $this->car->update(['negotiable' => true]);
-    ($this->offer)('11,800,000', $this->owner)->assertSessionHasErrors(['amount' => 'You work at this lot.']);
+    ($this->offer)('11,800,000', $this->owner)->assertSessionHasErrors(['amount' => 'You work for this seller.']);
 });
 
 it('replaces the buyer\'s open offer with a new one', function () {
@@ -83,7 +83,7 @@ it('replaces the buyer\'s open offer with a new one', function () {
     expect(Offer::withoutGlobalScopes()->orderBy('id')->pluck('status')->all())->toBe([OfferStatus::Withdrawn, OfferStatus::Pending]);
 });
 
-it('lets the lot accept, which moves the lead to negotiating and tells the buyer', function () {
+it('lets the seller accept, which moves the lead to negotiating and tells the buyer', function () {
     ($this->offer)();
     $offer = Offer::withoutGlobalScopes()->sole();
 
@@ -152,7 +152,7 @@ it('expires offers nobody answered after 48 hours', function () {
     $this->actingAs($this->owner)->post(route('dealer.offers.respond', [$this->lot, $offer]), ['action' => 'accept'])->assertSessionHasErrors('offer');
 });
 
-it('shows offers on the lot\'s page with a nudge for old stock', function () {
+it('shows offers on the seller\'s page with a nudge for old stock', function () {
     $this->car->forceFill(['listed_at' => now()->subDays(92)])->save();
     ($this->offer)();
 

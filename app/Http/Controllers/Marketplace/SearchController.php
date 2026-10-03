@@ -24,7 +24,7 @@ class SearchController extends Controller
 
         return self::render($request, $search, $criteria, [], [
             'title' => self::title($criteria),
-            'description' => 'Browse cars for sale at car lots near you on LotLink: compare prices, check what you can afford and get directions to the lot.',
+            'description' => 'Browse cars for sale at sellers near you on CarYard: compare prices, check what you can afford and get directions to the seller.',
             'robots' => $request->hasAny(['page', 'lat', 'sort']) ? 'noindex, follow' : null,
         ]);
     }
@@ -46,7 +46,7 @@ class SearchController extends Controller
             // Up to 3 spotlighted cars matching the search, labelled "Sponsored" (TDD M5).
             'sponsored' => $search->sponsored($criteria)->map(fn (Vehicle $v) => MarketplacePresenter::card($v, $from, $savedIds))->values(),
             'lotCount' => $results->getCollection()->pluck('lot.slug')->unique()->count(),
-            // A lot's search banner that fits this search (make, body type or city), if any.
+            // A seller's search banner that fits this search (make, body type or city), if any.
             'banner' => AdServer::search($criteria),
             'filters' => $criteria->toArray(),
             'activeFilters' => $criteria->activeFilterCount(),

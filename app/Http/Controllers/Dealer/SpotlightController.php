@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Buying spotlights (TDD M5): a car for 7/14/30 days, or the lot in "Featured lots". */
+/** Buying spotlights (TDD M5): a car for 7/14/30 days, or the seller in "Featured lots". */
 class SpotlightController extends Controller
 {
     /** Prices and the free allowance, for the spotlight sheet. */

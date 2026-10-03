@@ -91,8 +91,8 @@ const tone: Record<string, string> = {
             </div>
         </div>
 
-        <p v-if="ticket.status === 'pending'" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">LotLink Support replied and is waiting for you.</p>
-        <p v-else-if="ticket.status === 'open'" class="rounded-xl bg-map px-4 py-3 text-[14px] text-forest" role="status">With LotLink Support. We'll reply here and let you know.</p>
+        <p v-if="ticket.status === 'pending'" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">CarYard Support replied and is waiting for you.</p>
+        <p v-else-if="ticket.status === 'open'" class="rounded-xl bg-map px-4 py-3 text-[14px] text-forest" role="status">With CarYard Support. We'll reply here and let you know.</p>
 
         <ol class="flex max-w-3xl flex-col gap-3" aria-label="Messages">
             <li v-for="m in messages" :key="m.ulid" class="flex flex-col gap-1" :class="m.mine ? 'items-end' : 'items-start'">
@@ -119,7 +119,7 @@ const tone: Record<string, string> = {
         <form v-if="ticket.can_reply" class="card flex max-w-3xl flex-col gap-3 p-4" @submit.prevent="send">
             <label class="field-label">
                 {{ ticket.status === 'resolved' ? 'Still need help? Reply to reopen it' : 'Reply' }}
-                <textarea v-field="{ kind: 'text', max: 5000 }" v-model="form.body" rows="4" class="field h-auto py-2.5" placeholder="Write to LotLink Support" required />
+                <textarea v-field="{ kind: 'text', max: 5000 }" v-model="form.body" rows="4" class="field h-auto py-2.5" placeholder="Write to CarYard Support" required />
                 <InputError :message="form.errors.body" />
             </label>
             <input ref="file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only" tabindex="-1" aria-hidden="true" @change="pick" />

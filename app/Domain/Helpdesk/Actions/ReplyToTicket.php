@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * The only way to add a message to a ticket. A lot's reply puts the ticket back with LotLink
- * (reopening a resolved one); an admin's reply puts it with the lot, unless it is an internal
- * note, which the lot never sees and which changes nothing.
+ * The only way to add a message to a ticket. A seller's reply puts the ticket back with CarYard
+ * (reopening a resolved one); an admin's reply puts it with the seller, unless it is an internal
+ * note, which the seller never sees and which changes nothing.
  */
 class ReplyToTicket
 {
@@ -48,7 +48,7 @@ class ReplyToTicket
 
     /**
      * @param  UploadedFile|array{attachment_path: string, attachment_name: string|null}|null  $attachment  an upload, or a file the admin panel already stored on the private disk
-     * @param  TicketStatus|null  $then  status after the reply; defaults to waiting on the lot
+     * @param  TicketStatus|null  $then  status after the reply; defaults to waiting on the seller
      */
     public function fromAdmin(SupportTicket $ticket, User $admin, string $body, UploadedFile|array|null $attachment = null, bool $internal = false, ?TicketStatus $then = null): SupportMessage
     {
@@ -73,7 +73,7 @@ class ReplyToTicket
                     'assigned_to' => $ticket->assigned_to ?? $admin->id,
                     'last_message_at' => now(),
                     'admin_read_at' => now(),
-                    'lot_read_at' => null, // unread for the lot until someone opens it
+                    'lot_read_at' => null, // unread for the seller until someone opens it
                 ]);
             }
 

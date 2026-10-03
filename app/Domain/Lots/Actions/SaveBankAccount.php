@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Adds, edits, removes and picks the default bank account a lot shares with customers.
+ * Adds, edits, removes and picks the default bank account a seller shares with customers.
  * Money goes where these say, so every change is audit-logged and the owner and managers are told.
  */
 class SaveBankAccount

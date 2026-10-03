@@ -21,8 +21,8 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * An admin signs up a lot for its owner (field sales, phone calls): the owner's account (found or
- * made from their email or WhatsApp number, whichever they'll sign in with), the lot, and a welcome
+ * An admin signs up a seller for its owner (field sales, phone calls): the owner's account (found or
+ * made from their email or WhatsApp number, whichever they'll sign in with), the seller, and a welcome
  * telling them how to sign in. The owner finishes the profile, photos and bank details themselves.
  */
 class OnboardLot
@@ -91,7 +91,7 @@ class OnboardLot
         $owner = User::query()->where($field, $value)->first();
 
         if ($owner?->isAdmin()) {
-            throw ValidationException::withMessages([$field === 'email' ? 'email' : 'phone' => 'That is a LotLink admin account. Use the owner\'s own email or number.']);
+            throw ValidationException::withMessages([$field === 'email' ? 'email' : 'phone' => 'That is a CarYard admin account. Use the owner\'s own email or number.']);
         }
 
         if ($owner === null) {
@@ -125,14 +125,14 @@ class OnboardLot
                 $used = $this->messenger->send($phone, new Message(
                     template: 'lot_welcome',
                     params: [(string) $owner->name, $lot->name],
-                    text: "Hi {$owner->name}, {$lot->name} is set up on LotLink. Sign in with this WhatsApp number to add your cars: {$url}",
+                    text: "Hi {$owner->name}, {$lot->name} is set up on CarYard. Sign in with this WhatsApp number to add your cars: {$url}",
                     buttonSuffix: Message::suffix($url),
                 ), preferWhatsApp: true, smsFallback: false);
 
                 return $used !== 'off';
             }
         } catch (Throwable $e) {
-            Log::warning("Welcome message for lot {$lot->id} failed: {$e->getMessage()}");
+            Log::warning("Welcome message for seller {$lot->id} failed: {$e->getMessage()}");
         }
 
         return false;

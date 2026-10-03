@@ -35,7 +35,7 @@ it('hides past times and anything inside the minimum notice', function () {
         ->and($today['11:00']['available'])->toBeTrue();
 });
 
-it('closes days on the lot\'s closure list', function () {
+it('closes days on the seller\'s closure list', function () {
     LotClosure::withoutGlobalScopes()->create(['lot_id' => $this->lot->id, 'date' => '2026-10-06', 'reason' => 'Stock-taking']);
 
     expect($this->slots->days($this->lot->fresh())[1])->closed->toBeTrue()->slots->toBe([]);

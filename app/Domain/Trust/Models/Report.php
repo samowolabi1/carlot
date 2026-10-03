@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * A user's report on a listing, lot, review or chat message (TDD M14). Read only in the admin
- * panel, so it is not lot-scoped; `lot_id` is the lot the content belongs to.
+ * panel, so it is not lot-scoped; `lot_id` is the seller the content belongs to.
  *
  * @property int $id
  * @property string $ulid

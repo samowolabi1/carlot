@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-/** To the lot's team: a new offer, trade-in or paid reservation (TDD matrix: in-app for dealers). */
+/** To the seller's team: a new offer, trade-in or paid reservation (TDD matrix: in-app for sellers). */
 class DealAlert extends Notification implements ShouldQueue
 {
     use Queueable;

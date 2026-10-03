@@ -20,7 +20,7 @@ class AnswerCounterOffer
 {
     public function __construct(private readonly DealTimeline $timeline) {}
 
-    /** The buyer takes or turns down the lot's counter-offer (design 19). */
+    /** The buyer takes or turns down the seller's counter-offer (design 19). */
     public function run(Offer $offer, User $customer, bool $accept): Offer
     {
         $offer = DB::transaction(function () use ($offer, $customer, $accept): Offer {

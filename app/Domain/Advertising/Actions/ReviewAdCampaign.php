@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * An admin checks a paid advert (images and words are the lot's own). Approving schedules it from
+ * An admin checks a paid advert (images and words are the seller's own). Approving schedules it from
  * the date asked for (or from now, so no days are lost, or from the next free slot); rejecting
  * refunds it; removing takes a running advert down.
  */

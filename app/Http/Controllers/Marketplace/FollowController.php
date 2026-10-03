@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Follow a lot for new stock (TDD M5). */
+/** Follow a seller for new stock (TDD M5). */
 class FollowController extends Controller
 {
     public function index(Request $request): Response
@@ -19,7 +19,7 @@ class FollowController extends Controller
         return Inertia::render('Account/Following', [
             'lots' => $request->user()->followedLots()->where('status', LotStatus::Active)->orderBy('name')->get()
                 ->map(fn (Lot $lot) => [...collect(MarketplacePresenter::lot($lot))->only(['slug', 'url', 'name', 'initials', 'logo_url', 'city', 'verified'])->all()]),
-        ])->withViewData(['meta' => ['title' => 'Lots I follow', 'robots' => 'noindex']]);
+        ])->withViewData(['meta' => ['title' => 'Sellers I follow', 'robots' => 'noindex']]);
     }
 
     public function store(Request $request, Lot $lot): RedirectResponse

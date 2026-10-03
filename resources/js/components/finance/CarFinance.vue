@@ -24,7 +24,7 @@ const loan = computed(() => loanFor(props.finance.price, depositPercent.value, m
     <section class="card flex flex-col gap-4 p-4" aria-labelledby="loan-heading">
         <div class="flex flex-col gap-1">
             <h2 id="loan-heading" class="font-sans text-[16px] font-bold">Pay monthly</h2>
-            <p class="text-[13px] text-muted">If you buy with a loan or the lot's instalment plan. Rates vary by lender.</p>
+            <p class="text-[13px] text-muted">If you buy with a loan or the seller's instalment plan. Rates vary by lender.</p>
         </div>
 
         <label class="flex flex-col gap-1.5 text-[13px] font-semibold">

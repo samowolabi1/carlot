@@ -46,7 +46,7 @@ beforeEach(function () {
     $this->approve = fn (AdCampaign $c) => app(ReviewAdCampaign::class)->approve($c, $this->admin);
 });
 
-it('books a homepage banner: paid to LotLink, then checked before it runs', function () {
+it('books a homepage banner: paid to CarYard, then checked before it runs', function () {
     Notification::fake();
 
     ($this->book)()->assertStatus(409); // Inertia::location to the checkout
@@ -81,7 +81,7 @@ it('books a homepage banner: paid to LotLink, then checked before it runs', func
         ->where('banners.0.lot', 'Prime Motors')
         ->missing('banners.0.id'));
 
-    // It's a lot payment: on the Billing page and in the invoices.
+    // It's a seller payment: on the Billing page and in the invoices.
     $this->actingAs($this->owner)->get(route('dealer.billing', $this->lot))->assertInertia(fn (Assert $page) => $page->has('payments', 1));
 
     // Stops showing when the week is up.
@@ -90,7 +90,7 @@ it('books a homepage banner: paid to LotLink, then checked before it runs', func
     $this->get(route('home'))->assertInertia(fn (Assert $page) => $page->has('banners', 0));
 });
 
-it('counts views and clicks once per visit, not for bots or the lot\'s own staff', function () {
+it('counts views and clicks once per visit, not for bots or the seller\'s own staff', function () {
     ($this->book)(['vehicle' => $this->camry->ulid, 'image' => null, 'cta' => 'view_car']);
     ($this->pay)();
     $campaign = AdCampaign::withoutGlobalScopes()->sole();
@@ -114,7 +114,7 @@ it('counts views and clicks once per visit, not for bots or the lot\'s own staff
         ->where('campaigns.0.ctr', 100));
 });
 
-it('refunds and tells the lot when an advert is rejected', function () {
+it('refunds and tells the seller when an advert is rejected', function () {
     Notification::fake();
     ($this->book)();
     ($this->pay)();
@@ -161,7 +161,7 @@ it('shows the search banner that fits the search', function () {
     $this->get(route('cars.index'))->assertInertia(fn (Assert $page) => $page->where('banner', null));
 });
 
-it('keeps booking to owners and managers, and each lot sees only its own adverts', function () {
+it('keeps booking to owners and managers, and each seller sees only its own adverts', function () {
     $sales = User::factory()->staff()->create();
     $this->lot->members()->attach($sales, ['role' => LotRole::Sales->value, 'accepted_at' => now()]);
     $this->actingAs($sales)->get(route('dealer.ads.index', $this->lot))->assertForbidden();

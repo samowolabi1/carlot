@@ -27,7 +27,7 @@ it('offers only choices that have cars on sale, each with how many', function ()
 
     expect(collect($o['makes'])->pluck('count', 'name')->all())->toBe(['Honda' => 1, 'Toyota' => 2])
         ->and(collect($o['models'])->pluck('name')->all())->toBe(['Accord', 'Camry', 'RAV4'])
-        ->and(collect($o['body_types'])->pluck('count', 'value')->all())->toBe(['sedan' => 2, 'suv' => 1]) // no pickup: that lot isn't live
+        ->and(collect($o['body_types'])->pluck('count', 'value')->all())->toBe(['sedan' => 2, 'suv' => 1]) // no pickup: that seller isn't live
         ->and(collect($o['colours'])->pluck('count', 'value')->all())->toBe(['silver' => 2, 'black' => 1]) // "Silver" and "silver " together
         ->and(collect($o['drivetrains'])->pluck('value')->all())->toBe(['fwd', 'awd'])
         ->and(collect($o['states'])->pluck('count', 'label')->all())->toBe(['FCT (Abuja)' => 1, 'Lagos' => 2])

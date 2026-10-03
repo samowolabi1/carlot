@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * A message (and optional document, e.g. a payslip or ID) between the buyer and the lender on one application.
- * Files go on the private disk behind signed links; the lot never sees any of it. The other side is told.
+ * Files go on the private disk behind signed links; the seller never sees any of it. The other side is told.
  */
 class SendFinanceMessage
 {

@@ -7,7 +7,7 @@ use App\Domain\Audit\AuditLog;
 use App\Domain\Trust\Enums\ReportStatus;
 use App\Domain\Trust\Models\Report;
 
-/** Closes a report on a lot or a chat message once an admin has dealt with it. */
+/** Closes a report on a seller or a chat message once an admin has dealt with it. */
 class ResolveReport
 {
     public function run(Report $report, User $admin, ReportStatus $status): void

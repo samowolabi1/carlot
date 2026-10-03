@@ -14,7 +14,7 @@ const mode = ref<'code' | 'password'>(props.method === 'password' ? 'password' :
 const form = useForm({ method: props.method === 'email' ? 'email' : 'whatsapp', phone: '', email: '' });
 const passwordForm = useForm({ login: '', password: '' });
 const showPassword = ref(false);
-// "Keep me signed in for a week": a remember cookie that lasts 7 days. Off: signed out after 2 hours without using LotLink.
+// "Keep me signed in for a week": a remember cookie that lasts 7 days. Off: signed out after 2 hours without using CarYard.
 const remember = ref(true);
 const googleHref = computed(() => route('login.google', remember.value ? { remember: 1 } : {}));
 const phoneInput = ref<HTMLInputElement | null>(null);
@@ -146,12 +146,12 @@ function submitPassword() {
 
         <div class="mt-auto flex flex-col gap-3.5 pt-6">
             <div class="flex flex-col gap-1.5 rounded-2xl bg-forest p-4 text-white">
-                <span class="text-[15px] font-semibold">Own a car lot?</span>
-                <span class="text-[13px] text-mist">Sign in the same way, then put your stock online, take bookings and share cars in one tap. Lots in every state in Nigeria are welcome.</span>
-                <Link :href="route('dealer.home')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-peach hover:text-white">List your lot</Link>
+                <span class="text-[15px] font-semibold">Selling cars?</span>
+                <span class="text-[13px] text-mist">Sign in the same way, then put your stock online, take bookings and share cars in one tap. Sellers in every state in Nigeria are welcome.</span>
+                <Link :href="route('dealer.home')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-peach hover:text-white">Start selling</Link>
             </div>
             <p class="text-center text-[12px] text-muted">
-                By continuing you agree to LotLink's <Link :href="route('legal.show', 'terms')">Terms of Use</Link> and
+                By continuing you agree to CarYard's <Link :href="route('legal.show', 'terms')">Terms of Use</Link> and
                 <Link :href="route('legal.show', 'privacy')">Privacy Policy</Link>, and confirm you're 18 or older.
             </p>
         </div>

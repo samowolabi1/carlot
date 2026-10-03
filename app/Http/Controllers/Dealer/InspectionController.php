@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** "Add inspection report" for a car in stock (TDD M14, dealer API /vehicles/{v}/inspection). */
+/** "Add inspection report" for a car in stock (TDD M14, seller API /vehicles/{v}/inspection). */
 class InspectionController extends Controller
 {
     public function create(Lot $lot, Vehicle $vehicle): Response

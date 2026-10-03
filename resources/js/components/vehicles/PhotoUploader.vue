@@ -53,7 +53,7 @@ const TIPS = [
     { title: 'Good light', text: 'Daylight or shade. Avoid night shots and harsh midday glare.' },
     { title: 'Clean and clear', text: 'Wash the car and move other cars, people and clutter out of the shot.' },
     { title: 'Fill the frame', text: 'Stand about 3 steps back for outside shots; get close for the odometer.' },
-    { title: 'Be honest', text: 'Show scratches or dents. Buyers trust lots that do, and it saves wasted visits.' },
+    { title: 'Be honest', text: 'Show scratches or dents. Buyers trust sellers who do, and it saves wasted visits.' },
 ];
 
 const items = ref<Item[]>(props.initial.map(fromServer));

@@ -2,7 +2,7 @@
 @section('title', 'Enter your code')
 @section('content')
     <h1 class="text-[22px] font-bold">Enter your code</h1>
-    <p class="text-[14px] text-muted">Open your authenticator app and enter the 6-digit code for LotLink Admin, or one of your recovery codes.</p>
+    <p class="text-[14px] text-muted">Open your authenticator app and enter the 6-digit code for CarYard Admin, or one of your recovery codes.</p>
     <form method="POST" action="{{ route('admin.2fa.verify') }}" class="flex flex-col gap-2">
         @csrf
         <label class="field-label">Code

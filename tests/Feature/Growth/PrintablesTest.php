@@ -16,7 +16,7 @@ beforeEach(function () {
     $this->car($this->lot, 'Honda', 'Accord');
 });
 
-it('shows the mini-site and QR page to the lot\'s team', function () {
+it('shows the mini-site and QR page to the seller\'s team', function () {
     $this->actingAs($this->owner)->get(route('dealer.minisite', $this->lot))->assertInertia(fn (Assert $page) => $page
         ->component('Dealer/MiniSite')->where('site.url', route('lots.show', $this->lot))->where('stickers', 2));
 

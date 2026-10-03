@@ -25,7 +25,7 @@ beforeEach(function () {
     $this->browser = ['HTTP_USER_AGENT' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/604.1'];
 });
 
-it('counts a view once per visitor in 30 minutes, and skips bots and the lot\'s own staff', function () {
+it('counts a view once per visitor in 30 minutes, and skips bots and the seller\'s own staff', function () {
     $this->get(route('cars.show', $this->carPath), $this->browser)->assertOk();
     $this->get(route('cars.show', $this->carPath), $this->browser)->assertOk();
     $this->get(route('cars.show', $this->carPath), ['HTTP_USER_AGENT' => 'WhatsApp/2.23.20.0'])->assertOk();

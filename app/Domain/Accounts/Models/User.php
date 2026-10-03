@@ -177,7 +177,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         return true;
     }
 
-    /** "Forgot your password?" link, in LotLink's words and with our reset page. */
+    /** "Forgot your password?" link, in CarYard's words and with our reset page. */
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
     {
         $this->notify(new ResetPasswordLink($token));

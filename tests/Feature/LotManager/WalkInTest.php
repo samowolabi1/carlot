@@ -41,7 +41,7 @@ it('matches a returning visitor by phone however it is typed', function () {
         ->and(WalkIn::withoutGlobalScopes()->count())->toBe(2);
 });
 
-it('links a customer who already has a LotLink account', function () {
+it('links a customer who already has a CarYard account', function () {
     $buyer = User::factory()->create(['phone' => '+2348035550101']);
 
     ($this->walkIn)();
@@ -59,7 +59,7 @@ it('creates a call-back task for the next working day at 10:00', function () {
         ->and($task->note)->toBe('Wants a Camry');
 });
 
-it('records the cars they looked at from this lot only', function () {
+it('records the cars they looked at from this seller only', function () {
     $mine = Vehicle::factory()->available()->create(['lot_id' => $this->lot->id]);
     $theirs = Vehicle::factory()->available()->create();
 

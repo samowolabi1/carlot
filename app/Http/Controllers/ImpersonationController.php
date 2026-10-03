@@ -11,7 +11,7 @@ class ImpersonationController extends Controller
 {
     /**
      * A full page load, not an Inertia visit: /admin isn't an Inertia page, and following the
-     * redirect inside Inertia showed the admin panel in a pop-up over the dealer's page.
+     * redirect inside Inertia showed the admin panel in a pop-up over the seller's page.
      */
     public function destroy(Impersonation $impersonation): Response
     {

@@ -137,7 +137,7 @@ class LeadController extends Controller
         return back()->with('success', 'Note added.');
     }
 
-    /** The lot's reply, or a quick action: send the lot's location, its bank details, similar cars or the car's inspection report. */
+    /** The seller's reply, or a quick action: send the seller's location, its bank details, similar cars or the car's inspection report. */
     public function message(Request $request, Lot $lot, Lead $lead, SendMessage $send): RedirectResponse
     {
         $data = $request->validate([
@@ -149,10 +149,10 @@ class LeadController extends Controller
         $body = match ($data['preset'] ?? null) {
             'location' => $lot->directionsUrl()
                 ? "Here's how to find us: {$lot->name}".($lot->address ? ", {$lot->address}" : '').'. Directions: '.$lot->directionsUrl()
-                : abort(422, 'Set your lot location in Settings first.'),
+                : abort(422, 'Set your business location in Settings first.'),
             'similar' => $this->similar($lot, $lead),
             'inspection' => $this->inspection($lot, $lead),
-            // Buyers pay the lot directly (LotLink never takes car payments).
+            // Buyers pay the seller directly (CarYard never takes car payments).
             'bank' => LotBankAccount::preferredFor($lot->id)?->shareText($lot->name)
                 ?? throw ValidationException::withMessages(['preset' => 'Add your bank details in Settings first.']),
             default => (string) ($data['body'] ?? ''),

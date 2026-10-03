@@ -100,7 +100,7 @@ Route::get('/cars', SearchController::class)->middleware('throttle:browse')->nam
 Route::get('/search/suggest', SuggestController::class)->middleware('throttle:suggest')->name('search.suggest');
 // SEO landing pages (M18): /cars/{city}, /cars/{make}/{model?}/{city?}
 Route::get('/cars/{first}/{second?}/{third?}', LandingController::class)->where(['first' => '[a-z0-9-]+', 'second' => '[a-z0-9-]+', 'third' => '[a-z0-9-]+'])->middleware('throttle:browse')->name('cars.landing');
-// Caddy on-demand TLS asks here before issuing a certificate for a lot's custom domain (M6).
+// Caddy on-demand TLS asks here before issuing a certificate for a seller's custom domain (M6).
 Route::get('/internal/domains/allowed', [DomainController::class, 'allowed'])->middleware('throttle:120,1')->name('domains.allowed');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
@@ -137,7 +137,7 @@ Route::get('/bookings/{appointment}', [CustomerBookingController::class, 'show']
 Route::get('/bookings/{appointment}/calendar.ics', [CustomerBookingController::class, 'calendar'])->name('bookings.calendar');
 Route::post('/bookings/{appointment}/cancel', [CustomerBookingController::class, 'cancel'])->middleware('throttle:10,1')->name('bookings.cancel');
 
-// Trade-in photos are private; the lot's team and the buyer get short-lived signed links.
+// Trade-in photos are private; the seller's team and the buyer get short-lived signed links.
 Route::get('/trade-ins/{tradeIn}/photos/{index}', [TradeInController::class, 'photo'])->whereNumber('index')->middleware('signed')->name('trade-ins.photo');
 
 // Reviews after a completed visit (M14): the buyer, or a signed link from the invite message.
@@ -150,7 +150,7 @@ Route::get('/inspections/{inspection}/report.pdf', InspectionReportController::c
 // Adverts lots buy (homepage and search banners): clicks and views, once per visit.
 Route::get('/ad/{campaign}', [AdController::class, 'click'])->middleware('throttle:browse')->name('ads.click');
 Route::post('/ad/{campaign}/seen', [AdController::class, 'seen'])->middleware('throttle:browse')->name('ads.seen');
-// Support ticket attachments: signed, and only for the lot's staff or admins.
+// Support ticket attachments: signed, and only for the seller's staff or admins.
 Route::get('/support/attachments/{message}', SupportAttachmentController::class)->middleware(['auth', 'signed'])->name('support.attachment');
 
 // Order tracking (M19). Signed links on receipts and messages; no sign-in needed.
@@ -182,7 +182,7 @@ Route::middleware('throttle:20,1')->group(function () {
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
 
-// Links in LotLink's messages to lots: click tracking, and the email unsubscribe link (signed, no sign-in).
+// Links in CarYard's messages to lots: click tracking, and the email unsubscribe link (signed, no sign-in).
 Route::get('/e/{message}', [EngagementController::class, 'click'])->middleware('throttle:60,1')->name('engagement.click');
 Route::get('/e/unsubscribe/{user:ulid}/{type}', [EngagementController::class, 'unsubscribe'])->middleware(['signed', 'throttle:20,1'])->name('engagement.unsubscribe');
 
@@ -408,7 +408,7 @@ Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(functio
             Route::post('/reviews/{review}/reply', [DealerReviewController::class, 'reply'])->name('reviews.reply');
             Route::get('/analytics', AnalyticsController::class)->name('analytics');
 
-            // Support desk: tickets with LotLink
+            // Support desk: tickets with CarYard
             Route::get('/support', [SupportController::class, 'index'])->name('support.index');
             Route::post('/support', [SupportController::class, 'store'])->middleware('throttle:10,60')->name('support.store');
             Route::get('/support/{supportTicket}', [SupportController::class, 'show'])->name('support.show');
@@ -425,7 +425,7 @@ Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(functio
             Route::post('/reservations/{reservation}/decline', [DealController::class, 'declineReservation'])->name('reservations.decline');
             Route::post('/reservations/{reservation}/refunded', [DealController::class, 'refundedReservation'])->name('reservations.refunded');
             Route::put('/settings/deals', [SettingsController::class, 'updateDeals'])->name('settings.deals');
-            // Bank details customers pay into (the lot is paid directly, never through LotLink)
+            // Bank details customers pay into (the seller is paid directly, never through CarYard)
             Route::post('/bank-accounts', [BankAccountController::class, 'store'])->middleware('throttle:20,60')->name('bank-accounts.store');
             Route::put('/bank-accounts/{bankAccount}', [BankAccountController::class, 'update'])->middleware('throttle:20,60')->name('bank-accounts.update');
             Route::delete('/bank-accounts/{bankAccount}', [BankAccountController::class, 'destroy'])->name('bank-accounts.destroy');
@@ -439,14 +439,14 @@ Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(functio
             Route::get('/billing/card', [BillingController::class, 'card'])->name('billing.card');
             Route::get('/billing/invoices/{billingPayment}', [BillingController::class, 'invoice'])->name('billing.invoice');
             Route::get('/spotlight/options', [SpotlightController::class, 'options'])->name('spotlight.options');
-            // Adverts (paid to LotLink, checked before they run)
+            // Adverts (paid to CarYard, checked before they run)
             Route::get('/advertise', [AdvertController::class, 'index'])->name('ads.index');
             Route::get('/advertise/new', [AdvertController::class, 'create'])->name('ads.create');
             Route::post('/advertise', [AdvertController::class, 'store'])->middleware('throttle:10,60')->name('ads.store');
             Route::post('/vehicles/{vehicle}/spotlight', [SpotlightController::class, 'car'])->name('vehicles.spotlight');
             Route::post('/spotlight/featured', [SpotlightController::class, 'featured'])->name('spotlight.featured');
 
-            // Lot Manager lite (M19) and sales (M13)
+            // Sales Manager lite (M19) and sales (M13)
             Route::prefix('/manager')->name('manager.')->group(function () {
                 Route::get('/today', TodayController::class)->name('today');
                 Route::get('/walk-ins', [WalkInController::class, 'index'])->name('walk-ins.index');
@@ -464,7 +464,7 @@ Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(functio
                 Route::get('/orders/{order}/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('orders.receipt');
                 Route::post('/payments/{payment}/void', [PaymentController::class, 'void'])->name('payments.void');
                 Route::patch('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
-                // Lot Manager Pro (M19): instalments, papers and handover, reports
+                // Sales Manager Pro (M19): instalments, papers and handover, reports
                 Route::put('/orders/{order}/instalments', [InstalmentController::class, 'update'])->name('orders.instalments.update');
                 Route::delete('/orders/{order}/instalments', [InstalmentController::class, 'destroy'])->name('orders.instalments.destroy');
                 Route::post('/orders/{order}/documents', [DocumentController::class, 'store'])->name('orders.documents.store');

@@ -23,7 +23,7 @@ beforeEach(function () {
     $this->start = fn (?User $as = null, int $minutes = 30) => $this->actingAs($as ?? $this->buyer)->post(route('location.start', $this->appointment), ['minutes' => $minutes]);
 });
 
-it('lets the buyer share for a while, and the lot follow along', function () {
+it('lets the buyer share for a while, and the seller follow along', function () {
     ($this->start)()->assertRedirect();
     $session = LocationSession::withoutGlobalScopes()->sole();
 
@@ -103,7 +103,7 @@ it('lets a team member share their location with the buyer', function () {
         ->and($this->whatsapp->to('+2348035550001', 'appointment_update')[0]->params[2])->toBe('Prime Motors is sharing their live location');
 
     $this->actingAs($this->buyer)->get(route('location.show', $session))->assertInertia(fn (Assert $page) => $page->where('role', 'viewer')->where('call.phone', '+2348021112233'));
-    // Another team member isn't the other side of a lot-shared session.
+    // Another team member isn't the other side of a seller-shared session.
     $this->actingAs($this->owner)->get(route('location.show', $session))->assertForbidden();
 });
 

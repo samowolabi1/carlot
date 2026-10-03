@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A lot's plan and where it stands with paying for it (TDD M16). One row per lot; the
+ * A seller's plan and where it stands with paying for it (TDD M16). One row per lot; the
  * payments table holds the history.
  *
  * @property int $id

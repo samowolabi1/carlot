@@ -75,7 +75,7 @@ it('charges new bookings the new price and keeps what was already booked', funct
 
     expect(AdCampaign::withoutGlobalScopes()->orderBy('id')->pluck('price')->all())->toBe([4_000_000, 5_000_000]);
 
-    // The dealer's page shows the new prices.
+    // The seller's page shows the new prices.
     $this->actingAs($owner)->get(route('dealer.ads.create', $lot))->assertInertia(fn ($page) => $page->where('placements.0.options.0.price', 50000));
 });
 

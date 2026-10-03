@@ -34,7 +34,7 @@ it('lets an Enterprise lot add its domain, prove it with DNS and serve the mini-
     $this->get('/internal/domains/allowed?domain=cars.primemotors.ng')->assertNotFound();
 
     $this->actingAs($this->owner)->post(route('dealer.domain.verify', $this->lot))->assertSessionHas('error');
-    $this->dns->records['_lotlink.cars.primemotors.ng'] = ['"lotlink-verify='.$lot->domain_token.'"'];
+    $this->dns->records['_caryard.cars.primemotors.ng'] = ['"caryard-verify='.$lot->domain_token.'"'];
     $this->actingAs($this->owner)->post(route('dealer.domain.verify', $this->lot))->assertSessionHas('success');
 
     expect($this->lot->fresh()->domain_verified_at)->not->toBeNull();

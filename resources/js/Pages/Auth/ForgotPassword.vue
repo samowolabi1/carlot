@@ -25,7 +25,7 @@ function submit() {
 
         <div v-if="sentTo" class="flex gap-3 rounded-2xl bg-map p-4 text-[14px]" role="status">
             <Icon name="mail" :size="20" class="mt-0.5 shrink-0 text-forest" />
-            <span>If {{ sentTo }} has a LotLink account, we've sent a link to reset the password. Check your inbox and spam folder. The link expires in 60 minutes.</span>
+            <span>If {{ sentTo }} has a CarYard account, we've sent a link to reset the password. Check your inbox and spam folder. The link expires in 60 minutes.</span>
         </div>
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

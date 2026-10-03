@@ -23,7 +23,7 @@ class ActivateReservation
     public function __construct(private readonly VehicleStateMachine $stateMachine, private readonly DealTimeline $timeline) {}
 
     /**
-     * The lot confirms the buyer's transfer reached its account: the car is held for the hours
+     * The seller confirms the buyer's transfer reached its account: the car is held for the hours
      * the buyer chose. Other buyers' requests for the car lapse. Rows are locked, so two
      * confirmations can't both win.
      */

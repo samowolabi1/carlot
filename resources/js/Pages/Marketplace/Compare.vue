@@ -23,7 +23,7 @@ const rows: { key: string; label: string }[] = [
     { key: 'condition', label: 'Condition' },
     { key: 'duty', label: 'Duty' },
     { key: 'inspection', label: 'Inspection report' },
-    { key: 'lot', label: 'Lot' },
+    { key: 'lot', label: 'Seller' },
 ];
 
 function remove(ulid: string) {

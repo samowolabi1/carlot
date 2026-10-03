@@ -30,14 +30,14 @@ it('creates a code in capitals and checks its shape', function () {
         ->assertHasFormErrors(['code']);
 
     Livewire::test(CreateCoupon::class)
-        ->fillForm(['code' => ' kano-meetup ', 'plan_id' => $this->starter->id, 'trial_days' => 60, 'max_redemptions' => 10, 'note' => 'Kano dealer meetup'])
+        ->fillForm(['code' => ' kano-meetup ', 'plan_id' => $this->starter->id, 'trial_days' => 60, 'max_redemptions' => 10, 'note' => 'Kano seller meetup'])
         ->call('create')
         ->assertHasNoFormErrors();
 
     $coupon = Coupon::sole();
     expect($coupon->code)->toBe('KANO-MEETUP')
         ->and($coupon->active)->toBeTrue()
-        ->and($coupon->note)->toBe('Kano dealer meetup')
+        ->and($coupon->note)->toBe('Kano seller meetup')
         ->and(AuditLog::where('action', 'admin.coupon_created')->exists())->toBeTrue();
 
     ($this->redeem)('kano-meetup')->assertSessionHasNoErrors();

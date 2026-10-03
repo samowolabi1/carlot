@@ -37,7 +37,7 @@ const reasons: Record<Kind, { value: string; label: string }[]> = {
         { value: 'other', label: 'Something else' },
     ],
 };
-const nouns: Record<Kind, string> = { vehicle: 'this listing', lot: 'this lot', review: 'this review', message: 'this message' };
+const nouns: Record<Kind, string> = { vehicle: 'this listing', lot: 'this seller', review: 'this review', message: 'this message' };
 
 const { user } = useShared();
 const open = ref(false);
@@ -91,7 +91,7 @@ function submit() {
                     <button type="button" class="-mr-2 flex h-11 w-11 items-center justify-center" aria-label="Close" @click="close"><Icon name="close" :size="22" /></button>
                 </div>
                 <fieldset class="flex flex-col gap-2">
-                    <legend class="mb-2 text-[14px] text-muted">What's wrong? Our team checks every report; the lot isn't told who sent it.</legend>
+                    <legend class="mb-2 text-[14px] text-muted">What's wrong? Our team checks every report; the seller isn't told who sent it.</legend>
                     <label v-for="r in reasons[kind]" :key="r.value" class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3.5 text-[15px]" :class="form.reason === r.value ? 'border-forest bg-map' : 'border-line'">
                         <input v-model="form.reason" type="radio" name="reason" :value="r.value" class="h-4 w-4 accent-forest" />
                         {{ r.label }}

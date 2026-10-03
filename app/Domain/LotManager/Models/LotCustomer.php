@@ -15,8 +15,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 
 /**
- * One person in a lot's customer book, matched by phone across walk-ins, calls,
- * WhatsApp and online leads. Belongs to the lot (it is the data controller).
+ * One person in a seller's customer book, matched by phone across walk-ins, calls,
+ * WhatsApp and online leads. Belongs to the seller (it is the data controller).
  *
  * @property int $id
  * @property string $ulid

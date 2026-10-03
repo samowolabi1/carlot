@@ -50,7 +50,7 @@ class AuditLogResource extends Resource
                 Tables\Columns\TextColumn::make('action')->badge()->searchable(),
                 Tables\Columns\TextColumn::make('user.name')->label('By')->placeholder('System')
                     ->description(fn (AuditLog $l) => $l->impersonator ? 'Done by '.$l->impersonator->name.' (support, "Log in as")' : $l->user?->phone),
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->placeholder('—')->searchable(),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->placeholder('—')->searchable(),
                 Tables\Columns\TextColumn::make('subject_type')->label('Record')->formatStateUsing(fn (AuditLog $l) => $l->subject_type ? class_basename($l->subject_type).' #'.$l->subject_id : null)->placeholder('—')->toggleable(),
                 Tables\Columns\TextColumn::make('changes')->formatStateUsing(fn (AuditLog $l) => $l->changes ? json_encode($l->changes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null)->limit(80)->wrap()->placeholder('—'),
                 Tables\Columns\TextColumn::make('ip')->label('IP')->toggleable(isToggledHiddenByDefault: true),

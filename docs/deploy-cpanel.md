@@ -1,6 +1,6 @@
-# Deploying LotLink on cPanel
+# Deploying CarYard on cPanel
 
-LotLink runs on ordinary cPanel shared hosting. Nothing has to stay running in the background: the website is plain PHP,
+CarYard runs on ordinary cPanel shared hosting. Nothing has to stay running in the background: the website is plain PHP,
 and **one cron job** every minute runs the scheduler, which also processes the queue (photo processing, notifications,
 broadcasts). No Redis, no search server, no websocket server and no `storage:link` symlink are needed.
 
@@ -37,7 +37,7 @@ your local `.env` before building.
 3. **Database:** *MySQL Databases* → create a database and a user, and add the user to the database with **All Privileges**.
    MySQL 8 is recommended. MariaDB 10.6+ also works (the optional spatial index is skipped there), but our automated
    tests run on MySQL 8.
-4. **Email:** *Email Accounts* → create e.g. `no-reply@yourdomain.ng`. *Connect Devices* shows the SMTP host and port.
+4. **Email:** *Email Accounts* → create e.g. `no-reply@caryardng.com`. *Connect Devices* shows the SMTP host and port.
 5. **SSL:** *SSL/TLS Status* → run AutoSSL so the site is on `https://`.
 
 ## 3. Upload
@@ -90,11 +90,11 @@ Set these in each provider's dashboard once the site is live (replace the domain
 
 | Service | URL |
 |---|---|
-| Paystack webhook | `https://yourdomain.ng/webhooks/paystack` |
-| Flutterwave webhook | `https://yourdomain.ng/webhooks/flutterwave` |
+| Paystack webhook | `https://caryardng.com/webhooks/paystack` |
+| Flutterwave webhook | `https://caryardng.com/webhooks/flutterwave` |
 | WhatsApp (Meta) | templates listed in the README; no webhook needed for sending |
-| Google sign-in redirect | `https://yourdomain.ng/auth/google/callback` |
-| Lenders using their own API | `https://yourdomain.ng/webhooks/finance/{lender}` (shown in the lender's settings) |
+| Google sign-in redirect | `https://caryardng.com/auth/google/callback` |
+| Lenders using their own API | `https://caryardng.com/webhooks/finance/{lender}` (shown in the lender's settings) |
 
 Web push: run `php artisan push:vapid` once (writes the keys to `.env`), then `php artisan config:cache`.
 

@@ -71,7 +71,7 @@ it('only reviews completed visits, by the buyer who booked', function () {
     expect(Review::withoutGlobalScopes()->count())->toBe(0);
 });
 
-it('lets the lot reply once, and keeps replies to the lot\'s own team', function () {
+it('lets the seller reply once, and keeps replies to the seller\'s own team', function () {
     ($this->review)(($this->visit)());
     $review = Review::withoutGlobalScopes()->sole();
 
@@ -86,7 +86,7 @@ it('lets the lot reply once, and keeps replies to the lot\'s own team', function
     expect($review->fresh()->reply)->toBe('Thanks Tunde!');
     $this->get(route('lots.show', $this->lot))->assertInertia(fn (Assert $page) => $page->where('reviews.0.reply', 'Thanks Tunde!'));
 
-    // Another lot's reply route can't reach this lot's review (scoped bindings).
+    // Another lot's reply route can't reach this seller's review (scoped bindings).
     $otherLot = $other->lots()->first();
     $this->actingAs($other)->post(route('dealer.reviews.reply', [$otherLot, $review]), ['reply' => 'Hi'])->assertNotFound();
 });

@@ -9,6 +9,6 @@ withDefaults(defineProps<{ inverse?: boolean; size?: 'sm' | 'md' | 'lg' }>(), { 
             inverse ? 'text-white' : 'text-forest',
             { 'text-[22px]': size === 'sm', 'text-2xl': size === 'md', 'text-[26px]': size === 'lg' },
         ]"
-        >Lot<span :class="inverse ? 'text-clay-light' : 'text-clay'">Link</span></span
+        >Car<span :class="inverse ? 'text-clay-light' : 'text-clay'">Yard</span></span
     >
 </template>

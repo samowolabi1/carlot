@@ -100,7 +100,7 @@ function submit() {
                     Reserved by <strong>{{ car.reservation.by }}</strong>: their {{ car.reservation.deposit }} deposit is added to the order as a payment.
                 </p>
                 <p v-if="orderable.length === 0" class="text-[14px] text-muted">
-                    Only cars listed on LotLink can be ordered.
+                    Only cars listed on CarYard can be ordered.
                     <Link :href="route('dealer.vehicles.index', lot.slug)">List a car from your stock</Link>.
                 </p>
             </section>
@@ -170,7 +170,7 @@ function submit() {
                     </label>
                     <label v-if="form.trade_in" class="field-label">Trade-in value<input v-field="{ kind: 'money', min: 0 }" v-model="form.trade_in_value" class="field" inputmode="numeric" /><InputError :message="form.errors.trade_in_value" /></label>
                 </div>
-                <p class="text-[13px] text-muted">Instalment plans arrive with Lot Manager Pro.</p>
+                <p class="text-[13px] text-muted">Instalment plans arrive with Sales Manager Pro.</p>
                 <label class="field-label">Notes<textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.notes" class="field h-20 py-2.5" /></label>
             </section>
 

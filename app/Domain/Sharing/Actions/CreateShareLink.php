@@ -11,7 +11,7 @@ use App\Domain\Sharing\Models\ShareLink;
 class CreateShareLink
 {
     /**
-     * A tracked short link for a car or a lot (TDD M9). The same person sharing the same
+     * A tracked short link for a car or a seller (TDD M9). The same person sharing the same
      * thing to the same platform reuses one link, so counts aren't split. QR codes (on share
      * cards and stickers) share one link per car.
      */

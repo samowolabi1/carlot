@@ -47,7 +47,7 @@ function intent(source: 'whatsapp' | 'call') {
     if (user.value && !ownLot.value) recordIntent(source, { lot: props.lot.slug });
 }
 
-const whatsappHref = computed(() => (props.lot.whatsapp ? `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(`Hi ${props.lot.name}, I found you on LotLink.`)}` : null));
+const whatsappHref = computed(() => (props.lot.whatsapp ? `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(`Hi ${props.lot.name}, I found you on CarYard.`)}` : null));
 
 // Quick filters from the W4 design.
 const quick: { label: string; query: Partial<Filters> }[] = [
@@ -66,11 +66,11 @@ function filter(query: Partial<Filters>) {
 <template>
     <Head :title="lot.name" />
     <CustomerLayout :active="null" bare>
-        <div v-if="preview" class="bg-cream px-5 py-3 text-center text-[14px] text-clay-dark" role="status">Preview: your lot page goes public once LotLink approves your lot.</div>
+        <div v-if="preview" class="bg-cream px-5 py-3 text-center text-[14px] text-clay-dark" role="status">Preview: your seller page goes public once CarYard approves your business.</div>
 
         <div class="flex items-center justify-between border-b border-line bg-white px-5 py-2.5 text-[12px] text-muted">
             <span class="flex items-center gap-1.5">Powered by <Link :href="route('home')" class="inline-flex min-h-11 items-center no-underline"><Logo size="sm" /></Link></span>
-            <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[13px] font-semibold">Browse all lots</Link>
+            <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[13px] font-semibold">Browse all sellers</Link>
         </div>
 
         <header class="relative h-36 md:h-56" :style="{ background: lot.cover_url ? `url(${lot.cover_url}) center/cover` : brand }">
@@ -85,7 +85,7 @@ function filter(query: Partial<Filters>) {
                     <h1 class="flex items-center gap-1.5 text-[26px] font-bold md:text-4xl">
                         {{ lot.name }}
                         <Icon v-if="lot.verified" name="shield" :size="22" class="text-forest" :stroke-width="2" />
-                        <span v-if="lot.verified" class="sr-only">Verified lot</span>
+                        <span v-if="lot.verified" class="sr-only">Verified seller</span>
                     </h1>
                     <p v-if="lot.tagline" class="text-[15px] text-muted">{{ lot.tagline }}</p>
                     <p class="text-[14px] text-muted">
@@ -106,7 +106,7 @@ function filter(query: Partial<Filters>) {
                 <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" @click="intent('whatsapp')" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="whatsapp" :size="20" /> WhatsApp
                 </a>
-                <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" tile />
+                <ShareMenu :title="lot.name" :text="`${lot.name} on CarYard`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" tile />
             </div>
             <div v-if="!preview" class="mt-2.5 flex flex-col gap-2.5 md:flex-row md:items-center">
                 <Link :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
@@ -117,7 +117,7 @@ function filter(query: Partial<Filters>) {
                     :data="user ? { lot: lot.slug } : undefined"
                     :as="user ? 'button' : 'a'"
                     class="btn btn-outline w-full md:w-auto"
-                    ><Icon name="chat" :size="18" /> Message the lot</Link
+                    ><Icon name="chat" :size="18" /> Message the seller</Link
                 >
                 <Link
                     v-if="lot.trade_ins && !lots.some((l) => l.slug === lot.slug)"
@@ -139,7 +139,7 @@ function filter(query: Partial<Filters>) {
 
             <div class="mt-5 grid gap-6 pb-12 lg:grid-cols-[1fr_320px]">
                 <div class="flex min-w-0 flex-col gap-4">
-                    <div role="tablist" aria-label="Lot sections" class="flex gap-5 border-b border-line">
+                    <div role="tablist" aria-label="Seller sections" class="flex gap-5 border-b border-line">
                         <button type="button" role="tab" :aria-selected="tab === 'stock'" class="h-10 border-b-2 text-[15px]" :class="tab === 'stock' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'stock'">Stock ({{ total }})</button>
                         <button v-if="reviews.length" type="button" role="tab" :aria-selected="tab === 'reviews'" class="h-10 border-b-2 text-[15px]" :class="tab === 'reviews' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'reviews'">Reviews ({{ lot.reviews_count }})</button>
                         <button type="button" role="tab" :aria-selected="tab === 'about'" class="h-10 border-b-2 text-[15px] lg:hidden" :class="tab === 'about' ? 'border-clay font-semibold' : 'border-transparent text-muted'" @click="tab = 'about'">About</button>

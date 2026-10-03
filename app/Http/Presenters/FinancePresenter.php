@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\URL;
 
 /**
  * Car loan applications for the buyer and the lender. The lender sees what the buyer agreed to share; the buyer sees
- * their own. Neither shape ever goes to the lot (FinanceLeadNotice tells the lot the little it may know).
+ * their own. Neither shape ever goes to the seller (FinanceLeadNotice tells the seller the little it may know).
  */
 final class FinancePresenter
 {
@@ -112,7 +112,7 @@ final class FinancePresenter
                 'author' => match ($m->side) {
                     FinanceMessage::BUYER => $side === FinanceMessage::BUYER ? 'You' : ($m->user->name ?? 'Buyer'),
                     FinanceMessage::LENDER => $side === FinanceMessage::LENDER ? ($m->user->name ?? $lender?->name) : $lender?->name,
-                    default => 'LotLink',
+                    default => 'CarYard',
                 },
                 'body' => $m->body,
                 'file' => $m->attachment_path ? ['name' => $m->attachment_name, 'url' => URL::temporarySignedRoute('finance.file', now()->addMinutes(30), ['message' => $m->ulid])] : null,

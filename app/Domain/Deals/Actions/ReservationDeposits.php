@@ -18,15 +18,15 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * The deposit moves between buyer and lot outside LotLink; these record what each side says:
- * the buyer sent it, the lot declined the request, or the lot refunded it. (Confirming it
+ * The deposit moves between buyer and lot outside CarYard; these record what each side says:
+ * the buyer sent it, the seller declined the request, or the seller refunded it. (Confirming it
  * arrived is ActivateReservation.)
  */
 class ReservationDeposits
 {
     public function __construct(private readonly DealTimeline $timeline) {}
 
-    /** "I've sent the transfer": nudges the lot to check its account. */
+    /** "I've sent the transfer": nudges the seller to check its account. */
     public function sent(Reservation $reservation, User $buyer): Reservation
     {
         if ($reservation->customer_id !== $buyer->id || $reservation->status !== ReservationStatus::Pending) {
@@ -45,7 +45,7 @@ class ReservationDeposits
         return $reservation;
     }
 
-    /** The lot turns a request down (car sold elsewhere, money never came, ...). */
+    /** The seller turns a request down (car sold elsewhere, money never came, ...). */
     public function decline(Reservation $reservation, User $by, string $reason): Reservation
     {
         $reservation = DB::transaction(function () use ($reservation, $by, $reason) {
@@ -69,7 +69,7 @@ class ReservationDeposits
         return $reservation;
     }
 
-    /** reservations:expire: the lot never confirmed the transfer in time. */
+    /** reservations:expire: the seller never confirmed the transfer in time. */
     public function lapse(Reservation $reservation): void
     {
         $lapsed = DB::transaction(function () use ($reservation) {
@@ -92,7 +92,7 @@ class ReservationDeposits
             DealLinks::buyer()));
     }
 
-    /** The lot sent a deposit back from its own account. */
+    /** The seller sent a deposit back from its own account. */
     public function refunded(Reservation $reservation, User $by): Reservation
     {
         if (! $reservation->refund_due || $reservation->refunded_at !== null) {

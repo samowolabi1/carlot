@@ -69,7 +69,7 @@ it('gives Pro lots two free 7-day spotlights a month', function () {
     ($this->buy)($this->camry, ['days' => 7, 'free' => true])->assertSessionHasNoErrors();
 });
 
-it('only spotlights the lot\'s own live cars, for owners and managers', function () {
+it('only spotlights the seller\'s own live cars, for owners and managers', function () {
     $theirs = $this->car(app(CreateLot::class)->run(User::factory()->staff()->create(), ['name' => 'Autoworld']), 'Kia', 'Rio');
     ($this->buy)($theirs)->assertNotFound();
 
@@ -84,7 +84,7 @@ it('only spotlights the lot\'s own live cars, for owners and managers', function
     expect(Spotlight::withoutGlobalScopes()->count())->toBe(0);
 });
 
-it('features the lot on the home page', function () {
+it('features the seller on the home page', function () {
     $this->actingAs($this->owner)->post(route('dealer.spotlight.featured', $this->lot), ['days' => 7], ['X-Inertia' => 'true'])->assertStatus(409);
     ($this->pay)();
 

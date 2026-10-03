@@ -3,7 +3,7 @@ import Icon from '@/components/Icon.vue';
 import { markSeen, whenVisible, type AdBanner } from '@/lib/ads';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-/** A lot's search banner among the results (counted once it's on screen). */
+/** A seller's search banner among the results (counted once it's on screen). */
 const props = defineProps<{ ad: AdBanner }>();
 const root = ref<HTMLElement | null>(null);
 let stop: () => void = () => undefined;

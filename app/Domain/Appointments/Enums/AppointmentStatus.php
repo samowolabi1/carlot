@@ -15,7 +15,7 @@ enum AppointmentStatus: string
     {
         return match ($this) {
             self::AwaitingDeposit => 'Deposit due',
-            self::Pending => 'Waiting for lot',
+            self::Pending => 'Waiting for seller',
             self::Confirmed => 'Confirmed',
             self::Completed => 'Completed',
             self::NoShow => 'No-show',

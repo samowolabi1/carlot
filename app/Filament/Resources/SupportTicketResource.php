@@ -79,9 +79,9 @@ class SupportTicketResource extends Resource
                 Tables\Columns\TextColumn::make('unread')->label('')->badge()->color('warning')
                     ->state(fn (SupportTicket $record) => $record->isUnreadByAdmin() ? 'New' : null),
                 Tables\Columns\TextColumn::make('subject')->searchable()->limit(60)->weight('semibold')
-                    ->description(fn (SupportTicket $record) => "{$record->reference} · ".($record->lot->name ?? 'Deleted lot')),
+                    ->description(fn (SupportTicket $record) => "{$record->reference} · ".($record->lot->name ?? 'Deleted seller')),
                 Tables\Columns\TextColumn::make('reference')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('category')->formatStateUsing(fn (TicketCategory $state) => $state->label())->badge()->color('gray'),
                 Tables\Columns\TextColumn::make('priority')->formatStateUsing(fn (TicketPriority $state) => $state->short())->badge()->sortable()
                     ->color(fn (TicketPriority $state) => match ($state) {

@@ -52,7 +52,7 @@ it('makes admins set up and use an authenticator app before the panel opens', fu
     $this->actingAs($admin->fresh())->post(route('admin.2fa.verify'), ['code' => Totp::code($secret)])->assertRedirect('/admin');
     $this->actingAs($admin->fresh())->get('/admin')->assertOk();
 
-    // Customers and dealers never see any of this.
+    // Customers and sellers never see any of this.
     $this->actingAs(User::factory()->create())->get(route('admin.2fa.setup'))->assertForbidden();
 });
 

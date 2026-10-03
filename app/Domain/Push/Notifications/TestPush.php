@@ -16,6 +16,6 @@ class TestPush extends Notification
     /** @return array{title: string, body: string, url: string, tag: string} */
     public function toPush(object $notifiable): array
     {
-        return ['title' => 'LotLink', 'body' => 'Push notifications work on this device.', 'url' => route('notifications.settings'), 'tag' => 'test'];
+        return ['title' => 'CarYard', 'body' => 'Push notifications work on this device.', 'url' => route('notifications.settings'), 'tag' => 'test'];
     }
 }

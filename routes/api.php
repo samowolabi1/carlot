@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\V1\SavedController;
 use Illuminate\Support\Facades\Route;
 
 /*
- * LotLink API v1 for the mobile app (Sanctum bearer tokens). JSON only; public IDs are ULIDs and slugs.
+ * CarYard API v1 for the mobile app (Sanctum bearer tokens). JSON only; public IDs are ULIDs and slugs.
  * Every write goes through the same Actions as the web. Docs: docs/api.md.
  */
 Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function () {
@@ -57,7 +57,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
             Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
             Route::post('/notifications/read', [NotificationController::class, 'read'])->name('notifications.read');
 
-            // Lot staff: the lots come from GET /me; everything below checks membership (lot.member) and scopes to the lot.
+            // Lot staff: the sellers come from GET /me; everything below checks membership (lot.member) and scopes to the seller.
             Route::prefix('/dealer/lots/{lot}')->name('dealer.')->middleware('lot.member')->scopeBindings()->group(function () {
                 Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
                 Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');

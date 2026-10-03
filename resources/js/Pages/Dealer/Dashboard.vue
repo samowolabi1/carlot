@@ -34,7 +34,7 @@ const kpis: { label: string; note: string; key?: string }[] = [
     { label: 'Views, last 7 days', note: 'View tracking arrives with analytics' },
     { label: 'New leads', note: 'Enquiries arrive with chat and offers' },
     { label: 'Visits booked this week', note: 'See the calendar', key: 'visits' },
-    { label: 'Sold this month', note: 'Record sales in Lot Manager' },
+    { label: 'Sold this month', note: 'Record sales in Sales Manager' },
 ];
 </script>
 

@@ -9,8 +9,8 @@ use App\Domain\Deals\Models\Reservation;
 use Illuminate\Console\Command;
 
 /**
- * Every 5 minutes (TDD: reservations:expire): holds that ran out release the car (the lot owes
- * the deposit back if its policy says so); requests the lot never confirmed lapse.
+ * Every 5 minutes (TDD: reservations:expire): holds that ran out release the car (the seller owes
+ * the deposit back if its policy says so); requests the seller never confirmed lapse.
  */
 class ExpireReservations extends Command
 {

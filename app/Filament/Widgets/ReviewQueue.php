@@ -39,8 +39,8 @@ class ReviewQueue extends StatsOverviewWidget
             ->url($resource::canViewAny() ? $url : null);
 
         return [
-            $stat('Lots to approve', $q['lots_waiting'], LotResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending'], 'submitted_at' => ['value' => '1']]]), LotResource::class),
-            $stat('Lots to verify', $q['verifications'], LotVerificationResource::getUrl(), LotVerificationResource::class),
+            $stat('Sellers to approve', $q['lots_waiting'], LotResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'pending'], 'submitted_at' => ['value' => '1']]]), LotResource::class),
+            $stat('Sellers to verify', $q['verifications'], LotVerificationResource::getUrl(), LotVerificationResource::class),
             $stat('Flagged listings', $q['signals'], FraudSignalResource::getUrl(), FraudSignalResource::class),
             $stat('Reports', $q['reports'], ReportResource::getUrl(), ReportResource::class),
             $stat('Reported reviews', $q['reviews'], ReviewResource::getUrl(), ReviewResource::class),

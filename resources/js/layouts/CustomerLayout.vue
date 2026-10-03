@@ -25,14 +25,14 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
     <div class="min-h-dvh pb-24 md:pb-0">
         <header v-if="!bare" class="md:border-b md:border-line md:bg-white">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 pb-2 md:py-4">
-                <Link :href="route('home')" class="inline-flex min-h-11 items-center no-underline" aria-label="LotLink home"><Logo /></Link>
+                <Link :href="route('home')" class="inline-flex min-h-11 items-center no-underline" aria-label="CarYard home"><Logo /></Link>
                 <nav class="hidden items-center gap-6 text-[15px] font-medium md:flex" aria-label="Main">
                     <Link :href="route('cars.index')" class="no-underline hover:text-clay" :class="active === 'search' ? 'text-clay' : 'text-ink'">Buy a car</Link>
                     <Link :href="route('saved')" class="no-underline hover:text-clay" :class="active === 'saved' ? 'text-clay' : 'text-ink'">Saved</Link>
                     <Link :href="route('budget')" class="text-ink no-underline hover:text-clay">What can I afford?</Link>
                     <Link :href="route('bookings.index')" class="no-underline hover:text-clay" :class="active === 'bookings' ? 'text-clay' : 'text-ink'">Bookings</Link>
                     <Link v-if="user" :href="route('account')" class="no-underline hover:text-clay" :class="active === 'account' ? 'text-clay' : 'text-ink'">Account</Link>
-                    <Link :href="route('dealer.home')" class="text-ink no-underline hover:text-clay">For car lots</Link>
+                    <Link :href="route('dealer.home')" class="text-ink no-underline hover:text-clay">For sellers</Link>
                 </nav>
                 <div class="flex items-center gap-2">
                     <template v-if="user">

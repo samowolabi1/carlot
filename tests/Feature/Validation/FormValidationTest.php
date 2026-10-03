@@ -40,7 +40,7 @@ it('checks phone numbers and emails before sending a sign-in code', function () 
     expect($this->whatsapp->sent)->toBeEmpty();
 });
 
-it('checks the lot profile: a business name, real phone numbers and an email', function () {
+it('checks the seller profile: a business name, real phone numbers and an email', function () {
     $save = fn (array $data) => $this->actingAs($this->owner)->put(route('dealer.settings.profile', $this->lot), [
         'name' => 'Prime Motors', 'phone' => '0802 111 2233', ...$data,
     ]);

@@ -43,7 +43,7 @@ class ConversationController extends Controller
         })]);
     }
 
-    /** Start (or reopen) a chat about a car or with a lot. */
+    /** Start (or reopen) a chat about a car or with a seller. */
     public function store(Request $request, StartConversation $start): JsonResponse
     {
         $data = $request->validate([
@@ -55,7 +55,7 @@ class ConversationController extends Controller
         $vehicle = filled($data['vehicle'] ?? null) ? Vehicle::query()->marketplace()->where('vehicles.ulid', strtolower($data['vehicle']))->first() : null;
         $lot = $vehicle->lot ?? Lot::where('slug', $data['lot'] ?? '')->where('status', LotStatus::Active)->first();
         abort_if($lot === null, 404);
-        abort_if($request->user()->hasLotRole($lot), 403, 'You work at this lot.');
+        abort_if($request->user()->hasLotRole($lot), 403, 'You work for this seller.');
 
         $conversation = $start->run($request->user(), $lot, $vehicle, $data['body'] ?? null);
 

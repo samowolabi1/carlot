@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To the lot: LotLink replied, or resolved or closed their ticket (in-app and email). */
+/** To the seller: CarYard replied, or resolved or closed their ticket (in-app and email). */
 class SupportTicketUpdate extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -25,7 +25,7 @@ class SupportTicketUpdate extends Notification implements ShouldQueue
     }
 
     /**
-     * Whoever opened it, plus the lot's owner and managers.
+     * Whoever opened it, plus the seller's owner and managers.
      *
      * @return Collection<int, User>
      */
@@ -62,7 +62,7 @@ class SupportTicketUpdate extends Notification implements ShouldQueue
 
         return [
             'kind' => 'support',
-            'text' => "LotLink Support {$what}: {$this->ticket->reference} {$this->ticket->subject}",
+            'text' => "CarYard Support {$what}: {$this->ticket->reference} {$this->ticket->subject}",
             'url' => route('dealer.support.show', [Lot::withoutGlobalScopes()->findOrFail($this->ticket->lot_id)->slug, $this->ticket->ulid]),
         ];
     }

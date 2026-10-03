@@ -41,7 +41,7 @@ class ApplicationController extends Controller
             default => null,
         };
         if ($q !== null) {
-            // Names are encrypted with the application, so search the buyer's account, the car, the lot and references.
+            // Names are encrypted with the application, so search the buyer's account, the car, the seller and references.
             $query->where(fn ($w) => $w->where('ulid', 'like', strtolower($q).'%')->orWhere('external_ref', 'like', "%{$q}%")
                 ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%"))
                 ->orWhereHas('lot', fn ($l) => $l->withoutGlobalScopes()->where('name', 'like', "%{$q}%"))

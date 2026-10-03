@@ -27,7 +27,7 @@ class ViewLot extends ViewRecord
             Action::make('impersonate')->authorize(fn () => LotResource::allows(AdminArea::Support))->label('Log in as owner')->icon('heroicon-o-arrow-right-end-on-rectangle')
                 ->visible($lot->owner !== null && ! $lot->owner->isAdmin())
                 ->requiresConfirmation()
-                ->modalDescription('You will see LotLink as the lot owner. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
+                ->modalDescription('You will see CarYard as the seller. Everything you do there is logged with your name as well as theirs. Use "Back to admin" at the top, or Sign out, to return.')
                 ->action(function () use ($lot) {
                     /** @var User $admin */
                     $admin = Auth::user();

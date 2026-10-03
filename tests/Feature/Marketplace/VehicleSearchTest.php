@@ -95,7 +95,7 @@ it('filters by models, drive, colour and features (cars must have every feature 
         ->and(run(['featureIds' => [$camera->id, $sunroof->id]]))->toBe(['Camry']);
 })->with('engines');
 
-it('filters by what lots and cars offer: car loans, trade-ins, offers, inspection, verified lot, duty and registration', function (string $engine) {
+it('filters by what lots and cars offer: car loans, trade-ins, offers, inspection, verified seller, duty and registration', function (string $engine) {
     $this->useSearchEngine($engine);
     $cars = seedCars();
     $cars['camry']->forceFill(['negotiable' => true, 'duty_status' => 'paid', 'registered' => false])->save();
@@ -193,7 +193,7 @@ it('keeps the marketplace and car saves working when Meilisearch is down', funct
     app()->forgetInstance(Client::class);
     app()->forgetInstance(EngineManager::class);
 
-    // Dealers can still change cars (the index catches up with scout:import)...
+    // Sellers can still change cars (the index catches up with scout:import)...
     $cars['camry']->forceFill(['price' => 1_200_000_000])->save();
     $cars['accord']->forceFill(['status' => 'hidden'])->save();
 

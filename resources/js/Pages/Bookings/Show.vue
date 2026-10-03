@@ -157,12 +157,12 @@ function cancel() {
             <div v-if="booking.can_cancel" class="flex flex-wrap justify-center gap-6 text-[14px] font-semibold">
                 <Link v-if="user" :href="links.reschedule">Reschedule</Link>
                 <button type="button" class="text-clay hover:text-clay-dark" @click="cancelling = !cancelling">Cancel booking</button>
-                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener">Message lot</a>
+                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener">Message seller</a>
             </div>
 
             <form v-if="cancelling" class="card flex flex-col gap-3 p-4" @submit.prevent="cancel">
                 <label class="field-label">
-                    <span>Reason <span class="font-normal text-muted">(optional, shared with the lot)</span></span>
+                    <span>Reason <span class="font-normal text-muted">(optional, shared with the seller)</span></span>
                     <input v-field="{ kind: 'text', max: 200 }" v-model="cancelForm.reason" class="field" placeholder="e.g. Something came up" />
                 </label>
                 <div class="flex gap-2">

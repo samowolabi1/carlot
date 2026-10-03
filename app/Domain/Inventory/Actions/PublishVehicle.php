@@ -19,11 +19,11 @@ class PublishVehicle
 {
     public function __construct(private readonly VehicleStateMachine $stateMachine) {}
 
-    /** Takes a draft or hidden car live, within the lot's plan listing limit. */
+    /** Takes a draft or hidden car live, within the seller's plan listing limit. */
     public function run(Vehicle $vehicle): Vehicle
     {
         if ($vehicle->isHeld()) {
-            throw ValidationException::withMessages(['publish' => 'LotLink is reviewing this car. It goes back on sale once the review is done.']);
+            throw ValidationException::withMessages(['publish' => 'CarYard is reviewing this car. It goes back on sale once the review is done.']);
         }
 
         $this->ensureComplete($vehicle);
@@ -39,7 +39,7 @@ class PublishVehicle
                 DB::afterCommit(fn () => VehiclePublished::dispatch($vehicle));
                 // Saved-search alerts (TDD M4).
                 DB::afterCommit(fn () => SendPriceAlerts::dispatch($vehicle->id));
-                // Facebook/Instagram auto-post (TDD M9), if the lot connected a Page.
+                // Facebook/Instagram auto-post (TDD M9), if the seller connected a Page.
                 DB::afterCommit(fn () => PublishToSocial::dispatch($vehicle->id));
             }
 

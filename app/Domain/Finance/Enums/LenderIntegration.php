@@ -4,7 +4,7 @@ namespace App\Domain\Finance\Enums;
 
 use App\Domain\Support\HasOptions;
 
-/** How a lender receives applications: in the LotLink lender portal, by its own API, or the local demo. */
+/** How a lender receives applications: in the CarYard lender portal, by its own API, or the local demo. */
 enum LenderIntegration: string
 {
     use HasOptions;
@@ -16,7 +16,7 @@ enum LenderIntegration: string
     public function label(): string
     {
         return match ($this) {
-            self::Portal => 'In the LotLink lender portal',
+            self::Portal => 'In the CarYard lender portal',
             self::Api => 'Sent to our own system (API)',
             self::Demo => 'Demo (instant answer, nothing sent)',
         };

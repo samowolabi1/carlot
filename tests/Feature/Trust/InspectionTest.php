@@ -34,7 +34,7 @@ it('has 40 checks in seven groups and scores an advisory as half', function () {
         ->and(InspectionChecklist::score(($this->checklist)(['paint' => ['status' => 'advisory'], 'tread_front' => ['status' => 'fail']])))->toBe(96);
 });
 
-it('saves the lot\'s inspection and shows it to buyers with a PDF', function () {
+it('saves the seller\'s inspection and shows it to buyers with a PDF', function () {
     ($this->inspect)([
         'checklist' => ($this->checklist)([
             'paint' => ['status' => 'advisory', 'note' => 'Stone chips on the bonnet'],
@@ -71,7 +71,7 @@ it('needs a note for every fail and an answer for every check', function () {
     expect(Inspection::withoutGlobalScopes()->count())->toBe(0);
 });
 
-it('keeps inspections to the lot\'s own team, and the PDF private once the car is off sale', function () {
+it('keeps inspections to the seller\'s own team, and the PDF private once the car is off sale', function () {
     ($this->inspect)();
     $inspection = Inspection::withoutGlobalScopes()->sole();
 
@@ -86,7 +86,7 @@ it('keeps inspections to the lot\'s own team, and the PDF private once the car i
     $this->actingAs($this->owner)->get(route('inspections.pdf', $inspection))->assertOk();
 });
 
-it('lets a registered inspector sign an independent report that the lot cannot bury', function () {
+it('lets a registered inspector sign an independent report that the seller cannot bury', function () {
     $buyer = User::factory()->create();
     $this->actingAs($buyer)->get(route('inspector.create', $this->car->ulid))->assertForbidden();
 
@@ -100,7 +100,7 @@ it('lets a registered inspector sign an independent report that the lot cannot b
     $signed = Inspection::withoutGlobalScopes()->sole();
     expect($signed->isIndependent())->toBeTrue()->and($signed->inspector_name)->toBe('Tayo Bello, AutoCheck NG');
 
-    // The lot's own later check is kept, but the car still shows the independent report.
+    // The seller's own later check is kept, but the car still shows the independent report.
     ($this->inspect)();
     expect(Inspection::withoutGlobalScopes()->count())->toBe(2)->and($this->car->fresh()->inspection_id)->toBe($signed->id);
     $this->get($this->car->publicPath())->assertInertia(fn (Assert $page) => $page->where('car.inspection.independent', true)->where('car.inspection.label', 'Independently inspected'));

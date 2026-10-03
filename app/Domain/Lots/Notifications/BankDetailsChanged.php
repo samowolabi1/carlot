@@ -31,7 +31,7 @@ class BankDetailsChanged extends Notification implements ShouldQueue
 
         return (new MailMessage)->subject("Bank details changed at {$this->lot->name}")
             ->line($data['text'])
-            ->line('If you did not expect this, check your team and contact LotLink support.')
+            ->line('If you did not expect this, check your team and contact CarYard support.')
             ->action('See bank details', $data['url']);
     }
 

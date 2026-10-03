@@ -1,11 +1,11 @@
-# LotLink API v1
+# CarYard API v1
 
-JSON API for the LotLink mobile app, at `/api/v1`. Authentication is a Sanctum bearer token
+JSON API for the CarYard mobile app, at `/api/v1`. Authentication is a Sanctum bearer token
 (`Authorization: Bearer {token}`). Every endpoint answers in JSON, errors included:
 `401` (no or expired token), `403` (not allowed), `404`, `422` (`{"message", "errors": {field: [..]}}`) and `429` (rate limit).
 
 - Public IDs only: cars, chats, leads and bookings by ULID, lots by slug. No internal ids, costs or profit.
-- Times are ISO 8601 in UTC. `timezone` fields give the lot's zone for display.
+- Times are ISO 8601 in UTC. `timezone` fields give the seller's zone for display.
 - Prices: `price` is formatted (`₦12,500,000`), `price_value` whole naira.
 - Rate limit: `API_RATE_LIMIT` requests a minute (default 120) per user or address; sign-in endpoints have their own limits.
 - Tokens last `SANCTUM_TOKEN_DAYS` (90). People see and revoke them under Account → Sign-in and security;
@@ -37,7 +37,7 @@ JSON API for the LotLink mobile app, at `/api/v1`. Authentication is a Sanctum b
 
 The app's sign-in screen must say, next to the button, that continuing accepts the Terms of Use and Privacy Policy (with links from
 `/legal`): a new account made by `POST /auth/token` is recorded as accepting them. `GET /me` returns `terms: {accepted, required_version,
-accepted_version}`. While `accepted` is false (older accounts, accounts made by a lot or an admin, or after we change the documents), every
+accepted_version}`. While `accepted` is false (older accounts, accounts made by a seller or an admin, or after we change the documents), every
 signed-in endpoint except `/me`, `/auth/token` and `/legal/accept` answers `403 {code: "terms_not_accepted", required_version}`: show the
 documents and send `POST /legal/accept` with `agree: true` (returns the updated user).
 
@@ -48,7 +48,7 @@ documents and send `POST /legal/accept` with `agree: true` (returns the updated 
 | GET | `/saved` | Saved cars with `price_drop`, `sold`, `unavailable`. |
 | PUT / DELETE | `/saved/{car ulid}` | Save / remove. |
 | GET | `/conversations` | Chats with lots: `ulid, lot, car, last, last_at, unread`. |
-| POST | `/conversations` | `vehicle` (car ulid) or `lot` (slug), optional `body`. Starts or reopens the chat (and the lot's lead). `201 {data: thread}` |
+| POST | `/conversations` | `vehicle` (car ulid) or `lot` (slug), optional `body`. Starts or reopens the chat (and the seller's lead). `201 {data: thread}` |
 | GET | `/conversations/{ulid}` | The thread; `?after={message id}` returns only newer messages (poll every few seconds). Marks it read. |
 | POST | `/conversations/{ulid}/messages` | `body` and/or `photo` (multipart image). |
 | GET | `/bookings` | Visits and test drives. |
@@ -58,9 +58,9 @@ documents and send `POST /legal/accept` with `agree: true` (returns the updated 
 | GET | `/notifications` | The notification centre: `{data: [{id, kind, text, url, created_at, read}], unread}`. |
 | POST | `/notifications/read` | Marks all read. |
 
-## Lot staff (token; member of the lot)
+## Lot staff (token; member of the seller)
 
-The lots come from `GET /me`. Every path checks membership (`403` otherwise) and only finds the lot's own records (`404`).
+The sellers come from `GET /me`. Every path checks membership (`403` otherwise) and only finds the seller's own records (`404`).
 
 | Method | Path | Notes |
 |---|---|---|
@@ -68,27 +68,27 @@ The lots come from `GET /me`. Every path checks membership (`403` otherwise) and
 | GET | `/dealer/lots/{slug}/leads/{ulid}` | A lead with its chat (`?after=` as above). The buyer's number is masked until they engage. |
 | PATCH | `/dealer/lots/{slug}/leads/{ulid}` | `stage`, `assigned_to` (user ulid; sales staff can only take it themselves), `next_follow_up_at`, `lost_reason`. |
 | POST | `/dealer/lots/{slug}/leads/{ulid}/messages` | Reply to the buyer: `body` and/or `photo`. |
-| GET | `/dealer/lots/{slug}/vehicles` | Stock (dealer fields, prices in whole naira; never costs). `?status=`. |
-| GET | `/dealer/lots/{slug}/appointments` | Visits from `from` to `to` (dates in the lot's zone; default the next 8 days). |
+| GET | `/dealer/lots/{slug}/vehicles` | Stock (seller fields, prices in whole naira; never costs). `?status=`. |
+| GET | `/dealer/lots/{slug}/appointments` | Visits from `from` to `to` (dates in the seller's zone; default the next 8 days). |
 
 Push notifications for the app are not part of v1 (the web uses Web Push); the app can poll `/notifications`.
-Adding and editing cars, Lot Manager and billing stay on the website for now.
+Adding and editing cars, Sales Manager and billing stay on the website for now.
 
 ## Lenders' systems (car loans)
 
-Loans start on LotLink and continue with the lender: LotLink gathers and passes on the application; the lender decides and
+Loans start on CarYard and continue with the lender: CarYard gathers and passes on the application; the lender decides and
 completes KYC, the agreement and payment through its own channels. A lender that chooses "Our own system (API)" in the lender portal (Settings) or is set up that way by an admin gets each
-application posted to it instead of waiting in the portal. There is no token: LotLink calls the lender, and the lender calls back.
+application posted to it instead of waiting in the portal. There is no token: CarYard calls the lender, and the lender calls back.
 
-**LotLink → lender**: `POST {api_url}/applications` with `Authorization: Bearer {api_key}` and JSON:
-`reference` (LotLink's id for the application), `amount`, `deposit` (whole naira), `currency`, `tenor_months`,
+**CarYard → lender**: `POST {api_url}/applications` with `Authorization: Bearer {api_key}` and JSON:
+`reference` (CarYard's id for the application), `amount`, `deposit` (whole naira), `currency`, `tenor_months`,
 `vehicle {title, year, price}`, `lot {name, city, state}`, `applicant {name, phone, email, monthly_income, monthly_commitments,
 employment, employer}`, `consented_at`, `callback_url`. Answer `2xx` with `{reference, status?, message?, approved_amount?}`
 (`status`: `received` by default, or `pre_approved` / `declined` straight away). Any other answer marks the application
 "Couldn't send" and nothing is kept on your side.
 
-**Lender → LotLink**: `POST /webhooks/finance/{lender slug}` (the `callback_url`) with a JSON body signed with HMAC-SHA256 of the
-raw body using the lender's webhook secret, in `X-LotLink-Signature`. Fields: `reference` (LotLink's or yours), `status`
+**Lender → CarYard**: `POST /webhooks/finance/{lender slug}` (the `callback_url`) with a JSON body signed with HMAC-SHA256 of the
+raw body using the lender's webhook secret, in `X-CarYard-Signature`. Fields: `reference` (CarYard's or yours), `status`
 (`received`, `documents_requested`, `pre_approved`, `approved`, `disbursed`, `declined`), optional `message` (shown to the buyer),
 `next_steps` (with `pre_approved` / `approved`: how the buyer continues with you; defaults to the next steps in your settings), `approved_amount`, `rate` (% a year), `tenor_months`, `disbursed_amount`, `disbursed_reference`. Replies are JSON: `200 {ok, status}`,
 `401` bad signature, `404` not your application, `422 {errors}` invalid or not allowed from the current status (for example

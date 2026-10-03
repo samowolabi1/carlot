@@ -13,7 +13,7 @@ export function registerServiceWorker() {
         });
     });
 
-    // Signed out: drop any saved dealer pages from this phone.
+    // Signed out: drop any saved seller pages from this phone.
     router.on('navigate', (event) => {
         const auth = (event.detail.page.props as { auth?: { user: unknown } }).auth;
         if (auth && auth.user === null) navigator.serviceWorker.controller?.postMessage('clear-private');

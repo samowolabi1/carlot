@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
 /**
- * A bank or finance company that gives car loans through LotLink. It applies (or an admin onboards it),
+ * A bank or finance company that gives car loans through CarYard. It applies (or an admin onboards it),
  * is approved by an admin, and then receives buyers' applications in the lender portal or by its own API.
  *
  * @property int $id
@@ -136,7 +136,7 @@ class Lender extends Model
     }
 
     /**
-     * Would this lender consider a loan for this car? Active, lends in the lot's state, the amount is within
+     * Would this lender consider a loan for this car? Active, lends in the seller's state, the amount is within
      * its range, the deposit is enough and it offers the loan length.
      */
     public function lendsFor(int $priceKobo, int $depositKobo, int $tenor, ?string $state): bool

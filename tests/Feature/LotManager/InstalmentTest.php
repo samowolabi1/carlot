@@ -52,7 +52,7 @@ it('applies payments to the oldest instalment first, and a void puts it back', f
     expect(($this->statuses)())->toBe(['pending:0', 'pending:0']);
 });
 
-it('marks unpaid instalments overdue after their date in the lot\'s time', function () {
+it('marks unpaid instalments overdue after their date in the seller\'s time', function () {
     ($this->plan)(['count' => 2, 'frequency' => 'weekly', 'first_due' => '2026-10-06']);
 
     $this->travelTo(CarbonImmutable::parse('2026-10-06 22:00', 'UTC')); // 23:00 Lagos, still the 6th

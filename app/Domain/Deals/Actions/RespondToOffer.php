@@ -20,7 +20,7 @@ class RespondToOffer
 
     public function __construct(private readonly DealTimeline $timeline) {}
 
-    /** The lot accepts, declines or counters a waiting offer (TDD M12). */
+    /** The seller accepts, declines or counters a waiting offer (TDD M12). */
     public function run(Offer $offer, User $staff, string $action, ?int $counter = null, ?string $message = null): Offer
     {
         $offer = DB::transaction(function () use ($offer, $staff, $action, $counter, $message): Offer {

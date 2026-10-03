@@ -16,7 +16,7 @@ function hours(): OpeningHours
     return new OpeningHours($rows, 'Africa/Lagos');
 }
 
-it('says when a lot is open or when it opens next, in lot time', function (string $utc, bool $open, string $label) {
+it('says when a seller is open or when it opens next, in lot time', function (string $utc, bool $open, string $label) {
     expect(hours()->status(CarbonImmutable::parse($utc, 'UTC')))->toBe(['open' => $open, 'label' => $label]);
 })->with([
     'Monday 10am Lagos' => ['2026-09-28 09:00', true, 'Open until 6pm'],

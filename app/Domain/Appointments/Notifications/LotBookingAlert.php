@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
- * To the lot's WhatsApp: a new booking, a buyer's change, or a request left unconfirmed
+ * To the seller's WhatsApp: a new booking, a buyer's change, or a request left unconfirmed
  * for 4 hours (escalated to the owner).
  */
 class LotBookingAlert extends Notification implements ShouldQueue

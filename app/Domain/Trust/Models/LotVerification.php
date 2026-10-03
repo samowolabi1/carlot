@@ -13,8 +13,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
 /**
- * A lot's CAC certificate and frontage photo (TDD M14). The files stay on the private disk and
- * only admins and the lot's owner can open them.
+ * A seller's CAC certificate and frontage photo (TDD M14). The files stay on the private disk and
+ * only admins and the seller's owner can open them.
  *
  * @property int $id
  * @property string $ulid
@@ -131,7 +131,7 @@ class LotVerification extends Model
         };
     }
 
-    /** Worth a closer look: not found, not active, or a name that doesn't match the lot's. */
+    /** Worth a closer look: not found, not active, or a name that doesn't match the seller's. */
     public function registryConcern(): bool
     {
         return $this->registry_result === 'not_found'

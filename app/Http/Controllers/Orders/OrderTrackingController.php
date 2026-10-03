@@ -82,7 +82,7 @@ class OrderTrackingController extends Controller
                 'directions' => $lot->directionsUrl(),
                 'url' => route('lots.show', $lot->slug),
             ],
-            // Pay the lot directly: LotLink never takes payment for cars.
+            // Pay the seller directly: CarYard never takes payment for cars.
             'bank' => $order->isOpen() && $order->balance > 0 ? LotBankAccount::preferredFor($lot->id)?->present() : null,
             'poweredBy' => OrderLinks::poweredBy('order_tracking', $lot->slug),
         ]);

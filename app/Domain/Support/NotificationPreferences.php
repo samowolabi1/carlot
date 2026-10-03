@@ -17,15 +17,15 @@ final class NotificationPreferences
         'messages' => ['Chat messages', 'all'],
         'bookings' => ['Bookings and reminders', 'all'],
         'offers' => ['Offers, trade-ins and reservations', 'all'],
-        'new_stock' => ['New cars from lots I follow', 'buyers'],
+        'new_stock' => ['New cars from sellers I follow', 'buyers'],
         'alerts' => ['Price drops and saved-search matches', 'buyers'],
         'finance' => ['Car loan applications', 'buyers'],
         'leads' => ['New leads and follow-ups', 'dealers'],
         'billing' => ['Billing and plan', 'dealers'],
         'summary' => ['Daily summary', 'dealers'],
         'reviews' => ['Reviews of visits', 'all'],
-        'nudges' => ['Reminders to keep your lot busy', 'dealers'],
-        'news' => ['LotLink news, tips and offers', 'dealers'],
+        'nudges' => ['Reminders to keep your business busy', 'dealers'],
+        'news' => ['CarYard news, tips and offers', 'dealers'],
     ];
 
     public const OPTIONAL = ['phone', 'mail', 'push'];

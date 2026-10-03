@@ -59,7 +59,7 @@ it('only re-renders when what the card shows changes', function () {
         ->and(collect($this->disk->files("share-cards/{$this->camry->ulid}"))->every(fn ($f) => str_contains($f, substr($second, 0, 12))))->toBeTrue();
 });
 
-it('re-renders when the lot changes its name or phone', function () {
+it('re-renders when the seller changes its name or phone', function () {
     RenderShareCard::dispatchSync($this->camry->id);
     $first = $this->camry->refresh()->share_card_hash;
 

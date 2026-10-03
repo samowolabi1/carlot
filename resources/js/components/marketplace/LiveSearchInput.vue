@@ -12,7 +12,7 @@ import { computed, ref, useId } from 'vue';
 const query = defineModel<string>({ required: true });
 const props = withDefaults(defineProps<{ inputClass?: string; placeholder?: string; withCars?: boolean }>(), {
     inputClass: 'h-11 w-full bg-transparent text-[15px] outline-none',
-    placeholder: 'Search make, model or lot',
+    placeholder: 'Search make, model or seller',
     withCars: true,
 });
 const emit = defineEmits<{ submit: [] }>();
@@ -28,7 +28,7 @@ const groups = computed(() => {
     return [
         { key: 'makes', title: 'Makes and models', items: [...r.makes, ...r.models] },
         { key: 'places', title: 'Places', items: r.places },
-        { key: 'lots', title: 'Car lots', items: r.lots },
+        { key: 'lots', title: 'Sellers', items: r.lots },
         { key: 'cars', title: 'Cars', items: r.cars },
     ].filter((g) => g.items.length > 0);
 });

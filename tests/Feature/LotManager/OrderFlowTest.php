@@ -284,7 +284,7 @@ it('will not release a reserved car that an order has paid for', function () {
     ($this->pay)($order, '1000000');
 
     $this->actingAs($this->owner)->patch(route('dealer.vehicles.status', [$this->lot, $this->car]), ['status' => 'available'])
-        ->assertSessionHasErrors(['status' => 'Order PM-2026-00001 holds this car. Cancel the order in Lot Manager to release it.']);
+        ->assertSessionHasErrors(['status' => 'Order PM-2026-00001 holds this car. Cancel the order in Sales Manager to release it.']);
 });
 
 it('shows the order page with what each role can do', function () {

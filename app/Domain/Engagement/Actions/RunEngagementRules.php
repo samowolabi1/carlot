@@ -26,8 +26,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 /**
- * The automated emails to lot owners (`EngagementRules`). Runs hourly; each lot is checked at the
- * send hour in its own time zone. A rule reaches a lot's owner at most once per cooldown, and never
+ * The automated emails to sellers (`EngagementRules`). Runs hourly; each seller is checked at the
+ * send hour in its own time zone. A rule reaches a seller's owner at most once per cooldown, and never
  * when there's nothing to say. Admins can preview who would get a rule and send themselves a test.
  */
 class RunEngagementRules
@@ -93,7 +93,7 @@ class RunEngagementRules
     }
 
     /**
-     * What a rule has to say about a lot now, or null if nothing.
+     * What a rule has to say about a seller now, or null if nothing.
      *
      * @return array{count: int, lines: list<string>, url: string}|null
      */
@@ -130,7 +130,7 @@ class RunEngagementRules
         return [
             'count' => $leads,
             'lines' => array_values(array_filter([
-                $views > 0 ? number_format($views).' '.Str::plural('view', $views).' of your cars' : 'Your cars are still on LotLink',
+                $views > 0 ? number_format($views).' '.Str::plural('view', $views).' of your cars' : 'Your cars are still on CarYard',
                 $leads > 0 ? $leads.' new '.Str::plural('enquiry', $leads) : null,
                 $waiting > 0 ? $waiting.' '.Str::plural('chat', $waiting).' waiting for your reply' : null,
             ])),
@@ -185,7 +185,7 @@ class RunEngagementRules
         ];
     }
 
-    /** Chats whose latest message the lot hasn't read for at least $hours. */
+    /** Chats whose latest message the seller hasn't read for at least $hours. */
     private function unanswered(Lot $lot, int $hours): int
     {
         return Conversation::query()
@@ -208,7 +208,7 @@ class RunEngagementRules
     {
         $values = ['name' => trim(explode(' ', (string) $lot->owner?->name)[0]) ?: 'there', 'lot' => $lot->name, 'count' => $found['count']];
         $message = EngagementMessage::create([
-            // Tests don't count towards the lot's cooldown or the rule's stats.
+            // Tests don't count towards the seller's cooldown or the rule's stats.
             'rule' => $test ? null : $rule,
             'user_id' => $to->id,
             'lot_id' => $test ? null : $lot->id,

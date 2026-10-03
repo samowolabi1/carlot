@@ -38,7 +38,9 @@ class LotVerificationResource extends Resource
 
     protected static ?string $navigationGroup = 'Review queue';
 
-    protected static ?string $navigationLabel = 'Lots to verify';
+    protected static ?string $navigationLabel = 'Sellers to verify';
+
+    protected static ?string $modelLabel = 'seller verification';
 
     protected static ?int $navigationSort = 1;
 
@@ -64,9 +66,9 @@ class LotVerificationResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable()->description(fn (LotVerification $v) => collect([$v->lot->city, $v->lot->state])->filter()->implode(', ')),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable()->description(fn (LotVerification $v) => collect([$v->lot->city, $v->lot->state])->filter()->implode(', ')),
                 Tables\Columns\TextColumn::make('cac_number')->label('CAC')->formatStateUsing(fn (LotVerification $v) => $v->cacLabel())->searchable(),
-                // The automatic CAC lookup (when set up): the registered name, status and how well it matches the lot's name.
+                // The automatic CAC lookup (when set up): the registered name, status and how well it matches the seller's name.
                 Tables\Columns\TextColumn::make('registry_name')->label('Registry')
                     ->state(fn (LotVerification $v) => $v->registry_result === 'found' ? $v->registry_name : $v->registrySummary())
                     ->description(fn (LotVerification $v) => $v->registry_result === 'found' ? collect([
@@ -110,13 +112,13 @@ class LotVerificationResource extends Resource
                 Tables\Actions\Action::make('approve')->icon('heroicon-o-check-circle')->color('success')
                     ->visible(fn (LotVerification $v) => $v->status === VerificationStatus::Submitted)
                     ->form([Forms\Components\Textarea::make('notes')->label('Note (optional)')->rows(2)->maxLength(500)])
-                    ->modalDescription(fn (LotVerification $v) => 'Check the CAC number on the certificate and that the photo matches the lot\'s address and pin.'
+                    ->modalDescription(fn (LotVerification $v) => 'Check the CAC number on the certificate and that the photo matches the seller\'s address and pin.'
                         .($v->registrySummary() ? ' Registry: '.$v->registrySummary().'.' : ''))
-                    ->action(fn (LotVerification $v, array $data) => self::decide(fn (DecideLotVerification $d, User $admin) => $d->approve($v, $admin, $data['notes'] ?? null), 'Lot verified')),
+                    ->action(fn (LotVerification $v, array $data) => self::decide(fn (DecideLotVerification $d, User $admin) => $d->approve($v, $admin, $data['notes'] ?? null), 'Seller verified')),
                 Tables\Actions\Action::make('reject')->icon('heroicon-o-x-circle')->color('danger')
                     ->visible(fn (LotVerification $v) => $v->status === VerificationStatus::Submitted)
-                    ->form([Forms\Components\Textarea::make('notes')->label('What should the lot fix?')->required()->rows(3)->maxLength(500)])
-                    ->action(fn (LotVerification $v, array $data) => self::decide(fn (DecideLotVerification $d, User $admin) => $d->reject($v, $admin, $data['notes']), 'Sent back to the lot')),
+                    ->form([Forms\Components\Textarea::make('notes')->label('What should the seller fix?')->required()->rows(3)->maxLength(500)])
+                    ->action(fn (LotVerification $v, array $data) => self::decide(fn (DecideLotVerification $d, User $admin) => $d->reject($v, $admin, $data['notes']), 'Sent back to the seller')),
             ]);
     }
 

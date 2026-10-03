@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** A lender's licence copy, for LotLink admins checking it, through a short-lived signed link. */
+/** A lender's licence copy, for CarYard admins checking it, through a short-lived signed link. */
 class LicenceController extends Controller
 {
     public function __invoke(Request $request, Lender $lender): StreamedResponse

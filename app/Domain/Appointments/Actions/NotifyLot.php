@@ -7,7 +7,7 @@ use App\Domain\Appointments\Notifications\LotBookingAlert;
 use App\Domain\Lots\Models\Lot;
 use Illuminate\Support\Facades\Notification;
 
-/** Sends a booking alert to the lot's WhatsApp number (its phone, else the owner's). */
+/** Sends a booking alert to the seller's WhatsApp number (its phone, else the owner's). */
 class NotifyLot
 {
     public function run(Appointment $appointment, string $event, bool $ownerOnly = false): void

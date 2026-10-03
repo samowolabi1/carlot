@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To the lot owner: the CAC verification was approved or needs another try. */
+/** To the seller: the CAC verification was approved or needs another try. */
 class VerificationDecided extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -31,7 +31,7 @@ class VerificationDecided extends Notification implements ShouldQueue
         $data = $this->toArray($notifiable);
 
         return (new MailMessage)
-            ->subject($this->approved() ? 'Your lot is verified' : 'We could not verify your lot yet')
+            ->subject($this->approved() ? 'Your business is verified' : 'We could not verify your business yet')
             ->line($data['text'])
             ->action($this->approved() ? 'Open your dashboard' : 'Try again', $data['url']);
     }
@@ -44,7 +44,7 @@ class VerificationDecided extends Notification implements ShouldQueue
         return [
             'kind' => 'verification',
             'text' => $this->approved()
-                ? "{$lot->name} is verified. Buyers now see the Verified lot badge."
+                ? "{$lot->name} is verified. Buyers now see the Verified seller badge."
                 : "We couldn't verify {$lot->name}: ".($this->verification->notes ?: 'please send the documents again.'),
             'url' => $this->approved() ? route('dealer.dashboard', $lot) : route('dealer.settings', $lot).'#verification',
         ];

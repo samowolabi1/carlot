@@ -15,7 +15,7 @@ class PlanSeeder extends Seeder
     public function run(): void
     {
         $plans = [
-            // Lot Manager gating (TDD M19): Free lots keep up to 10 open orders. Offers and deposits are Pro (spec).
+            // Sales Manager gating (TDD M19): Free lots keep up to 10 open orders. Offers and deposits are Pro (spec).
             ['code' => 'free', 'name' => 'Free', 'price' => 0, 'listing_limit' => 10, 'staff_limit' => 1, 'free_spotlights' => 0, 'sort' => 1,
                 'features' => ['open_orders' => 10, 'share_cards' => false, 'offers' => false, 'deposits' => false, 'instalments' => false, 'daily_summary' => false, 'costs' => false, 'analytics' => false, 'analytics_full' => false, 'bulk_import' => false, 'custom_domain' => false]],
             ['code' => 'starter', 'name' => 'Starter', 'price' => 15_000_00, 'listing_limit' => 50, 'staff_limit' => 3, 'free_spotlights' => 0, 'sort' => 2,

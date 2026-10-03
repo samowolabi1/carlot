@@ -11,7 +11,7 @@ class WalkInRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Any member of the lot (lot.member middleware).
+        return true; // Any member of the seller (lot.member middleware).
     }
 
     protected function prepareForValidation(): void

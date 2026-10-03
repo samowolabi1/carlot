@@ -126,7 +126,7 @@ class LenderResource extends Resource
                 })->toggleable(),
                 Tables\Columns\TextColumn::make('open_count')->label('Open')->sortable(),
                 Tables\Columns\TextColumn::make('applications_count')->label('All applications')->sortable()->toggleable(),
-                Tables\Columns\TextColumn::make('disbursed_total')->label('Paid to lots')->formatStateUsing(fn ($state) => Money::format((int) $state))->placeholder('—')->sortable(),
+                Tables\Columns\TextColumn::make('disbursed_total')->label('Paid to sellers')->formatStateUsing(fn ($state) => Money::format((int) $state))->placeholder('—')->sortable(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact')->description(fn (Lender $l) => PhoneNumber::display($l->contact_phone))->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')->label('Joined')->since()->sortable(),
             ])

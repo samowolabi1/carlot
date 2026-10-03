@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Sends one message to a phone: WhatsApp first (most Nigerian buyers and dealers live
+ * Sends one message to a phone: WhatsApp first (most Nigerian buyers and sellers live
  * there), SMS if WhatsApp fails or isn't wanted.
  */
 class Messenger

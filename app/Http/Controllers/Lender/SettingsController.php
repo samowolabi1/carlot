@@ -57,7 +57,7 @@ class SettingsController extends Controller
             $request->merge([$key => Fields::cleanMoney($request->input($key))]);
         }
         $rules = [...LenderRules::profile(), ...LenderRules::product(), ...($lender->integration->value === 'demo' ? [] : LenderRules::integration())];
-        // The name and licence are what LotLink checked: ask support to change them.
+        // The name and licence are what CarYard checked: ask support to change them.
         unset($rules['name'], $rules['licence_type'], $rules['licence_number']);
         $data = $request->validate($rules);
         $data['states'] ??= [];

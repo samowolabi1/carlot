@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-/** One Lot Manager report as an Excel sheet (TDD M19: "?export=xlsx"). Money is whole naira. */
+/** One Sales Manager report as an Excel sheet (TDD M19: "?export=xlsx"). Money is whole naira. */
 class ReportExport implements FromArray, ShouldAutoSize, WithHeadings, WithTitle
 {
     /**

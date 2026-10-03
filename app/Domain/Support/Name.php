@@ -4,7 +4,7 @@ namespace App\Domain\Support;
 
 final class Name
 {
-    /** "Tunde Adebayo" → "Tunde A.", as the dealer designs show buyers. */
+    /** "Tunde Adebayo" → "Tunde A.", as the seller designs show buyers. */
     public static function short(?string $name, string $fallback = 'Buyer'): string
     {
         $parts = preg_split('/\s+/', trim((string) $name)) ?: [];

@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To LotLink admins: a paid advert is waiting to be checked. */
+/** To CarYard admins: a paid advert is waiting to be checked. */
 class AdSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -40,7 +40,7 @@ class AdSubmitted extends Notification implements ShouldQueue
 
         return [
             'kind' => 'moderation',
-            'text' => ($lot->name ?? 'A lot')." paid for a {$this->campaign->placement->label()} ({$this->campaign->days} days): \"{$this->campaign->headline}\". Check it before it runs.",
+            'text' => ($lot->name ?? 'A seller')." paid for a {$this->campaign->placement->label()} ({$this->campaign->days} days): \"{$this->campaign->headline}\". Check it before it runs.",
             'url' => route('filament.admin.resources.ad-campaigns.index'),
         ];
     }

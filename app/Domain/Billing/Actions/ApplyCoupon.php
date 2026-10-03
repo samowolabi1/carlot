@@ -31,11 +31,11 @@ class ApplyCoupon
 
             $paid = Payment::where('lot_id', $lot->id)->where('purpose', PaymentPurpose::Subscription)->where('status', PaymentStatus::Success)->exists();
             if ($paid || $subscription->status === SubscriptionStatus::Active) {
-                throw ValidationException::withMessages(['coupon' => 'Codes are for lots that have not paid for a plan yet.']);
+                throw ValidationException::withMessages(['coupon' => 'Codes are for sellers that have not paid for a plan yet.']);
             }
 
             if ($subscription->coupon_id !== null) {
-                throw ValidationException::withMessages(['coupon' => 'This lot has already used a code.']);
+                throw ValidationException::withMessages(['coupon' => 'This seller has already used a code.']);
             }
 
             $subscription->fill([

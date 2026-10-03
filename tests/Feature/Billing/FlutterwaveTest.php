@@ -126,7 +126,7 @@ it('keeps old payments and subscriptions with the provider that took them', func
     expect($this->payments->cancelled)->toBe(['SUB_paystack'])->and($this->flutterwave->cancelled)->toBe([]);
 });
 
-it('stops the Paystack renewal when a lot resubscribes through Flutterwave', function () {
+it('stops the Paystack renewal when a seller resubscribes through Flutterwave', function () {
     ($this->checkout)();
     ($this->callback)($this->payments->lastReference());
     Subscription::sole()->forceFill(['provider_ref' => 'SUB_paystack', 'provider_token' => 'tok'])->save();
@@ -163,5 +163,5 @@ it('creates a plan on Flutterwave from the admin', function () {
         ->assertNotified('Plan created on Flutterwave');
 
     expect($this->pro->fresh()->flutterwave_plan_id)->toBe('9001')
-        ->and($this->flutterwave->createdPlans[0])->toBe(['name' => 'LotLink Pro', 'amount' => $this->pro->price]);
+        ->and($this->flutterwave->createdPlans[0])->toBe(['name' => 'CarYard Pro', 'amount' => $this->pro->price]);
 });

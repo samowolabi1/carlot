@@ -65,8 +65,8 @@ class FraudSignal extends Model
         $d = $this->details ?? [];
 
         return match ($this->type) {
-            FraudSignalType::DuplicateVin => 'Same VIN as a '.($d['other_lot'] ?? 'another lot\'s').' listing',
-            FraudSignalType::DuplicatePhoto => 'Cover photo matches '.(isset($d['other_lot']) ? $d['other_lot'].'\'s' : 'another lot\'s'),
+            FraudSignalType::DuplicateVin => 'Same VIN as a '.($d['other_lot'] ?? 'another seller\'s').' listing',
+            FraudSignalType::DuplicatePhoto => 'Cover photo matches '.(isset($d['other_lot']) ? $d['other_lot'].'\'s' : 'another seller\'s'),
             FraudSignalType::LowPrice => 'Price '.($d['below_percent'] ?? '?').'% below guide',
             FraudSignalType::ListingBurst => ($d['count'] ?? '30+').' cars in 24 h',
         };

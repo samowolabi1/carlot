@@ -79,7 +79,7 @@ function preset(kind: 'location' | 'similar' | 'bank' | 'inspection') {
 }
 
 const whatsapp = computed(() =>
-    props.lead.phone ? `https://wa.me/${props.lead.phone.whatsapp}?text=${encodeURIComponent(`Hi ${props.lead.name.split(' ')[0]}, this is ${lot.value.name} on LotLink${props.lead.car ? ` about the ${props.lead.car}` : ''}.`)}` : null,
+    props.lead.phone ? `https://wa.me/${props.lead.phone.whatsapp}?text=${encodeURIComponent(`Hi ${props.lead.name.split(' ')[0]}, this is ${lot.value.name} on CarYard${props.lead.car ? ` about the ${props.lead.car}` : ''}.`)}` : null,
 );
 </script>
 
@@ -105,13 +105,13 @@ const whatsapp = computed(() =>
                     :messages="chat.messages.value"
                     me="lot"
                     :typing="chat.typing.value"
-                    :empty-text="lead.conversation ? 'No messages yet.' : `${lead.name} reached you by ${lead.source_label.toLowerCase()}. Send a message to start a chat in their LotLink app.`"
+                    :empty-text="lead.conversation ? 'No messages yet.' : `${lead.name} reached you by ${lead.source_label.toLowerCase()}. Send a message to start a chat in their CarYard app.`"
                 />
 
                 <div class="flex flex-col gap-2.5 border-t border-line px-4 pt-3 pb-4 md:px-6">
                     <InputError :message="error" />
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('location')">Send lot location</button>
+                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('location')">Send my location</button>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('similar')">Suggest similar cars</button>
                         <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('bank')">Send bank details</button>
                         <button v-if="lead.inspection" type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('inspection')">

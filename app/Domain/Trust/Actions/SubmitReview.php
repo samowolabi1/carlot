@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * One review per completed visit (TDD M14); the buyer can change it for 14 days. The lot's
+ * One review per completed visit (TDD M14); the buyer can change it for 14 days. The seller's
  * owner and managers hear about new reviews.
  */
 class SubmitReview

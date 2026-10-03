@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
- * The automated emails to lot owners, with their defaults. Admins switch each on or off and change
+ * The automated emails to sellers, with their defaults. Admins switch each on or off and change
  * when it goes (the threshold), how often (cooldown days), the subject and the opening line in
  * /admin → Settings → Automated emails; those overrides live in `platform_settings`.
  * Placeholders: {name} (owner's first name), {lot}, {count}.
@@ -26,18 +26,18 @@ final class EngagementRules
     public const RULES = [
         'inactive_owner' => [
             'label' => 'Owner hasn\'t signed in',
-            'description' => 'The lot is live but its owner hasn\'t used LotLink for a while. Includes the lot\'s views, leads and waiting chats.',
+            'description' => 'The seller is live but its owner hasn\'t used CarYard for a while. Includes the seller\'s views, leads and waiting chats.',
             'unit' => 'days', 'threshold' => 30, 'cooldown' => 30,
             'subject' => 'Buyers are still looking at {lot}',
-            'intro' => 'It\'s been a while since you signed in to LotLink. Here\'s what has happened at {lot} in the last 30 days:',
+            'intro' => 'It\'s been a while since you signed in to CarYard. Here\'s what has happened at {lot} in the last 30 days:',
             'cta' => 'Open your dashboard',
         ],
         'no_cars' => [
             'label' => 'No cars uploaded',
-            'description' => 'The lot is approved but has never added a car.',
+            'description' => 'The seller is approved but has never added a car.',
             'unit' => 'days', 'threshold' => 3, 'cooldown' => 7,
             'subject' => 'Add your first cars to {lot}',
-            'intro' => 'Buyers can\'t find {lot} until it has cars. Adding one takes about two minutes: photos, price, done. Lots with 10 or more cars get most of the enquiries.',
+            'intro' => 'Buyers can\'t find {lot} until it has cars. Adding one takes about two minutes: photos, price, done. Sellers with 10 or more cars get most of the enquiries.',
             'cta' => 'Add a car',
         ],
         'drafts_waiting' => [
@@ -50,7 +50,7 @@ final class EngagementRules
         ],
         'setup_incomplete' => [
             'label' => 'Setup not finished',
-            'description' => 'The lot was created but never submitted for approval.',
+            'description' => 'The seller was created but never submitted for approval.',
             'unit' => 'days', 'threshold' => 2, 'cooldown' => 5,
             'subject' => 'Finish setting up {lot}',
             'intro' => 'You\'re nearly there. Add your location and opening hours, then submit {lot} for approval so buyers can find you.',
@@ -58,7 +58,7 @@ final class EngagementRules
         ],
         'pending_actions' => [
             'label' => 'Buyers waiting (daily digest)',
-            'description' => 'Unanswered chats, bookings to confirm, offers, reservations and trade-ins waiting on the lot.',
+            'description' => 'Unanswered chats, bookings to confirm, offers, reservations and trade-ins waiting on the seller.',
             'unit' => 'hours', 'threshold' => 4, 'cooldown' => 1,
             'subject' => 'Buyers are waiting at {lot}',
             'intro' => 'Buyers are waiting for {lot} to answer. Quick replies win sales:',
@@ -66,7 +66,7 @@ final class EngagementRules
         ],
     ];
 
-    /** Local hour (in each lot's time zone) the automated emails go out. */
+    /** Local hour (in each seller's time zone) the automated emails go out. */
     public const DEFAULT_HOUR = 10;
 
     /**

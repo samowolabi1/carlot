@@ -27,7 +27,7 @@ beforeEach(function () {
 });
 
 it('imports good rows as drafts and lists the problems with the others', function () {
-    $this->actingAs($this->owner)->get(route('dealer.vehicles.import.template', $this->lot))->assertOk()->assertDownload('lotlink-stock-template.xlsx');
+    $this->actingAs($this->owner)->get(route('dealer.vehicles.import.template', $this->lot))->assertOk()->assertDownload('caryard-stock-template.xlsx');
 
     $this->actingAs($this->owner)->post(route('dealer.vehicles.import.store', $this->lot), ['file' => ($this->csv)([
         ['4T1B11HK8JU654821', 'Toyota', 'Camry', '2018', 'SE', 'Sedan', '62,400', 'Tokunbo', 'Automatic', 'Petrol', '2.5', 'Silver', 'Paid', '₦12,500,000', 'Yes', 'Clean'],
@@ -59,7 +59,7 @@ it('imports good rows as drafts and lists the problems with the others', functio
     $this->actingAs($this->owner)->get(route('dealer.vehicles.import', $this->lot))->assertInertia(fn (Assert $page) => $page->where('allowed', true)->has('imports', 2));
 });
 
-it('is an Enterprise feature for owners and managers, kept to the lot', function () {
+it('is an Enterprise feature for owners and managers, kept to the seller', function () {
     $sales = User::factory()->staff()->create();
     $this->lot->members()->attach($sales, ['role' => LotRole::Sales->value, 'accepted_at' => now()]);
     $this->actingAs($sales)->get(route('dealer.vehicles.import', $this->lot))->assertForbidden();

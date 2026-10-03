@@ -45,7 +45,7 @@ class SubmitReport
 
             $report->fill(['lot_id' => $lotId, 'reason' => $reason, 'details' => filled($details) ? trim((string) $details) : null, 'status' => ReportStatus::Open, 'handled_by' => null, 'handled_at' => null])->save();
 
-            // A lot reporting a review of itself doesn't hide it: that waits for an admin.
+            // A seller reporting a review of itself doesn't hide it: that waits for an admin.
             if ($subject instanceof Review && $subject->status === ReviewStatus::Visible && ! $member) {
                 $subject->forceFill(['status' => ReviewStatus::Hidden])->save();
                 RefreshLotRating::run($subject->lot_id);
@@ -57,7 +57,7 @@ class SubmitReport
                 if ($open >= Report::HOLD_AFTER) {
                     // save() so the car leaves the search index straight away.
                     $subject->held_at = now();
-                    $subject->held_reason = 'Reported by buyers: LotLink is taking a look';
+                    $subject->held_reason = 'Reported by buyers: CarYard is taking a look';
                     $subject->save();
                 }
             }

@@ -35,11 +35,11 @@ class PlatformStats extends StatsOverviewWidget
         $m = Cache::remember('admin:platform-summary', now()->addMinutes(5), fn () => PlatformMetrics::summary());
 
         return [
-            Stat::make('Active lots', number_format($m['active_lots'])),
+            Stat::make('Active sellers', number_format($m['active_lots'])),
             Stat::make('Live listings', number_format($m['live_listings'])),
             Stat::make('New users', number_format($m['new_users'])),
             Stat::make('Bookings', number_format($m['bookings'])),
-            Stat::make('Recorded sales', Money::format($m['sales_value'], 'NGN') ?? '₦0')->description($m['sales_count'].' delivered in Lot Manager'),
+            Stat::make('Recorded sales', Money::format($m['sales_value'], 'NGN') ?? '₦0')->description($m['sales_count'].' delivered in Sales Manager'),
             Stat::make('MRR', Money::format($m['mrr'], 'NGN') ?? '₦0')->description('Active paid plans'),
             Stat::make('Churn', $m['churn'] === null ? '—' : $m['churn'].'%')->description('Paid plans cancelled'),
         ];

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Notification;
 /**
  * MatchSavedSearches (TDD M4): when a car is published or its price drops, tell buyers whose
  * saved searches it matches (at most one alert per search every 6 hours) and, on a drop, the
- * buyers who saved the car. The lot's own team is never alerted about its own cars.
+ * buyers who saved the car. The seller's own team is never alerted about its own cars.
  */
 class SendPriceAlerts implements ShouldQueue
 {

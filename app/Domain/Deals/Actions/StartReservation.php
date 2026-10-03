@@ -25,9 +25,9 @@ class StartReservation
     public function __construct(private readonly CaptureLead $capture, private readonly DealTimeline $timeline) {}
 
     /**
-     * "Reserve this car" (design 11): records the request and shows the buyer the lot's bank
-     * details. The buyer transfers the deposit to the lot, never to LotLink; the car is only held
-     * once the lot confirms the money arrived (ActivateReservation). Asking again returns the same request.
+     * "Reserve this car" (design 11): records the request and shows the buyer the seller's bank
+     * details. The buyer transfers the deposit to the seller, never to CarYard; the car is only held
+     * once the seller confirms the money arrived (ActivateReservation). Asking again returns the same request.
      */
     public function run(User $customer, Vehicle $vehicle, int $hours): Reservation
     {
@@ -35,11 +35,11 @@ class StartReservation
         $deposit = $lot->reservationDeposit();
 
         if ($deposit === null || LotBankAccount::preferredFor($lot->id) === null) {
-            throw ValidationException::withMessages(['hours' => "{$lot->name} doesn't take reservations on LotLink."]);
+            throw ValidationException::withMessages(['hours' => "{$lot->name} doesn't take reservations on CarYard."]);
         }
 
         if ($customer->hasLotRole($lot)) {
-            throw ValidationException::withMessages(['hours' => 'You work at this lot.']);
+            throw ValidationException::withMessages(['hours' => 'You work for this seller.']);
         }
 
         if (! in_array($hours, Reservation::HOURS, true)) {

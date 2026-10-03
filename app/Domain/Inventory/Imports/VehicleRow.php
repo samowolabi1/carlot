@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 /**
  * One spreadsheet row, checked and turned into the add-car actions' data. Accepts the values or
- * the labels dealers see ("Automatic", "Tokunbo", "₦12,500,000").
+ * the labels sellers see ("Automatic", "Tokunbo", "₦12,500,000").
  */
 final class VehicleRow
 {

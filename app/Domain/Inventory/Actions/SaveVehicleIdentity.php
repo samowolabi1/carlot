@@ -42,7 +42,7 @@ class SaveVehicleIdentity
             'trim' => $data['trim'] ?? null,
         ]);
 
-        // Prefill details from the VIN decode, without overwriting what the dealer entered.
+        // Prefill details from the VIN decode, without overwriting what the seller entered.
         foreach (['engine_cc', 'fuel', 'drivetrain', 'body_type'] as $field) {
             if ($vehicle->{$field} === null && filled($data['decoded'][$field] ?? null)) {
                 $vehicle->{$field} = $data['decoded'][$field];

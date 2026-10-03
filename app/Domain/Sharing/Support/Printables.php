@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
- * Printables for the lot (TDD M6): a gate poster with a QR to the mini-site, and a sheet of
+ * Printables for the seller (TDD M6): a gate poster with a QR to the mini-site, and a sheet of
  * windscreen stickers, one QR per car. Every QR goes through a /c/{code} share link with
  * platform "qr", so scans show up in analytics.
  */

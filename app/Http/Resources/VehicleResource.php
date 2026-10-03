@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Dealer view of a vehicle, for the add/edit flow. Load make, model, media and features.
+ * Seller view of a vehicle, for the add/edit flow. Load make, model, media and features.
  *
  * @mixin Vehicle
  */

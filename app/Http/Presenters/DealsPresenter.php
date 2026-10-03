@@ -15,7 +15,7 @@ use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Money;
 use Carbon\CarbonInterface;
 
-/** Offers, trade-ins and reservations as the buyer and the lot see them (designs 09–11, 19, D7). */
+/** Offers, trade-ins and reservations as the buyer and the seller see them (designs 09–11, 19, D7). */
 final class DealsPresenter
 {
     /** A marketplace car for the offer and reserve pages, or 404. */
@@ -51,13 +51,13 @@ final class DealsPresenter
                 },
             ] : null,
             'reserved_until' => $reservation?->expires_at?->copy()->setTimezone($lot->timezone)->format('D j M, g:ia'),
-            // A request waiting for the buyer's transfer: back to the lot's bank details.
+            // A request waiting for the buyer's transfer: back to the seller's bank details.
             'reservation_request' => $request ? route('reservations.show', $request) : null,
         ];
     }
 
     /**
-     * Asking prices of similar cars on LotLink (same make and model, two years either side):
+     * Asking prices of similar cars on CarYard (same make and model, two years either side):
      * the "Similar cars" bar on the offer sheet (design 09). Needs three to mean anything.
      *
      * @return array{low: int, median: int, high: int, count: int}|null whole naira

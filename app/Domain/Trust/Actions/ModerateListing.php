@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * An admin's decision on a flagged or reported listing (design A1): hide it (it stays off the
- * marketplace and the lot can't republish it) or approve it (back on sale; the reports and
- * signals are closed). Either way the lot is told.
+ * marketplace and the seller can't republish it) or approve it (back on sale; the reports and
+ * signals are closed). Either way the seller is told.
  */
 class ModerateListing
 {
@@ -24,12 +24,12 @@ class ModerateListing
         DB::transaction(function () use ($vehicle, $admin, $reason): void {
             // save() so search drops it straight away.
             $vehicle->held_at = $vehicle->held_at ?? now();
-            $vehicle->held_reason = 'Hidden by LotLink: '.$reason;
+            $vehicle->held_reason = 'Hidden by CarYard: '.$reason;
             $vehicle->save();
 
             $this->close($vehicle, $admin, ReportStatus::Actioned, SignalStatus::Actioned);
             AuditLog::record('admin.listing_hidden', $vehicle, ['reason' => $reason], $admin, $vehicle->lot_id);
-            $vehicle->lot->owner->notify(new ModerationNotice($vehicle->lot, "{$vehicle->title()} was taken off LotLink: {$reason}. Contact LotLink support if you think this is a mistake."));
+            $vehicle->lot->owner->notify(new ModerationNotice($vehicle->lot, "{$vehicle->title()} was taken off CarYard: {$reason}. Contact CarYard support if you think this is a mistake."));
         });
     }
 
@@ -45,7 +45,7 @@ class ModerateListing
             AuditLog::record('admin.listing_approved', $vehicle, [], $admin, $vehicle->lot_id);
 
             if ($wasHeld) {
-                $vehicle->lot->owner->notify(new ModerationNotice($vehicle->lot, "{$vehicle->title()} has been checked and is back on LotLink."));
+                $vehicle->lot->owner->notify(new ModerationNotice($vehicle->lot, "{$vehicle->title()} has been checked and is back on CarYard."));
             }
         });
     }

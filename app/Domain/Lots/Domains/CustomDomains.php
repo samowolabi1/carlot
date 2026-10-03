@@ -11,8 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Custom domains for mini-sites (TDD M6, Enterprise): the lot points its domain at LotLink with a
- * CNAME and proves ownership with a TXT record at _lotlink.{domain}. Verified domains serve the
+ * Custom domains for mini-sites (TDD M6, Enterprise): the seller points its domain at CarYard with a
+ * CNAME and proves ownership with a TXT record at _caryard.{domain}. Verified domains serve the
  * lot's page; the TLS "ask" endpoint only allows these.
  */
 class CustomDomains
@@ -28,11 +28,11 @@ class CustomDomains
         }
 
         if ($domain === self::appHost() || str_ends_with($domain, '.'.self::appHost())) {
-            throw ValidationException::withMessages(['domain' => 'Use a domain you own, not a LotLink address.']);
+            throw ValidationException::withMessages(['domain' => 'Use a domain you own, not a CarYard address.']);
         }
 
         if (Lot::where('custom_domain', $domain)->whereKeyNot($lot->id)->exists()) {
-            throw ValidationException::withMessages(['domain' => 'Another lot already uses that domain.']);
+            throw ValidationException::withMessages(['domain' => 'Another seller already uses that domain.']);
         }
 
         $lot->forceFill(['custom_domain' => $domain, 'domain_token' => Str::lower(Str::random(32)), 'domain_verified_at' => null])->save();
@@ -48,8 +48,8 @@ class CustomDomains
             return false;
         }
 
-        $expected = 'lotlink-verify='.$lot->domain_token;
-        $found = collect($this->dns->txt('_lotlink.'.$lot->custom_domain))->contains(fn (string $txt) => trim($txt, ' "') === $expected);
+        $expected = 'caryard-verify='.$lot->domain_token;
+        $found = collect($this->dns->txt('_caryard.'.$lot->custom_domain))->contains(fn (string $txt) => trim($txt, ' "') === $expected);
 
         if ($found && $lot->domain_verified_at === null) {
             $lot->forceFill(['domain_verified_at' => now()])->save();

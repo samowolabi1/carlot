@@ -25,7 +25,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-/** Advertise (paid to LotLink): homepage and search banners, plus links to car spotlights and featured lots. Owners and managers. */
+/** Advertise (paid to CarYard): homepage and search banners, plus links to car spotlights and featured sellers. Owners and managers. */
 class AdvertController extends Controller
 {
     public function index(Lot $lot): Response
@@ -111,7 +111,7 @@ class AdvertController extends Controller
         return Inertia::location($result['checkout']);
     }
 
-    /** @return list<array<string, mixed>> every way to promote on LotLink, with prices (whole naira) */
+    /** @return list<array<string, mixed>> every way to promote on CarYard, with prices (whole naira) */
     private static function products(Lot $lot): array
     {
         $from = fn (array $options) => $options[0]['price'] ?? null;
@@ -120,7 +120,7 @@ class AdvertController extends Controller
             ['key' => 'home_banner', 'label' => AdPlacement::HomeBanner->label(), 'description' => AdPlacement::HomeBanner->description(), 'from' => $from(AdSchedule::options(AdPlacement::HomeBanner)), 'url' => route('dealer.ads.create', [$lot, 'placement' => 'home_banner'])],
             ['key' => 'search_banner', 'label' => AdPlacement::SearchBanner->label(), 'description' => AdPlacement::SearchBanner->description(), 'from' => $from(AdSchedule::options(AdPlacement::SearchBanner)), 'url' => route('dealer.ads.create', [$lot, 'placement' => 'search_banner'])],
             ['key' => 'spotlight', 'label' => 'Car spotlight', 'description' => 'One car first in matching searches ("Sponsored") and in the home page Spotlight row.', 'from' => $from(SpotlightPricing::options(SpotlightPlacement::Car)), 'url' => route('dealer.vehicles.index', $lot)],
-            ['key' => 'featured', 'label' => 'Featured lot', 'description' => 'Your lot in the "Featured lots" row on the home page.', 'from' => $from(SpotlightPricing::options(SpotlightPlacement::FeaturedLot)), 'url' => route('dealer.billing', $lot).'#featured-heading'],
+            ['key' => 'featured', 'label' => 'Featured seller', 'description' => 'Your business in the "Featured sellers" row on the home page.', 'from' => $from(SpotlightPricing::options(SpotlightPlacement::FeaturedLot)), 'url' => route('dealer.billing', $lot).'#featured-heading'],
         ];
     }
 }

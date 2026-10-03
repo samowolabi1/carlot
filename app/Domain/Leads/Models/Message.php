@@ -57,7 +57,7 @@ class Message extends Model
             'side' => $this->side,
             'body' => $this->body,
             'image' => $this->attachmentUrl(),
-            'sender' => $this->side === self::LOT ? ($this->sender?->name ? explode(' ', $this->sender->name)[0] : 'The lot') : null,
+            'sender' => $this->side === self::LOT ? ($this->sender?->name ? explode(' ', $this->sender->name)[0] : 'The seller') : null,
             'time' => $this->created_at->copy()->setTimezone($timezone)->format('H:i'),
             'day' => $this->created_at->copy()->setTimezone($timezone)->isToday() ? 'Today' : $this->created_at->copy()->setTimezone($timezone)->format('D j M'),
         ];

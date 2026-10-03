@@ -21,7 +21,7 @@ const props = withDefaults(
         lot?: string;
         label?: string;
         compact?: boolean;
-        /** Match the lot page's action tiles (icon over label on phones). */
+        /** Match the seller page's action tiles (icon over label on phones). */
         tile?: boolean;
         /** Offer the share-card images (for Status and Stories). */
         images?: boolean;
@@ -63,7 +63,7 @@ async function cardFile(): Promise<File | null> {
     if (!square) return null;
     try {
         const blob = await (await fetch(square)).blob();
-        return new File([blob], 'lotlink-car.png', { type: 'image/png' });
+        return new File([blob], 'caryard-car.png', { type: 'image/png' });
     } catch {
         return null;
     }
@@ -167,8 +167,8 @@ const item = 'flex h-11 w-full items-center gap-2.5 rounded-xl px-3 text-left te
             <p v-if="note" class="px-3 py-2 text-[13px] text-muted" role="status">{{ note }}</p>
             <template v-if="images && cards">
                 <div class="mx-2 my-1 border-t border-divider" />
-                <a :href="cards.story" download="lotlink-status.png" target="_blank" rel="noopener" :class="item" role="menuitem"><Icon name="download" :size="18" /> Image for Status and Stories</a>
-                <a :href="cards.square" download="lotlink-post.png" target="_blank" rel="noopener" :class="item" role="menuitem"><Icon name="download" :size="18" /> Image for posts</a>
+                <a :href="cards.story" download="caryard-status.png" target="_blank" rel="noopener" :class="item" role="menuitem"><Icon name="download" :size="18" /> Image for Status and Stories</a>
+                <a :href="cards.square" download="caryard-post.png" target="_blank" rel="noopener" :class="item" role="menuitem"><Icon name="download" :size="18" /> Image for posts</a>
             </template>
         </div>
     </div>

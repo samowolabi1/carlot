@@ -67,14 +67,14 @@ class ReportResource extends Resource
         return false;
     }
 
-    /** What was reported, in a line: the car, the lot, or the message text. */
+    /** What was reported, in a line: the car, the seller, or the message text. */
     public static function subject(Report $r): string
     {
         $item = $r->reportable;
 
         return match (true) {
             $item instanceof Vehicle => 'Listing: '.$item->title().($item->isHeld() ? ' (held)' : ''),
-            $item instanceof Lot => 'Lot: '.$item->name,
+            $item instanceof Lot => 'Seller: '.$item->name,
             $item instanceof Message => 'Message: "'.Str::limit($item->body, 90).'"',
             default => 'Removed content',
         };
@@ -91,7 +91,7 @@ class ReportResource extends Resource
                         $r->reportable instanceof Lot => route('lots.show', $r->reportable),
                         default => null,
                     }, shouldOpenInNewTab: true),
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->placeholder('—')->searchable(),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->placeholder('—')->searchable(),
                 Tables\Columns\TextColumn::make('reason')->badge()->formatStateUsing(fn (ReportReason $state) => $state->label())
                     ->description(fn (Report $r) => $r->details ? Str::limit($r->details, 80) : null),
                 Tables\Columns\TextColumn::make('reporter.name')->label('By')->placeholder('—')->description(fn (Report $r) => $r->reporter?->phone)->toggleable(),
@@ -106,7 +106,7 @@ class ReportResource extends Resource
                 // Listings: the same decision as a flagged listing, closing every report on it.
                 Tables\Actions\Action::make('hide')->label('Hide listing')->icon('heroicon-o-eye-slash')->color('danger')
                     ->visible(fn (Report $r) => $r->status === ReportStatus::Open && $r->reportable instanceof Vehicle)
-                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the lot will see')->required()->maxLength(160)->default(fn (Report $r) => $r->reason->label())])
+                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the seller will see')->required()->maxLength(160)->default(fn (Report $r) => $r->reason->label())])
                     ->action(function (Report $r, array $data): void {
                         /** @var Vehicle $vehicle */
                         $vehicle = $r->reportable;
@@ -124,7 +124,7 @@ class ReportResource extends Resource
                     }),
                 Tables\Actions\Action::make('actioned')->label('Dealt with')->icon('heroicon-o-check-badge')
                     ->visible(fn (Report $r) => $r->status === ReportStatus::Open && ! $r->reportable instanceof Vehicle)
-                    ->requiresConfirmation()->modalDescription('Use after acting on it, e.g. suspending the lot or contacting the sender.')
+                    ->requiresConfirmation()->modalDescription('Use after acting on it, e.g. suspending the seller or contacting the sender.')
                     ->action(fn (Report $r) => app(ResolveReport::class)->run($r, self::admin(), ReportStatus::Actioned)),
                 Tables\Actions\Action::make('dismiss')->icon('heroicon-o-x-mark')->color('gray')
                     ->visible(fn (Report $r) => $r->status === ReportStatus::Open && ! $r->reportable instanceof Vehicle)

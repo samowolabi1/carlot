@@ -8,7 +8,7 @@ use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\LotManager\Support\InstalmentSchedule;
 use Illuminate\Console\Command;
 
-/** Hourly (TDD: manager:mark-overdue): unpaid instalments past their date in the lot's time become overdue. */
+/** Hourly (TDD: manager:mark-overdue): unpaid instalments past their date in the seller's time become overdue. */
 class MarkOverdueInstalments extends Command
 {
     protected $signature = 'manager:mark-overdue';

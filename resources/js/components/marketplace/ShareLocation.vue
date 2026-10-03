@@ -2,7 +2,7 @@
 import Icon from '@/components/Icon.vue';
 import { ref } from 'vue';
 
-// "Share lot location" (TDD M8): the lot's name, address and a Google Maps link, sent through
+// "Share lot location" (TDD M8): the seller's name, address and a Google Maps link, sent through
 // the phone's share sheet, or WhatsApp / SMS / copy where there is no share sheet.
 const props = defineProps<{ name: string; address?: string | null; directions: string; block?: boolean }>();
 

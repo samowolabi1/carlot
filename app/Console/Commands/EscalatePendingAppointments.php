@@ -7,12 +7,12 @@ use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use Illuminate\Console\Command;
 
-/** Hourly: booking requests left unconfirmed for 4 hours go to the lot owner (TDD M7). */
+/** Hourly: booking requests left unconfirmed for 4 hours go to the seller (TDD M7). */
 class EscalatePendingAppointments extends Command
 {
     protected $signature = 'appointments:escalate-pending';
 
-    protected $description = 'Alert lot owners about booking requests waiting more than 4 hours';
+    protected $description = 'Alert sellers about booking requests waiting more than 4 hours';
 
     public function handle(NotifyLot $notifyLot): int
     {

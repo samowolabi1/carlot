@@ -43,7 +43,7 @@ function submit() {
     <form class="flex flex-col gap-5" @submit.prevent="submit">
         <div class="card overflow-hidden">
             <div class="relative flex h-40 items-center justify-center bg-sand" :style="coverPreview ? `background:url(${coverPreview}) center/cover` : ''">
-                <span v-if="!coverPreview" class="text-[14px] text-muted">Cover photo: your lot frontage or best cars</span>
+                <span v-if="!coverPreview" class="text-[14px] text-muted">Cover photo: your yard or best cars</span>
             </div>
             <div class="flex items-center gap-4 px-5 pb-5">
                 <div class="-mt-8 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white text-2xl font-bold text-white" :style="{ background: form.brand_color }">
@@ -52,7 +52,7 @@ function submit() {
                 </div>
                 <div class="pt-3">
                     <div class="text-[16px] font-semibold">{{ lot.name }}</div>
-                    <div class="text-[13px] text-muted">How your lot appears to buyers</div>
+                    <div class="text-[13px] text-muted">How your business appears to buyers</div>
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@ beforeEach(function () {
     $this->pro = Plan::where('code', 'pro')->first();
     $this->pro->update(['provider_plan_code' => 'PLN_pro']);
 
-    // A lot paying for Pro, renewing on 1 Nov.
+    // A seller paying for Pro, renewing on 1 Nov.
     $this->owner = User::factory()->staff()->create(['email' => 'ada@primemotors.ng']);
     $this->lot = app(CreateLot::class)->run($this->owner, ['name' => 'Prime Motors', 'phone' => '+2348021112233']);
     Subscription::withoutGlobalScopes()->where('lot_id', $this->lot->id)->update(['plan_id' => $this->pro->id, 'status' => SubscriptionStatus::Active, 'current_period_end' => '2026-11-01 09:00']);
@@ -43,7 +43,7 @@ it('changes the price for new subscribers only: Paystack first, current subscrib
         ->and(AuditLog::where('action', 'admin.plan_price_changed')->sole()->changes)->toMatchArray(['before' => 4_500_000, 'after' => 5_000_000]);
     Notification::assertNothingSent();
 
-    // A lot subscribing now is charged the new price, matching Paystack's plan.
+    // A seller subscribing now is charged the new price, matching Paystack's plan.
     $newOwner = User::factory()->staff()->create(['email' => 'new@lot.ng']);
     $newLot = app(CreateLot::class)->run($newOwner, ['name' => 'New Lot', 'phone' => '+2348021119999']);
     $this->actingAs($newOwner)->post(route('dealer.billing.checkout', $newLot), ['plan' => 'pro'], ['X-Inertia' => 'true']);

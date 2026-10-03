@@ -28,7 +28,7 @@ beforeEach(function () {
         ->filter(fn (EngagementNotice $n) => $n->message->rule === $rule)->values();
 });
 
-it('nudges an owner who hasn\'t signed in for 30 days, with the lot\'s figures', function () {
+it('nudges an owner who hasn\'t signed in for 30 days, with the seller\'s figures', function () {
     Vehicle::factory()->withPhoto()->available()->create(['lot_id' => $this->lot->id]);
     $this->owner->forceFill(['last_seen_at' => now()->subDays(31)])->save();
 
@@ -38,7 +38,7 @@ it('nudges an owner who hasn\'t signed in for 30 days, with the lot\'s figures',
     expect($notice->subject)->toBe('Buyers are still looking at Prime Motors')
         ->and($notice->type)->toBe('nudges')
         ->and($notice->lines[0])->toStartWith('It\'s been a while since you signed in')
-        ->and($notice->lines[1])->toBe('• Your cars are still on LotLink')
+        ->and($notice->lines[1])->toBe('• Your cars are still on CarYard')
         ->and($notice->via($this->owner))->toBe(['database', 'mail'])
         ->and($notice->toMail($this->owner)->actionUrl)->toBe($notice->message->link());
 
@@ -48,7 +48,7 @@ it('nudges an owner who hasn\'t signed in for 30 days, with the lot\'s figures',
     expect(($this->sent)('inactive_owner'))->toHaveCount(1);
 });
 
-it('only sends at the send hour in the lot\'s time zone', function () {
+it('only sends at the send hour in the seller\'s time zone', function () {
     $this->owner->forceFill(['last_seen_at' => now()->subDays(31)])->save();
 
     $this->travelTo('2026-10-05 13:00'); // 14:00 in Lagos
@@ -114,7 +114,7 @@ it('saves admin changes to the automated emails', function () {
     expect(($this->sent)('inactive_owner')->sole()->subject)->toBe('Emeka, Prime Motors misses you')
         ->and(($this->sent)('no_cars'))->toHaveCount(0);
 
-    // A test goes to the admin and doesn't count as the lot's reminder.
+    // A test goes to the admin and doesn't count as the seller's reminder.
     app(RunEngagementRules::class)->test('drafts_waiting', $admin, $this->lot);
     Notification::assertSentTo($admin, EngagementNotice::class, fn (EngagementNotice $n) => str_starts_with($n->subject, '[Test] '));
     expect(EngagementMessage::where('user_id', $admin->id)->sole()->rule)->toBeNull();
@@ -123,7 +123,7 @@ it('saves admin changes to the automated emails', function () {
     $this->actingAs($admin)->get('/admin/engagement/automated-emails')->assertOk()->assertSee('Owner hasn');
 });
 
-it('records when people last used LotLink, at most every 15 minutes', function () {
+it('records when people last used CarYard, at most every 15 minutes', function () {
     $this->owner->forceFill(['last_seen_at' => null])->save();
 
     $this->actingAs($this->owner)->get(route('account'));

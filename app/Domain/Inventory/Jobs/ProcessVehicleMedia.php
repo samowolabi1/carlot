@@ -99,7 +99,7 @@ class ProcessVehicleMedia implements ShouldQueue
         }
     }
 
-    /** After the last retry: show the photo as failed so the dealer can remove it and try again. */
+    /** After the last retry: show the photo as failed so the seller can remove it and try again. */
     public function failed(?Throwable $exception): void
     {
         VehicleMedia::whereKey($this->mediaId)->update(['status' => MediaStatus::Failed, 'error' => 'Processing failed. Remove the photo and add it again.']);

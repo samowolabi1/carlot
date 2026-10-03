@@ -78,7 +78,7 @@ final class Fields
         return [...self::presence($required), 'string', "max:{$max}", new FieldPattern('code')];
     }
 
-    /** A phone number the platform can message: checked with libphonenumber for the lot's region. @return list<mixed> */
+    /** A phone number the platform can message: checked with libphonenumber for the seller's region. @return list<mixed> */
     public static function phone(bool $required = true, ?string $region = null): array
     {
         return [...self::presence($required), 'string', 'max:20', new FieldPattern('phone'), new PhoneNumberRule($region)];

@@ -133,7 +133,7 @@ class FinanceController extends Controller
     {
         $user = $request->user();
         $application = $message->application;
-        // Only the buyer and the lender they chose: never the lot or LotLink staff (Privacy Policy).
+        // Only the buyer and the lender they chose: never the seller or CarYard staff (Privacy Policy).
         $allowed = $application->user_id === $user->id || ($application->lender && $application->lender->roleOf($user) !== null);
         abort_unless($allowed, 404);
 

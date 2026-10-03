@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 
-/** To a lot owner an admin signed up: the lot is ready and how to sign in. */
+/** To a seller an admin signed up: the seller is ready and how to sign in. */
 class LotWelcome extends Mailable implements ShouldQueue
 {
     use Queueable;
@@ -21,7 +21,7 @@ class LotWelcome extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "{$this->lot->name} is set up on LotLink");
+        return new Envelope(subject: "{$this->lot->name} is set up on CarYard");
     }
 
     public function content(): Content

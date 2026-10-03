@@ -90,7 +90,7 @@ function submit() {
             </div>
 
             <div v-if="market" class="flex flex-col gap-2 rounded-[14px] bg-ivory px-3.5 py-3">
-                <span class="text-[13px] font-semibold">Similar cars on LotLink ({{ market.count }})</span>
+                <span class="text-[13px] font-semibold">Similar cars on CarYard ({{ market.count }})</span>
                 <div class="relative h-2 rounded bg-line" aria-hidden="true">
                     <div class="absolute inset-0 rounded bg-[#9DB8B0]" />
                     <div class="absolute -top-[3px] h-3.5 w-0.5 bg-forest" :style="{ left: `${at(market.median)}%` }" />
@@ -107,12 +107,12 @@ function submit() {
             </div>
 
             <label class="flex flex-col gap-1.5 text-[13px] font-semibold">
-                <span>Message to the lot <span class="font-normal text-muted">(optional)</span></span>
+                <span>Message to the seller <span class="font-normal text-muted">(optional)</span></span>
                 <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.message" rows="3" class="field h-auto py-3 font-normal" placeholder="e.g. I can pay this week and would like to test drive first." />
                 <InputError :message="form.errors.message" />
             </label>
 
-            <p class="text-[12px] text-muted">Your offer lasts 48 hours. The lot can accept, decline or counter, and we'll tell you on WhatsApp.</p>
+            <p class="text-[12px] text-muted">Your offer lasts 48 hours. The seller can accept, decline or counter, and we'll tell you on WhatsApp.</p>
 
             <button type="submit" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing || !amount || tooLow || tooHigh">
                 Send offer of {{ formatNaira(amount) }}

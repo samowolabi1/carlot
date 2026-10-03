@@ -28,7 +28,7 @@ it('lets admins approve a pending lot', function () {
     expect($lot->fresh()->status)->toBe(LotStatus::Active);
 });
 
-it('lets admins approve a model a dealer typed in', function () {
+it('lets admins approve a model a seller typed in', function () {
     $admin = User::factory()->admin()->create();
     $make = Make::create(['name' => 'Toyota', 'slug' => 'toyota']);
     $model = VehicleModel::create(['make_id' => $make->id, 'name' => 'Crown Athlete', 'slug' => 'crown-athlete']);

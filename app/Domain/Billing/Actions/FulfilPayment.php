@@ -74,8 +74,8 @@ class FulfilPayment
             PaymentPurpose::Spotlight => $this->spotlight->run(Spotlight::withoutGlobalScopes()->findOrFail($payment->payable_id)),
             PaymentPurpose::Advert => $this->advert->run(AdCampaign::withoutGlobalScopes()->findOrFail($payment->payable_id)),
             PaymentPurpose::Renewal => null,
-            // Buyer checkouts started before LotLink stopped taking payments for cars. A reservation
-            // is now paid to the lot directly, so an old one is closed and the money goes back;
+            // Buyer checkouts started before CarYard stopped taking payments for cars. A reservation
+            // is now paid to the seller directly, so an old one is closed and the money goes back;
             // a test-drive deposit still confirms its booking (or goes back if the slot was released).
             PaymentPurpose::Reservation => $this->closeLegacyReservation($payment),
             PaymentPurpose::Deposit => $this->deposit->run($payment) ?: $this->refund->run($payment),
@@ -85,7 +85,7 @@ class FulfilPayment
     private function closeLegacyReservation(Payment $payment): void
     {
         Reservation::withoutGlobalScopes()->whereKey($payment->payable_id)->where('status', ReservationStatus::Pending)
-            ->update(['status' => ReservationStatus::Failed, 'ended_at' => now(), 'end_reason' => 'Paid online after LotLink stopped taking payments; refunded']);
+            ->update(['status' => ReservationStatus::Failed, 'ended_at' => now(), 'end_reason' => 'Paid online after CarYard stopped taking payments; refunded']);
         $this->refund->run($payment);
     }
 }

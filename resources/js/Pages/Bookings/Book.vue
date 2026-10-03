@@ -130,13 +130,13 @@ function submit() {
                     </button>
                 </div>
                 <p v-else class="card px-4 py-5 text-center text-[14px] text-muted">{{ lot.name }} is closed or fully booked this day. Try another day.</p>
-                <p v-if="days.every((d) => !bookable(d))" class="text-[14px] text-muted">No free times in the next two weeks. Message the lot on WhatsApp to arrange a visit.</p>
+                <p v-if="days.every((d) => !bookable(d))" class="text-[14px] text-muted">No free times in the next two weeks. Message the seller on WhatsApp to arrange a visit.</p>
                 <InputError :message="form.errors.starts_at ?? form.errors.vehicle" />
             </div>
 
             <template v-if="!reschedule">
                 <label class="field-label">
-                    <span>Anything the lot should know? <span class="font-normal text-muted">(optional)</span></span>
+                    <span>Anything the seller should know? <span class="font-normal text-muted">(optional)</span></span>
                     <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.notes" rows="2" class="field h-auto py-3" placeholder="e.g. I'd like to bring my mechanic" />
                 </label>
                 <label class="card flex items-center gap-2.5 px-3.5 py-3 text-[14px]">

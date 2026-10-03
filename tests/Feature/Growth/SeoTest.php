@@ -22,7 +22,7 @@ it('renders landing pages for a make, a model, a city and combinations', functio
     $this->get('/cars/toyota/camry/ikeja')->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('Marketplace/Search')
         ->where('landing.heading', 'Used Toyota Camry cars for sale in Ikeja')
-        ->where('landing.intro', fn ($intro) => str_starts_with($intro, '1 Toyota Camry car for sale in Ikeja at 1 lot on LotLink at ₦12,500,000'))
+        ->where('landing.intro', fn ($intro) => str_starts_with($intro, '1 Toyota Camry car for sale in Ikeja at 1 seller on CarYard at ₦12,500,000'))
         ->where('results.total', 1));
 
     $this->get('/cars/toyota')->assertInertia(fn (Assert $page) => $page
@@ -32,7 +32,7 @@ it('renders landing pages for a make, a model, a city and combinations', functio
     $this->get('/cars/honda/lekki')->assertInertia(fn (Assert $page) => $page->where('results.total', 1));
 
     $html = $this->get('/cars/toyota/camry')->getContent();
-    expect($html)->toContain('<title inertia>Used Toyota Camry cars for sale | LotLink</title>')
+    expect($html)->toContain('<title inertia>Used Toyota Camry cars for sale | CarYard</title>')
         ->toContain('<link rel="canonical" href="'.url('/cars/toyota/camry').'">')
         ->not->toContain('noindex');
 });

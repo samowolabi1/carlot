@@ -34,7 +34,7 @@ it('lists notifications and marks them read', function () {
     $this->get(route('notifications'))->assertInertia(fn (Assert $page) => $page->where('unread.notifications', 0)->where('items.0.new', false));
 });
 
-it('shows buyers and dealers their own notification settings', function () {
+it('shows buyers and sellers their own notification settings', function () {
     $this->actingAs($this->buyer)->get(route('notifications.settings'))
         ->assertInertia(fn (Assert $page) => $page
             ->component('Account/NotificationSettings')

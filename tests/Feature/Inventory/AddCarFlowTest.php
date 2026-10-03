@@ -47,7 +47,7 @@ it('creates a draft from the VIN step and prefills decoded details', function ()
         ->and($vehicle->body_type->value)->toBe('sedan');
 });
 
-it('rejects a VIN already in the lot\'s stock', function () {
+it('rejects a VIN already in the seller\'s stock', function () {
     Vehicle::factory()->create(['lot_id' => $this->lot->id, 'vin' => '4T1B11HK8JU654821', 'vehicle_model_id' => $this->camry->id]);
 
     $this->actingAs($this->lot->owner)->post(route('dealer.vehicles.store', $this->lot), identity())

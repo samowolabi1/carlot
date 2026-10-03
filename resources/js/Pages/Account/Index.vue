@@ -46,7 +46,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 </div>
             </div>
 
-            <nav class="card overflow-hidden" aria-label="Your LotLink">
+            <nav class="card overflow-hidden" aria-label="Your CarYard">
                 <Link :href="route('conversations.index')" :class="row"
                     >Messages<span class="flex items-center gap-2"><span v-if="unread?.messages" class="rounded-full bg-clay px-2 py-0.5 text-[12px] font-semibold text-white">{{ unread.messages }} new</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link
                 >
@@ -55,7 +55,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <Link :href="route('saved')" :class="row">Saved cars<span class="flex items-center gap-2"><span v-if="counts.saved" class="text-[13px] text-muted">{{ counts.saved }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
                 <Link :href="`${route('bookings.index')}#offers`" :class="row">Offers and trade-ins<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('finance.index')" :class="row">Car loan applications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <Link :href="route('following')" :class="row">Lots I follow<span class="flex items-center gap-2"><span v-if="counts.following" class="text-[13px] text-muted">{{ counts.following }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
+                <Link :href="route('following')" :class="row">Sellers I follow<span class="flex items-center gap-2"><span v-if="counts.following" class="text-[13px] text-muted">{{ counts.following }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
                 <Link v-for="l in lenders" :key="l.slug" :href="route('lender.dashboard', l.slug)" :class="row"
                     >Lender portal<span class="flex items-center gap-2"><span class="text-[13px] text-muted">{{ l.name }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link
                 >
@@ -76,11 +76,11 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
             </section>
 
             <nav class="card overflow-hidden" aria-label="Settings">
-                <button v-if="install.canPrompt.value" type="button" :class="row" class="w-full text-left" @click="install.prompt()">Install the LotLink app<Icon name="download" :size="18" class="text-muted" /></button>
+                <button v-if="install.canPrompt.value" type="button" :class="row" class="w-full text-left" @click="install.prompt()">Install the CarYard app<Icon name="download" :size="18" class="text-muted" /></button>
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
                 <Link :href="route('account.security')" :class="row">Sign-in and security<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <Link v-if="!lenders.length" :href="route('lenders.join')" :class="row">Lend with LotLink<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
+                <Link v-if="!lenders.length" :href="route('lenders.join')" :class="row">Lend with CarYard<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <button type="button" :class="row" class="w-full text-left" :aria-expanded="deleting" @click="deleting = !deleting">Privacy and my data<Icon name="chevronDown" :size="18" class="text-muted" :class="{ 'rotate-180': deleting }" /></button>
             </nav>
 
@@ -88,7 +88,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <h2 id="delete-heading" class="font-sans text-[16px] font-bold">Delete my account</h2>
                 <p class="text-[14px] text-muted">
                     Your account closes now. Your name, phone, email, saved cars, searches and budget are removed after 30 days; sign in before then if you change your mind.
-                    Lots you bought from keep their own sales records, as the law requires.
+                    Sellers you bought from keep their own sales records, as the law requires.
                 </p>
                 <label class="flex cursor-pointer items-start gap-3 text-[14px]">
                     <input v-model="deleteForm.confirm" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
@@ -100,12 +100,12 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
 
             <template v-if="lots.length">
                 <Link v-for="lot in lots" :key="lot.url" :href="lot.url" class="flex items-center justify-between rounded-2xl bg-forest p-4 text-white no-underline hover:text-white">
-                    <span class="flex flex-col"><span class="text-[15px] font-semibold">{{ lot.name }}</span><span class="text-[13px] text-mist">Open the dealer dashboard</span></span>
+                    <span class="flex flex-col"><span class="text-[15px] font-semibold">{{ lot.name }}</span><span class="text-[13px] text-mist">Open the seller dashboard</span></span>
                     <Icon name="chevronDown" class="-rotate-90" />
                 </Link>
             </template>
             <Link v-else :href="route('dealer.home')" class="flex flex-col gap-1 rounded-2xl bg-forest p-4 text-white no-underline hover:text-white">
-                <span class="text-[15px] font-semibold">Own a car lot?</span>
+                <span class="text-[15px] font-semibold">Selling cars?</span>
                 <span class="text-[13px] text-mist">List your stock free for up to 10 cars.</span>
             </Link>
 

@@ -29,7 +29,7 @@ beforeEach(function () {
     };
 });
 
-it('gives every lot a referral code and shows the invite page to the owner', function () {
+it('gives every seller a referral code and shows the invite page to the owner', function () {
     expect($this->referrer->referral_code)->toMatch('/^[A-Z0-9]{8}$/');
 
     $this->actingAs($this->referrerOwner)->get(route('dealer.referrals', $this->referrer))
@@ -49,7 +49,7 @@ it('records the referral and adds a month to the referrer\'s trial when the new 
 
     expect(LotReferral::sole())->status->toBe('rewarded')->reward_months->toBe(1)
         ->and(Subscription::where('lot_id', $this->referrer->id)->sole()->trial_ends_at->toIso8601String())->toBe($trialEnds->copy()->addMonth()->toIso8601String())
-        ->and($this->referrerOwner->notifications()->latest()->first()->data['text'])->toContain('Victory Cars joined LotLink with your referral code');
+        ->and($this->referrerOwner->notifications()->latest()->first()->data['text'])->toContain('Victory Cars joined CarYard with your referral code');
 
     // Only once, even if they pay again.
     ($this->pay)($new);

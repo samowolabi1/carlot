@@ -50,7 +50,7 @@ class DeliverBroadcast implements ShouldQueue
                 'url' => $url,
                 'sent_at' => now(),
             ]);
-            $user->notify(new EngagementNotice($message, 'news', $broadcast->title, $lines, $broadcast->cta_label ?: 'Open LotLink', $broadcast->channels));
+            $user->notify(new EngagementNotice($message, 'news', $broadcast->title, $lines, $broadcast->cta_label ?: 'Open CarYard', $broadcast->channels));
         }
 
         $broadcast->update([

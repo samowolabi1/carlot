@@ -19,8 +19,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 /**
- * What lots pay LotLink to promote: homepage and search banners (price and how many run at once),
- * car spotlights and featured lots. Changes apply to new bookings only.
+ * What lots pay CarYard to promote: homepage and search banners (price and how many run at once),
+ * car spotlights and featured sellers. Changes apply to new bookings only.
  *
  * @property Form $form
  */
@@ -77,7 +77,7 @@ class AdvertPriceSettings extends Page implements HasForms
             $banner(AdPlacement::SearchBanner),
             Forms\Components\Section::make('Car spotlight')->description('One car first in matching searches ("Sponsored") and in the home page Spotlight row. Pro plans\' free monthly spotlights stay free.')
                 ->columns(3)->schema($prices('car')),
-            Forms\Components\Section::make('Featured lot')->description('The lot in the "Featured lots" row on the home page.')
+            Forms\Components\Section::make('Featured seller')->description('The seller in the "Featured sellers" row on the home page.')
                 ->columns(3)->schema($prices('featured_lot')),
         ]);
     }

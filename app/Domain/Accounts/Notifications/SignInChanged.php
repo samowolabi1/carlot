@@ -30,9 +30,9 @@ class SignInChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)->subject('Your LotLink sign-in changed')
+        return (new MailMessage)->subject('Your CarYard sign-in changed')
             ->line($this->toArray($notifiable)['text'])
-            ->line('If this wasn\'t you, sign in with a one-time code, remove the password or Google account, and contact LotLink support.')
+            ->line('If this wasn\'t you, sign in with a one-time code, remove the password or Google account, and contact CarYard support.')
             ->action('Check sign-in and security', route('account.security'));
     }
 

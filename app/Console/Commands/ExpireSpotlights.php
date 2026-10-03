@@ -24,7 +24,7 @@ class ExpireSpotlights extends Command
 
         $lots = Lot::where('featured_until', '<=', now())->update(['featured_until' => null]);
 
-        $this->info("Ended {$cars} car spotlights and {$lots} featured lots.");
+        $this->info("Ended {$cars} car spotlights and {$lots} featured sellers.");
 
         return self::SUCCESS;
     }

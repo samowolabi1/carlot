@@ -4,7 +4,7 @@ namespace App\Domain\Advertising\Enums;
 
 enum AdPlacement: string
 {
-    /** The rotating banner at the top of the home page, for every buyer who opens LotLink. */
+    /** The rotating banner at the top of the home page, for every buyer who opens CarYard. */
     case HomeBanner = 'home_banner';
     /** A banner among search results and on city/make landing pages; can target a make, body type or city. */
     case SearchBanner = 'search_banner';
@@ -20,7 +20,7 @@ enum AdPlacement: string
     public function description(): string
     {
         return match ($this) {
-            self::HomeBanner => 'A large banner at the top of the LotLink home page, shown to every buyer. Up to '.self::HomeBanner->slots().' lots rotate at a time.',
+            self::HomeBanner => 'A large banner at the top of the CarYard home page, shown to every buyer. Up to '.self::HomeBanner->slots().' sellers rotate at a time.',
             self::SearchBanner => 'A banner among search results and on city and make pages. Aim it at buyers looking for a make, body type or city.',
         };
     }

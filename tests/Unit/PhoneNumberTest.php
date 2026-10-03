@@ -11,11 +11,11 @@ it('rejects invalid numbers', function () {
     PhoneNumber::normalize('12345');
 })->throws(InvalidArgumentException::class);
 
-it('masks numbers for the dealer UI', function () {
+it('masks numbers for the seller UI', function () {
     expect(PhoneNumber::mask('+2348031234412'))->toBe('+234 803 *** 4412');
 });
 
-it('shortens names for dealer lists', function () {
+it('shortens names for seller lists', function () {
     expect(Name::short('Tunde Adebayo'))->toBe('Tunde A.')
         ->and(Name::short('Chioma Ngozi Okafor'))->toBe('Chioma O.')
         ->and(Name::short('Kemi'))->toBe('Kemi')

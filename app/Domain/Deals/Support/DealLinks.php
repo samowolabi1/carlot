@@ -13,7 +13,7 @@ final class DealLinks
         return route('bookings.index').'#offers';
     }
 
-    /** The lot's Offers and trade-ins page (design D7) on a tab: offers, trade-ins or reservations. */
+    /** The seller's Offers and trade-ins page (design D7) on a tab: offers, trade-ins or reservations. */
     public static function lot(Lot $lot, string $tab): string
     {
         return route('dealer.offers.index', [$lot->slug, 'tab' => $tab]);

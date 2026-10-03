@@ -32,7 +32,7 @@ final class SearchCriteria
         'offers' => 'Open to offers',
         'negotiable' => 'Price negotiable',
         'inspected' => 'Inspected',
-        'verified_lot' => 'Verified lot',
+        'verified_lot' => 'Verified seller',
         'duty_paid' => 'Customs duty paid',
         'registered' => 'Registered in Nigeria',
     ];

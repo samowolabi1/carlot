@@ -69,7 +69,7 @@ class PlanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('price')->formatStateUsing(fn (int $state) => Money::format($state)),
-                Tables\Columns\TextColumn::make('paying')->label('Paying lots')
+                Tables\Columns\TextColumn::make('paying')->label('Paying sellers')
                     // Counted with the table's query (withCount); a plan loaded some other way counts on its own.
                     ->state(fn (Plan $record) => (int) ($record->getAttribute('paying_count') ?? $record->subscriptions()->withoutGlobalScopes()->whereIn('status', [SubscriptionStatus::Active, SubscriptionStatus::PastDue])->count())),
                 Tables\Columns\TextColumn::make('listing_limit')->placeholder('Unlimited'),
@@ -89,7 +89,7 @@ class PlanResource extends Resource
                         MoneyInput::make('price')->label('New price a month')->minValue(100)->maxValue(100_000_000)->required(),
                         Forms\Components\Radio::make('who')->label('Who pays the new price?')->required()
                             ->options([
-                                'new' => 'Only lots that subscribe from now on (current subscribers keep their price)',
+                                'new' => 'Only sellers that subscribe from now on (current subscribers keep their price)',
                                 'all' => 'Everyone, from their next renewal (current subscribers are told)',
                             ]),
                     ])
@@ -113,7 +113,7 @@ class PlanResource extends Resource
                     ->requiresConfirmation()
                     ->action(function (Plan $plan, PaymentGateways $gateways) use ($label, $provider): void {
                         try {
-                            $plan->setCodeFor($provider, $gateways->for($provider)->createPlan("LotLink {$plan->name}", $plan->price, $plan->interval));
+                            $plan->setCodeFor($provider, $gateways->for($provider)->createPlan("CarYard {$plan->name}", $plan->price, $plan->interval));
                             Notification::make()->title("Plan created on {$label}")->success()->send();
                         } catch (Throwable $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();

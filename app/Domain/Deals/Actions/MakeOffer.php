@@ -37,7 +37,7 @@ class MakeOffer
         }
 
         if ($customer->hasLotRole($lot)) {
-            throw ValidationException::withMessages(['amount' => 'You work at this lot.']);
+            throw ValidationException::withMessages(['amount' => 'You work for this seller.']);
         }
 
         if ($amount < intdiv($price, 2)) {

@@ -26,7 +26,7 @@ const lotPoint = computed(() => (props.lot.lat !== null && props.lot.lng !== nul
 const minutesLeft = computed(() => Math.max(0, Math.ceil((new Date(props.session.expires_at).getTime() - now.value) / 60000)));
 const secondsAgo = computed(() => (point.value?.at ? Math.max(0, Math.round((now.value - new Date(point.value.at).getTime()) / 1000)) : null));
 
-// Straight-line distance to the lot; a rough time assumes city traffic (about 25 km/h).
+// Straight-line distance to the seller; a rough time assumes city traffic (about 25 km/h).
 const distanceKm = computed(() => {
     if (!point.value || !lotPoint.value) return null;
     const r = 6371;

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
- * To buyers following a lot: it listed new cars (TDD M5). The in-app bell arrives with
+ * To buyers following a seller: it listed new cars (TDD M5). The in-app bell arrives with
  * the notification centre (S8); WhatsApp goes now, as following is the buyer's opt-in.
  */
 class NewStockAtLot extends Notification implements ShouldQueue
@@ -39,7 +39,7 @@ class NewStockAtLot extends Notification implements ShouldQueue
     {
         $url = route('lots.show', $this->lot->slug);
 
-        return new Message('lot_new_stock', [$this->lot->name, (string) $this->count, $this->example], $this->summary()." See them: {$url} (Unfollow the lot to stop these.)", Message::suffix($url));
+        return new Message('lot_new_stock', [$this->lot->name, (string) $this->count, $this->example], $this->summary()." See them: {$url} (Unfollow the seller to stop these.)", Message::suffix($url));
     }
 
     /** @return array<string, string> */

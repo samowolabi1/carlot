@@ -46,7 +46,7 @@ const toggle =
         <label class="flex items-start justify-between gap-4 border-b border-divider pb-4 text-[15px]">
             <span class="flex flex-col">
                 Take trade-ins from buyers
-                <span class="text-[13px] text-muted">Buyers send photos and details of their car for you to value, towards one of yours. Off: the "Trade in my car" buttons are hidden. Trade-ins you add to a sale in Lot Manager still work.</span>
+                <span class="text-[13px] text-muted">Buyers send photos and details of their car for you to value, towards one of yours. Off: the "Trade in my car" buttons are hidden. Trade-ins you add to a sale in Sales Manager still work.</span>
             </span>
             <input v-model="form.accepts_trade_ins" type="checkbox" role="switch" class="peer sr-only" />
             <span :class="toggle" />
@@ -66,7 +66,7 @@ const toggle =
             <input v-field="{ kind: 'money', min: 1000, max: 50000000 }" v-model="form.reservation_deposit" class="field md:w-64" inputmode="numeric" placeholder="Off" />
             <span class="font-normal text-muted">
                 Buyers transfer this straight to your bank account to hold a car for 24, 48 or 72 hours; you confirm it when it lands, and it counts towards the price.
-                LotLink never handles the money. Leave empty to turn reservations off.
+                CarYard never handles the money. Leave empty to turn reservations off.
             </span>
             <span v-if="!hasBank" class="font-normal text-clay-dark">Add your bank details first (Settings → Bank details) so buyers know where to pay.</span>
             <InputError :message="form.errors.reservation_deposit" />

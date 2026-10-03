@@ -71,7 +71,7 @@ class CustomerBookingController extends Controller
             'tradeIns' => $tradeIns->filter(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->values()->map(fn (TradeIn $t) => DealsPresenter::buyerTradeIn($t, $dealLots[$t->lot_id])),
             'pastDeals' => collect()
                 ->merge($offers->reject($openOffer)->map(fn (Offer $o) => ['key' => "o{$o->ulid}", 'title' => 'Offer on '.$o->vehicle->title(), 'detail' => $o->money().' · '.$dealLots[$o->lot_id]->name, 'status' => $o->status->label(), 'at' => $o->created_at]))
-                ->merge($reservations->reject(fn (Reservation $r) => in_array($r->status, [ReservationStatus::Pending, ReservationStatus::Active], true))->map(fn (Reservation $r) => ['key' => "r{$r->ulid}", 'title' => 'Reservation: '.$r->vehicle->title(), 'detail' => $r->money().' deposit · '.$dealLots[$r->lot_id]->name.($r->payment?->refunded_at || $r->refunded_at ? ' · refunded' : ($r->refund_due ? ' · refund due from the lot' : '')), 'status' => $r->status->label(), 'at' => $r->created_at]))
+                ->merge($reservations->reject(fn (Reservation $r) => in_array($r->status, [ReservationStatus::Pending, ReservationStatus::Active], true))->map(fn (Reservation $r) => ['key' => "r{$r->ulid}", 'title' => 'Reservation: '.$r->vehicle->title(), 'detail' => $r->money().' deposit · '.$dealLots[$r->lot_id]->name.($r->payment?->refunded_at || $r->refunded_at ? ' · refunded' : ($r->refund_due ? ' · refund due from the seller' : '')), 'status' => $r->status->label(), 'at' => $r->created_at]))
                 ->merge($tradeIns->reject(fn (TradeIn $t) => in_array($t->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true))->map(fn (TradeIn $t) => ['key' => "t{$t->ulid}", 'title' => 'Trade-in: '.$t->title(), 'detail' => ($t->estimate() ?? '').' · '.$dealLots[$t->lot_id]->name, 'status' => $t->status->label(), 'at' => $t->created_at]))
                 ->sortByDesc('at')->take(20)->values()->map(fn (array $d) => [...$d, 'at' => $d['at']?->diffForHumans()]),
         ])->withViewData(['meta' => ['title' => 'Bookings and offers', 'robots' => 'noindex']]);
@@ -94,7 +94,7 @@ class CustomerBookingController extends Controller
             ],
             'lot' => MarketplacePresenter::lot($lot),
             'justBooked' => $appointment->created_at->gt(now()->subMinutes(2)) && ! $signed,
-            // Live location (TDD M8): share yours on the way, or follow the lot's.
+            // Live location (TDD M8): share yours on the way, or follow the seller's.
             'location' => [
                 'can_share' => $request->user()?->id === $appointment->customer_id && StartLocationSession::canShare($appointment),
                 'live' => LocationSession::withoutGlobalScopes()->live()->where('appointment_id', $appointment->id)->get()
@@ -116,7 +116,7 @@ class CustomerBookingController extends Controller
         $data = $request->validate(['starts_at' => ['required', 'date']]);
         $reschedule->run($appointment, CarbonImmutable::parse($data['starts_at']), $request->user());
 
-        return redirect()->route('bookings.show', $appointment)->with('success', 'Booking moved. The lot has been told.');
+        return redirect()->route('bookings.show', $appointment)->with('success', 'Booking moved. The seller has been told.');
     }
 
     public function cancel(Request $request, Appointment $appointment, CancelAppointment $cancel): RedirectResponse
@@ -126,7 +126,7 @@ class CustomerBookingController extends Controller
         $data = $request->validate(['reason' => ['nullable', 'string', 'max:200']]);
         $cancel->run($appointment, $appointment->customer, $data['reason'] ?? null);
 
-        return back()->with('success', 'Booking cancelled. The lot has been told.');
+        return back()->with('success', 'Booking cancelled. The seller has been told.');
     }
 
     public function calendar(Request $request, Appointment $appointment): Response
@@ -136,7 +136,7 @@ class CustomerBookingController extends Controller
 
         return response(IcsCalendar::for($appointment, $lot, AppointmentText::what($appointment)." at {$lot->name}"), 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="lotlink-visit.ics"',
+            'Content-Disposition' => 'attachment; filename="caryard-visit.ics"',
         ]);
     }
 
@@ -171,7 +171,7 @@ class CustomerBookingController extends Controller
         ];
     }
 
-    /** A deposit paid online before LotLink stopped taking buyer payments: paid or refunded. @return array<string, mixed>|null */
+    /** A deposit paid online before CarYard stopped taking buyer payments: paid or refunded. @return array<string, mixed>|null */
     private function deposit(Appointment $a, Lot $lot): ?array
     {
         $payment = $a->deposit_payment_id ? Payment::find($a->deposit_payment_id) : null;

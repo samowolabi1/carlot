@@ -10,7 +10,7 @@ use App\Domain\Trust\Registry\RegistryUnavailable;
 
 /**
  * Asks the CAC registry about a submitted number and keeps its answer on the verification, with how well
- * the registered name matches the lot's name. It never approves or rejects: that stays an admin's call.
+ * the registered name matches the seller's name. It never approves or rejects: that stays an admin's call.
  */
 class CheckCompanyRegistry
 {

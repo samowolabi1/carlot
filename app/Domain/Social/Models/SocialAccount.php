@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * A lot's Facebook Page or Instagram Business account (TDD M9 auto-post). The page token is
+ * A seller's Facebook Page or Instagram Business account (TDD M9 auto-post). The page token is
  * encrypted at rest and never leaves the server.
  *
  * @property int $id

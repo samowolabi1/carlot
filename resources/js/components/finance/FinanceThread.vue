@@ -66,7 +66,7 @@ function send() {
                     <Icon name="send" :size="18" /> {{ form.processing ? 'Sending…' : 'Send' }}
                 </button>
             </div>
-            <span class="text-[12px] text-muted">PDF or photo, up to {{ Math.round(maxKb / 1024) }} MB. Only you and the other side can open it; the car lot never sees it.</span>
+            <span class="text-[12px] text-muted">PDF or photo, up to {{ Math.round(maxKb / 1024) }} MB. Only you and the other side can open it; the seller never sees it.</span>
             <InputError :message="form.errors.file" />
         </form>
     </section>

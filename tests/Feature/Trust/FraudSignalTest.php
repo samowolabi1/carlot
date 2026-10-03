@@ -87,7 +87,7 @@ it('lets admins clear or act on flagged listings', function () {
     $this->get('/admin/fraud-signals')->assertOk();
     Livewire::test(ListFraudSignals::class)
         ->assertCanSeeTableRecords([$signal])
-        ->callTableAction('message', $signal, ['note' => 'Please confirm which lot currently holds this car.'])
+        ->callTableAction('message', $signal, ['note' => 'Please confirm which seller currently holds this car.'])
         ->callTableAction('hide', $signal, ['reason' => 'Same VIN as another lot']);
 
     expect($copy->fresh()->isHeld())->toBeTrue()->and($signal->fresh()->status->value)->toBe('actioned')

@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * One scheduled amount in an order's instalment plan (TDD M19). The lot's own arrangement:
- * LotLink only records and reminds. paid_amount and status come from InstalmentSchedule.
+ * One scheduled amount in an order's instalment plan (TDD M19). The seller's own arrangement:
+ * CarYard only records and reminds. paid_amount and status come from InstalmentSchedule.
  *
  * @property int $id
  * @property int $lot_id

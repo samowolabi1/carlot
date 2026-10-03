@@ -22,7 +22,7 @@ final class AppointmentText
         return $appointment->type->label().($vehicle ? ' · '.$vehicle->title() : '');
     }
 
-    /** "Tue 29 Sep, 10:30" in the lot's timezone */
+    /** "Tue 29 Sep, 10:30" in the seller's timezone */
     public static function when(Appointment $appointment, Lot $lot): string
     {
         return $appointment->whenLabel($lot->timezone);

@@ -9,7 +9,7 @@ import { listenForInstall } from './composables/usePwaInstall';
 import { field } from './directives/field';
 import { registerServiceWorker } from './lib/pwa';
 
-const appName = import.meta.env.VITE_APP_NAME || 'LotLink';
+const appName = import.meta.env.VITE_APP_NAME || 'CarYard';
 
 createInertiaApp({
     title: (title) => (title ? `${title} · ${appName}` : appName),

@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 /**
  * A hold on a car for 24, 48 or 72 hours (TDD M12). The buyer transfers the deposit straight to
- * the lot's bank account (LotLink never holds it) quoting `reference`; the hold starts when the
+ * the seller's bank account (CarYard never holds it) quoting `reference`; the hold starts when the
  * lot confirms the money arrived (`ActivateReservation`). One active reservation per car; the
  * car shows as Reserved. A sale converts it and the deposit counts towards the price.
  *
@@ -28,7 +28,7 @@ use Illuminate\Support\Str;
  * @property int $customer_id
  * @property int|null $lead_id
  * @property int|null $offer_id
- * @property int|null $payment_id only for deposits paid online before LotLink stopped taking buyer payments
+ * @property int|null $payment_id only for deposits paid online before CarYard stopped taking buyer payments
  * @property string|null $reference
  * @property int $amount
  * @property int $price
@@ -53,7 +53,7 @@ class Reservation extends Model
 
     public const HOURS = [24, 48, 72];
 
-    /** A request lapses if the lot hasn't confirmed the transfer within this many hours. */
+    /** A request lapses if the seller hasn't confirmed the transfer within this many hours. */
     public const PAY_WITHIN_HOURS = 12;
 
     protected $fillable = ['lot_id', 'vehicle_id', 'customer_id', 'lead_id', 'offer_id', 'payment_id', 'amount', 'price', 'currency', 'hours', 'status', 'reference', 'pay_by', 'buyer_paid_at', 'confirmed_by', 'refund_due', 'refunded_at', 'activated_at', 'expires_at', 'ended_at', 'end_reason', 'sales_order_id'];

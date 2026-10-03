@@ -8,9 +8,9 @@
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-title" content="LotLink">
+        <meta name="apple-mobile-web-app-title" content="CarYard">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <title inertia>{{ $meta['title'] ?? config('app.name', 'LotLink') }}</title>
+        <title inertia>{{ $meta['title'] ?? config('app.name', 'CarYard') }}</title>
         {{-- Server-rendered so link previews (WhatsApp, Facebook, X) and search engines see them without JavaScript. --}}
         @isset($meta)
             @if (! empty($meta['description']))
@@ -20,7 +20,7 @@
                 <meta name="robots" content="{{ $meta['robots'] }}">
             @endif
             <link rel="canonical" href="{{ $meta['url'] ?? url()->current() }}">
-            <meta property="og:site_name" content="{{ config('app.name', 'LotLink') }}">
+            <meta property="og:site_name" content="{{ config('app.name', 'CarYard') }}">
             <meta property="og:type" content="{{ $meta['type'] ?? 'website' }}">
             <meta property="og:title" content="{{ $meta['title'] }}">
             @if (! empty($meta['description']))

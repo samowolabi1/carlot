@@ -113,7 +113,7 @@ it('posts new listings once, with a JPEG and a tracked link, and records failure
     expect(SocialPost::withoutGlobalScopes()->where('social_account_id', $account->id)->where('vehicle_id', $failed[0]->vehicle_id)->value('status'))->toBe('posted');
 });
 
-it('keeps social settings to owners and managers of the lot', function () {
+it('keeps social settings to owners and managers of the seller', function () {
     $other = User::factory()->staff()->create();
     app(CreateLot::class)->run($other, ['name' => 'Other Autos', 'phone' => '+2348021119999']);
     $this->actingAs($other)->get(route('dealer.social.connect', $this->lot))->assertForbidden();

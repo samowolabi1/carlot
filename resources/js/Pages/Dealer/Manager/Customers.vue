@@ -28,7 +28,7 @@ watch(search, () => list.later(() => params(props.filters.tag)));
     <DealerLayout>
         <div>
             <h1 class="text-[30px] font-bold">Customers</h1>
-            <span class="text-[14px] text-muted">{{ total }} in your customer book · only your lot can see them</span>
+            <span class="text-[14px] text-muted">{{ total }} in your customer book · only your business can see them</span>
         </div>
 
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

@@ -81,6 +81,6 @@ class AnalyticsController extends Controller
                 fputcsv($out, array_map(fn ($v) => $v ?? '', $row));
             }
             fclose($out);
-        }, "lotlink-{$lot->slug}-{$type}-".now($tz)->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, "caryard-{$lot->slug}-{$type}-".now($tz)->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

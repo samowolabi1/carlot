@@ -30,7 +30,7 @@ class FinanceUpdate extends Notification implements ShouldQueue
     {
         return (new MailMessage)->subject('Your car loan application')->line($this->text)
             ->action('See your application', route('finance.show', $this->application))
-            ->line('LotLink doesn\'t lend money: '.$this->application->lenderName().' makes the decisions.');
+            ->line('CarYard doesn\'t lend money: '.$this->application->lenderName().' makes the decisions.');
     }
 
     /** @return array<string, string> */

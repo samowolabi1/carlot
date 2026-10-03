@@ -53,7 +53,7 @@ class ConversationController extends Controller
         ])->withViewData(['meta' => ['title' => 'Messages', 'robots' => 'noindex']]);
     }
 
-    /** "Chat" on a car or lot page: opens (or starts) the buyer's conversation with the lot. */
+    /** "Chat" on a car or lot page: opens (or starts) the buyer's conversation with the seller. */
     public function store(Request $request, StartConversation $start): RedirectResponse
     {
         return $this->begin($request, $start);
@@ -82,7 +82,7 @@ class ConversationController extends Controller
             : null;
         $lot = $vehicle->lot ?? Lot::where('slug', $data['lot'] ?? '')->where('status', LotStatus::Active)->first();
         abort_if($lot === null, 404);
-        abort_if($request->user()->hasLotRole($lot), 403, 'You work at this lot.');
+        abort_if($request->user()->hasLotRole($lot), 403, 'You work for this seller.');
 
         $conversation = $start->run($request->user(), $lot, $vehicle, $data['body'] ?? null);
 

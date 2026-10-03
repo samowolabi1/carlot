@@ -18,7 +18,7 @@ use Throwable;
 
 /**
  * An admin changes a plan's monthly price. Each provider with the plan (Paystack, Flutterwave) is
- * updated first (its plan is what renews cards), so LotLink and the providers never disagree about
+ * updated first (its plan is what renews cards), so CarYard and the providers never disagree about
  * what a new subscriber pays. Current subscribers either keep their price or pay the new one from
  * their next renewal, and are told. Flutterwave can't reprice a plan, so it gets a new plan for new
  * subscribers, and "everyone" is refused while it bills anyone on this plan.
@@ -37,7 +37,7 @@ class ChangePlanPrice
             throw ValidationException::withMessages(['price' => 'The free plan stays free. Change a paid plan instead.']);
         }
         if (! $plan->isFree() && $new <= 0) {
-            throw ValidationException::withMessages(['price' => 'A paid plan needs a price. Lots move to the free plan by downgrading.']);
+            throw ValidationException::withMessages(['price' => 'A paid plan needs a price. Sellers move to the free plan by downgrading.']);
         }
         if ($new === $old) {
             return 0;

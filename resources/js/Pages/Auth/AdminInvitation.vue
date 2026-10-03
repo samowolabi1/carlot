@@ -13,7 +13,7 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Join the LotLink admin team" />
+    <Head title="Join the CarYard admin team" />
     <AuthLayout>
         <form class="flex flex-col gap-5" @submit.prevent="submit">
             <div class="flex flex-col gap-1.5">

@@ -42,7 +42,7 @@ class SendOtp
             $used = $this->messenger->send($phone, new Message(
                 template: 'login_code',
                 params: [$code],
-                text: "Your LotLink code is {$code}. It expires in {$config['ttl_minutes']} minutes. Don't share it with anyone.",
+                text: "Your CarYard code is {$code}. It expires in {$config['ttl_minutes']} minutes. Don't share it with anyone.",
                 authentication: true,
             ), preferWhatsApp: $channel === 'whatsapp', smsFallback: $fallback);
         } catch (Throwable $e) {

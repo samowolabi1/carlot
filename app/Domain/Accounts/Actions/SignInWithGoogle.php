@@ -20,7 +20,7 @@ use Laravel\Socialite\Contracts\User as GoogleUser;
  */
 class SignInWithGoogle
 {
-    public const TAKEN = 'That Google account is already linked to another LotLink account.';
+    public const TAKEN = 'That Google account is already linked to another CarYard account.';
 
     public function run(GoogleUser $google, ?User $current = null): User
     {
@@ -55,7 +55,7 @@ class SignInWithGoogle
             }
 
             if (! $user->reopenForSignIn()) {
-                throw ValidationException::withMessages(['google' => 'That account was closed. Contact LotLink support.']);
+                throw ValidationException::withMessages(['google' => 'That account was closed. Contact CarYard support.']);
             }
 
             return $user->google_id === $id ? $this->fillIn($user, $google, $email) : $this->link($user, $id, $email, $google);

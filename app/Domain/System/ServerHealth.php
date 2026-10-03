@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
- * What the server needs for LotLink, checked from inside the app: PHP and its extensions, writable folders, the image
+ * What the server needs for CarYard, checked from inside the app: PHP and its extensions, writable folders, the image
  * repository, the cron job (and the queue it drives on shared hosting), mail, search and the built front end. Used by
  * `php artisan lotlink:doctor` and /admin → System health, so a cPanel install can be checked without SSH.
  */

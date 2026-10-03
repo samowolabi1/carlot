@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/** To the lot's owner and managers: their advert was approved, rejected (and refunded) or taken down. */
+/** To the seller's owner and managers: their advert was approved, rejected (and refunded) or taken down. */
 class AdReviewed extends Notification implements ShouldQueue
 {
     use Queueable;
@@ -43,14 +43,14 @@ class AdReviewed extends Notification implements ShouldQueue
     {
         $c = $this->campaign;
         $from = $c->starts_at?->copy()->setTimezone($this->lot->timezone)->format('D j M, g:ia');
-        $note = $c->review_note ? " LotLink's note: {$c->review_note}" : '';
+        $note = $c->review_note ? " CarYard's note: {$c->review_note}" : '';
 
         return [
             'kind' => 'billing',
             'text' => match ($this->event) {
                 'approved' => "Your {$c->placement->label()} \"{$c->headline}\" is approved and runs from {$from} for {$c->days} days.",
                 'rejected' => "Your {$c->placement->label()} \"{$c->headline}\" wasn't approved and {$c->money()} is being refunded.{$note}",
-                default => "LotLink took down your {$c->placement->label()} \"{$c->headline}\".{$note}",
+                default => "CarYard took down your {$c->placement->label()} \"{$c->headline}\".{$note}",
             },
             'url' => route('dealer.ads.index', $this->lot),
         ];

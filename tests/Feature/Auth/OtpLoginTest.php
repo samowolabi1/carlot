@@ -52,7 +52,7 @@ it('signs an existing user back in without creating a duplicate', function () {
     expect(User::count())->toBe(1);
 });
 
-it('asks new users for their name before the dealer area', function () {
+it('asks new users for their name before the seller area', function () {
     $user = User::factory()->unnamed()->create();
 
     $this->actingAs($user)->get(route('dealer.home'))->assertRedirect(route('profile.name'));

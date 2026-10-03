@@ -131,7 +131,7 @@ function onDrop(e: DragEvent, date: string) {
     reschedule(a, date, time);
 }
 
-// Drops send the lot-local date and time; the drawer sends a slot's exact UTC start.
+// Drops send the seller-local date and time; the drawer sends a slot's exact UTC start.
 function reschedule(a: Item, date: string, time: string, startsAt?: string) {
     const payload = startsAt ? { starts_at: startsAt } : { date, time };
     router.patch(route('dealer.appointments.update', [slug.value, a.ulid]), payload, { preserveScroll: true, onSuccess: () => (selected.value = null) });
@@ -353,7 +353,7 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
                         class="flex items-center gap-2 text-[14px] font-semibold no-underline"
                     >
                         <span class="h-2.5 w-2.5 rounded-full bg-[#22C55E]" aria-hidden="true" />
-                        {{ l.side === 'customer' ? `${l.who} is sharing live location` : `${l.who} is sharing the lot's location` }} · View
+                        {{ l.side === 'customer' ? `${l.who} is sharing live location` : `${l.who} is sharing the seller's location` }} · View
                     </Link>
                     <form v-if="selected.location.can_share" class="flex items-center gap-2" @submit.prevent="shareLocation">
                         <label class="text-[13px]">

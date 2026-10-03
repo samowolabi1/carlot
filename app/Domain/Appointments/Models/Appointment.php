@@ -153,7 +153,7 @@ class Appointment extends Model
         return $this->isActive() && $this->starts_at->isFuture();
     }
 
-    /** "Tue 29 Sep, 10:30" in the lot's timezone. */
+    /** "Tue 29 Sep, 10:30" in the seller's timezone. */
     public function whenLabel(string $timezone): string
     {
         return $this->starts_at->copy()->setTimezone($timezone)->format('D j M, H:i');

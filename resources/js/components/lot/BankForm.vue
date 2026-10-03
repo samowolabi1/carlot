@@ -45,7 +45,7 @@ function makeDefault(account: BankAccount) {
         <div>
             <h2 class="font-sans text-[16px] font-bold">Bank details for customers</h2>
             <p class="text-[14px] text-muted">
-                Customers pay your lot directly: LotLink never collects money for cars. Your team can send these details from an order, a chat or a reservation when the
+                Customers pay you directly: CarYard never collects money for cars. Your team can send these details from an order, a chat or a reservation when the
                 customer is ready to pay.
             </p>
         </div>
@@ -72,7 +72,7 @@ function makeDefault(account: BankAccount) {
                 </span>
             </li>
         </ul>
-        <p v-else-if="!bank.can_edit" class="text-[14px] text-muted">No bank details yet. Ask the lot owner to add them.</p>
+        <p v-else-if="!bank.can_edit" class="text-[14px] text-muted">No bank details yet. Ask the seller to add them.</p>
 
         <form v-if="editing" class="flex flex-col gap-3 rounded-xl border border-line bg-ivory p-4" @submit.prevent="save">
             <h3 class="font-sans text-[15px] font-bold">{{ editing === 'new' ? 'Add an account' : 'Edit account' }}</h3>
@@ -105,6 +105,6 @@ function makeDefault(account: BankAccount) {
         <button v-else-if="bank.can_edit && bank.accounts.length < bank.max" type="button" class="btn btn-outline h-11 self-start" @click="start(null)">
             <Icon name="plus" :size="18" /> Add another account
         </button>
-        <p v-if="!bank.can_edit && bank.accounts.length" class="text-[13px] text-muted">Only the lot owner can change these.</p>
+        <p v-if="!bank.can_edit && bank.accounts.length" class="text-[13px] text-muted">Only the seller can change these.</p>
     </div>
 </template>

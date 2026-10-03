@@ -106,14 +106,14 @@ it('schedules a broadcast and sends it when due', function () {
 
 it('tracks clicks, and lets people unsubscribe from news emails', function () {
     $this->actingAs($this->admin);
-    ($this->create)(['cta_url' => 'https://lotlink.ng/blog/whatsapp-status', 'audience' => ['states' => ['Kano']]]);
+    ($this->create)(['cta_url' => 'https://caryardng.com/blog/whatsapp-status', 'audience' => ['states' => ['Kano']]]);
     Livewire::test(ListBroadcasts::class)->callTableAction('send', Broadcast::sole());
 
     $message = EngagementMessage::sole();
     expect($this->kanoOwner->notifications()->sole()->data)->toMatchArray(['kind' => 'news', 'text' => 'Share cars to WhatsApp status', 'url' => route('engagement.click', $message)]);
 
     auth()->logout();
-    $this->get(route('engagement.click', $message))->assertRedirect('https://lotlink.ng/blog/whatsapp-status');
+    $this->get(route('engagement.click', $message))->assertRedirect('https://caryardng.com/blog/whatsapp-status');
     expect($message->fresh()->clicked_at)->not->toBeNull();
     Livewire::actingAs($this->admin)->test(ListBroadcasts::class)->assertTableColumnStateSet('opened', '1 (100%)', Broadcast::sole());
 

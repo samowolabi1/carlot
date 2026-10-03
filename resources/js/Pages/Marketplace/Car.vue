@@ -74,7 +74,7 @@ function goTo(i: number) {
 
 const whatsappHref = computed(() => {
     if (!props.lot.whatsapp) return null;
-    const text = `Hi ${props.lot.name}, I'm interested in the ${props.car.title}${props.car.price ? ` (${props.car.price})` : ''} I saw on LotLink: ${props.car.url}`;
+    const text = `Hi ${props.lot.name}, I'm interested in the ${props.car.title}${props.car.price ? ` (${props.car.price})` : ''} I saw on CarYard: ${props.car.url}`;
     return `https://wa.me/${props.lot.whatsapp}?text=${encodeURIComponent(text)}`;
 });
 const bookHref = computed(() => route('bookings.create', { lot: props.lot.slug, car: props.car.ulid }));
@@ -88,7 +88,7 @@ function intent(source: 'whatsapp' | 'call') {
     if (user.value && !ownLot.value) recordIntent(source, { vehicle: props.car.ulid });
 }
 
-/** In-app chat with the lot (design 15). Guests sign in first and come back to the thread. */
+/** In-app chat with the seller (design 15). Guests sign in first and come back to the thread. */
 function message() {
     if (!user.value) {
         router.visit(route('conversations.start', { vehicle: props.car.ulid }));
@@ -192,7 +192,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <span v-if="car.reserved" class="rounded-xl bg-ink px-2.5 py-1 text-[12px] font-semibold text-white">Reserved</span>
                         <span v-if="car.new_arrival" class="rounded-xl bg-blush px-2.5 py-1 text-[12px] font-semibold text-clay-dark">New arrival</span>
                         <span v-if="car.inspection" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">{{ car.inspection.independent ? 'Independently inspected' : 'Inspected' }}</span>
-                        <span v-if="lot.verified" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">Verified lot</span>
+                        <span v-if="lot.verified" class="rounded-xl bg-map px-2.5 py-1 text-[12px] font-semibold text-forest">Verified seller</span>
                         <span v-if="withinBudget" class="rounded-xl bg-[#E3F1E8] px-2.5 py-1 text-[12px] font-semibold text-success">Within your budget</span>
                     </div>
 
@@ -261,7 +261,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Link :href="route('bookings.index')" class="ml-auto shrink-0 font-semibold">Details</Link>
                     </p>
                     <p v-else-if="deals?.reservation_request" class="card flex items-center gap-2.5 border-2 border-clay px-4 py-3 text-[14px]">
-                        <Icon name="card" :size="20" class="shrink-0 text-clay" /> You asked to reserve this car. Pay the lot's deposit to hold it.
+                        <Icon name="card" :size="20" class="shrink-0 text-clay" /> You asked to reserve this car. Pay the seller's deposit to hold it.
                         <Link :href="deals.reservation_request" class="ml-auto shrink-0 font-semibold">Payment details</Link>
                     </p>
                     <p v-else-if="deals?.my_offer" class="card flex items-center gap-2.5 px-4 py-3 text-[14px]" :class="{ 'border-2 border-clay': deals.my_offer.status === 'countered' }">
@@ -269,11 +269,11 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Link :href="`${route('bookings.index')}#offers`" class="ml-auto shrink-0 font-semibold">{{ deals.my_offer.status === 'countered' ? 'Answer' : 'View' }}</Link>
                     </p>
 
-                    <!-- Design 06: Reserve with deposit · Trade in my car (and the lot's phone, on phones). -->
+                    <!-- Design 06: Reserve with deposit · Trade in my car (and the seller's phone, on phones). -->
                     <div v-if="canDeal && !sold" class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-semibold">
                         <Link v-if="deals?.reserve && !deals.reservation_request" :href="reserveHref" class="inline-flex min-h-11 items-center">Reserve with deposit</Link>
                         <Link v-if="deals?.trade_ins" :href="tradeInHref" class="inline-flex min-h-11 items-center">Trade in my car</Link>
-                        <a v-if="lot.phone && deals?.offers" :href="`tel:${lot.phone}`" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('call')">Call the lot</a>
+                        <a v-if="lot.phone && deals?.offers" :href="`tel:${lot.phone}`" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('call')">Call the seller</a>
                         <a v-if="whatsappHref && deals?.offers" :href="whatsappHref" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center lg:hidden" @click="intent('whatsapp')">WhatsApp</a>
                     </div>
 
@@ -282,8 +282,8 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <Link v-if="inspector" :href="route('inspector.create', car.ulid)" class="inline-flex min-h-11 items-center gap-1.5 text-[13px] font-semibold"><Icon name="clipboard" :size="15" /> Add an independent inspection</Link>
                     </div>
                     <p v-if="!preview" class="text-[12px] leading-snug text-muted">
-                        Listed by {{ lot.name }}, who is responsible for this car and its description. Check the car and its papers before paying, and pay only the lot's own
-                        account. LotLink doesn't sell cars or take payment for them. <Link :href="route('legal.show', 'security')">Stay safe</Link>
+                        Listed by {{ lot.name }}, who is responsible for this car and its description. Check the car and its papers before paying, and pay only the seller's own
+                        account. CarYard doesn't sell cars or take payment for them. <Link :href="route('legal.show', 'security')">Stay safe</Link>
                     </p>
                 </div>
             </div>
@@ -305,7 +305,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
                             <Link v-if="canDeal && deals?.offers" :href="offerHref" class="btn btn-outline w-full"><Icon name="tag" :size="18" /> Make an offer</Link>
-                            <button v-if="!ownLot" type="button" class="btn btn-outline w-full" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Message the lot</button>
+                            <button v-if="!ownLot" type="button" class="btn btn-outline w-full" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Message the seller</button>
                             <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline w-full" @click="intent('whatsapp')"><Icon name="whatsapp" :size="18" /> Chat on WhatsApp</a>
                             <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline w-full" @click="intent('call')"><Icon name="phone" :size="18" /> Call {{ lot.phone_display }}</a>
                         </template>
@@ -325,8 +325,8 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
         <!-- Phone action bar -->
         <div v-if="!sold && !preview" class="fixed inset-x-0 bottom-[76px] z-30 flex gap-2.5 border-t border-line bg-white px-5 pt-3 pb-3 md:hidden">
             <template v-if="!(canDeal && deals?.offers)">
-                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the lot" @click="intent('call')"><Icon name="phone" :size="20" /></a>
-                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="WhatsApp the lot" @click="intent('whatsapp')"><Icon name="whatsapp" :size="20" /></a>
+                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="Call the seller" @click="intent('call')"><Icon name="phone" :size="20" /></a>
+                <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" class="btn btn-outline h-[52px] w-[52px] shrink-0 rounded-[14px] px-0" aria-label="WhatsApp the seller" @click="intent('whatsapp')"><Icon name="whatsapp" :size="20" /></a>
             </template>
             <button v-if="!ownLot" type="button" class="btn btn-outline h-[52px] shrink-0 rounded-[14px] px-3" :disabled="starting" @click="message"><Icon name="chat" :size="18" /> Chat</button>
             <Link v-if="canDeal && deals?.offers" :href="offerHref" class="btn btn-outline h-[52px] shrink-0 rounded-[14px] px-3.5">Offer</Link>

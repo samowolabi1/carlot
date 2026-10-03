@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('LotLink Admin')
+            ->brandName('CarYard Admin')
             ->defaultAvatarProvider(InitialsAvatar::class)
             ->colors([
                 'primary' => Color::hex('#C2410C'),

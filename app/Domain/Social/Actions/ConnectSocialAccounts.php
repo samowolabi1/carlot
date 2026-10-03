@@ -9,7 +9,7 @@ use App\Domain\Social\Models\SocialAccount;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Saves the Page (and its Instagram account) a dealer connected. A lot has one of each;
+ * Saves the Page (and its Instagram account) a seller connected. A seller has one of each;
  * connecting again replaces them. When Meta returns several Pages, the first one is used.
  */
 class ConnectSocialAccounts

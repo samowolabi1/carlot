@@ -35,10 +35,10 @@ class DomainController extends Controller
         $this->authorizeDomain($lot);
         $domains->remove($lot, $request->user());
 
-        return back()->with('success', 'Custom domain removed. Your LotLink link keeps working.');
+        return back()->with('success', 'Custom domain removed. Your CarYard link keeps working.');
     }
 
-    /** Caddy on-demand TLS "ask" endpoint: certificates only for LotLink and verified lot domains. */
+    /** Caddy on-demand TLS "ask" endpoint: certificates only for CarYard and verified seller domains. */
     public function allowed(Request $request): Response
     {
         $domain = CustomDomains::normalise((string) $request->query('domain'));

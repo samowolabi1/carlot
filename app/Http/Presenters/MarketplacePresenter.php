@@ -115,7 +115,7 @@ class MarketplacePresenter
             'ulid' => $i->ulid,
             'score' => $i->score,
             'independent' => $i->isIndependent(),
-            'label' => $i->isIndependent() ? 'Independently inspected' : 'Inspected by the lot',
+            'label' => $i->isIndependent() ? 'Independently inspected' : 'Inspected by the seller',
             'inspector' => $i->inspector_name,
             'date' => $i->created_at?->timezone($timezone)->format('j M Y'),
             'summary' => $i->summary,
@@ -157,7 +157,7 @@ class MarketplacePresenter
         ];
     }
 
-    /** A visible review on the lot's pages: first name and initial only (design 17). */
+    /** A visible review on the seller's pages: first name and initial only (design 17). */
     public static function review(Review $r, string $timezone, ?int $viewerId = null): array
     {
         return [

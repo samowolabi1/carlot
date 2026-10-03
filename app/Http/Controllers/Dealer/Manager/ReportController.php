@@ -38,7 +38,7 @@ class ReportController extends Controller
         if ($request->query('export') === 'xlsx') {
             abort_unless($pro, 403, 'Excel export comes with the Pro plan.');
 
-            return Excel::download(new ReportExport($report), "lotlink-{$lot->slug}-{$type}-".now($lot->timezone)->format('Y-m-d').'.xlsx');
+            return Excel::download(new ReportExport($report), "caryard-{$lot->slug}-{$type}-".now($lot->timezone)->format('Y-m-d').'.xlsx');
         }
 
         return Inertia::render('Dealer/Manager/Reports', [

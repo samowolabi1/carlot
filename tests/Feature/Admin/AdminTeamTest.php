@@ -61,15 +61,15 @@ it('lets owners invite an admin, who sets a password from the emailed link', fun
     Notification::fake();
     $this->actingAs($this->owner);
 
-    Livewire::test(ListAdminTeam::class)->callAction('invite', ['name' => 'Bola Support', 'email' => 'Bola@LotLink.ng', 'role' => 'support'])->assertHasNoActionErrors();
+    Livewire::test(ListAdminTeam::class)->callAction('invite', ['name' => 'Bola Support', 'email' => 'Bola@CarYardNG.com', 'role' => 'support'])->assertHasNoActionErrors();
 
-    $bola = User::where('email', 'bola@lotlink.ng')->sole();
+    $bola = User::where('email', 'bola@caryardng.com')->sole();
     expect($bola)->role->toBe(UserRole::Admin)->admin_role->toBe(AdminRole::Support)->password->toBeNull()->invited_by->toBe($this->owner->id)
         ->and(AuditLog::where('action', 'admin.team_invited')->exists())->toBeTrue();
     Notification::assertSentTo($bola, AdminInvitation::class, fn (AdminInvitation $n) => $n->role === AdminRole::Support);
 
-    // An email that already has an account (a buyer, a lot owner) can't be turned into an admin.
-    expect(fn () => app(ManageAdminTeam::class)->invite($this->owner, 'X', 'bola@lotlink.ng', AdminRole::Viewer))->toThrow(ValidationException::class);
+    // An email that already has an account (a buyer, a seller) can't be turned into an admin.
+    expect(fn () => app(ManageAdminTeam::class)->invite($this->owner, 'X', 'bola@caryardng.com', AdminRole::Viewer))->toThrow(ValidationException::class);
 
     auth()->logout();
     $link = URL::temporarySignedRoute('admin.invitation', now()->addDays(7), ['user' => $bola->ulid]);

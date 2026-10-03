@@ -27,7 +27,7 @@ function submit() {
 <template>
     <form class="flex flex-col gap-4" @submit.prevent="submit">
         <label class="field-label">
-            Lot name
+            Business name
             <input v-field="{ kind: 'business_name', max: 80 }" v-model="form.name" class="field" required placeholder="e.g. Prime Motors" autocomplete="organization" />
             <InputError :message="form.errors.name" />
         </label>
@@ -54,7 +54,7 @@ function submit() {
             <InputError :message="form.errors.email" />
         </label>
         <label class="field-label">
-            <span>About the lot <span class="font-normal text-muted">(optional)</span></span>
+            <span>About the seller <span class="font-normal text-muted">(optional)</span></span>
             <textarea v-field="{ kind: 'text', max: 2000 }"
                 v-model="form.about"
                 rows="4"

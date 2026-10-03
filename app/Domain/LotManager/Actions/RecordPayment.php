@@ -21,7 +21,7 @@ class RecordPayment
     public function __construct(private readonly OrderLedger $ledger) {}
 
     /**
-     * Locks the order row, inserts the payment with the lot's next receipt number,
+     * Locks the order row, inserts the payment with the seller's next receipt number,
      * recalculates the totals, moves the order (and its car) along and sends the receipt
      * (TDD M19: Payments). Safe to replay with the same client_uuid.
      *

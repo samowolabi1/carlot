@@ -32,7 +32,7 @@ class BookAppointment
     ) {}
 
     /**
-     * Books a slot. The lot row is locked while the capacity check and insert run, so two
+     * Books a slot. The seller row is locked while the capacity check and insert run, so two
      * buyers can't take the last place in a slot at the same moment (TDD M7).
      *
      * @param  array{type: string, starts_at: string, vehicle?: ?string, notes?: ?string, whatsapp_reminders?: bool}  $data
@@ -64,7 +64,7 @@ class BookAppointment
                 throw ValidationException::withMessages(['starts_at' => 'You already have a booking at this time.']);
             }
 
-            // LotLink takes no deposits: a booking is confirmed or waits for the lot, nothing else.
+            // CarYard takes no deposits: a booking is confirmed or waits for the seller, nothing else.
             $auto = $lot->booking_auto_confirm;
 
             return Appointment::withoutGlobalScopes()->create([
@@ -97,7 +97,7 @@ class BookAppointment
             $this->sendMessage->run($conversation, null, Message::SYSTEM, AppointmentText::what($appointment).' booked · '.AppointmentText::when($appointment, $lot));
         }
 
-        // A trade-in valuation visit is linked to the buyer's latest trade-in at this lot (TDD M12).
+        // A trade-in valuation visit is linked to the buyer's latest trade-in at this seller (TDD M12).
         if ($appointment->type === AppointmentType::TradeIn) {
             TradeIn::withoutGlobalScopes()->where('lot_id', $lot->id)->where('customer_id', $customer->id)->whereNull('appointment_id')
                 ->whereIn('status', [TradeInStatus::Submitted, TradeInStatus::Valued, TradeInStatus::Accepted])->latest('id')->first()

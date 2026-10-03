@@ -20,7 +20,7 @@ const distance = computed(() => (location.value && props.lot.location ? formatDi
                 <span class="flex items-center gap-1 truncate text-[15px] font-semibold">
                     {{ lot.name }}
                     <Icon v-if="lot.verified" name="shield" :size="16" class="shrink-0 text-forest" :stroke-width="2" />
-                    <span v-if="lot.verified" class="sr-only">Verified lot</span>
+                    <span v-if="lot.verified" class="sr-only">Verified seller</span>
                 </span>
                 <span class="truncate text-[12px] text-muted">
                     <template v-if="lot.rating"><span class="inline-flex items-baseline gap-0.5 font-semibold text-ink"><Icon name="star" filled :size="13" class="self-center text-clay" />{{ lot.rating.toFixed(1) }}<span class="sr-only"> out of 5</span></span> ({{ lot.reviews_count }}) · </template>

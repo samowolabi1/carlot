@@ -118,7 +118,7 @@ class FakePaymentGateway implements PaymentGateway
                 throw new \RuntimeException('Flutterwave can\'t change the price for current subscribers.');
             }
 
-            return $this->createPlan('LotLink plan', $amount, 'monthly');
+            return $this->createPlan('CarYard plan', $amount, 'monthly');
         }
 
         return $code;

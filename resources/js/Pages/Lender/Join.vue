@@ -66,7 +66,7 @@ function submit() {
 }
 
 const perks = [
-    { icon: 'leads', title: 'Buyers who already chose a car', text: 'Each application comes with the car, the lot, the price, the deposit and the term.' },
+    { icon: 'leads', title: 'Buyers who already chose a car', text: 'Each application comes with the car, the seller, the price, the deposit and the term.' },
     { icon: 'shield', title: "With the buyer's consent", text: 'Buyers agree to share their income and work details with you, and only you.' },
     { icon: 'chat', title: 'Decide here, finish with you', text: 'Review, ask for documents and pre-approve or approve here; the buyer then finishes with you (KYC, agreement, payment).' },
     { icon: 'settings', title: 'Or use your own system', text: 'Receive applications by API and send updates back to a signed webhook.' },
@@ -74,13 +74,13 @@ const perks = [
 </script>
 
 <template>
-    <Head title="Lend with LotLink" />
+    <Head title="Lend with CarYard" />
     <CustomerLayout>
         <div class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-6">
             <header class="flex flex-col gap-2">
-                <h1 class="text-[30px] leading-tight font-bold">Lend with LotLink</h1>
+                <h1 class="text-[30px] leading-tight font-bold">Lend with CarYard</h1>
                 <p class="text-[16px] text-[#4A4D53]">
-                    Banks, microfinance banks, finance companies, licensed money lenders and individual lenders: get car loan applications from buyers on LotLink and work them in the lender portal. LotLink doesn't lend and
+                    Banks, microfinance banks, finance companies, licensed money lenders and individual lenders: get car loan applications from buyers on CarYard and work them in the lender portal. CarYard doesn't lend and
                     never takes a cut of the car's price.
                 </p>
             </header>
@@ -178,7 +178,7 @@ const perks = [
                         <button type="button" class="btn btn-outline h-11" @click="picker?.click()"><Icon name="upload" :size="18" /> {{ form.licence ? 'Change file' : 'Add a copy' }}</button>
                         <span v-if="form.licence" class="text-[13px]">{{ form.licence.name }}</span>
                     </div>
-                    <span class="text-[12px] text-muted">PDF or photo, up to {{ Math.round(props.licence.max_kb / 1024) }} MB. Only LotLink's team sees it.</span>
+                    <span class="text-[12px] text-muted">PDF or photo, up to {{ Math.round(props.licence.max_kb / 1024) }} MB. Only CarYard's team sees it.</span>
                     <InputError :message="form.errors.licence" />
                 </div>
 
@@ -192,8 +192,8 @@ const perks = [
                     <input v-model="form.agree" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
                     <span>
                         I have authority to act for this company and agree to the <Link :href="route('legal.show', 'lender-terms')" target="_blank">Lender Terms</Link>: we hold the
-                        licence above, will use buyers' details only to consider their car loan, will tell buyers our decision through LotLink, and complete loans (KYC, agreement,
-                        payment) ourselves, outside LotLink.
+                        licence above, will use buyers' details only to consider their car loan, will tell buyers our decision through CarYard, and complete loans (KYC, agreement,
+                        payment) ourselves, outside CarYard.
                     </span>
                 </label>
                 <InputError :message="form.errors.agree" />

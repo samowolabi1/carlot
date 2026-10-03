@@ -17,7 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-/** What lots have paid LotLink, with refunds through the provider that took each payment (TDD M17). */
+/** What lots have paid CarYard, with refunds through the provider that took each payment (TDD M17). */
 class PaymentResource extends Resource
 {
     use AdminsOnly;

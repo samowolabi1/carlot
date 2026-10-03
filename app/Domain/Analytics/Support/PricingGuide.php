@@ -7,7 +7,7 @@ use App\Domain\Inventory\Models\Vehicle;
 
 /**
  * The pricing guide (TDD M15): median and range of the asking prices of available cars with
- * the same make, model and year ±1 across LotLink, shown with 5 or more comparables.
+ * the same make, model and year ±1 across CarYard, shown with 5 or more comparables.
  */
 final class PricingGuide
 {

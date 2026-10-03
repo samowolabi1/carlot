@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->lot = app(CreateLot::class)->run($this->owner, ['name' => 'Prime Motors', 'phone' => '+2348021112233']);
 });
 
-it('lets admins open any lot (the dealer policy no longer applies in the admin)', function () {
+it('lets admins open any seller (the seller policy no longer applies in the admin)', function () {
     $this->actingAs($this->admin)->get(LotResource::getUrl('view', ['record' => $this->lot]))->assertOk()->assertSee('Prime Motors');
     Livewire::test(ListLots::class)->assertTableActionVisible('view', $this->lot)->assertTableActionVisible('impersonate', $this->lot);
 
@@ -41,11 +41,11 @@ it('goes back to the admin panel with a full page load, and the admin stays sign
     Livewire::test(ListLots::class)->callTableAction('impersonate', $this->lot)->assertRedirect(route('dealer.dashboard', $this->lot));
     expect(auth()->id())->toBe($this->owner->id);
 
-    // The dealer's page (Inertia) asks for "Back to admin": a location response, not a redirect Inertia follows.
+    // The seller's page (Inertia) asks for "Back to admin": a location response, not a redirect Inertia follows.
     $this->withHeader('X-Inertia', 'true')->post(route('impersonation.stop'))
         ->assertStatus(409)->assertHeader('X-Inertia-Location', url('/admin'));
 
-    // The panel doesn't log the admin out over the dealer's password hash left in the session.
+    // The panel doesn't log the admin out over the seller's password hash left in the session.
     $this->withHeaders(['X-Inertia' => ''])->get('/admin')->assertOk();
     expect(auth()->id())->toBe($this->admin->id);
 });
@@ -57,7 +57,7 @@ it('ends the support session on sign out instead of signing the admin out', func
     $this->withHeader('X-Inertia', 'true')->post(route('logout'))->assertStatus(409)->assertHeader('X-Inertia-Location', url('/admin'));
     expect(auth()->id())->toBe($this->admin->id)->and(session()->has(Impersonation::SESSION_KEY))->toBeFalse();
 
-    // A dealer signing out normally is signed out.
+    // A seller signing out normally is signed out.
     auth()->logout();
     $this->actingAs($this->owner)->post(route('logout'))->assertRedirect(route('home'));
     $this->assertGuest();

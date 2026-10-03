@@ -110,7 +110,7 @@ it('lets managers assign reps, and keeps sales reps to their own bookings', func
     $this->actingAs($other)->patch(route('dealer.appointments.update', [$this->lot, $a]), ['action' => 'confirm'])->assertSessionHasNoErrors();
 });
 
-it('keeps each lot\'s bookings to itself', function () {
+it('keeps each seller\'s bookings to itself', function () {
     $otherLot = Lot::factory()->active()->create();
     $theirs = Appointment::factory()->create(['lot_id' => $otherLot->id]);
 

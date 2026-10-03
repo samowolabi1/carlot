@@ -7,11 +7,11 @@ use App\Domain\Social\Models\SocialAccount;
 /** Facebook/Instagram behind an interface (TDD: external services), so tests and Laragon never call Meta. */
 interface SocialPublisher
 {
-    /** Where to send the dealer to connect their Page. */
+    /** Where to send the seller to connect their Page. */
     public function authorizeUrl(string $state, string $redirectUri): string;
 
     /**
-     * Swap the OAuth code for the Pages (and linked Instagram accounts) the dealer manages.
+     * Swap the OAuth code for the Pages (and linked Instagram accounts) the seller manages.
      *
      * @return list<array{provider: string, page_id: string, name: string, token: string, expires_at: ?\DateTimeInterface}>
      */

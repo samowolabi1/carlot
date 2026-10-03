@@ -21,8 +21,8 @@ class ResetPasswordLink extends Notification
         $minutes = (int) config('auth.passwords.users.expire', 60);
         $url = route('password.reset', ['token' => $this->token, 'email' => $notifiable->getEmailForPasswordReset()]);
 
-        return (new MailMessage)->subject('Reset your LotLink password')
-            ->line('Someone (hopefully you) asked to reset the password on your LotLink account.')
+        return (new MailMessage)->subject('Reset your CarYard password')
+            ->line('Someone (hopefully you) asked to reset the password on your CarYard account.')
             ->action('Choose a new password', $url)
             ->line("The link works once and expires in {$minutes} minutes.")
             ->line('Didn\'t ask for this? Ignore this email: your password stays the same. You can always sign in with a one-time code instead.');

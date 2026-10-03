@@ -17,8 +17,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * A lot's support request to LotLink. Replies go through `ReplyToTicket`, status changes
- * through `ChangeTicketStatus`; the lot sees everything except internal admin notes.
+ * A seller's support request to CarYard. Replies go through `ReplyToTicket`, status changes
+ * through `ChangeTicketStatus`; the seller sees everything except internal admin notes.
  *
  * @property int $id
  * @property string $ulid
@@ -99,7 +99,7 @@ class SupportTicket extends Model
         return $this->hasMany(SupportMessage::class)->orderBy('created_at')->orderBy('id');
     }
 
-    /** @return HasMany<SupportMessage, $this> what the lot may see (no internal notes) */
+    /** @return HasMany<SupportMessage, $this> what the seller may see (no internal notes) */
     public function publicMessages(): HasMany
     {
         return $this->messages()->where('internal', false);
@@ -112,7 +112,7 @@ class SupportTicket extends Model
     }
 
     /**
-     * Tickets with a LotLink reply the lot hasn't opened (`ReplyToTicket` clears `lot_read_at`).
+     * Tickets with a CarYard reply the seller hasn't opened (`ReplyToTicket` clears `lot_read_at`).
      *
      * @param  Builder<SupportTicket>  $query
      */
@@ -126,7 +126,7 @@ class SupportTicket extends Model
         return $this->lot_read_at === null && $this->status !== TicketStatus::Open;
     }
 
-    /** A lot's message nobody at LotLink has opened (`ReplyToTicket` clears `admin_read_at`). */
+    /** A seller's message nobody at CarYard has opened (`ReplyToTicket` clears `admin_read_at`). */
     public function isUnreadByAdmin(): bool
     {
         return $this->admin_read_at === null && $this->status === TicketStatus::Open;

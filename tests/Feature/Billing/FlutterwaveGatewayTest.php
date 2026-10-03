@@ -54,7 +54,7 @@ it('refunds by transaction id and makes a new plan to change a price', function 
     Http::fake([
         'api.flutterwave.com/v3/transactions/verify_by_reference*' => Http::response(['data' => ['id' => 288200, 'tx_ref' => 'sub_ABC123', 'status' => 'successful', 'amount' => 45000, 'currency' => 'NGN']]),
         'api.flutterwave.com/v3/transactions/288200/refund' => Http::response(['status' => 'success', 'data' => ['id' => 1]]),
-        'api.flutterwave.com/v3/payment-plans/4501' => Http::response(['data' => ['id' => 4501, 'name' => 'LotLink Pro', 'interval' => 'monthly']]),
+        'api.flutterwave.com/v3/payment-plans/4501' => Http::response(['data' => ['id' => 4501, 'name' => 'CarYard Pro', 'interval' => 'monthly']]),
         'api.flutterwave.com/v3/payment-plans' => Http::response(['data' => ['id' => 4600]]),
     ]);
 
@@ -62,7 +62,7 @@ it('refunds by transaction id and makes a new plan to change a price', function 
     Http::assertSent(fn (Request $r) => $r->url() === 'https://api.flutterwave.com/v3/transactions/288200/refund' && $r['amount'] === 45000);
 
     expect($this->gateway->updatePlan('4501', 5_000_000, false))->toBe('4600');
-    Http::assertSent(fn (Request $r) => $r->method() === 'POST' && str_ends_with($r->url(), '/payment-plans') && $r['amount'] === 50000 && $r['name'] === 'LotLink Pro');
+    Http::assertSent(fn (Request $r) => $r->method() === 'POST' && str_ends_with($r->url(), '/payment-plans') && $r['amount'] === 50000 && $r['name'] === 'CarYard Pro');
 
     expect(fn () => $this->gateway->updatePlan('4501', 5_000_000, true))->toThrow(RuntimeException::class, 'current subscribers');
 });

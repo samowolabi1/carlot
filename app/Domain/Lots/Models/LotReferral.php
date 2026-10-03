@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A lot that signed up with another lot's referral code (TDD M19: growth hooks). When it
+ * A seller that signed up with another lot's referral code (TDD M19: growth hooks). When it
  * first pays for a plan, RewardReferral gives the referrer a month.
  *
  * @property int $id

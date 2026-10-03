@@ -139,7 +139,7 @@ it('applies the launch code once, only before paying', function () {
         ->assertSessionHasErrors(['coupon' => 'That code is not valid or has been used up.']);
 });
 
-it('serves invoices for the lot\'s own payments only', function () {
+it('serves invoices for the seller\'s own payments only', function () {
     ($this->checkout)();
     ($this->callback)();
     $payment = Payment::sole();

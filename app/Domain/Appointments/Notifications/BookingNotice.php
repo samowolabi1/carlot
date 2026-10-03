@@ -14,7 +14,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * To the buyer: booking received (waiting for the lot), confirmed, rescheduled or
+ * To the buyer: booking received (waiting for the seller), confirmed, rescheduled or
  * cancelled. Phone (WhatsApp, else SMS) always; email with a calendar file when we
  * have their address.
  */
@@ -115,7 +115,7 @@ class BookingNotice extends Notification implements ShouldQueue
         $mail->action('Manage your booking', AppointmentText::manageUrl($a));
 
         if ($this->event !== self::CANCELLED) {
-            $mail->attachData(IcsCalendar::for($a, $lot, "{$what} at {$lot->name}"), 'lotlink-visit.ics', ['mime' => 'text/calendar']);
+            $mail->attachData(IcsCalendar::for($a, $lot, "{$what} at {$lot->name}"), 'caryard-visit.ics', ['mime' => 'text/calendar']);
         }
 
         return $mail;

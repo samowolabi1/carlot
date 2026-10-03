@@ -13,7 +13,7 @@ beforeEach(function () {
     $this->buyer = User::factory()->create(['phone' => '+2348035550101']);
 });
 
-it('follows and unfollows a lot', function () {
+it('follows and unfollows a seller', function () {
     $this->post(route('lots.follow', $this->lot))->assertRedirect(route('login'));
 
     $this->actingAs($this->buyer)->post(route('lots.follow', $this->lot))->assertSessionHas('success');

@@ -8,7 +8,7 @@ use App\Domain\Lots\Models\Lot;
 use Carbon\CarbonImmutable;
 
 /**
- * Rolls a lot's raw events for one local day into daily_vehicle_stats (TDD M15). Recomputing a
+ * Rolls a seller's raw events for one local day into daily_vehicle_stats (TDD M15). Recomputing a
  * day from the raw rows is idempotent, so it can run as often as needed.
  */
 final class RollupDailyStats

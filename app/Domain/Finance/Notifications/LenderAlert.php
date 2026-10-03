@@ -27,7 +27,7 @@ class LenderAlert extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)->subject('LotLink lender portal')->line($this->text)->action('Open the lender portal', $this->url);
+        return (new MailMessage)->subject('CarYard lender portal')->line($this->text)->action('Open the lender portal', $this->url);
     }
 
     /** @return array<string, string> */

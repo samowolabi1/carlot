@@ -31,10 +31,10 @@ class EndReservation
     ) {}
 
     /**
-     * Expiry (reservations:expire) or the lot cancelling: the car goes back on sale unless an
-     * order holds it. The deposit is owed back when the lot's policy says so (a lot cancelling
-     * always owes it); the lot refunds from its own account and records it. Only deposits paid
-     * online before LotLink stopped taking buyer payments are refunded through the gateway.
+     * Expiry (reservations:expire) or the seller cancelling: the car goes back on sale unless an
+     * order holds it. The deposit is owed back when the seller's policy says so (a seller cancelling
+     * always owes it); the seller refunds from its own account and records it. Only deposits paid
+     * online before CarYard stopped taking buyer payments are refunded through the gateway.
      */
     public function run(Reservation $reservation, ReservationStatus $end, string $reason, ?User $by = null): Reservation
     {
@@ -74,7 +74,7 @@ class EndReservation
         $car = $reservation->vehicle->title();
         $money = $reservation->money();
         $update = match ($end) {
-            ReservationStatus::Expired => 'Your reservation has ended and the car is back on sale.'.($refunded ? " {$lot->name} will refund your {$money} deposit." : " The {$money} deposit is kept, as the lot's terms say."),
+            ReservationStatus::Expired => 'Your reservation has ended and the car is back on sale.'.($refunded ? " {$lot->name} will refund your {$money} deposit." : " The {$money} deposit is kept, as the seller's terms say."),
             default => "{$lot->name} cancelled your reservation ({$reason}). They will refund your {$money} deposit.",
         };
 

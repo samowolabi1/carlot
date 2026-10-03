@@ -82,17 +82,17 @@ return [
     // changes materially: people who accepted an older Terms or Privacy Policy are asked to accept again, and lenders'
     // admins the Lender Terms.
     'legal' => [
-        'company' => env('LEGAL_COMPANY_NAME', 'LotLink Technologies Limited'),
+        'company' => env('LEGAL_COMPANY_NAME', 'CarYard Technologies Limited'),
         'rc_number' => env('LEGAL_RC_NUMBER', 'RC number to be added'),
         'address' => env('LEGAL_ADDRESS', 'Lagos, Nigeria'),
-        'email' => env('LEGAL_EMAIL', 'support@lotlink.ng'),
-        'privacy_email' => env('LEGAL_PRIVACY_EMAIL', 'privacy@lotlink.ng'),
-        'security_email' => env('LEGAL_SECURITY_EMAIL', 'security@lotlink.ng'),
+        'email' => env('LEGAL_EMAIL', 'support@caryardng.com'),
+        'privacy_email' => env('LEGAL_PRIVACY_EMAIL', 'privacy@caryardng.com'),
+        'security_email' => env('LEGAL_SECURITY_EMAIL', 'security@caryardng.com'),
         'versions' => [
-            'terms' => '2026-10-01',
-            'privacy' => '2026-10-01',
-            'lender-terms' => '2026-10-01',
-            'security' => '2026-10-01',
+            'terms' => '2026-10-04',
+            'privacy' => '2026-10-04',
+            'lender-terms' => '2026-10-04',
+            'security' => '2026-10-04',
         ],
     ],
 
@@ -115,7 +115,7 @@ return [
         ],
     ],
 
-    // Adverts lots buy from LotLink (placeholder prices in whole naira). Every advert is checked by
+    // Adverts lots buy from CarYard (placeholder prices in whole naira). Every advert is checked by
     // an admin before it runs; "slots" is how many can run at once. These (and the spotlight prices
     // above) are defaults: admins change them in /admin → Advert prices (AdvertPricing).
     'adverts' => [
@@ -148,8 +148,8 @@ return [
         'servicing' => [3 => 250000, 8 => 400000, 99 => 600000],
     ],
 
-    // Account numbers lots share with customers (Nigeria: 10-digit NUBAN). LotLink never takes
-    // payments for cars; buyers pay the lot's account directly.
+    // Account numbers lots share with customers (Nigeria: 10-digit NUBAN). CarYard never takes
+    // payments for cars; buyers pay the seller's account directly.
     'bank_account_pattern' => env('BANK_ACCOUNT_PATTERN', '/^\d{10}$/'),
 
     'maps' => [

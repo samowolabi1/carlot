@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Lot Manager home: today's walk-ins, follow-ups due and balances to collect. */
+/** Sales Manager home: today's walk-ins, follow-ups due and balances to collect. */
 class TodayController extends Controller
 {
     public function __invoke(Request $request, Lot $lot): Response

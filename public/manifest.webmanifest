@@ -1,7 +1,7 @@
 {
-    "name": "LotLink",
-    "short_name": "LotLink",
-    "description": "Cars from trusted lots near you: browse, budget, book a viewing. Lot Manager for dealers.",
+    "name": "CarYard",
+    "short_name": "CarYard",
+    "description": "Cars from trusted sellers near you: browse, budget, book a viewing. Sales Manager for sellers.",
     "id": "/",
     "start_url": "/?source=pwa",
     "scope": "/",
@@ -20,6 +20,6 @@
         { "name": "Search cars", "url": "/cars?source=pwa", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
         { "name": "What can I afford?", "url": "/budget?source=pwa", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
         { "name": "My bookings", "url": "/bookings?source=pwa", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-        { "name": "Dealer dashboard", "url": "/dealer?source=pwa", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+        { "name": "Seller dashboard", "url": "/dealer?source=pwa", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
     ]
 }

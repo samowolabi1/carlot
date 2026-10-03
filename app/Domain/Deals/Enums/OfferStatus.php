@@ -4,7 +4,7 @@ namespace App\Domain\Deals\Enums;
 
 enum OfferStatus: string
 {
-    case Pending = 'pending';     // waiting for the lot
+    case Pending = 'pending';     // waiting for the seller
     case Countered = 'countered'; // waiting for the buyer
     case Accepted = 'accepted';
     case Declined = 'declined';
@@ -14,7 +14,7 @@ enum OfferStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => 'Waiting for the lot',
+            self::Pending => 'Waiting for the seller',
             self::Countered => 'Countered',
             self::Accepted => 'Accepted',
             self::Declined => 'Declined',

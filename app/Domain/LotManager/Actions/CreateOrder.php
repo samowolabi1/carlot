@@ -52,7 +52,7 @@ class CreateOrder
                     ?? throw ValidationException::withMessages(['vehicle' => 'Pick a car from your stock.']);
 
                 if (! in_array($vehicle->status, [VehicleStatus::Available, VehicleStatus::Reserved], true)) {
-                    throw ValidationException::withMessages(['vehicle' => 'Only an available or reserved car can be ordered. List it on LotLink first.']);
+                    throw ValidationException::withMessages(['vehicle' => 'Only an available or reserved car can be ordered. List it on CarYard first.']);
                 }
 
                 $held = SalesOrder::withoutGlobalScopes()->where('vehicle_id', $vehicle->id)->whereIn('status', OrderStatus::open())->value('order_no');
@@ -126,7 +126,7 @@ class CreateOrder
             return $this->find($lot, (string) ($data['client_uuid'] ?? '')) ?? throw $e;
         }
 
-        // The reservation deposit counts towards the price: the buyer transferred it to the lot
+        // The reservation deposit counts towards the price: the buyer transferred it to the seller
         // (or, for reservations from before that, paid it online).
         if ($order->wasRecentlyCreated && $order->reservation_id !== null && $order->balance > 0) {
             $reservation = Reservation::withoutGlobalScopes()->findOrFail($order->reservation_id);

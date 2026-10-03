@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * For /lender/{lender}/... routes: only the lender's team gets in (403 for anyone else, LotLink admins included:
+ * For /lender/{lender}/... routes: only the lender's team gets in (403 for anyone else, CarYard admins included:
  * they see applications in /admin). Shares the lender with the page as `currentLender`.
  */
 class SetCurrentLender

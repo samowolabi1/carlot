@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Reviews of the lot and the one reply each (TDD M14). Owners and managers reply. */
+/** Reviews of the seller and the one reply each (TDD M14). Owners and managers reply. */
 class ReviewController extends Controller
 {
     public function index(Lot $lot): Response

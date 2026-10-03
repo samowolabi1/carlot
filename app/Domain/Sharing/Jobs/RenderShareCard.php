@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 
 /**
  * RenderShareCard (TDD M9): runs when a car is published, its price, details or cover
- * change, or the lot's name, phone or logo change. Does nothing if the card is current.
+ * change, or the seller's name, phone or logo change. Does nothing if the card is current.
  */
 class RenderShareCard implements ShouldBeUnique, ShouldQueue
 {

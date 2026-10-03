@@ -136,7 +136,7 @@ it('checks SMS placeholders before saving', function (string $key, string $sms, 
 })->with([
     ['booking_confirmed', 'Hi {1}, see {9}: {link}', "{9} isn't available here. Use {1}, {2}, {3}, {4}, {link}."],
     ['booking_confirmed', 'Hi {1}, booked.', 'Include {link} so people can manage booking from the SMS.'],
-    ['login_code', 'Your LotLink code is ready.', 'The sign-in code text must include the code: {1}.'],
+    ['login_code', 'Your CarYard code is ready.', 'The sign-in code text must include the code: {1}.'],
 ]);
 
 it('stops a message an admin switched off, but never sign-in codes', function () {

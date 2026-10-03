@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * An advert a lot pays LotLink for: a homepage banner or a search banner. Bought with
+ * An advert a seller pays CarYard for: a homepage banner or a search banner. Bought with
  * `CreateAdCampaign`, checked by an admin (`ReviewAdCampaign`), served by `AdServer`.
  *
  * @property int $id
@@ -122,7 +122,7 @@ class AdCampaign extends Model
             ->where($query->qualifyColumn('ends_at'), '>', now());
     }
 
-    /** What the lot sees: awaiting payment, in review, scheduled, live, ended, rejected or removed. */
+    /** What the seller sees: awaiting payment, in review, scheduled, live, ended, rejected or removed. */
     public function state(): string
     {
         return match ($this->status) {
@@ -142,12 +142,12 @@ class AdCampaign extends Model
     {
         return match ($state) {
             'unpaid' => 'Waiting for payment',
-            'in_review' => 'Being checked by LotLink',
+            'in_review' => 'Being checked by CarYard',
             'scheduled' => 'Scheduled',
             'live' => 'Live',
             'ended' => 'Ended',
             'rejected' => 'Not approved (refunded)',
-            default => 'Removed by LotLink',
+            default => 'Removed by CarYard',
         };
     }
 

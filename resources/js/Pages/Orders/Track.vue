@@ -102,7 +102,7 @@ defineProps<{
             <BankDetailsCard v-if="bank" :account="bank" :amount="order.balance" :reference="order.order_no" :title="`Pay ${lot.name}`">
                 <p class="flex gap-2 text-[13px] text-muted">
                     <Icon name="shield" :size="16" class="mt-0.5 shrink-0 text-forest" />
-                    You pay {{ lot.name }} directly; LotLink never takes payment for cars. Only pay into the account shown here or on your receipt, and ask the lot for a receipt.
+                    You pay {{ lot.name }} directly; CarYard never takes payment for cars. Only pay into the account shown here or on your receipt, and ask the seller for a receipt.
                 </p>
             </BankDetailsCard>
 
@@ -148,8 +148,8 @@ defineProps<{
 
             <a :href="poweredBy" class="card flex items-center gap-3 p-4 text-ink no-underline">
                 <span class="grow">
-                    <span class="block text-[15px] font-semibold">Open in LotLink</span>
-                    <span class="block text-[13px] text-muted">Find cars from trusted lots near you, book test drives and keep your receipts.</span>
+                    <span class="block text-[15px] font-semibold">Open in CarYard</span>
+                    <span class="block text-[13px] text-muted">Find cars from trusted sellers near you, book test drives and keep your receipts.</span>
                 </span>
                 <Icon name="chevronDown" class="-rotate-90" />
             </a>

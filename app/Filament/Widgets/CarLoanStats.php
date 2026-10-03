@@ -35,7 +35,7 @@ class CarLoanStats extends StatsOverviewWidget
             Stat::make('Applications (30 days)', (string) $s['sent'])->description("{$s['open']} open now"),
             Stat::make('Said yes', $s['rate'] !== null ? "{$s['rate']}%" : '—')->description('Pre-approved or approved, of those decided'),
             Stat::make('Approved (30 days)', Money::compact($s['approved'])),
-            Stat::make('Paid to lots (30 days)', Money::compact($s['disbursed'])),
+            Stat::make('Paid to sellers (30 days)', Money::compact($s['disbursed'])),
         ];
     }
 }

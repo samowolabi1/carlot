@@ -17,7 +17,7 @@ class AnswerTradeIn
 {
     public function __construct(private readonly DealTimeline $timeline) {}
 
-    /** The buyer says they'll use the valuation, or not. The lot can then add it to the order. */
+    /** The buyer says they'll use the valuation, or not. The seller can then add it to the order. */
     public function run(TradeIn $tradeIn, User $customer, bool $accept): TradeIn
     {
         abort_unless($tradeIn->customer_id === $customer->id, 403);

@@ -86,7 +86,7 @@ class RecordWalkIn
         return WalkIn::withoutGlobalScopes()->where('lot_id', $lot->id)->where('client_uuid', $clientUuid)->first();
     }
 
-    /** 10:00 lot time on the next day the lot is open (the next day if no hours are set). */
+    /** 10:00 lot time on the next day the seller is open (the next day if no hours are set). */
     public function nextWorkingMorning(Lot $lot, Carbon $from): CarbonImmutable
     {
         $open = LotHour::withoutGlobalScopes()->where('lot_id', $lot->id)->where('is_closed', false)->pluck('weekday')->all();

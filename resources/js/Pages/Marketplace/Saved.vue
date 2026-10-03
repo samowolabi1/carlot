@@ -45,7 +45,7 @@ const deleteSearch = (s: Search) => router.delete(route('saved-searches.destroy'
                     v-for="t in [
                         { key: 'cars', label: `Cars (${cars.length})` },
                         { key: 'searches', label: `Searches (${searches.length})` },
-                        { key: 'lots', label: `Lots (${lots.length})` },
+                        { key: 'lots', label: `Sellers (${lots.length})` },
                     ] as const"
                     :key="t.key"
                     type="button"
@@ -90,8 +90,8 @@ const deleteSearch = (s: Search) => router.delete(route('saved-searches.destroy'
 
             <template v-else-if="tab === 'lots'">
                 <div v-if="!lots.length" class="card flex flex-col items-center gap-2 px-6 py-10 text-center">
-                    <h2 class="text-xl font-bold">You don't follow any lots yet</h2>
-                    <p class="max-w-sm text-[15px] text-muted">Tap <strong>Follow</strong> on a lot's page to hear about its new stock.</p>
+                    <h2 class="text-xl font-bold">You don't follow any sellers yet</h2>
+                    <p class="max-w-sm text-[15px] text-muted">Tap <strong>Follow</strong> on a seller's page to hear about its new stock.</p>
                 </div>
                 <ul v-else class="flex flex-col gap-2.5">
                     <li v-for="lot in lots" :key="lot.slug">

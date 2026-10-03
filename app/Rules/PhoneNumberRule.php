@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * A real, dialable number, checked with libphonenumber. Local numbers ("0803…") are read for the given region,
- * else the current lot's country (dealer forms), else the platform default (Nigeria).
+ * else the current lot's country (seller forms), else the platform default (Nigeria).
  */
 final class PhoneNumberRule implements ValidationRule
 {

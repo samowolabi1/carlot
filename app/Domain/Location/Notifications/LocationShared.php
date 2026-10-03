@@ -12,7 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
- * To the other side of a booking: live location is being shared. The lot's team sees it in
+ * To the other side of a booking: live location is being shared. The seller's team sees it in
  * the notification centre; a buyer also gets it on WhatsApp (appointment_update template).
  */
 class LocationShared extends Notification implements ShouldQueue

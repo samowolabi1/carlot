@@ -16,7 +16,7 @@ class LoginCode extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Your LotLink code: {$this->code}");
+        return new Envelope(subject: "Your CarYard code: {$this->code}");
     }
 
     public function content(): Content

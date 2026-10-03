@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Records views, saves, shares, leads and bookings for dealer analytics (TDD M15). Bots and
+ * Records views, saves, shares, leads and bookings for seller analytics (TDD M15). Bots and
  * link previews are skipped; a visitor viewing the same car again within 30 minutes counts once.
  */
 final class Tracker

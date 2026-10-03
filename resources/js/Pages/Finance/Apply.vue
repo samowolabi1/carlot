@@ -49,7 +49,7 @@ const amount = computed(() => Math.max(0, props.price - num(form.deposit)));
 
 /** Why a lender can't take this loan, or null when it can (the same rules as Lender::lendsFor on the server). */
 function reason(l: LenderOption): string | null {
-    if (!l.in_state) return "Doesn't lend in this lot's state";
+    if (!l.in_state) return "Doesn't lend in this seller's state";
     if (amount.value < l.min_amount) return `Lends from ${formatNaira(l.min_amount)}`;
     if (amount.value > l.max_amount) return `Lends up to ${formatNaira(l.max_amount)}`;
     if (num(form.deposit) * 100 < props.price * l.min_deposit_percent) return `Needs a ${l.min_deposit_percent}% deposit (${formatNaira(Math.ceil((props.price * l.min_deposit_percent) / 100))})`;
@@ -163,7 +163,7 @@ function submit() {
             <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 text-[14px]">
                 <input v-model="form.consent" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-forest" />
                 <span>
-                    I agree to LotLink sending my name, phone, email, income, commitments and work details, with this car and loan, to
+                    I agree to CarYard sending my name, phone, email, income, commitments and work details, with this car and loan, to
                     <strong>{{ chosen?.name ?? 'the lender I picked' }}</strong> so they can consider my application, and to them contacting me about it.
                     {{ car.lot.name }} will know that I applied for this car and, if I'm approved, for how much, but never sees my income, commitments or work details, or a decline.
                 </span>
@@ -171,8 +171,8 @@ function submit() {
             <InputError :message="form.errors.consent" />
 
             <p class="text-[12px] text-muted">
-                LotLink only collects your application and passes it to the lender you pick. The lender decides, and the loan is completed with them: identity (BVN/NIN) and credit
-                checks, the loan agreement and payment to the lot all happen with the lender. LotLink doesn't lend money or charge you for this. See our
+                CarYard only collects your application and passes it to the lender you pick. The lender decides, and the loan is completed with them: identity (BVN/NIN) and credit
+                checks, the loan agreement and payment to the seller all happen with the lender. CarYard doesn't lend money or charge you for this. See our
                 <Link :href="route('legal.show', 'privacy')">Privacy Policy</Link>.
             </p>
             <button type="submit" class="btn btn-primary h-[52px] rounded-[14px]" :disabled="form.processing || !form.consent || !chosen">

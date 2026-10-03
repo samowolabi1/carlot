@@ -65,7 +65,7 @@ async function copy(text: string) {
     <LenderLayout>
         <div>
             <h1 class="text-[30px] font-bold">Settings</h1>
-            <p class="text-[14px] text-muted">{{ values.name }} · {{ types.find((t) => t.value === values.licence_type)?.label }}<template v-if="values.licence_number"> · licence {{ values.licence_number }}</template>. To change these, contact LotLink.</p>
+            <p class="text-[14px] text-muted">{{ values.name }} · {{ types.find((t) => t.value === values.licence_type)?.label }}<template v-if="values.licence_number"> · licence {{ values.licence_number }}</template>. To change these, contact CarYard.</p>
         </div>
         <p v-if="!can_manage" class="rounded-xl bg-sand px-4 py-3 text-[14px]">Only your team's admins can change settings.</p>
 
@@ -136,7 +136,7 @@ async function copy(text: string) {
                 <div v-if="form.integration === 'api'" class="grid gap-4 sm:grid-cols-2">
                     <label class="field-label">
                         API address
-                        <input v-field="{ kind: 'text', max: 255 }" v-model="form.api_url" type="url" class="field h-11" placeholder="https://api.example.com/lotlink" />
+                        <input v-field="{ kind: 'text', max: 255 }" v-model="form.api_url" type="url" class="field h-11" placeholder="https://api.example.com/caryard" />
                         <InputError :message="form.errors.api_url" />
                     </label>
                     <label class="field-label">
@@ -147,7 +147,7 @@ async function copy(text: string) {
                     <div class="flex flex-col gap-1.5 text-[14px] sm:col-span-2">
                         <span class="field-label">Send updates to</span>
                         <code class="rounded-lg bg-sand px-3 py-2 break-all">{{ webhook.url }}</code>
-                        <span class="text-[13px] text-muted">Sign each body with HMAC-SHA256 using your webhook secret, in the <code>X-LotLink-Signature</code> header. The API guide is in LotLink's docs.</span>
+                        <span class="text-[13px] text-muted">Sign each body with HMAC-SHA256 using your webhook secret, in the <code>X-CarYard-Signature</code> header. The API guide is in CarYard's docs.</span>
                     </div>
                     <div v-if="webhook.secret" class="flex flex-col gap-1.5 rounded-xl bg-cream p-3 text-[14px] sm:col-span-2" role="status">
                         <strong>Your webhook secret (shown once):</strong>

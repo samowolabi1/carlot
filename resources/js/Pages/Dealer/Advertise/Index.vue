@@ -42,10 +42,10 @@ const tone: Record<Campaign['state'], string> = {
     <DealerLayout>
         <div>
             <h1 class="text-[30px] font-bold">Advertise</h1>
-            <p class="text-[14px] text-muted">Put your lot and cars in front of more buyers. Paid to LotLink with your card, like your plan.</p>
+            <p class="text-[14px] text-muted">Put your business and cars in front of more buyers. Paid to CarYard with your card, like your plan.</p>
         </div>
 
-        <p v-if="!live" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">Adverts can run once LotLink has approved your lot.</p>
+        <p v-if="!live" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">Adverts can run once CarYard has approved your business.</p>
 
         <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ways to advertise">
             <Link v-for="p in products" :key="p.key" :href="p.url" class="card flex flex-col gap-2 p-4 text-ink no-underline hover:border-forest">
@@ -62,7 +62,7 @@ const tone: Record<Campaign['state'], string> = {
         <section class="flex flex-col gap-3" aria-labelledby="campaigns-heading">
             <h2 id="campaigns-heading" class="font-sans text-[17px] font-bold">Your banners</h2>
             <p v-if="!campaigns.length" class="card px-5 py-10 text-center text-[15px] text-muted">
-                No banners yet. A homepage banner is seen by every buyer who opens LotLink.
+                No banners yet. A homepage banner is seen by every buyer who opens CarYard.
             </p>
             <article v-for="c in campaigns" :key="c.ulid" class="card flex flex-col gap-3 p-3.5 md:flex-row md:items-center md:gap-5">
                 <div class="aspect-[8/3] w-full shrink-0 overflow-hidden rounded-xl bg-forest md:w-[200px]">
@@ -74,7 +74,7 @@ const tone: Record<Campaign['state'], string> = {
                         <span class="rounded-lg px-2 py-0.5 text-[12px] font-semibold" :class="tone[c.state]">{{ c.state_label }}</span>
                     </span>
                     <span class="text-[13px] text-muted">{{ c.placement }} · {{ c.dates }} · {{ c.price }}</span>
-                    <span v-if="c.note" class="text-[13px] text-clay-dark">LotLink: {{ c.note }}</span>
+                    <span v-if="c.note" class="text-[13px] text-clay-dark">CarYard: {{ c.note }}</span>
                 </div>
                 <dl class="flex shrink-0 gap-5 text-[13px]">
                     <div class="flex flex-col"><dt class="text-muted">Views</dt><dd class="text-[16px] font-semibold tabular-nums">{{ c.impressions.toLocaleString('en-NG') }}</dd></div>

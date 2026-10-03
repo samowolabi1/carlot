@@ -7,7 +7,7 @@ use App\Domain\Leads\Models\Conversation;
 use App\Domain\Leads\Models\Lead;
 use App\Domain\Lots\Models\Lot;
 
-/** The buyer on the lead, or anyone working at the lot (TDD: private-conversation channel). */
+/** The buyer on the lead, or anyone working at the seller (TDD: private-conversation channel). */
 class ConversationPolicy
 {
     public function view(User $user, Conversation $conversation): bool

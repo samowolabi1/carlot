@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 /**
- * Read-only lot views for staff in the app: stock (dealer fields via `VehicleResource`, never costs)
+ * Read-only lot views for staff in the app: stock (seller fields via `VehicleResource`, never costs)
  * and the calendar. Adding and editing cars stays on the web for now.
  */
 class StockController extends Controller
@@ -37,7 +37,7 @@ class StockController extends Controller
         ]);
     }
 
-    /** Visits between `from` and `to` (dates in the lot's time zone; default: today and the next 7 days). */
+    /** Visits between `from` and `to` (dates in the seller's time zone; default: today and the next 7 days). */
     public function appointments(Request $request, Lot $lot): JsonResponse
     {
         $data = $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);

@@ -8,12 +8,12 @@ use App\Domain\Lots\Models\Lot;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
-/** Hourly: at 19:00 in each lot's timezone the owner gets the day's summary, once (TDD M19). */
+/** Hourly: at 19:00 in each seller's timezone the owner gets the day's summary, once (TDD M19). */
 class SendDailySummaries extends Command
 {
     protected $signature = 'manager:daily-summary';
 
-    protected $description = "WhatsApp each lot owner the day's walk-ins, orders and money at 19:00 lot time";
+    protected $description = "WhatsApp each seller the day's walk-ins, orders and money at 19:00 seller time";
 
     public function handle(): int
     {

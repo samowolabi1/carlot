@@ -24,8 +24,8 @@ class LegalController extends Controller
             ...$doc,
             'others' => collect(LegalDocuments::TITLES)->except($document)->map(fn (string $title, string $key) => ['key' => $key, 'title' => $title])->values(),
         ])->withViewData(['meta' => [
-            'title' => "{$doc['title']} — LotLink",
-            'description' => "LotLink's {$doc['title']}, effective {$doc['effective']}.",
+            'title' => "{$doc['title']} — CarYard",
+            'description' => "CarYard's {$doc['title']}, effective {$doc['effective']}.",
         ]]);
     }
 

@@ -9,7 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-/** To the lot owner: trial ending, payment failed, plan changed. WhatsApp, SMS fallback. */
+/** To the seller: trial ending, payment failed, plan changed. WhatsApp, SMS fallback. */
 class BillingNotice extends Notification implements ShouldQueue
 {
     use Queueable;

@@ -13,14 +13,14 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Account (design 21): budget, bookings, saved cars, orders from lots, and dealer links. */
+/** Account (design 21): budget, bookings, saved cars, orders from lots, and seller links. */
 class AccountController extends Controller
 {
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
 
-        // Orders a lot recorded for this phone number (Lot Manager links the account by phone).
+        // Orders a seller recorded for this phone number (Sales Manager links the account by phone).
         $customerIds = LotCustomer::withoutGlobalScopes()
             ->where(fn ($q) => $q->where('user_id', $user->id)->when($user->phone, fn ($q) => $q->orWhere('phone', $user->phone)))
             ->pluck('id');

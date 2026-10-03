@@ -25,7 +25,7 @@ class AdminInvitationController extends Controller
             'role' => $user->adminRole()?->label(),
             'role_description' => $user->adminRole()?->description(),
             'action' => $request->fullUrl(),
-        ])->withViewData(['meta' => ['title' => 'Join the LotLink admin team', 'robots' => 'noindex']]);
+        ])->withViewData(['meta' => ['title' => 'Join the CarYard admin team', 'robots' => 'noindex']]);
     }
 
     public function store(Request $request, User $user): SymfonyResponse

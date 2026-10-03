@@ -77,7 +77,7 @@ it('needs photos and a model', function () {
     expect(TradeIn::withoutGlobalScopes()->sole()->title())->toBe('2014 Honda Accord Crosstour');
 });
 
-it('lets the lot send a valuation the buyer hears about on WhatsApp', function () {
+it('lets the seller send a valuation the buyer hears about on WhatsApp', function () {
     ($this->submit)();
     $tradeIn = TradeIn::withoutGlobalScopes()->sole();
 
@@ -98,7 +98,7 @@ it('lets the lot send a valuation the buyer hears about on WhatsApp', function (
     expect($tradeIn->fresh()->status)->toBe(TradeInStatus::Accepted);
 });
 
-it('lets the lot ask for more photos in the chat', function () {
+it('lets the seller ask for more photos in the chat', function () {
     ($this->submit)();
     $tradeIn = TradeIn::withoutGlobalScopes()->sole();
 

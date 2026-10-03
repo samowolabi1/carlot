@@ -11,7 +11,7 @@ it('needs signing in', function () {
     $this->get(route('account'))->assertRedirect(route('login'));
 });
 
-it('shows the budget, counts and orders a lot recorded for this phone', function () {
+it('shows the budget, counts and orders a seller recorded for this phone', function () {
     $this->travelTo('2026-10-05 10:00'); // order numbers include the year
     $owner = User::factory()->staff()->create();
     $lot = app(CreateLot::class)->run($owner, ['name' => 'Prime Motors']);
@@ -19,7 +19,7 @@ it('shows the budget, counts and orders a lot recorded for this phone', function
     $order = app(CreateOrder::class)->run($lot, $owner, ['vehicle' => $car->ulid, 'name' => 'Ada Obi', 'phone' => '08035550101']);
     app(RecordPayment::class)->run($order, $owner, ['amount' => 200_000_000, 'method' => 'cash']);
 
-    // Ada signs up to LotLink later with the same number.
+    // Ada signs up to CarYard later with the same number.
     $ada = User::factory()->create(['name' => 'Ada Obi', 'phone' => '+2348035550101']);
     $stranger = User::factory()->create(['phone' => '+2348035550999']);
 

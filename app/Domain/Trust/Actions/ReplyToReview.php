@@ -8,7 +8,7 @@ use App\Domain\Trust\Models\Review;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/** The lot answers a review, once (TDD M14). */
+/** The seller answers a review, once (TDD M14). */
 class ReplyToReview
 {
     public function run(Review $review, User $staff, string $reply): Review

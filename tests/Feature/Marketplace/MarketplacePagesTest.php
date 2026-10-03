@@ -54,7 +54,7 @@ it('redirects to the canonical car URL', function () {
     $this->get('/car/'.strtoupper($this->camry->ulid))->assertRedirect($this->camry->publicPath());
 });
 
-it('hides drafts and cars at unapproved lots from the public, but lets the lot preview them', function () {
+it('hides drafts and cars at unapproved lots from the public, but lets the seller preview them', function () {
     $draft = Vehicle::factory()->create(['lot_id' => $this->lot->id]);
     $pendingLot = Lot::factory()->create();
     $early = $this->car($pendingLot, 'Honda', 'Accord');
@@ -89,7 +89,7 @@ it('compares cars and marks the best values', function () {
             ->where('cars.0.rows.price.best', false));
 });
 
-it('serves the lot mini-site with its own stock only', function () {
+it('serves the seller mini-site with its own stock only', function () {
     $other = Lot::factory()->active()->create();
     $this->car($other, 'Honda', 'Accord');
 

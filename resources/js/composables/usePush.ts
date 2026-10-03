@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 /**
  * Push notifications on this device (Web Push). Needs the service worker, so HTTPS (or
- * localhost). iPhones only allow it once LotLink is added to the Home Screen (iOS 16.4+).
+ * localhost). iPhones only allow it once CarYard is added to the Home Screen (iOS 16.4+).
  */
 export type PushState = 'checking' | 'not-configured' | 'unsupported' | 'needs-install' | 'denied' | 'off' | 'on';
 

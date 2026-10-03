@@ -39,7 +39,7 @@ function submit() {
             <p class="text-[14px] text-muted">{{ visit }}</p>
         </div>
 
-        <p v-if="!reviewable" class="rounded-xl bg-cream p-4 text-[14px] text-clay-dark" role="status">You can review this visit once it has happened and the lot has marked it complete.</p>
+        <p v-if="!reviewable" class="rounded-xl bg-cream p-4 text-[14px] text-clay-dark" role="status">You can review this visit once it has happened and the seller has marked it complete.</p>
         <p v-else-if="review?.hidden" class="rounded-xl bg-cream p-4 text-[14px] text-clay-dark" role="status">Your review was reported and is hidden while our team takes a look.</p>
         <p v-else-if="review && !review.editable" class="rounded-xl bg-map p-4 text-[14px] text-forest" role="status">Thanks for your review. Reviews can be changed for 14 days after posting.</p>
 
@@ -82,7 +82,7 @@ function submit() {
 
                 <label class="flex flex-col gap-1.5 text-[15px] font-semibold">
                     Tell others about it
-                    <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.body" rows="4" class="field h-auto py-3 text-[15px] font-normal" placeholder="What was the car and the lot like?" />
+                    <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.body" rows="4" class="field h-auto py-3 text-[15px] font-normal" placeholder="What was the car and the seller like?" />
                     <InputError :message="form.errors.body" />
                 </label>
             </fieldset>

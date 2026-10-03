@@ -42,7 +42,7 @@ defineProps<{
                 <span v-if="a.approved" class="text-[14px] font-semibold text-[#166534]">Approved up to {{ a.approved }}</span>
                 <span v-if="a.message" class="line-clamp-2 text-[14px]">{{ a.message }}</span>
             </Link>
-            <p class="text-[12px] text-muted">The lender decides and may ask for documents. LotLink doesn't lend money.</p>
+            <p class="text-[12px] text-muted">The lender decides and may ask for documents. CarYard doesn't lend money.</p>
         </div>
     </CustomerLayout>
 </template>

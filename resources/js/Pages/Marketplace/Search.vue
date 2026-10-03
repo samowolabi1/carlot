@@ -126,7 +126,7 @@ const empty: Partial<Filters> = {
 
 const heading = computed(() => {
     const n = props.results.total;
-    return `${n.toLocaleString('en-NG')} ${n === 1 ? 'car' : 'cars'}` + (props.lotCount > 0 && props.results.last_page === 1 ? ` at ${props.lotCount} ${props.lotCount === 1 ? 'lot' : 'lots'}` : '');
+    return `${n.toLocaleString('en-NG')} ${n === 1 ? 'car' : 'cars'}` + (props.lotCount > 0 && props.results.last_page === 1 ? ` at ${props.lotCount} ${props.lotCount === 1 ? 'seller' : 'sellers'}` : '');
 });
 </script>
 
@@ -227,7 +227,7 @@ const heading = computed(() => {
                 <div v-if="results.data.length" class="grid gap-3 transition-opacity sm:grid-cols-2 xl:grid-cols-3" :class="{ 'opacity-60': searching }" :aria-busy="searching">
                     <template v-for="(car, i) in results.data" :key="car.ulid">
                         <CarCard :car="car" compare />
-                        <!-- A lot's search banner after the sixth car (or at the end of a short list). -->
+                        <!-- A seller's search banner after the sixth car (or at the end of a short list). -->
                         <SearchBanner v-if="banner && (i === 5 || (i === results.data.length - 1 && results.data.length < 6))" :ad="banner" />
                     </template>
                 </div>

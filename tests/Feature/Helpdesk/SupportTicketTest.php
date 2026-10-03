@@ -37,7 +37,7 @@ function openTicket(array $overrides = []): SupportTicket
     return SupportTicket::withoutGlobalScopes()->latest('id')->firstOrFail();
 }
 
-it('lets a lot open a ticket with a screenshot and alerts the admins', function () {
+it('lets a seller open a ticket with a screenshot and alerts the admins', function () {
     Notification::fake();
 
     $ticket = openTicket(['attachment' => UploadedFile::fake()->image('screen.png')]);
@@ -68,30 +68,30 @@ it('validates new tickets', function () {
     expect(SupportTicket::withoutGlobalScopes()->count())->toBe(0);
 });
 
-it('runs the conversation between the lot and LotLink', function () {
+it('runs the conversation between the seller and CarYard', function () {
     Notification::fake();
     $ticket = openTicket();
 
-    // An admin replies: the ticket waits on the lot, which is told.
+    // An admin replies: the ticket waits on the seller, which is told.
     app(ReplyToTicket::class)->fromAdmin($ticket, $this->admin, 'Thanks, we are checking with Paystack.');
     expect($ticket->refresh())->status->toBe(TicketStatus::Pending)->assigned_to->toBe($this->admin->id);
     Notification::assertSentTo($this->owner, SupportTicketUpdate::class);
 
-    // The lot sees the reply signed with the admin's first name, and the badge clears once read.
+    // The seller sees the reply signed with the admin's first name, and the badge clears once read.
     $this->get(route('dealer.support.index', $this->lot))->assertInertia(fn (Assert $page) => $page->where('tickets.data.0.unread', true)->where('currentLot.support_badge', 1));
     $this->get(route('dealer.support.show', [$this->lot, $ticket]))->assertInertia(fn (Assert $page) => $page
         ->component('Dealer/Support/Show')
-        ->where('messages.1.author', 'Ada, LotLink Support')
+        ->where('messages.1.author', 'Ada, CarYard Support')
         ->where('messages.1.mine', false));
     $this->get(route('dealer.support.index', $this->lot))->assertInertia(fn (Assert $page) => $page->where('currentLot.support_badge', 0));
 
-    // The lot answers: back with LotLink, and the assigned admin is alerted.
+    // The seller answers: back with CarYard, and the assigned admin is alerted.
     $this->post(route('dealer.support.reply', [$this->lot, $ticket]), ['body' => 'Receipt attached.', 'attachment' => UploadedFile::fake()->create('receipt.pdf', 50, 'application/pdf')])
         ->assertSessionHasNoErrors();
     expect($ticket->refresh()->status)->toBe(TicketStatus::Open);
     Notification::assertSentTo($this->admin, SupportTicketAlert::class, fn ($n) => $n->event === 'replied');
 
-    // The lot marks it solved, then reopens it.
+    // The seller marks it solved, then reopens it.
     $this->patch(route('dealer.support.status', [$this->lot, $ticket]), ['status' => 'resolved'])->assertSessionHasNoErrors();
     expect($ticket->refresh())->status->toBe(TicketStatus::Resolved)->resolved_at->not->toBeNull();
     $this->patch(route('dealer.support.status', [$this->lot, $ticket]), ['status' => 'open'])->assertSessionHasNoErrors();
@@ -99,7 +99,7 @@ it('runs the conversation between the lot and LotLink', function () {
         ->and(AuditLog::where('action', 'support.status_changed')->count())->toBe(2);
 });
 
-it('never shows internal notes to the lot', function () {
+it('never shows internal notes to the seller', function () {
     $ticket = openTicket();
     app(ReplyToTicket::class)->fromAdmin($ticket, $this->admin, 'Lot has 3 chargebacks, be careful.', internal: true);
 
@@ -116,7 +116,7 @@ it('does not take replies on closed tickets', function () {
     $this->patch(route('dealer.support.status', [$this->lot, $ticket]), ['status' => 'open'])->assertSessionHasErrors('status');
 });
 
-it('keeps tickets and attachments inside the lot', function () {
+it('keeps tickets and attachments inside the seller', function () {
     $ticket = openTicket(['attachment' => UploadedFile::fake()->image('screen.png')]);
     $other = Lot::factory()->create();
     $stranger = $other->owner;

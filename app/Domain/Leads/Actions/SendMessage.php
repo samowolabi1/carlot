@@ -21,7 +21,7 @@ use Intervention\Image\ImageManager;
 class SendMessage
 {
     /**
-     * A chat message from the buyer, the lot, or the system ("Test drive booked"). Photos
+     * A chat message from the buyer, the seller, or the system ("Test drive booked"). Photos
      * are re-encoded to WebP, which also strips location data from phone pictures.
      */
     public function run(Conversation $conversation, ?User $sender, string $side, string $body, ?UploadedFile $photo = null): Message

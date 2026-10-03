@@ -11,8 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * People who haven't accepted the current Terms of Use and Privacy Policy (accounts from before they existed, accounts
- * an admin or a lot made for someone, or after a material change) accept them once before continuing. New sign-ups
- * accept on the sign-in page. LotLink staff are bound by their employment terms instead, and during "Log in as" the
+ * an admin or a seller made for someone, or after a material change) accept them once before continuing. New sign-ups
+ * accept on the sign-in page. CarYard staff are bound by their employment terms instead, and during "Log in as" the
  * admin must never accept on the person's behalf.
  */
 class EnsureTermsAccepted

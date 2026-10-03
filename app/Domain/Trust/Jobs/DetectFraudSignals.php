@@ -62,7 +62,7 @@ class DetectFraudSignals implements ShouldQueue
         }
     }
 
-    /** The cover photo against other lots' covers of the same make (dHash, a few bits apart). */
+    /** The cover photo against other sellers' covers of the same make (dHash, a few bits apart). */
     private function duplicatePhoto(Vehicle $vehicle): void
     {
         $hash = $vehicle->cover?->phash;

@@ -35,7 +35,7 @@ const quick = ['Is the price negotiable?', 'Can I see the papers?', 'Is it still
                     <h1 class="m-0 font-sans text-[15px] leading-tight font-semibold">{{ lot.name }}</h1>
                     <span class="text-[12px] text-success">{{ chat.typing.value ? 'typing…' : 'Usually replies in minutes' }}</span>
                 </Link>
-                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="flex h-11 w-11 items-center justify-center text-ink" aria-label="Call the lot"><Icon name="phone" :size="20" /></a>
+                <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="flex h-11 w-11 items-center justify-center text-ink" aria-label="Call the seller"><Icon name="phone" :size="20" /></a>
             </div>
             <div v-if="car" class="flex items-center gap-2.5 rounded-xl bg-ivory p-2">
                 <Link :href="car.url" class="flex min-w-0 grow items-center gap-2.5 text-ink no-underline">

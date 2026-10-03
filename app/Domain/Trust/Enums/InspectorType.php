@@ -10,7 +10,7 @@ enum InspectorType: string
     public function label(): string
     {
         return match ($this) {
-            self::Dealer => 'Inspected by the lot',
+            self::Dealer => 'Inspected by the seller',
             self::ThirdParty => 'Independently inspected',
         };
     }

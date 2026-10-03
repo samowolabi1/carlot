@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** The lot's mini-site at /l/{slug}, which lots share as their own website (M6). */
+/** The seller's mini-site at /l/{slug}, which lots share as their own website (M6). */
 class LotSiteController extends Controller
 {
     public function __invoke(Request $request, Lot $lot, VehicleSearch $search): Response
@@ -39,7 +39,7 @@ class LotSiteController extends Controller
                 ->map(fn (Review $r) => MarketplacePresenter::review($r, $lot->timezone, $request->user()?->id)),
         ])->withViewData(['meta' => [
             'title' => $lot->name.($lot->city ? " — cars for sale in {$lot->city}" : ''),
-            'description' => $lot->tagline ?? "See {$lot->name}'s cars, opening hours and directions on LotLink.",
+            'description' => $lot->tagline ?? "See {$lot->name}'s cars, opening hours and directions on CarYard.",
             'image' => $lot->cover_url ?? $lot->logo_url,
             'url' => route('lots.show', $lot),
             'robots' => $preview ? 'noindex' : null,

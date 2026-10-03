@@ -140,7 +140,7 @@ class OtpLoginController extends Controller
 
     public function destroy(Request $request, Impersonation $impersonation): SymfonyResponse
     {
-        // An admin using "Log in as" signs out of the dealer's account, not their own: back to the admin panel.
+        // An admin using "Log in as" signs out of the seller's account, not their own: back to the admin panel.
         if (Impersonation::active() && $impersonation->stop() !== null) {
             return Inertia::location(url('/admin'));
         }

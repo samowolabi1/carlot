@@ -53,7 +53,7 @@ function choose(key: string) {
                     type="search"
                     maxlength="60"
                     class="h-11 w-full bg-transparent text-[15px] outline-none"
-                    placeholder="Buyer, car, lot or reference"
+                    placeholder="Buyer, car, seller or reference"
                     @input="live.later(params)"
                 />
                 <Icon v-if="live.searching.value" name="refresh" :size="16" class="animate-spin text-muted" />

@@ -59,7 +59,7 @@ final class PhoneNumber
         }
     }
 
-    /** "+2348031234412" → "+234 803 *** 4412", as shown in the dealer UI ("" when there's no number). */
+    /** "+2348031234412" → "+234 803 *** 4412", as shown in the seller UI ("" when there's no number). */
     public static function mask(?string $e164): string
     {
         if ($e164 === null || $e164 === '') {

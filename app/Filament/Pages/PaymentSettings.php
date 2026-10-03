@@ -18,7 +18,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\HtmlString;
 
 /**
- * Which provider takes lots' payments to LotLink (plans, spotlights, adverts): Paystack or
+ * Which provider takes lots' payments to CarYard (plans, spotlights, adverts): Paystack or
  * Flutterwave. Switching only affects new payments; each subscription keeps renewing, refunding
  * and cancelling through the provider it started on.
  *
@@ -61,14 +61,14 @@ class PaymentSettings extends Page implements HasForms
     {
         return $form->statePath('data')->schema([
             Forms\Components\Section::make('New payments go through')
-                ->description('Plans, renewals of new subscriptions, spotlights and adverts. Lots pay by card, bank transfer or USSD on the provider\'s page.')
+                ->description('Plans, renewals of new subscriptions, spotlights and adverts. Sellers pay by card, bank transfer or USSD on the provider\'s page.')
                 ->schema([
                     Forms\Components\Radio::make('provider')->hiddenLabel()->required()
                         ->options(PaymentGateways::PROVIDERS)
                         ->descriptions(collect(PaymentGateways::PROVIDERS)->mapWithKeys(fn (string $label, string $p) => [$p => self::status($p)])->all())
                         ->disableOptionWhen(fn (string $value) => ! PaymentGateways::configured($value)),
                     Forms\Components\Placeholder::make('note')->hiddenLabel()->content(new HtmlString(
-                        'Switching doesn\'t move anyone: existing subscriptions keep renewing with the provider they started on until the lot changes plan. '
+                        'Switching doesn\'t move anyone: existing subscriptions keep renewing with the provider they started on until the seller changes plan. '
                         .(PaymentGateways::live() ? '' : '<strong>Test mode</strong> (PAYMENT_DRIVER=sandbox): both use the test checkout.'))),
                 ]),
             Forms\Components\Section::make('Set up at the providers')->collapsible()->collapsed()->schema([

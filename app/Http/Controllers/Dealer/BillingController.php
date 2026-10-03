@@ -77,7 +77,7 @@ class BillingController extends Controller
                 'price' => $p->self_serve ? ($p->price > 0 ? Money::format($p->price, $p->currency).'/mo' : '₦0') : 'Talk to us',
                 'limits' => ($p->listing_limit ? "Up to {$p->listing_limit} cars" : 'Unlimited cars').' · '.($p->staff_limit ? "{$p->staff_limit} staff" : 'unlimited staff'),
                 'blurb' => match ($p->code) {
-                    'free' => 'Listing, booking, sharing, lot map, Lot Manager lite',
+                    'free' => 'Listing, booking, sharing, seller map, Sales Manager lite',
                     'starter' => '+ share cards, unlimited orders, WhatsApp reminders',
                     'pro' => "+ {$p->free_spotlights} free spotlights a month, leads and offers as they launch",
                     default => '+ multi-branch, custom domain, bulk import, priority support',
@@ -98,7 +98,7 @@ class BillingController extends Controller
                 ]),
             'spotlights' => Spotlight::query()->with(['vehicle.make', 'vehicle.model'])->where('status', 'paid')->where('ends_at', '>', now())->orderBy('ends_at')->get()
                 ->map(fn (Spotlight $s) => [
-                    'what' => $s->placement === SpotlightPlacement::Car ? ($s->vehicle?->title() ?? 'Car') : 'Featured lot',
+                    'what' => $s->placement === SpotlightPlacement::Car ? ($s->vehicle?->title() ?? 'Car') : 'Featured seller',
                     'placement' => $s->placement->label(),
                     'from' => $date($s->starts_at),
                     'until' => $date($s->ends_at),
@@ -146,8 +146,8 @@ class BillingController extends Controller
         return redirect($back)->with(...match ($payment->status) {
             PaymentStatus::Success => ['success', match (true) {
                 $carSpotlight => 'Paid. Your spotlight is live.',
-                $advert => 'Paid. LotLink will check your advert (usually within a working day) and it runs from its start date.',
-                $payment->purpose === PaymentPurpose::Spotlight => 'Paid. Your lot is featured on the home page.',
+                $advert => 'Paid. CarYard will check your advert (usually within a working day) and it runs from its start date.',
+                $payment->purpose === PaymentPurpose::Spotlight => 'Paid. Your business is featured on the home page.',
                 default => 'Paid. Your plan is active.',
             }],
             PaymentStatus::Pending => ['success', 'We are waiting for Paystack to confirm the payment.'],
@@ -195,7 +195,7 @@ class BillingController extends Controller
 
         return response($pdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="lotlink-'.$payment->invoiceNumber().'.pdf"',
+            'Content-Disposition' => 'inline; filename="caryard-'.$payment->invoiceNumber().'.pdf"',
         ]);
     }
 }

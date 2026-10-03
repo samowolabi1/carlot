@@ -16,9 +16,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * Money paid through Paystack: a lot paying LotLink for plans, renewals and spotlights (TDD M16),
+ * Money paid through Paystack: a seller paying CarYard for plans, renewals and spotlights (TDD M16),
  * and buyers' reservation and test-drive deposits (M12, user_id is the buyer). Not to be
- * confused with Lot Manager's order_payments (payments a lot records itself).
+ * confused with Sales Manager's order_payments (payments a seller records itself).
  *
  * @property int $id
  * @property string $ulid
@@ -91,7 +91,7 @@ class Payment extends Model
         return (string) Money::format($this->amount, $this->currency);
     }
 
-    /** "LL-2026-000042": LotLink's invoice number for this payment. */
+    /** "LL-2026-000042": CarYard's invoice number for this payment. */
     public function invoiceNumber(): string
     {
         return sprintf('LL-%d-%06d', ($this->paid_at ?? $this->created_at ?? now())->year, $this->id);

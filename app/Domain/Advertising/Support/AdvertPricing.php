@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
- * Prices (and banner slots) for everything lots pay LotLink to promote: homepage and search
- * banners, car spotlights and featured lots. `config/lotlink.php` holds the defaults; an admin can
+ * Prices (and banner slots) for everything lots pay CarYard to promote: homepage and search
+ * banners, car spotlights and featured sellers. `config/lotlink.php` holds the defaults; an admin can
  * change them in /admin → Advert prices. The overrides are laid over config at boot and before each
  * queued job, so `AdSchedule`, `SpotlightPricing` and the pages keep reading config. New prices apply
  * to new bookings; what's already booked keeps the price paid.

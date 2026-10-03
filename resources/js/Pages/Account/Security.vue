@@ -137,7 +137,7 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
             </section>
 
             <section v-if="apps.length" class="card overflow-hidden" aria-labelledby="apps-heading">
-                <h2 id="apps-heading" class="border-b border-divider px-4 py-3 font-sans text-[15px] font-bold">Signed in to the LotLink app</h2>
+                <h2 id="apps-heading" class="border-b border-divider px-4 py-3 font-sans text-[15px] font-bold">Signed in to the CarYard app</h2>
                 <div v-for="a in apps" :key="a.id" :class="row">
                     <Icon name="phone" :size="20" class="shrink-0 text-muted" />
                     <span class="flex min-w-0 grow flex-col">

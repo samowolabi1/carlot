@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * The chat on a lead: the buyer on one side, the lot's staff on the other (TDD M11).
+ * The chat on a lead: the buyer on one side, the seller's staff on the other (TDD M11).
  *
  * @property int $id
  * @property string $ulid

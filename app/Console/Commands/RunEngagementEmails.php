@@ -5,12 +5,12 @@ namespace App\Console\Commands;
 use App\Domain\Engagement\Actions\RunEngagementRules;
 use Illuminate\Console\Command;
 
-/** Hourly: automated emails to lot owners at the send hour in each lot's time zone, and any scheduled broadcasts that are due. */
+/** Hourly: automated emails to sellers at the send hour in each seller's time zone, and any scheduled broadcasts that are due. */
 class RunEngagementEmails extends Command
 {
     protected $signature = 'engagement:run {--now : Ignore the send hour} {--rule= : Only this rule}';
 
-    protected $description = 'Send automated engagement emails to lot owners';
+    protected $description = 'Send automated engagement emails to sellers';
 
     public function handle(RunEngagementRules $rules): int
     {

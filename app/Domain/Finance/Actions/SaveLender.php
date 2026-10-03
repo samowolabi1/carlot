@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 /**
- * Saves a lender's profile, loan product and connection (by the lender's admins or a LotLink admin). Amounts come in
+ * Saves a lender's profile, loan product and connection (by the lender's admins or a CarYard admin). Amounts come in
  * whole naira and the rate as a percentage; a lender that switches to its own API gets a webhook secret.
  */
 class SaveLender

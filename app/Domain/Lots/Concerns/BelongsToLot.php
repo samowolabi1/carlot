@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Row-level tenancy for lot-owned models: sets lot_id on create and, while a dealer
+ * Row-level tenancy for lot-owned models: sets lot_id on create and, while a seller
  * context is active, limits every query to the current lot.
  */
 trait BelongsToLot

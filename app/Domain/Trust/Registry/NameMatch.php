@@ -5,7 +5,7 @@ namespace App\Domain\Trust\Registry;
 use Illuminate\Support\Str;
 
 /**
- * How closely a lot's trading name matches its registered company name, 0–100. Words every company has
+ * How closely a seller's trading name matches its registered company name, 0–100. Words every company has
  * ("limited", "enterprises", "Nigeria"…) are ignored, so "AutoHub" matches "AUTOHUB MOTORS NIGERIA LIMITED".
  */
 final class NameMatch

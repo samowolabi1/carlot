@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * What the lot spent on a car: the purchase and every extra (TDD M19: car costs and profit).
+ * What the seller spent on a car: the purchase and every extra (TDD M19: car costs and profit).
  * Owners and managers only; never on customer pages, receipts or API resources.
  *
  * @property int $id

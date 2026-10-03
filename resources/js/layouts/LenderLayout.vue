@@ -9,7 +9,7 @@ import type { SharedProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-/** The lender portal (forest sidebar like the dealer dashboard): applications, team and settings. */
+/** The lender portal (forest sidebar like the seller dashboard): applications, team and settings. */
 const page = usePage<SharedProps>();
 const { unread } = useShared();
 const lender = computed(() => page.props.currentLender!);
@@ -107,8 +107,8 @@ const isActive = (item: NavItem) => route().current(item.match ?? item.route);
 
             <div v-if="lender.status !== 'active'" class="border-b border-apricot bg-cream px-5 py-3 text-[14px] text-clay-dark lg:px-8" role="status">
                 <strong>{{ lender.status_label }}.</strong>
-                <template v-if="lender.status === 'pending'"> LotLink is checking your details and licence. Buyers will see you once you're approved.</template>
-                <template v-else-if="lender.status === 'suspended'"> You get no new applications. Contact LotLink to sort it out.</template>
+                <template v-if="lender.status === 'pending'"> CarYard is checking your details and licence. Buyers will see you once you're approved.</template>
+                <template v-else-if="lender.status === 'suspended'"> You get no new applications. Contact CarYard to sort it out.</template>
                 <template v-else> See the note on your dashboard.</template>
             </div>
 

@@ -38,7 +38,7 @@ it('signs up with an email address and a code, with no phone needed', function (
         ->and($this->whatsapp->sent)->toBe([])->and($this->sms->sent)->toBe([]);
     $this->assertAuthenticatedAs($user);
 
-    // New accounts add their name first, then can start a lot like anyone else.
+    // New accounts add their name first, then can start a seller like anyone else.
     $this->get(route('dealer.onboarding.start'))->assertRedirect(route('profile.name'));
 });
 
@@ -64,7 +64,7 @@ it('rejects wrong codes and limits email codes too', function () {
     $this->post(route('login.send'), ['method' => 'email', 'email' => 'ada@example.com'])->assertSessionHasErrors('email');
 });
 
-it('lets a buyer who signed up by email contact a lot: the customer book matches them by email', function () {
+it('lets a buyer who signed up by email contact a seller: the customer book matches them by email', function () {
     $owner = User::factory()->staff()->create();
     $lot = app(CreateLot::class)->run($owner, ['name' => 'Prime Motors', 'phone' => '+2348021112233']);
     $lot->update(['status' => 'active']);

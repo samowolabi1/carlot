@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
 /**
- * A LotLink message to a lot owner or manager: an admin broadcast ("news") or an automated nudge
+ * A CarYard message to a seller or manager: an admin broadcast ("news") or an automated nudge
  * ("nudges"). Always in the notification centre; email, push and WhatsApp as chosen and as the
  * person's settings allow. Links go through the message's tracked `/e/{ulid}`; emails carry an unsubscribe link.
  */
@@ -59,16 +59,16 @@ class EngagementNotice extends Notification implements ShouldQueue
         $unsubscribe = URL::signedRoute('engagement.unsubscribe', ['user' => $notifiable->ulid ?? '', 'type' => $this->type]);
 
         return $mail->action($this->ctaLabel, $this->message->link())
-            ->salutation('The LotLink team')
+            ->salutation('The CarYard team')
             ->line($this->type === 'news'
-                ? "Don't want LotLink news by email? [Unsubscribe]({$unsubscribe})."
+                ? "Don't want CarYard news by email? [Unsubscribe]({$unsubscribe})."
                 : "Don't want these reminders by email? [Turn them off]({$unsubscribe}).");
     }
 
     /** @return array{title: string, body: string, url: string, tag: string} */
     public function toPush(object $notifiable): array
     {
-        return ['title' => $this->type === 'news' ? 'LotLink' : 'Your lot', 'body' => $this->subject, 'url' => $this->message->link(), 'tag' => 'engagement-'.$this->message->ulid];
+        return ['title' => $this->type === 'news' ? 'CarYard' : 'Your sales', 'body' => $this->subject, 'url' => $this->message->link(), 'tag' => 'engagement-'.$this->message->ulid];
     }
 
     public function toPhone(object $notifiable): Message
@@ -76,7 +76,7 @@ class EngagementNotice extends Notification implements ShouldQueue
         $name = trim(explode(' ', (string) ($notifiable->name ?? ''))[0]) ?: 'there';
         $link = $this->message->link();
 
-        return new Message('lot_announcement', [$name, $this->subject], "LotLink: {$this->subject} {$link}", Message::suffix($link));
+        return new Message('lot_announcement', [$name, $this->subject], "CarYard: {$this->subject} {$link}", Message::suffix($link));
     }
 
     /** @return array{kind: string, text: string, url: string} */

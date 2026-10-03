@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
  */
 class PushChannel
 {
-    /** Titles by notification kind; anything else is "LotLink". */
+    /** Titles by notification kind; anything else is "CarYard". */
     public const TITLES = [
         'message' => 'New message',
         'booking' => 'Bookings',
@@ -70,7 +70,7 @@ class PushChannel
         $kind = (string) ($data['kind'] ?? 'info');
 
         return [
-            'title' => self::TITLES[$kind] ?? 'LotLink',
+            'title' => self::TITLES[$kind] ?? 'CarYard',
             'body' => Str::limit((string) ($data['text'] ?? ''), 180),
             'url' => $data['url'] ?? null,
             // A newer push about the same thing replaces the older one on the phone.

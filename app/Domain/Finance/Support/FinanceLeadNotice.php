@@ -13,10 +13,10 @@ use App\Domain\Support\Name;
 use Illuminate\Support\Facades\Notification;
 
 /**
- * Tells the lot about a car loan application on one of its cars, without the private part: that the buyer
+ * Tells the seller about a car loan application on one of its cars, without the private part: that the buyer
  * applied (a "Car loan" lead with a line in the chat), and later that they were pre-approved or approved and for
- * how much, and when the lender paid the lot. Income, commitments, employer, declines and withdrawals are never
- * shared with the lot.
+ * how much, and when the lender paid the seller. Income, commitments, employer, declines and withdrawals are never
+ * shared with the seller.
  */
 class FinanceLeadNotice
 {
@@ -48,7 +48,7 @@ class FinanceLeadNotice
         $amount = $application->approved_amount ? ' of '.Money::format($application->approved_amount, $application->currency) : '';
         $lender = $application->lenderName();
 
-        $this->timeline->post($lead, "{$lender} approved a car loan{$amount} for the {$car}. They'll arrange payment to the lot.");
+        $this->timeline->post($lead, "{$lender} approved a car loan{$amount} for the {$car}. They'll arrange payment to the seller.");
         $this->alert($application, $lead, Name::short($application->user->name)."'s car loan{$amount} for the {$car} is approved by {$lender}.");
     }
 
@@ -60,8 +60,8 @@ class FinanceLeadNotice
         $ref = $application->disbursed_reference ? " (reference {$application->disbursed_reference})" : '';
         $lender = $application->lenderName();
 
-        $this->timeline->post($lead, "{$lender} says it paid {$amount} to the lot for the {$car}{$ref}.");
-        $this->alert($application, $lead, "{$lender} says it paid {$amount} to your lot for ".Name::short($application->user->name)."'s {$car}{$ref}. Check your account.");
+        $this->timeline->post($lead, "{$lender} says it paid {$amount} to the seller for the {$car}{$ref}.");
+        $this->alert($application, $lead, "{$lender} says it paid {$amount} to your business for ".Name::short($application->user->name)."'s {$car}{$ref}. Check your account.");
     }
 
     private function lead(FinanceApplication $application): Lead

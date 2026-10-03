@@ -25,7 +25,7 @@ class ManageAdminTeam
         $email = Str::lower(trim($email));
 
         if (User::withTrashed()->where('email', $email)->exists()) {
-            throw ValidationException::withMessages(['email' => 'That email already has a LotLink account. Use a separate work email for admin access.']);
+            throw ValidationException::withMessages(['email' => 'That email already has a CarYard account. Use a separate work email for admin access.']);
         }
 
         $admin = DB::transaction(function () use ($owner, $name, $email, $role) {
@@ -117,7 +117,7 @@ class ManageAdminTeam
     {
         $others = User::query()->where('role', UserRole::Admin)->where('admin_role', AdminRole::Owner->value)->whereKeyNot($admin->id)->whereNotNull('password')->exists();
         if (! $others) {
-            throw ValidationException::withMessages(['admin' => 'LotLink always needs at least one owner who has joined. Make someone else an owner first.']);
+            throw ValidationException::withMessages(['admin' => 'CarYard always needs at least one owner who has joined. Make someone else an owner first.']);
         }
     }
 }

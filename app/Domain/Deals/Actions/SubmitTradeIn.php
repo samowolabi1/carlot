@@ -27,8 +27,8 @@ class SubmitTradeIn
     public function __construct(private readonly CaptureLead $capture, private readonly DealTimeline $timeline) {}
 
     /**
-     * A buyer asks a lot to value their car (TDD M12). Photos are re-encoded (which strips
-     * EXIF GPS) and kept on the private disk; only the lot and the buyer can see them.
+     * A buyer asks a seller to value their car (TDD M12). Photos are re-encoded (which strips
+     * EXIF GPS) and kept on the private disk; only the seller and the buyer can see them.
      *
      * @param  array{make_id: int, vehicle_model_id?: ?int, model_name?: ?string, year: int, mileage_km: int, condition: string, notes?: ?string}  $data
      * @param  list<UploadedFile>  $photos
@@ -36,7 +36,7 @@ class SubmitTradeIn
     public function run(Lot $lot, User $customer, array $data, array $photos, ?Vehicle $towards = null): TradeIn
     {
         if ($customer->hasLotRole($lot)) {
-            throw ValidationException::withMessages(['make_id' => 'You work at this lot.']);
+            throw ValidationException::withMessages(['make_id' => 'You work for this seller.']);
         }
         if (! $lot->takesTradeIns()) {
             throw ValidationException::withMessages(['make_id' => "{$lot->name} isn't taking trade-ins right now."]);

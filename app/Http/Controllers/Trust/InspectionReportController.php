@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * The PDF of a car's current inspection. Public while the car is on the marketplace (buyers
- * share it); otherwise only the lot's team can open it.
+ * share it); otherwise only the seller's team can open it.
  */
 class InspectionReportController extends Controller
 {

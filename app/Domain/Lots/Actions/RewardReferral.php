@@ -15,8 +15,8 @@ class RewardReferral
     public const MONTHS = 1;
 
     /**
-     * A lot that signed up with a referral code paid for its first plan: the referrer gets a
-     * month (TDD M19: RewardReferral). It is added to the end of their plan or trial; a lot
+     * A seller that signed up with a referral code paid for its first plan: the referrer gets a
+     * month (TDD M19: RewardReferral). It is added to the end of their plan or trial; a seller
      * on Free gets a month of Starter.
      */
     public function run(Lot $referred): void
@@ -50,7 +50,7 @@ class RewardReferral
             }
 
             $referral->forceFill(['status' => 'rewarded', 'reward_months' => $months, 'rewarded_at' => now()])->save();
-            $referrer->owner?->notify(new BillingNotice($referrer, "{$referred->name} joined LotLink with your referral code and chose a plan. You get a free month. Thank you!"));
+            $referrer->owner?->notify(new BillingNotice($referrer, "{$referred->name} joined CarYard with your referral code and chose a plan. You get a free month. Thank you!"));
         });
     }
 }

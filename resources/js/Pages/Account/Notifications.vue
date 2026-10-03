@@ -47,10 +47,10 @@ const look: Record<string, { icon: IconName; tone: string }> = {
                 class="mx-5 mb-3 flex items-center gap-3 rounded-2xl bg-forest p-4 text-white no-underline hover:text-white"
             >
                 <Icon name="bell" :size="22" class="shrink-0" />
-                <span class="flex grow flex-col"><span class="text-[15px] font-semibold">Get these on your phone</span><span class="text-[13px] text-mist">Turn on push notifications: instant, free, even when LotLink is closed.</span></span>
+                <span class="flex grow flex-col"><span class="text-[15px] font-semibold">Get these on your phone</span><span class="text-[13px] text-mist">Turn on push notifications: instant, free, even when CarYard is closed.</span></span>
                 <Icon name="chevronRight" :size="20" class="shrink-0" />
             </Link>
-            <p v-if="items.length === 0" class="mx-5 card px-5 py-10 text-center text-[15px] text-muted">Nothing yet. Booking updates, new cars from lots you follow and more show up here.</p>
+            <p v-if="items.length === 0" class="mx-5 card px-5 py-10 text-center text-[15px] text-muted">Nothing yet. Booking updates, new cars from sellers you follow and more show up here.</p>
             <ul v-else class="border-t border-divider">
                 <li v-for="n in items" :key="n.id">
                     <component

@@ -293,7 +293,7 @@ async function copyLink() {
                             </select>
                         </label>
                         <p class="text-[13px] text-muted sm:col-span-2">
-                            About {{ formatNaira(perInstalment) }} each. LotLink doesn't lend money: this is your own arrangement with the customer.
+                            About {{ formatNaira(perInstalment) }} each. CarYard doesn't lend money: this is your own arrangement with the customer.
                         </p>
                         <button type="submit" class="btn btn-dark h-11 text-[14px]" :disabled="planForm.processing">Save plan</button>
                         <InputError class="sm:col-span-3" :message="planForm.errors.count || planForm.errors.first_due" />

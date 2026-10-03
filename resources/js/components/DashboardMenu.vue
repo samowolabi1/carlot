@@ -6,8 +6,8 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 /**
- * "Dashboard" in the marketplace header for anyone who has one: their car lot(s), the lender portal(s) they work in, and
- * the admin panel for LotLink staff. One place goes straight there; several open a short menu.
+ * "Dashboard" in the marketplace header for anyone who has one: their seller(s), the lender portal(s) they work in, and
+ * the admin panel for CarYard staff. One place goes straight there; several open a short menu.
  */
 const page = usePage<SharedProps>();
 const { user, lots } = useShared();
@@ -17,17 +17,17 @@ type Destination = { key: string; label: string; detail: string; href: string; e
 const destinations = computed<Destination[]>(() => {
     const list: Destination[] = [];
     for (const lot of lots.value ?? []) {
-        list.push({ key: `lot-${lot.slug}`, label: 'Dealer dashboard', detail: lot.name, href: route('dealer.dashboard', lot.slug) });
+        list.push({ key: `lot-${lot.slug}`, label: 'Seller dashboard', detail: lot.name, href: route('dealer.dashboard', lot.slug) });
     }
     if (!(lots.value ?? []).length && user.value?.role === 'staff') {
-        list.push({ key: 'dealer', label: 'Dealer dashboard', detail: 'Set up your lot', href: route('dealer.home') });
+        list.push({ key: 'dealer', label: 'Seller dashboard', detail: 'Set up your business', href: route('dealer.home') });
     }
     for (const lender of page.props.lenders ?? []) {
         list.push({ key: `lender-${lender.slug}`, label: 'Lender portal', detail: lender.name, href: route('lender.dashboard', lender.slug) });
     }
     if (user.value?.role === 'admin') {
         // The admin panel is a separate app (Filament), so a full page load.
-        list.push({ key: 'admin', label: 'Admin panel', detail: 'LotLink staff', href: '/admin', external: true });
+        list.push({ key: 'admin', label: 'Admin panel', detail: 'CarYard staff', href: '/admin', external: true });
     }
     return list;
 });
@@ -54,7 +54,7 @@ const buttonClass = 'flex h-11 items-center gap-2 rounded-full border border-for
             <Icon name="grid" :size="18" /><span class="hidden sm:inline">{{ only.label }}</span>
         </a>
         <Link v-else-if="only" :href="only.href" :class="buttonClass" :aria-label="`${only.label}, ${only.detail}`">
-            <Icon name="grid" :size="18" /><span class="hidden sm:inline">{{ only.label === 'Dealer dashboard' ? 'Dashboard' : only.label }}</span>
+            <Icon name="grid" :size="18" /><span class="hidden sm:inline">{{ only.label === 'Seller dashboard' ? 'Dashboard' : only.label }}</span>
         </Link>
         <div v-else ref="root" class="relative">
             <button type="button" :class="buttonClass" aria-haspopup="menu" :aria-expanded="open" aria-label="Your dashboards" @click.stop="toggle">

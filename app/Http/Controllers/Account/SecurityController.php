@@ -31,7 +31,7 @@ class SecurityController extends Controller
             'passwordChanged' => $user->password_changed_at?->timezone(config('lotlink.timezone', 'Africa/Lagos'))->format('j M Y'),
             'google' => ['enabled' => GoogleController::enabled(), 'connected' => $user->google_id !== null],
             'isAdmin' => $user->isAdmin(),
-            // Phones signed in to the LotLink app (API tokens).
+            // Phones signed in to the CarYard app (API tokens).
             'apps' => $user->tokens()->latest()->get()->map(fn (PersonalAccessToken $t) => [
                 'id' => $t->getKey(),
                 'name' => $t->name,

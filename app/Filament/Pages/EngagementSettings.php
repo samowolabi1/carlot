@@ -18,9 +18,9 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * The automated emails LotLink sends lot owners (`EngagementRules`): on/off, when (threshold),
+ * The automated emails CarYard sends sellers (`EngagementRules`): on/off, when (threshold),
  * how often (cooldown), subject and opening line, the send hour, and last-30-day stats.
- * "Who gets it now" counts the lots that qualify today; "Send me a test" emails the admin.
+ * "Who gets it now" counts the sellers that qualify today; "Send me a test" emails the admin.
  *
  * @property Form $form
  */
@@ -41,7 +41,7 @@ class EngagementSettings extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'Automated emails';
 
-    protected static ?string $title = 'Automated emails to lot owners';
+    protected static ?string $title = 'Automated emails to sellers';
 
     protected static ?string $slug = 'engagement/automated-emails';
 
@@ -65,8 +65,8 @@ class EngagementSettings extends Page implements HasForms
             ->columns(3)
             ->headerActions([
                 FormAction::make("preview_{$key}")->label('Who gets it now')->link()
-                    ->action(fn (RunEngagementRules $rules) => Notification::make()->title($rules->preview($key).' lots qualify today')
-                        ->body('Counted with the saved settings, after each lot\'s cooldown.')->info()->send()),
+                    ->action(fn (RunEngagementRules $rules) => Notification::make()->title($rules->preview($key).' sellers qualify today')
+                        ->body('Counted with the saved settings, after each seller\'s cooldown.')->info()->send()),
                 FormAction::make("test_{$key}")->label('Send me a test')->link()
                     ->action(function (RunEngagementRules $rules) use ($key): void {
                         /** @var User $admin */
@@ -87,7 +87,7 @@ class EngagementSettings extends Page implements HasForms
 
         return $form->statePath('data')->schema([
             Forms\Components\Section::make('When they go')->schema([
-                Forms\Components\Select::make('hour')->label('Send hour (each lot\'s local time)')->required()
+                Forms\Components\Select::make('hour')->label('Send hour (each seller\'s local time)')->required()
                     ->options(collect(range(6, 20))->mapWithKeys(fn (int $h) => [$h => sprintf('%02d:00', $h)])),
             ]),
             ...$sections,

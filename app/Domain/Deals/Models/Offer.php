@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A buyer's offer on a car (TDD M12). The lot accepts, declines or counters; the buyer can
+ * A buyer's offer on a car (TDD M12). The seller accepts, declines or counters; the buyer can
  * accept or decline a counter, or make a new offer. Open offers expire after 48 hours.
  *
  * @property int $id

@@ -51,7 +51,7 @@ function acceptTerms() {
             <p class="text-[14px] text-[#4A4D53]">
                 Before your team can work applications, one of your admins must accept the
                 <Link :href="route('legal.show', 'lender-terms')" target="_blank">Lender Terms</Link> (effective {{ lender.terms_version }}). They cover your licence or identity,
-                fair treatment of buyers, data protection and how loans continue with you outside LotLink.
+                fair treatment of buyers, data protection and how loans continue with you outside CarYard.
             </p>
             <template v-if="lender.is_admin">
                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 text-[14px]">
@@ -65,7 +65,7 @@ function acceptTerms() {
         </form>
 
         <p v-if="lender.status !== 'active' && lender.note" class="rounded-xl bg-cream px-4 py-3 text-[14px] text-clay-dark" role="status">
-            <strong>Note from LotLink:</strong> {{ lender.note }}
+            <strong>Note from CarYard:</strong> {{ lender.note }}
         </p>
 
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
@@ -82,7 +82,7 @@ function acceptTerms() {
                 <span class="text-[13px] text-muted">Approved this month</span><strong class="text-[26px]">{{ stats.approved_month }}</strong>
             </div>
             <div class="card flex flex-col justify-between gap-1 p-4">
-                <span class="text-[13px] text-muted">Paid to lots this month</span><strong class="text-[26px]">{{ stats.disbursed_month }}</strong>
+                <span class="text-[13px] text-muted">Paid to sellers this month</span><strong class="text-[26px]">{{ stats.disbursed_month }}</strong>
             </div>
         </div>
 
@@ -92,7 +92,7 @@ function acceptTerms() {
                 <Link :href="route('lender.applications.index', slug)" class="text-[14px] font-semibold">See all</Link>
             </div>
             <p v-if="!recent.length" class="py-6 text-center text-[14px] text-muted">
-                {{ lender.status === 'active' ? 'No open applications. New ones appear here and you get a notification.' : 'Applications arrive once LotLink approves you.' }}
+                {{ lender.status === 'active' ? 'No open applications. New ones appear here and you get a notification.' : 'Applications arrive once CarYard approves you.' }}
             </p>
             <Link
                 v-for="a in recent"

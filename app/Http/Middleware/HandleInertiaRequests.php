@@ -47,7 +47,7 @@ class HandleInertiaRequests extends Middleware
                     'role' => $user->role->value,
                 ] : null,
             ],
-            // Lots the user works at, for the dealer lot switcher.
+            // Lots the user works at, for the seller lot switcher.
             'lots' => fn () => $user
                 ? $user->lots()->orderBy('name')->get()->map(fn ($lot) => [
                     'slug' => $lot->slug,
@@ -84,11 +84,11 @@ class HandleInertiaRequests extends Middleware
                     // Leads badge: new leads plus leads with unread chat messages.
                     'leads_badge' => Lead::query()->where('stage', LeadStage::New)->count()
                         + Conversation::query()->unreadFor(Message::LOT)->whereIn('lead_id', Lead::query()->where('stage', '!=', LeadStage::New)->select('id'))->count(),
-                    // Offers & trade-ins badge: offers, trade-ins and reservation requests waiting for the lot.
+                    // Offers & trade-ins badge: offers, trade-ins and reservation requests waiting for the seller.
                     'deals_badge' => Offer::query()->where('status', OfferStatus::Pending)->count()
                         + TradeIn::query()->where('status', TradeInStatus::Submitted)->count()
                         + Reservation::query()->where('status', ReservationStatus::Pending)->count(),
-                    // Support badge: tickets where LotLink replied and the lot hasn't read it yet.
+                    // Support badge: tickets where CarYard replied and the seller hasn't read it yet.
                     'support_badge' => SupportTicket::query()->unreadByLot()->count(),
                 ];
             },

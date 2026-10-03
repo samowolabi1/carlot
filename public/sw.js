@@ -1,9 +1,9 @@
 /*
- * LotLink service worker (TDD: PWA offline shell).
+ * CarYard service worker (TDD: PWA offline shell).
  *
  * - Built assets (/build/assets/*) are cached on first use; their names change with every
  *   build, so a cached copy is never stale.
- * - Pages are network-first. Lot Manager pages that loaded once are kept, so a dealer
+ * - Pages are network-first. Sales Manager pages that loaded once are kept, so a seller
  *   can reopen them with no signal and keep recording walk-ins and payments (the offline
  *   queue in IndexedDB sends them later). Anything else falls back to /offline.html.
  * - Nothing that changes data (POST, PUT, ...) and no JSON is ever cached.
@@ -33,7 +33,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Signing out clears saved dealer pages, which hold customer details, and stops this device's pushes.
+// Signing out clears saved seller pages, which hold customer details, and stops this device's pushes.
 self.addEventListener('message', (event) => {
     if (event.data === 'clear-private') {
         event.waitUntil(

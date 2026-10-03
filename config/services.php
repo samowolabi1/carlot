@@ -48,7 +48,7 @@ return [
 
     'termii' => [
         'key' => env('TERMII_API_KEY'),
-        'sender_id' => env('TERMII_SENDER_ID', 'LotLink'),
+        'sender_id' => env('TERMII_SENDER_ID', 'CarYard'),
         'base_url' => env('TERMII_BASE_URL', 'https://api.ng.termii.com'),
     ],
 
@@ -82,7 +82,7 @@ return [
 
     // Web push (browser notifications). Keys from `php artisan push:vapid`; without them pushes are only logged.
     'webpush' => [
-        'subject' => env('VAPID_SUBJECT', 'mailto:support@lotlink.ng'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:support@caryardng.com'),
         'public_key' => env('VAPID_PUBLIC_KEY'),
         'private_key' => env('VAPID_PRIVATE_KEY'),
     ],

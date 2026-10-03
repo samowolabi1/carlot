@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * The owner sends the CAC certificate, CAC number and a photo of the lot frontage (TDD M14).
+ * The owner sends the CAC certificate, CAC number and a photo of the seller frontage (TDD M14).
  * Files go to the private disk; an admin approves or rejects in the review queue.
  */
 class SubmitLotVerification
@@ -23,7 +23,7 @@ class SubmitLotVerification
     public function run(Lot $lot, User $owner, string $cacNumber, UploadedFile $certificate, UploadedFile $frontage): LotVerification
     {
         if ($lot->isVerified()) {
-            throw ValidationException::withMessages(['cac_number' => 'Your lot is already verified.']);
+            throw ValidationException::withMessages(['cac_number' => 'Your business is already verified.']);
         }
 
         $pending = LotVerification::withoutGlobalScopes()->where('lot_id', $lot->id)->where('status', VerificationStatus::Submitted)->first();

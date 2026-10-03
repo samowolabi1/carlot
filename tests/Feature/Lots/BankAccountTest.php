@@ -97,7 +97,7 @@ it('shares the details from an order, on the customer\'s tracking page and in ch
     auth()->logout();
     $this->get(OrderLinks::track($order))->assertInertia(fn (Assert $page) => $page->where('bank.account_name', 'Prime Motors Ltd'));
 
-    // A buyer's chat: "Send bank details" posts them as the lot's message.
+    // A buyer's chat: "Send bank details" posts them as the seller's message.
     $buyer = User::factory()->create(['phone' => '+2348035550001']);
     $this->actingAs($buyer)->post(route('conversations.store'), ['vehicle' => $car->ulid]);
     $lead = Lead::withoutGlobalScopes()->sole();

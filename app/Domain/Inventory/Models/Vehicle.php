@@ -84,7 +84,7 @@ class Vehicle extends Model
         syncRemoveFromSearch as scoutSyncRemoveFromSearch;
     }
 
-    /** Photos per car (dealers asked for a tighter, better-chosen gallery). */
+    /** Photos per car (sellers asked for a tighter, better-chosen gallery). */
     public const MAX_PHOTOS = 12;
 
     public const NEW_ARRIVAL_DAYS = 7;
@@ -225,7 +225,7 @@ class Vehicle extends Model
     }
 
     /**
-     * What the lot spent on the car; owners and managers only. Scoped {cost} bindings.
+     * What the seller spent on the car; owners and managers only. Scoped {cost} bindings.
      *
      * @return HasMany<VehicleCost, $this>
      */
@@ -262,7 +262,7 @@ class Vehicle extends Model
         return $this->hasMany(FraudSignal::class);
     }
 
-    /** Held for an admin to look at: off the marketplace, and the lot cannot republish it. */
+    /** Held for an admin to look at: off the marketplace, and the seller cannot republish it. */
     public function isHeld(): bool
     {
         return $this->held_at !== null;
@@ -287,7 +287,7 @@ class Vehicle extends Model
     }
 
     /**
-     * Index updates never block a save: if Meilisearch is down or rejects the update, dealers can still add,
+     * Index updates never block a save: if Meilisearch is down or rejects the update, sellers can still add,
      * publish and sell cars. The error is reported; `php artisan scout:import` brings the index back in step.
      * The scout:* commands still fail loudly, so an import can't "succeed" against a dead index.
      *
@@ -346,7 +346,7 @@ class Vehicle extends Model
             'inspected' => $this->inspection_id !== null,
             'duty_status' => $this->duty_status?->value,
             'registered' => $this->registered,
-            // What the lot offers (kept fresh by SyncLotVehiclesToSearch when the lot's settings change).
+            // What the seller offers (kept fresh by SyncLotVehiclesToSearch when the seller's settings change).
             'lot_loans' => $this->lot->takesFinance(),
             'lot_trade_ins' => $this->lot->takesTradeIns(),
             'lot_offers' => $this->lot->takesOffers(),

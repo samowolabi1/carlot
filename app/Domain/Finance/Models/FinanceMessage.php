@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * A note between the buyer and the lender on one application (with an optional document on the private disk),
- * or a system line recording what happened. The lot never sees these.
+ * or a system line recording what happened. The seller never sees these.
  *
  * @property int $id
  * @property string $ulid

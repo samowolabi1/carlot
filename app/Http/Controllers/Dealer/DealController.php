@@ -52,7 +52,7 @@ class DealController extends Controller
             ->with(['make', 'model', 'customer', 'vehicle.make', 'vehicle.model', 'lead'])
             ->orderByRaw("case status when 'submitted' then 0 else 1 end")->latest('id')->get();
 
-        // Requests waiting for the buyer's transfer, cars on hold, and deposits the lot still owes back.
+        // Requests waiting for the buyer's transfer, cars on hold, and deposits the seller still owes back.
         $reservations = Reservation::query()
             ->where(fn ($q) => $q->whereIn('status', [ReservationStatus::Pending, ReservationStatus::Active])
                 ->orWhere(fn ($q) => $q->where('refund_due', true)->whereNull('refunded_at')))
@@ -184,7 +184,7 @@ class DealController extends Controller
         return back()->with('success', 'Reservation cancelled and the car is back on sale. Refund the deposit from your account, then mark it refunded here.');
     }
 
-    /** The buyer's transfer reached the lot's account: hold the car. Owners and managers. */
+    /** The buyer's transfer reached the seller's account: hold the car. Owners and managers. */
     public function confirmReservation(Request $request, Lot $lot, Reservation $reservation, ActivateReservation $activate): RedirectResponse
     {
         abort_unless($request->user()->hasLotRole($lot, LotRole::Owner, LotRole::Manager), 403);

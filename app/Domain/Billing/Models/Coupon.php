@@ -45,7 +45,7 @@ class Coupon extends Model
         return $this->belongsTo(Plan::class);
     }
 
-    /** @return HasMany<Subscription, $this> the lots that redeemed it */
+    /** @return HasMany<Subscription, $this> the sellers that redeemed it */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class)->withoutGlobalScopes();

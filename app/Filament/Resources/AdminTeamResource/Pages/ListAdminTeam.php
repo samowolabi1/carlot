@@ -15,13 +15,13 @@ class ListAdminTeam extends ListRecords
 {
     protected static string $resource = AdminTeamResource::class;
 
-    protected ?string $subheading = 'LotLink staff who can sign in to /admin, and what each can do. Everyone uses a password and two-step sign-in; everything is in the audit log.';
+    protected ?string $subheading = 'CarYard staff who can sign in to /admin, and what each can do. Everyone uses a password and two-step sign-in; everything is in the audit log.';
 
     protected function getHeaderActions(): array
     {
         return [
             Action::make('invite')->label('Invite an admin')->icon('heroicon-o-user-plus')
-                ->modalDescription('They get an email with a link to set a password (valid 7 days), then turn on two-step sign-in. Use their work email: it can\'t already have a LotLink account.')
+                ->modalDescription('They get an email with a link to set a password (valid 7 days), then turn on two-step sign-in. Use their work email: it can\'t already have a CarYard account.')
                 ->form([
                     Forms\Components\TextInput::make('name')->label('Full name')->required()->maxLength(80)->rules([new FieldPattern('person_name')]),
                     Forms\Components\TextInput::make('email')->label('Work email')->email()->rule('email:rfc,strict')->required()->maxLength(190),

@@ -14,7 +14,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
-/** A lot asks LotLink for help: the ticket, its first message and an alert to the admin team. */
+/** A seller asks CarYard for help: the ticket, its first message and an alert to the admin team. */
 class OpenTicket
 {
     /**

@@ -16,7 +16,7 @@ use App\Domain\Lots\Models\LotMember;
 use Carbon\CarbonImmutable;
 
 /**
- * Lot Manager reports (TDD M19): sales and profit by month, outstanding balances, walk-ins by
+ * Sales Manager reports (TDD M19): sales and profit by month, outstanding balances, walk-ins by
  * source with conversion, and staff performance. Each returns the same shape so one page and
  * one Excel export serve them all. Money is whole naira here.
  *

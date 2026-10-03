@@ -22,7 +22,7 @@ class DeleteAccount
 
         $owned = $user->lots()->wherePivot('role', LotRole::Owner->value)->pluck('name');
         if ($owned->isNotEmpty()) {
-            throw ValidationException::withMessages(['account' => 'You own '.$owned->implode(', ').'. Hand the lot to another owner or ask us to close it before deleting your account.']);
+            throw ValidationException::withMessages(['account' => 'You own '.$owned->implode(', ').'. Hand the seller to another owner or ask us to close it before deleting your account.']);
         }
 
         $user->forceFill(['deletion_requested_at' => now()])->save();

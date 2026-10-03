@@ -40,8 +40,8 @@ it('takes a listing off the marketplace after 3 open reports until an admin look
     expect($car->isHeld())->toBeTrue()->and(Vehicle::query()->marketplace()->count())->toBe(0);
     $this->get($car->publicPath())->assertNotFound();
 
-    // The lot sees why, and can't put it back on sale itself.
-    $this->actingAs($this->owner)->get(route('dealer.vehicles.index', $this->lot))->assertInertia(fn (Assert $page) => $page->where('vehicles.data.0.held', 'Reported by buyers: LotLink is taking a look')->where('vehicles.data.0.next_statuses', []));
+    // The seller sees why, and can't put it back on sale itself.
+    $this->actingAs($this->owner)->get(route('dealer.vehicles.index', $this->lot))->assertInertia(fn (Assert $page) => $page->where('vehicles.data.0.held', 'Reported by buyers: CarYard is taking a look')->where('vehicles.data.0.next_statuses', []));
     $this->actingAs($this->owner)->patch(route('dealer.vehicles.status', [$this->lot, $car]), ['status' => 'hidden']);
     $this->actingAs($this->owner)->patch(route('dealer.vehicles.status', [$this->lot, $car->fresh()]), ['status' => 'available'])->assertSessionHasErrors();
 
@@ -58,11 +58,11 @@ it('lets admins hide a reported listing from the queue', function () {
     $this->actingAs($this->admin);
     Livewire::test(ListReports::class)->assertCanSeeTableRecords([$report])->callTableAction('hide', $report, ['reason' => 'Payment before viewing']);
 
-    expect($this->car->fresh())->held_reason->toBe('Hidden by LotLink: Payment before viewing')
+    expect($this->car->fresh())->held_reason->toBe('Hidden by CarYard: Payment before viewing')
         ->and($report->fresh()->status->value)->toBe('actioned');
 });
 
-it('hides a review a buyer reports, but not one the lot reports about itself', function () {
+it('hides a review a buyer reports, but not one the seller reports about itself', function () {
     $author = $this->buyers[0];
     $visit = Appointment::factory()->at(now()->subDay())->create(['lot_id' => $this->lot->id, 'customer_id' => $author->id, 'status' => 'completed', 'completed_at' => now()->subDay()]);
     $this->actingAs($author)->post(route('reviews.store', $visit), ['rating' => 1, 'body' => 'Rude staff']);

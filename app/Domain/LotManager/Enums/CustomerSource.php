@@ -26,7 +26,7 @@ enum CustomerSource: string
             self::Instagram => 'Instagram',
             self::Facebook => 'Facebook',
             self::WhatsApp => 'WhatsApp',
-            self::Marketplace => 'LotLink',
+            self::Marketplace => 'CarYard',
             self::Other => 'Other',
         };
     }

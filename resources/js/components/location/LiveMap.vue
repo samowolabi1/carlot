@@ -52,7 +52,7 @@ onMounted(async () => {
 
 watch(() => props.person, draw);
 
-// Without a Google Maps key: both points on a plain grid, the lot pin top-right.
+// Without a Google Maps key: both points on a plain grid, the seller pin top-right.
 const drawn = computed(() => {
     const pts = [props.person, props.lot].filter((p): p is Point => !!p);
     if (pts.length === 0) return null;

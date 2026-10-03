@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** "Mini-site and QR codes" (design D-MiniSite, TDD M6): the lot's link, a gate poster and windscreen stickers. */
+/** "Mini-site and QR codes" (design D-MiniSite, TDD M6): the seller's link, a gate poster and windscreen stickers. */
 class MiniSiteController extends Controller
 {
     public function show(Lot $lot): Response
@@ -38,8 +38,8 @@ class MiniSiteController extends Controller
                 'can_manage' => Gate::allows('manageBilling', $lot),
                 'name' => $lot->custom_domain,
                 'verified' => $lot->domain_verified_at !== null,
-                'txt_host' => $lot->custom_domain ? '_lotlink.'.$lot->custom_domain : null,
-                'txt_value' => $lot->domain_token ? 'lotlink-verify='.$lot->domain_token : null,
+                'txt_host' => $lot->custom_domain ? '_caryard.'.$lot->custom_domain : null,
+                'txt_value' => $lot->domain_token ? 'caryard-verify='.$lot->domain_token : null,
                 'cname' => CustomDomains::appHost(),
             ],
             'canEdit' => Gate::allows('update', $lot),
@@ -63,7 +63,7 @@ class MiniSiteController extends Controller
         return $this->pdf($printables->stickers($lot, $cars), "{$lot->slug}-windscreen-stickers.pdf");
     }
 
-    /** @return Builder<Vehicle> cars on the lot now: available or reserved */
+    /** @return Builder<Vehicle> cars on the seller now: available or reserved */
     private function stickerCars()
     {
         return Vehicle::query()->whereIn('status', [VehicleStatus::Available, VehicleStatus::Reserved])->whereNull('held_at');

@@ -67,9 +67,9 @@ const badge: Record<Row['status'], string> = {
     sold: 'bg-forest text-white',
 };
 
-// "List on LotLink" is the M3 publish flow; hiding takes a car off the marketplace.
+// "List on CarYard" is the M3 publish flow; hiding takes a car off the marketplace.
 const actionLabel = (row: Row, next: string) =>
-    ({ hidden: 'Take off LotLink', available: row.status === 'reserved' ? 'Release reservation' : 'List on LotLink', reserved: 'Mark reserved' })[next] ?? next;
+    ({ hidden: 'Take off CarYard', available: row.status === 'reserved' ? 'Release reservation' : 'List on CarYard', reserved: 'Mark reserved' })[next] ?? next;
 
 function setStatus(row: Row, status: string) {
     router.patch(route('dealer.vehicles.status', [lot.value.slug, row.ulid]), { status }, { preserveScroll: true });
@@ -199,7 +199,7 @@ function editHref(row: Row) {
                             images
                             compact
                         />
-                        <Link v-if="row.status === 'draft'" :href="editHref(row)">List on LotLink</Link>
+                        <Link v-if="row.status === 'draft'" :href="editHref(row)">List on CarYard</Link>
                         <Link v-else :href="editHref(row)">Edit</Link>
                         <Link v-if="row.order" :href="route('dealer.manager.orders.show', [lot.slug, row.order.ulid])" class="text-clay">Order {{ row.order.order_no }}</Link>
                         <Link

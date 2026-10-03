@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@lotlink.test')],
             [
-                'name' => 'LotLink Admin',
+                'name' => 'CarYard Admin',
                 'phone' => env('ADMIN_PHONE', '+2348000000000'),
                 'password' => env('ADMIN_PASSWORD', 'password'),
                 'role' => UserRole::Admin,

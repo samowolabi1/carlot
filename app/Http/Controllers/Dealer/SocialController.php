@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Throwable;
 
-/** Connect Facebook/Instagram and auto-post new listings (TDD M9, dealer API /social). */
+/** Connect Facebook/Instagram and auto-post new listings (TDD M9, seller API /social). */
 class SocialController extends Controller
 {
     /** @return array<string, mixed> the Settings → Social media props */
@@ -57,7 +57,7 @@ class SocialController extends Controller
         return redirect()->away($publisher->authorizeUrl($state, route('social.callback')));
     }
 
-    /** Meta sends the dealer back here (one fixed redirect URL for every lot). */
+    /** Meta sends the seller back here (one fixed redirect URL for every seller). */
     public function callback(Request $request, SocialPublisher $publisher, ConnectSocialAccounts $connect): RedirectResponse
     {
         $pending = $request->session()->pull('social_oauth');

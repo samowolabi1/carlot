@@ -18,12 +18,12 @@ class ChangeVehicleStatus
 
     /**
      * Manual status changes from the stock list. Going live runs the publish checks;
-     * selling goes through a Lot Manager order, not here.
+     * selling goes through a Sales Manager order, not here.
      */
     public function run(Vehicle $vehicle, VehicleStatus $to): Vehicle
     {
         if ($to === VehicleStatus::Sold) {
-            throw ValidationException::withMessages(['status' => 'Record the sale in Lot Manager to mark a car sold.']);
+            throw ValidationException::withMessages(['status' => 'Record the sale in Sales Manager to mark a car sold.']);
         }
 
         if (! $this->stateMachine->canTransition($vehicle->status, $to)) {
@@ -36,7 +36,7 @@ class ChangeVehicleStatus
                 ->value('order_no');
 
             if ($order !== null) {
-                throw ValidationException::withMessages(['status' => "Order {$order} holds this car. Cancel the order in Lot Manager to release it."]);
+                throw ValidationException::withMessages(['status' => "Order {$order} holds this car. Cancel the order in Sales Manager to release it."]);
             }
         }
 

@@ -67,7 +67,7 @@ class FinanceApplicationResource extends Resource
                 Tables\Columns\TextColumn::make('lender.name')->label('Lender')->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Loan')->formatStateUsing(fn (FinanceApplication $a) => $a->money())->description(fn (FinanceApplication $a) => "{$a->tenor_months} months")->sortable(),
                 Tables\Columns\TextColumn::make('approved_amount')->label('Approved')->formatStateUsing(fn (FinanceApplication $a) => $a->approved_amount ? $a->money($a->approved_amount) : null)->placeholder('—')->sortable(),
-                Tables\Columns\TextColumn::make('disbursed_amount')->label('Paid to lot')->formatStateUsing(fn (FinanceApplication $a) => $a->disbursed_amount ? $a->money($a->disbursed_amount) : null)->placeholder('—')->sortable()->toggleable(),
+                Tables\Columns\TextColumn::make('disbursed_amount')->label('Paid to seller')->formatStateUsing(fn (FinanceApplication $a) => $a->disbursed_amount ? $a->money($a->disbursed_amount) : null)->placeholder('—')->sortable()->toggleable(),
                 Tables\Columns\TextColumn::make('status')->badge()->formatStateUsing(fn (FinanceStatus $state) => $state->label())
                     ->color(fn (FinanceStatus $state) => match ($state->tone()) {
                         'good' => 'success', 'action' => 'warning', 'bad' => 'danger', 'closed' => 'gray', default => 'info',
@@ -94,12 +94,12 @@ class FinanceApplicationResource extends Resource
                 Infolists\Components\TextEntry::make('lender.name')->label('Lender'),
                 Infolists\Components\TextEntry::make('assignee.name')->label('Lender officer')->placeholder('Whole team'),
                 Infolists\Components\TextEntry::make('vehicle_id')->label('Car')->state(fn (FinanceApplication $a) => $a->vehicle?->title() ?? '—'),
-                Infolists\Components\TextEntry::make('lot.name')->label('Lot'),
+                Infolists\Components\TextEntry::make('lot.name')->label('Seller'),
                 Infolists\Components\TextEntry::make('status')->badge()->formatStateUsing(fn (FinanceStatus $state) => $state->label()),
                 Infolists\Components\TextEntry::make('amount')->label('Loan asked for')->formatStateUsing(fn (FinanceApplication $a) => $a->money()." over {$a->tenor_months} months"),
                 Infolists\Components\TextEntry::make('deposit')->formatStateUsing(fn (FinanceApplication $a) => $a->money($a->deposit)),
                 Infolists\Components\TextEntry::make('approved_amount')->label('Approved')->formatStateUsing(fn (FinanceApplication $a) => $a->approved_amount ? $a->money($a->approved_amount) : null)->placeholder('—'),
-                Infolists\Components\TextEntry::make('disbursed_amount')->label('Paid to the lot')
+                Infolists\Components\TextEntry::make('disbursed_amount')->label('Paid to the seller')
                     ->formatStateUsing(fn (FinanceApplication $a) => $a->disbursed_amount ? $a->money($a->disbursed_amount).($a->disbursed_reference ? " · {$a->disbursed_reference}" : '') : null)->placeholder('—'),
                 Infolists\Components\TextEntry::make('external_ref')->label('Lender reference')->placeholder('—'),
                 Infolists\Components\TextEntry::make('consented_at')->label('Buyer consented')->dateTime('j M Y, H:i', 'Africa/Lagos'),

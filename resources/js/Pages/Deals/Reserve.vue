@@ -78,7 +78,7 @@ const submit = () => form.post(route('reservations.store', props.car.ulid));
                     <li>{{ lot.name }} confirms it arrived, and the car is held for you.</li>
                 </ol>
                 <p class="flex gap-2 rounded-xl bg-map px-3 py-2 text-[13px] text-forest">
-                    <Icon name="shield" :size="18" class="shrink-0" /> You pay {{ lot.name }} directly. LotLink never takes payment for cars.
+                    <Icon name="shield" :size="18" class="shrink-0" /> You pay {{ lot.name }} directly. CarYard never takes payment for cars.
                 </p>
             </div>
         </div>
@@ -86,7 +86,7 @@ const submit = () => form.post(route('reservations.store', props.car.ulid));
         <div class="fixed inset-x-0 bottom-[76px] z-30 border-t border-line bg-white md:bottom-0">
             <div class="mx-auto flex max-w-xl flex-col gap-2 px-5 pt-3 pb-3 md:pb-6">
                 <button type="button" class="btn btn-primary h-[52px] w-full rounded-[14px]" :disabled="form.processing" @click="submit">Ask to reserve · {{ deposit }} deposit</button>
-                <span class="text-center text-[12px] text-muted">Nothing is charged here. You'll get the lot's bank details next.</span>
+                <span class="text-center text-[12px] text-muted">Nothing is charged here. You'll get the seller's bank details next.</span>
             </div>
         </div>
     </CustomerLayout>

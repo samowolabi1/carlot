@@ -23,7 +23,7 @@ Schedule::command('engagement:run')->hourly()->withoutOverlapping();
 Schedule::command('engagement:send-broadcasts')->everyMinute()->withoutOverlapping();
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 
-// Lot Manager (TDD M19)
+// Sales Manager (TDD M19)
 Schedule::command('manager:follow-up-reminders')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('share-links:prune')->daily();
 Schedule::command('finance:prune')->dailyAt('03:30')->withoutOverlapping();
@@ -42,7 +42,7 @@ Schedule::command('offers:expire')->hourly()->withoutOverlapping();
 Schedule::command('reservations:expire')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('appointments:release-unpaid')->everyFiveMinutes()->withoutOverlapping();
 
-// Lot Manager Pro (TDD M19). Hourly so each lot gets them at its own local time.
+// Sales Manager Pro (TDD M19). Hourly so each seller gets them at its own local time.
 Schedule::command('manager:instalment-reminders')->hourly()->withoutOverlapping();
 Schedule::command('manager:mark-overdue')->hourlyAt(30)->withoutOverlapping();
 Schedule::command('manager:daily-summary')->hourly()->withoutOverlapping();

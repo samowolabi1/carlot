@@ -52,7 +52,7 @@ it('checks the CAC number and files, and only the owner may send them', function
     $this->lot->members()->attach($manager, ['role' => LotRole::Manager->value, 'accepted_at' => now()]);
     ($this->send)($manager)->assertForbidden();
 
-    // Another lot's owner can't reach this lot at all.
+    // Another lot's owner can't reach this seller at all.
     $other = User::factory()->staff()->create();
     app(CreateLot::class)->run($other, ['name' => 'Other Autos', 'phone' => '+2348021119999']);
     ($this->send)($other)->assertForbidden();
@@ -69,7 +69,7 @@ it('serves the documents only through short-lived signed links', function () {
     $this->get($v->fileUrl('frontage'))->assertOk(); // a fresh link
 });
 
-it('gives the lot its badge when an admin approves, and a note when rejected', function () {
+it('gives the seller its badge when an admin approves, and a note when rejected', function () {
     ($this->send)();
     $v = LotVerification::withoutGlobalScopes()->sole();
 

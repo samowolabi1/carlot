@@ -13,7 +13,7 @@ defineProps<{
         <div class="mx-auto flex max-w-xl flex-col gap-4 px-5 pt-4 pb-28 md:pt-8">
             <h1 class="text-[26px] font-bold">Messages</h1>
             <div v-if="conversations.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">
-                Chat with a lot from any car page. Replies show up here.
+                Chat with a seller from any car page. Replies show up here.
                 <Link :href="route('cars.index')" class="mt-2 block font-semibold">Browse cars</Link>
             </div>
             <ul v-else class="card divide-y divide-divider overflow-hidden">

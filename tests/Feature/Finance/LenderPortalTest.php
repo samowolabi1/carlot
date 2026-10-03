@@ -98,7 +98,7 @@ it('keeps each lender to its own portal and applications', function () {
         ->assertInertia(fn (Assert $page) => $page->has('applications.data', 0));
 });
 
-it('works an application from review to payment, telling the buyer each step and the lot only the good news', function () {
+it('works an application from review to payment, telling the buyer each step and the seller only the good news', function () {
     ($this->apply)();
     $application = FinanceApplication::sole();
     Notification::fake();
@@ -134,12 +134,12 @@ it('works an application from review to payment, telling the buyer each step and
     expect($application->fresh())->status->toBe(FinanceStatus::Disbursed)->approved_amount->toBe(650_000_000)->offer_rate_bp->toBe(2300)
         ->disbursed_amount->toBe(650_000_000)->disbursed_reference->toBe('TRF/2027/88');
     Notification::assertSentTo($this->buyer, FinanceUpdate::class, fn (FinanceUpdate $n) => str_contains($n->text, 'approved a loan of ₦6,500,000 for the 2018 Toyota Camry at 23% a year over 36 months'));
-    Notification::assertSentTo($this->owner, DealAlert::class, fn (DealAlert $n) => str_contains($n->text, 'paid ₦6,500,000 to your lot'));
+    Notification::assertSentTo($this->owner, DealAlert::class, fn (DealAlert $n) => str_contains($n->text, 'paid ₦6,500,000 to your business'));
     $lotLines = Message::query()->where('side', Message::SYSTEM)->pluck('body')->implode("\n");
     expect($lotLines)->toContain('approved a car loan of ₦6,500,000')->not->toContain('1,500,000')->not->toContain('statements')->not->toContain('Dangote');
 });
 
-it('never tells the lot about a decline, and lets the buyer withdraw', function () {
+it('never tells the seller about a decline, and lets the buyer withdraw', function () {
     ($this->apply)();
     $first = FinanceApplication::sole();
     Notification::fake();

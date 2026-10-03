@@ -118,7 +118,7 @@ class OrderController extends Controller
                 ...Presenter::payment($p, $lot->timezone, $order),
                 'receipt_url' => route('dealer.manager.orders.receipt', [$lot, $order, $p]),
             ]),
-            // The customer pays the lot directly (LotLink never takes car payments): send them the details.
+            // The customer pays the seller directly (CarYard never takes car payments): send them the details.
             'bank' => $order->isOpen() && $order->balance > 0 && ($account = LotBankAccount::preferredFor($lot->id)) ? [
                 'account' => $account->present(),
                 'share_text' => $account->shareText($lot->name, $order->money(max(0, $order->balance)), $order->order_no),

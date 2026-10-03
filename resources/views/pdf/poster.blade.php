@@ -36,6 +36,6 @@
     <p class="site">{{ $site }}</p>
     @if ($whatsapp)<p class="wa">WhatsApp {{ $whatsapp }}</p>@endif
 </div>
-<div class="foot">Open your phone camera and point it at the code · Powered by LotLink</div>
+<div class="foot">Open your phone camera and point it at the code · Powered by CarYard</div>
 </body>
 </html>

@@ -19,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * The only place a car loan application changes status: the lender's team in the portal, the lender's API
  * (signed webhook), or the buyer withdrawing. Locks the row, checks the move is allowed, keeps a line in the
- * application's thread, audit-logs it, tells the buyer (or the lender, for a withdrawal) and tells the lot
+ * application's thread, audit-logs it, tells the buyer (or the lender, for a withdrawal) and tells the seller
  * only the good news (pre-approved, approved, paid).
  */
 class UpdateFinanceApplication
@@ -91,7 +91,7 @@ class UpdateFinanceApplication
             $application->user->notify(new FinanceUpdate($application, $this->line($application, $to, 'buyer')));
         }
 
-        // The lot hears only the good news; declines and withdrawals stay between the buyer and the lender.
+        // The seller hears only the good news; declines and withdrawals stay between the buyer and the lender.
         if ($application->lot && $application->vehicle) {
             match ($to) {
                 FinanceStatus::PreApproved => $this->notice->preApproved($application),
@@ -120,7 +120,7 @@ class UpdateFinanceApplication
             FinanceStatus::DocumentsRequested => "{$lender} needs some documents to go on. Upload them on the application.",
             FinanceStatus::PreApproved => "{$lender} pre-approved a loan of {$approved} for the {$car}, subject to its checks. Continue with {$lender} to finish.",
             FinanceStatus::Approved => "{$lender} approved a loan of {$approved} for the {$car}".($terms !== '' ? " at {$terms}" : '').". Continue with {$lender} to sign and complete it.",
-            FinanceStatus::Disbursed => "{$lender} paid ".$application->money($application->disbursed_amount ?? $application->approved_amount ?? $application->amount).' to '.($application->lot->name ?? 'the lot')." for the {$car}.",
+            FinanceStatus::Disbursed => "{$lender} paid ".$application->money($application->disbursed_amount ?? $application->approved_amount ?? $application->amount).' to '.($application->lot->name ?? 'the seller')." for the {$car}.",
             FinanceStatus::Declined => "{$lender} couldn't approve the loan for the {$car}.",
             FinanceStatus::Withdrawn => $for === 'lender'
                 ? Name::short($application->user->name)." withdrew the application for the {$car}."

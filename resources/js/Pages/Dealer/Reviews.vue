@@ -49,7 +49,7 @@ function send(review: ReviewRow) {
     <DealerLayout>
         <div>
             <h1 class="text-[30px] font-bold">Reviews</h1>
-            <p class="text-[14px] text-muted">Only buyers with a completed visit can review, so every review is from someone who came to the lot. You can reply once to each.</p>
+            <p class="text-[14px] text-muted">Only buyers with a completed visit can review, so every review is from someone who came to the seller. You can reply once to each.</p>
         </div>
 
         <section class="card flex flex-col gap-5 p-5 sm:flex-row sm:items-center" aria-label="Rating summary">
@@ -82,7 +82,7 @@ function send(review: ReviewRow) {
                     </span>
                     <strong class="text-[15px]">{{ r.author }}</strong>
                     <span class="text-[13px] text-muted">{{ r.visit }} · {{ r.date }}<template v-if="r.edited"> · edited</template></span>
-                    <span v-if="r.hidden" class="rounded-lg bg-cream px-2 py-0.5 text-[12px] font-semibold text-clay-dark">Hidden while LotLink reviews a report</span>
+                    <span v-if="r.hidden" class="rounded-lg bg-cream px-2 py-0.5 text-[12px] font-semibold text-clay-dark">Hidden while CarYard reviews a report</span>
                 </div>
                 <p v-if="r.body" class="text-[15px] whitespace-pre-line">{{ r.body }}</p>
                 <ul v-if="r.tags.length" class="flex flex-wrap gap-1.5">
@@ -107,7 +107,7 @@ function send(review: ReviewRow) {
                     </form>
                     <button v-else type="button" class="inline-flex min-h-11 items-center self-start text-[14px] font-semibold text-clay" @click="replying = r.ulid">Reply</button>
                 </template>
-                <ReportButton v-if="!r.hidden" kind="review" :id="r.ulid" label="Report to LotLink" class="self-end" />
+                <ReportButton v-if="!r.hidden" kind="review" :id="r.ulid" label="Report to CarYard" class="self-end" />
             </li>
         </ul>
 

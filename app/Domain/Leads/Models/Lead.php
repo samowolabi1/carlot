@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
- * A buyer's interest in a lot (usually in one car), from any source: chat, WhatsApp tap,
- * booking, call and, later, offers (TDD M11). Linked to the lot's customer book.
+ * A buyer's interest in a seller (usually in one car), from any source: chat, WhatsApp tap,
+ * booking, call and, later, offers (TDD M11). Linked to the seller's customer book.
  *
  * @property int $id
  * @property string $ulid

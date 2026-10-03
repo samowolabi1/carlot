@@ -16,7 +16,7 @@ class ValueTradeIn
 {
     public function __construct(private readonly DealTimeline $timeline) {}
 
-    /** The lot sends a low–high estimate; the buyer hears on WhatsApp (TDD M12). Minor units. */
+    /** The seller sends a low–high estimate; the buyer hears on WhatsApp (TDD M12). Minor units. */
     public function run(TradeIn $tradeIn, User $staff, int $low, int $high, ?string $note = null): TradeIn
     {
         if (! in_array($tradeIn->status, [TradeInStatus::Submitted, TradeInStatus::Valued], true)) {

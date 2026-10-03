@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 /**
- * "Log in as" a dealer for support (TDD M17). The admin's id is kept in the session so they
+ * "Log in as" a seller for support (TDD M17). The admin's id is kept in the session so they
  * can switch back; both ends are written to the audit log, and everything done in between is
  * logged with the admin as `impersonator_id`.
  */

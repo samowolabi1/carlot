@@ -106,7 +106,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                     <template v-else>No payment needed</template>
                 </span>
                 <span v-if="subscription.coupon" class="text-[13px] text-peach">Code {{ subscription.coupon }} applied</span>
-                <Link v-if="can.manage" :href="route('dealer.referrals', lot.slug)" class="inline-flex min-h-11 items-center text-[13px] font-semibold text-peach hover:text-white">Refer a lot and get a free month</Link>
+                <Link v-if="can.manage" :href="route('dealer.referrals', lot.slug)" class="inline-flex min-h-11 items-center text-[13px] font-semibold text-peach hover:text-white">Refer a seller and get a free month</Link>
                 <div v-if="can.manage && subscription.can_update_card" class="mt-1.5 flex gap-2">
                     <a :href="route('dealer.billing.card', lot.slug)" class="inline-flex h-11 items-center rounded-[10px] border border-forest-600 px-3.5 text-[13px] font-semibold text-white no-underline hover:text-white">Update card</a>
                 </div>
@@ -147,7 +147,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                         >
                             {{ busy === plan.code ? `Opening ${checkoutWith}…` : plan.free ? 'Move to Free' : subscription.status === 'active' ? `Switch to ${plan.name}` : `Choose ${plan.name}` }}
                         </button>
-                        <a v-else href="mailto:hello@lotlink.app?subject=Enterprise%20plan" class="btn btn-outline mt-2 h-11 text-[14px]">Talk to us</a>
+                        <a v-else href="mailto:hello@caryardng.com?subject=Enterprise%20plan" class="btn btn-outline mt-2 h-11 text-[14px]">Talk to us</a>
                     </template>
                     <button
                         v-else-if="can.manage && plan.current && !plan.free && subscription.status !== 'active'"
@@ -160,7 +160,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                     </button>
                 </div>
             </div>
-            <p v-if="!can.manage" class="text-[13px] text-muted">Only the lot owner can change the plan.</p>
+            <p v-if="!can.manage" class="text-[13px] text-muted">Only the seller can change the plan.</p>
         </section>
 
         <div class="grid gap-3.5 lg:grid-cols-2">
@@ -174,10 +174,10 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
             </section>
 
             <section v-if="can.spotlight" class="card flex flex-col gap-2 p-[18px]" aria-labelledby="featured-heading">
-                <h2 id="featured-heading" class="font-sans text-[15px] font-bold">Feature your lot on the home page</h2>
+                <h2 id="featured-heading" class="font-sans text-[15px] font-bold">Feature your business on the home page</h2>
                 <p class="text-[13px] text-muted">
                     <template v-if="featured.until">Featured until {{ featured.until }}. Buying more adds to the end.</template>
-                    <template v-else>Your lot shows in "Featured lots" for every buyer who opens LotLink.</template>
+                    <template v-else>Your business shows in "Featured sellers" for every buyer who opens CarYard.</template>
                     To spotlight a single car, use Spotlight on the Stock page.
                 </p>
                 <div class="flex flex-wrap gap-2">
@@ -185,7 +185,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                         <input v-model="featuredDays" type="radio" name="featured-days" :value="o.days" class="sr-only" />{{ o.days }} days · {{ formatNaira(o.price) }}
                     </label>
                 </div>
-                <button type="button" class="btn btn-primary h-11 self-start text-[14px]" :disabled="busy !== null" @click="buyFeatured">{{ busy === 'featured' ? `Opening ${checkoutWith}…` : 'Pay and feature my lot' }}</button>
+                <button type="button" class="btn btn-primary h-11 self-start text-[14px]" :disabled="busy !== null" @click="buyFeatured">{{ busy === 'featured' ? `Opening ${checkoutWith}…` : 'Pay and feature my business' }}</button>
             </section>
         </div>
 

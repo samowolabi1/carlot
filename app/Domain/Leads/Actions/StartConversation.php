@@ -14,7 +14,7 @@ class StartConversation
 {
     public function __construct(private readonly CaptureLead $capture, private readonly SendMessage $send) {}
 
-    /** A buyer's first message to a lot, about a car or the lot in general (design 15). */
+    /** A buyer's first message to a seller, about a car or the seller in general (design 15). */
     public function run(User $customer, Lot $lot, ?Vehicle $vehicle, ?string $body = null): Conversation
     {
         $lead = $this->capture->run($lot, $customer, LeadSource::Chat, $vehicle);

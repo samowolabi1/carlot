@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-/** LotLink's own staff in /admin (owners only): invite, change role, resend the invite, remove. */
+/** CarYard's own staff in /admin (owners only): invite, change role, resend the invite, remove. */
 class AdminTeamResource extends Resource
 {
     use AdminsOnly;

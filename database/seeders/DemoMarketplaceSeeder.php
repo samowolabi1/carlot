@@ -27,9 +27,9 @@ use RuntimeException;
 class DemoMarketplaceSeeder extends Seeder
 {
     private const LOTS = [
-        ['name' => 'Demo Lot Ikeja', 'phone' => '+2348000000101', 'city' => 'Ikeja', 'state' => 'Lagos', 'lat' => 6.6018, 'lng' => 3.3515, 'color' => '#16302B'],
-        ['name' => 'Demo Lot Lekki', 'phone' => '+2348000000102', 'city' => 'Lekki', 'state' => 'Lagos', 'lat' => 6.4474, 'lng' => 3.4723, 'color' => '#1E3A8A'],
-        ['name' => 'Demo Lot Abuja', 'phone' => '+2348000000103', 'city' => 'Wuse', 'state' => 'FCT', 'lat' => 9.0765, 'lng' => 7.3986, 'color' => '#7C2D12'],
+        ['name' => 'Demo Seller Ikeja', 'phone' => '+2348000000101', 'city' => 'Ikeja', 'state' => 'Lagos', 'lat' => 6.6018, 'lng' => 3.3515, 'color' => '#16302B'],
+        ['name' => 'Demo Seller Lekki', 'phone' => '+2348000000102', 'city' => 'Lekki', 'state' => 'Lagos', 'lat' => 6.4474, 'lng' => 3.4723, 'color' => '#1E3A8A'],
+        ['name' => 'Demo Seller Abuja', 'phone' => '+2348000000103', 'city' => 'Wuse', 'state' => 'FCT', 'lat' => 9.0765, 'lng' => 7.3986, 'color' => '#7C2D12'],
     ];
 
     // lot index, make, model, year, trim, price (naira), km, body colour (RGB)
@@ -68,10 +68,12 @@ class DemoMarketplaceSeeder extends Seeder
     private function lot(array $data): Lot
     {
         $owner = User::firstOrCreate(['phone' => $data['phone']], ['name' => "{$data['name']} owner", 'phone_verified_at' => now()]);
-        $lot = Lot::where('name', $data['name'])->first()
-            ?? app(CreateLot::class)->run($owner, ['name' => $data['name'], 'phone' => $data['phone'], 'tagline' => 'Demo lot for trying LotLink locally']);
+        // Databases seeded before the CarYard rename have "Demo Lot …": rename those rather than add a second set.
+        $lot = Lot::whereIn('name', [$data['name'], str_replace('Seller', 'Lot', $data['name'])])->first()
+            ?? app(CreateLot::class)->run($owner, ['name' => $data['name'], 'phone' => $data['phone'], 'tagline' => 'Demo seller for trying CarYard locally']);
 
         $lot->update([
+            'name' => $data['name'], 'tagline' => 'Demo seller for trying CarYard locally',
             'status' => LotStatus::Active, 'whatsapp' => $data['phone'], 'city' => $data['city'], 'state' => $data['state'], 'address' => 'Demo address',
             'latitude' => $data['lat'], 'longitude' => $data['lng'], 'brand_color' => $data['color'],
         ]);

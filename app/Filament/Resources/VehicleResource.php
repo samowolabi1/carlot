@@ -70,7 +70,7 @@ class VehicleResource extends Resource
                     ->description(fn (Vehicle $v) => $v->vinTail() ? 'VIN ···'.$v->vinTail() : null)
                     ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($w) => $w->where('vehicles.slug', 'like', '%'.str($search)->slug().'%')->orWhere('vehicles.vin', 'like', "%{$search}%")))
                     ->url(fn (Vehicle $v) => $v->listed_at ? url($v->publicPath()) : null, shouldOpenInNewTab: true),
-                Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable(),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable(),
                 Tables\Columns\TextColumn::make('price')->formatStateUsing(fn (Vehicle $v) => $v->formattedPrice())->sortable(),
                 Tables\Columns\TextColumn::make('status')->badge()->formatStateUsing(fn (VehicleStatus $state) => $state->label()),
                 Tables\Columns\IconColumn::make('held_at')->label('Held')->boolean()->getStateUsing(fn (Vehicle $v) => $v->isHeld())
@@ -87,7 +87,7 @@ class VehicleResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('hide')->icon('heroicon-o-eye-slash')->color('danger')
                     ->visible(fn (Vehicle $v) => ! $v->isHeld() && $v->listed_at !== null)
-                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the lot will see')->required()->maxLength(160)])
+                    ->form([Forms\Components\TextInput::make('reason')->label('Reason the seller will see')->required()->maxLength(160)])
                     ->action(function (Vehicle $v, array $data): void {
                         app(ModerateListing::class)->hide($v, self::admin(), $data['reason']);
                         Notification::make()->title('Listing hidden')->success()->send();

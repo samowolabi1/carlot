@@ -79,9 +79,9 @@ use Illuminate\Support\Str;
  * @property bool $accepts_finance
  * @property int|null $reservation_deposit
  * @property bool $reservation_refundable
- * @property int|null $test_drive_deposit no longer used: LotLink takes no buyer deposits
+ * @property int|null $test_drive_deposit no longer used: CarYard takes no buyer deposits
  * @property string|null $paystack_subaccount
- * @property int|null $onboarded_by the admin who signed the lot up, if one did
+ * @property int|null $onboarded_by the admin who signed the seller up, if one did
  * @property string|null $referral_code
  * @property Carbon|null $daily_summary_sent_on
  * @property-read string|null $logo_url
@@ -152,7 +152,7 @@ class Lot extends Model
                 SyncLotVehiclesToSearch::dispatch($lot->id);
             }
 
-            // Share cards show the lot's name, phone and logo, and exist only while it is live.
+            // Share cards show the seller's name, phone and logo, and exist only while it is live.
             if ($lot->wasChanged(['status', 'name', 'phone', 'logo_path', 'plan_id'])) {
                 $lot->vehicles()->withoutGlobalScopes()->whereIn('status', ['available', 'reserved'])->pluck('id')
                     ->each(fn (int $id) => RenderShareCard::refresh($id));
@@ -192,13 +192,13 @@ class Lot extends Model
         return $this->hasOne(Subscription::class);
     }
 
-    /** Buyers following the lot for new stock (TDD M5). @return BelongsToMany<User, $this> */
+    /** Buyers following the seller for new stock (TDD M5). @return BelongsToMany<User, $this> */
     public function followers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'lot_followers')->withTimestamps();
     }
 
-    /** What the lot has paid LotLink (plans, spotlights); {billingPayment} route bindings. @return HasMany<Payment, $this> */
+    /** What the seller has paid CarYard (plans, spotlights); {billingPayment} route bindings. @return HasMany<Payment, $this> */
     public function billingPayments(): HasMany
     {
         return $this->hasMany(Payment::class)->whereIn('purpose', PaymentPurpose::billing());
@@ -293,7 +293,7 @@ class Lot extends Model
         return (bool) ($this->plan ?? Plan::default())?->allows($feature);
     }
 
-    /** Buyers can make offers: the lot takes them and its plan includes them. */
+    /** Buyers can make offers: the seller takes them and its plan includes them. */
     public function takesOffers(): bool
     {
         return $this->accepts_offers && $this->planAllows('offers');
@@ -305,7 +305,7 @@ class Lot extends Model
         return $this->accepts_trade_ins;
     }
 
-    /** Buyers can apply for a car loan on this lot's cars (the owner can turn it off). */
+    /** Buyers can apply for a car loan on this seller's cars (the owner can turn it off). */
     public function takesFinance(): bool
     {
         return $this->accepts_finance;
@@ -314,7 +314,7 @@ class Lot extends Model
     /** The reservation deposit in minor units, or null when reservations are off. */
     public function reservationDeposit(): ?int
     {
-        // Buyers pay the lot directly, so there must be an account to pay into.
+        // Buyers pay the seller directly, so there must be an account to pay into.
         return $this->reservation_deposit > 0 && $this->planAllows('deposits') && $this->bankAccounts()->exists() ? $this->reservation_deposit : null;
     }
 
@@ -333,7 +333,7 @@ class Lot extends Model
     }
 
     /**
-     * Bank accounts customers pay into (the lot is paid directly; LotLink never holds car money).
+     * Bank accounts customers pay into (the seller is paid directly; CarYard never holds car money).
      *
      * @return HasMany<LotBankAccount, $this>
      */
@@ -343,7 +343,7 @@ class Lot extends Model
     }
 
     /**
-     * Support tickets the lot opened with LotLink (also the scoped binding for `{supportTicket}`).
+     * Support tickets the seller opened with CarYard (also the scoped binding for `{supportTicket}`).
      *
      * @return HasMany<SupportTicket, $this>
      */
@@ -383,7 +383,7 @@ class Lot extends Model
     }
 
     /**
-     * Lot Manager (M19). Scoped route bindings use these for {customer}, {order},
+     * Sales Manager (M19). Scoped route bindings use these for {customer}, {order},
      * {payment} and {task}.
      *
      * @return HasMany<LotCustomer, $this>

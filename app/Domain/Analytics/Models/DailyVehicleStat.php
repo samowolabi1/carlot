@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * A car's numbers for one day in the lot's timezone (TDD M15: RollupDailyStats).
+ * A car's numbers for one day in the seller's timezone (TDD M15: RollupDailyStats).
  *
  * @property int $id
  * @property int $vehicle_id

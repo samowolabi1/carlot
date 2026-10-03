@@ -20,7 +20,7 @@ function submit() {
             <h1 class="text-[24px] leading-tight font-bold">{{ updated ? "We've updated our terms" : 'Before you continue' }}</h1>
             <p class="text-[15px] text-[#4A4D53]">
                 {{ updated ? `Our Terms of Use and Privacy Policy changed on ${effective}.` : 'Please read and accept our Terms of Use and Privacy Policy.' }}
-                They explain what LotLink does and doesn't do (we don't sell cars or lend money), how we use and protect your data under the Nigeria Data Protection Act 2023, and your
+                They explain what CarYard does and doesn't do (we don't sell cars or lend money), how we use and protect your data under the Nigeria Data Protection Act 2023, and your
                 rights.
             </p>
             <ul class="flex flex-col gap-1 text-[15px]">
@@ -29,7 +29,7 @@ function submit() {
                 <li><Link :href="route('legal.show', 'security')" target="_blank">Security and safety</Link></li>
             </ul>
             <p v-if="impersonating" class="rounded-xl bg-cream px-3 py-2.5 text-[14px] text-clay-dark" role="status">
-                You're viewing this account as LotLink support. Only the account holder can accept the terms.
+                You're viewing this account as CarYard support. Only the account holder can accept the terms.
             </p>
             <template v-else>
                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 text-[14px]">

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
 /**
- * One review per completed appointment (TDD M14). Editable by the buyer for 14 days; the lot
+ * One review per completed appointment (TDD M14). Editable by the buyer for 14 days; the seller
  * may reply once. Reported reviews are hidden until an admin looks at them.
  *
  * @property int $id

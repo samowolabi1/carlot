@@ -8,8 +8,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
- * A lot's name, place, pin, approval, plan or buyer settings (loans, trade-ins, offers, verified) changed: refresh its cars in the search index,
- * adding them when the lot goes live and removing them when it is suspended.
+ * A seller's name, place, pin, approval, plan or buyer settings (loans, trade-ins, offers, verified) changed: refresh its cars in the search index,
+ * adding them when the seller goes live and removing them when it is suspended.
  */
 class SyncLotVehiclesToSearch implements ShouldQueue
 {

@@ -16,7 +16,7 @@ enum AdCta: string
             self::SeeCars => 'See our cars',
             self::ViewCar => 'View this car',
             self::BookVisit => 'Book a visit',
-            self::VisitLot => 'Visit our lot',
+            self::VisitLot => 'Visit our yard',
             self::SeeOffers => 'See this week\'s offers',
         };
     }

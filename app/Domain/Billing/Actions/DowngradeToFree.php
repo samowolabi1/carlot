@@ -18,7 +18,7 @@ class DowngradeToFree
     public function __construct(private readonly VehicleStateMachine $stateMachine) {}
 
     /**
-     * Moves a lot to the Free plan. Cars above the Free listing limit are hidden, not
+     * Moves a seller to the Free plan. Cars above the Free listing limit are hidden, not
      * deleted: the newest listings stay live, reserved cars always stay (TDD M16: Dunning).
      *
      * @return int how many cars were hidden

@@ -59,7 +59,7 @@ final class CustomerBook
         }
 
         // Consent is only ever added here; customers withdraw it by replying STOP or
-        // asking the lot, which clears it on their record.
+        // asking the seller, which clears it on their record.
         if ($data['consent_whatsapp'] ?? false) {
             $customer->consent_whatsapp = true;
         }

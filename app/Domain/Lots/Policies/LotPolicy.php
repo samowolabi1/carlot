@@ -8,7 +8,7 @@ use App\Domain\Lots\Models\Lot;
 
 class LotPolicy
 {
-    /** Open the dealer dashboard for this lot. */
+    /** Open the seller dashboard for this seller. */
     public function view(User $user, Lot $lot): bool
     {
         return $user->hasLotRole($lot);
@@ -20,7 +20,7 @@ class LotPolicy
         return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager);
     }
 
-    /** Invite, change and remove staff; submit the lot for approval. */
+    /** Invite, change and remove staff; submit the seller for approval. */
     public function manageStaff(User $user, Lot $lot): bool
     {
         return $user->hasLotRole($lot, LotRole::Owner);
@@ -44,7 +44,7 @@ class LotPolicy
         return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager) && $lot->planAllows('costs');
     }
 
-    /** Lot Manager reports; the staff report and Excel export also need viewCosts' plan. */
+    /** Sales Manager reports; the staff report and Excel export also need viewCosts' plan. */
     public function viewReports(User $user, Lot $lot): bool
     {
         return $user->hasLotRole($lot, LotRole::Owner, LotRole::Manager);

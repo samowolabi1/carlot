@@ -29,7 +29,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Dealer calendar (design D4): week grid, today's visits and requests to confirm. */
+/** Seller calendar (design D4): week grid, today's visits and requests to confirm. */
 class CalendarController extends Controller
 {
     public function index(Request $request, Lot $lot): Response
@@ -105,7 +105,7 @@ class CalendarController extends Controller
         if ($request->has('staff')) {
             Gate::authorize('assign', $appointment);
             $staffId = $data['staff']
-                ? LotMember::query()->where('lot_id', $lot->id)->whereHas('user', fn ($q) => $q->where('ulid', $data['staff']))->value('user_id') ?? abort(422, 'Not a member of this lot.')
+                ? LotMember::query()->where('lot_id', $lot->id)->whereHas('user', fn ($q) => $q->where('ulid', $data['staff']))->value('user_id') ?? abort(422, 'Not a member of this seller.')
                 : null;
             $appointment->forceFill(['staff_id' => $staffId])->save();
 
@@ -114,7 +114,7 @@ class CalendarController extends Controller
 
         Gate::authorize('manage', $appointment);
 
-        // A drop on the calendar grid sends the lot-local date and time.
+        // A drop on the calendar grid sends the seller-local date and time.
         $start = ! empty($data['date'])
             ? CarbonImmutable::parse("{$data['date']} {$data['time']}", $lot->timezone)
             : (! empty($data['starts_at']) ? CarbonImmutable::parse($data['starts_at']) : null);
@@ -173,7 +173,7 @@ class CalendarController extends Controller
             'minutes' => (int) $a->starts_at->diffInMinutes($a->ends_at),
             'when' => $start->format('D j M, H:i'),
             'customer' => $a->customer->name ?? 'Buyer',
-            // Buyers who book have engaged with the lot, so their number is shown (TDD: Privacy).
+            // Buyers who book have engaged with the seller, so their number is shown (TDD: Privacy).
             'phone' => $a->customer->phone,
             'phone_display' => PhoneNumber::display($a->customer->phone),
             'whatsapp' => $a->customer->phone ? ltrim($a->customer->phone, '+') : null,
@@ -182,7 +182,7 @@ class CalendarController extends Controller
             'staff' => $a->staff ? ['ulid' => $a->staff->ulid, 'name' => $a->staff->name] : null,
             'checked_in' => $a->checked_in_at !== null,
             'past' => $a->starts_at->isPast(),
-            // Live location (TDD M8): follow a buyer on the way, or share the lot's.
+            // Live location (TDD M8): follow a buyer on the way, or share the seller's.
             'location' => [
                 'can_share' => StartLocationSession::canShare($a),
                 'live' => $this->liveLocations->get($a->id, collect())->map(fn (LocationSession $s) => [

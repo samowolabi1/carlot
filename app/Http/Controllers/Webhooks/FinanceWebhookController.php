@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Status updates from a lender's own system (/webhooks/finance/{lender}), signed with HMAC-SHA256 of the raw body
- * using that lender's webhook secret (header X-LotLink-Signature). Unsigned or badly signed calls are refused, and
+ * using that lender's webhook secret (header X-CarYard-Signature; the older X-LotLink-Signature is still accepted). Unsigned or badly signed calls are refused, and
  * a lender can only touch its own applications.
  */
 class FinanceWebhookController extends Controller
@@ -26,7 +26,7 @@ class FinanceWebhookController extends Controller
     public function __invoke(Request $request, Lender $lender, UpdateFinanceApplication $update): JsonResponse
     {
         $secret = (string) $lender->webhook_secret;
-        $signature = (string) $request->header('X-LotLink-Signature');
+        $signature = (string) ($request->header('X-CarYard-Signature') ?? $request->header('X-LotLink-Signature'));
 
         abort_if($lender->integration !== LenderIntegration::Api || $secret === '' || ! hash_equals(hash_hmac('sha256', $request->getContent(), $secret), $signature), 401);
 
