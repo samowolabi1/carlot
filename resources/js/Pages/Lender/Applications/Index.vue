@@ -52,7 +52,7 @@ function choose(key: string) {
                     v-field="{ kind: 'text', max: 60 }"
                     type="search"
                     maxlength="60"
-                    class="w-full bg-transparent text-[15px] outline-none"
+                    class="h-11 w-full bg-transparent text-[15px] outline-none"
                     placeholder="Buyer, car, lot or reference"
                     @input="live.later(params)"
                 />

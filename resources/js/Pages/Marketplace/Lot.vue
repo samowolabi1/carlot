@@ -69,8 +69,8 @@ function filter(query: Partial<Filters>) {
         <div v-if="preview" class="bg-cream px-5 py-3 text-center text-[14px] text-clay-dark" role="status">Preview: your lot page goes public once LotLink approves your lot.</div>
 
         <div class="flex items-center justify-between border-b border-line bg-white px-5 py-2.5 text-[12px] text-muted">
-            <span class="flex items-center gap-1.5">Powered by <Link :href="route('home')" class="no-underline"><Logo size="sm" /></Link></span>
-            <Link :href="route('cars.index')" class="text-[13px] font-semibold">Browse all lots</Link>
+            <span class="flex items-center gap-1.5">Powered by <Link :href="route('home')" class="inline-flex min-h-11 items-center no-underline"><Logo size="sm" /></Link></span>
+            <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[13px] font-semibold">Browse all lots</Link>
         </div>
 
         <header class="relative h-36 md:h-56" :style="{ background: lot.cover_url ? `url(${lot.cover_url}) center/cover` : brand }">
@@ -89,7 +89,7 @@ function filter(query: Partial<Filters>) {
                     </h1>
                     <p v-if="lot.tagline" class="text-[15px] text-muted">{{ lot.tagline }}</p>
                     <p class="text-[14px] text-muted">
-                        <button v-if="lot.rating" type="button" class="font-semibold text-ink" @click="tab = 'reviews'">★ {{ lot.rating.toFixed(1) }} ({{ lot.reviews_count }} reviews)</button><template v-if="lot.rating"> · </template>
+                        <button v-if="lot.rating" type="button" class="tap inline-flex items-baseline gap-1 font-semibold text-ink" @click="tab = 'reviews'"><Icon name="star" filled :size="15" class="self-center text-clay" />{{ lot.rating.toFixed(1) }} ({{ lot.reviews_count }} reviews)</button><template v-if="lot.rating"> · </template>
                         <span v-if="lot.open" :class="lot.open.open ? 'font-semibold text-success' : ''">{{ lot.open.label }}</span>
                         <template v-if="lot.address || lot.city"> · {{ [lot.address, lot.city, lot.state].filter(Boolean).join(', ') }}</template>
                     </p>
@@ -106,7 +106,7 @@ function filter(query: Partial<Filters>) {
                 <a v-if="whatsappHref" :href="whatsappHref" target="_blank" rel="noopener" @click="intent('whatsapp')" class="flex h-16 flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink no-underline md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]">
                     <Icon name="whatsapp" :size="20" /> WhatsApp
                 </a>
-                <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" />
+                <ShareMenu :title="lot.name" :text="`${lot.name} on LotLink`" :url="lot.url" :lot="preview ? undefined : lot.slug" label="Share" tile />
             </div>
             <div v-if="!preview" class="mt-2.5 flex flex-col gap-2.5 md:flex-row md:items-center">
                 <Link :href="route('bookings.create', { lot: lot.slug })" class="btn btn-dark w-full md:w-auto"><Icon name="calendar" :size="18" /> Book a visit</Link>
@@ -148,7 +148,7 @@ function filter(query: Partial<Filters>) {
                     <ul v-if="tab === 'reviews'" class="flex flex-col gap-3">
                         <li v-for="r in reviews" :key="r.ulid" class="card flex flex-col gap-1.5 p-4">
                             <div class="flex flex-wrap items-center gap-x-2 text-[14px]">
-                                <span class="font-semibold text-clay" :aria-label="`${r.rating} out of 5 stars`">{{ '★'.repeat(r.rating) }}<span class="text-line-strong">{{ '★'.repeat(5 - r.rating) }}</span></span>
+                                <span class="inline-flex items-center gap-0.5" role="img" :aria-label="`${r.rating} out of 5 stars`"><Icon v-for="n in 5" :key="n" name="star" filled :size="15" :class="n <= r.rating ? 'text-clay' : 'text-line-strong'" /></span>
                                 <strong>{{ r.author }}</strong>
                                 <span class="text-muted"><template v-if="r.visit">{{ r.visit }} · </template>{{ r.date }}</span>
                             </div>
@@ -168,7 +168,7 @@ function filter(query: Partial<Filters>) {
                                 v-for="q in quick"
                                 :key="q.label"
                                 type="button"
-                                class="h-9 shrink-0 rounded-full px-3.5 text-[14px]"
+                                class="h-9 shrink-0 rounded-full px-3.5 text-[14px] tap"
                                 :class="isQuick(q.query) ? 'bg-forest font-semibold text-white' : 'border border-line bg-white'"
                                 :aria-pressed="isQuick(q.query)"
                                 @click="filter(q.query)"
@@ -182,7 +182,7 @@ function filter(query: Partial<Filters>) {
                         <p v-else class="card px-5 py-8 text-center text-[15px] text-muted">{{ total ? 'No cars match that filter.' : 'No cars listed yet. Check back soon.' }}</p>
                         <nav v-if="stock.last_page > 1" aria-label="Pages" class="flex flex-wrap justify-center gap-1">
                             <template v-for="link in stock.links" :key="link.label">
-                                <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'bg-white text-ink ring-1 ring-line'"><span v-html="link.label" /></Link>
+                                <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-11 min-w-11 items-center justify-center rounded-lg px-3 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'bg-white text-ink ring-1 ring-line'"><span v-html="link.label" /></Link>
                             </template>
                         </nav>
                     </template>

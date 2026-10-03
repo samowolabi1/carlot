@@ -148,7 +148,7 @@ function submitPassword() {
             <div class="flex flex-col gap-1.5 rounded-2xl bg-forest p-4 text-white">
                 <span class="text-[15px] font-semibold">Own a car lot?</span>
                 <span class="text-[13px] text-mist">Sign in the same way, then put your stock online, take bookings and share cars in one tap. Lots in every state in Nigeria are welcome.</span>
-                <Link :href="route('dealer.home')" class="text-[14px] font-semibold text-peach hover:text-white">List your lot</Link>
+                <Link :href="route('dealer.home')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-peach hover:text-white">List your lot</Link>
             </div>
             <p class="text-center text-[12px] text-muted">
                 By continuing you agree to LotLink's <Link :href="route('legal.show', 'terms')">Terms of Use</Link> and

@@ -200,7 +200,7 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
                     v-for="t in types"
                     :key="t.value"
                     type="button"
-                    class="flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold"
+                    class="flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold tap"
                     :class="[colours[t.value as Item['type']], hidden.includes(t.value) ? 'opacity-40' : '']"
                     :aria-pressed="!hidden.includes(t.value)"
                     @click="hidden = hidden.includes(t.value) ? hidden.filter((h) => h !== t.value) : [...hidden, t.value]"
@@ -322,7 +322,7 @@ const canMove = (a: Item) => (a.status === 'pending' || a.status === 'confirmed'
 
         <!-- Booking drawer -->
         <div v-if="selected" class="fixed inset-0 z-50 bg-ink/40" @click.self="selected = null">
-            <div class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col gap-4 overflow-y-auto bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="booking-title">
+            <div class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col gap-4 overflow-y-auto bg-white p-5 shadow-2xl *:shrink-0" role="dialog" aria-modal="true" aria-labelledby="booking-title">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <span class="rounded-lg px-2 py-0.5 text-[12px] font-semibold" :class="colours[selected.type]">{{ selected.type_label }}</span>

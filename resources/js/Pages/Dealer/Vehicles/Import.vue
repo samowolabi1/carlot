@@ -84,7 +84,7 @@ onBeforeUnmount(() => clearInterval(timer));
                     <Link v-if="i.imported" :href="route('dealer.vehicles.index', { lot: lot.slug, status: 'draft' })">See drafts</Link>
                 </p>
                 <details v-if="i.errors.length" class="rounded-xl bg-[#FDECEC] p-3 text-[14px]" :open="i.errors.length <= 5">
-                    <summary class="cursor-pointer font-semibold text-danger">{{ i.errors.filter((e) => e.row > 0).length }} {{ i.errors.filter((e) => e.row > 0).length === 1 ? 'row' : 'rows' }} to fix</summary>
+                    <summary class="cursor-pointer py-3 font-semibold text-danger">{{ i.errors.filter((e) => e.row > 0).length }} {{ i.errors.filter((e) => e.row > 0).length === 1 ? 'row' : 'rows' }} to fix</summary>
                     <ul class="mt-2 flex flex-col gap-1">
                         <li v-for="e in i.errors" :key="e.row"><strong v-if="e.row">Row {{ e.row }}:</strong> {{ e.messages.join(' ') }}</li>
                     </ul>

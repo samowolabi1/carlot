@@ -106,7 +106,7 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                     <template v-else>No payment needed</template>
                 </span>
                 <span v-if="subscription.coupon" class="text-[13px] text-peach">Code {{ subscription.coupon }} applied</span>
-                <Link v-if="can.manage" :href="route('dealer.referrals', lot.slug)" class="text-[13px] font-semibold text-peach hover:text-white">Refer a lot and get a free month</Link>
+                <Link v-if="can.manage" :href="route('dealer.referrals', lot.slug)" class="inline-flex min-h-11 items-center text-[13px] font-semibold text-peach hover:text-white">Refer a lot and get a free month</Link>
                 <div v-if="can.manage && subscription.can_update_card" class="mt-1.5 flex gap-2">
                     <a :href="route('dealer.billing.card', lot.slug)" class="inline-flex h-11 items-center rounded-[10px] border border-forest-600 px-3.5 text-[13px] font-semibold text-white no-underline hover:text-white">Update card</a>
                 </div>
@@ -202,7 +202,8 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
         <section class="card overflow-hidden" aria-labelledby="payments-heading">
             <h2 id="payments-heading" class="border-b border-divider px-[18px] py-3 font-sans text-[15px] font-bold">Payments</h2>
             <p v-if="payments.length === 0" class="px-[18px] py-6 text-[14px] text-muted">No payments yet.</p>
-            <table v-else class="w-full text-[13px]">
+            <div v-else class="overflow-x-auto">
+            <table class="w-full min-w-[520px] text-[13px]">
                 <thead class="text-left text-[12px] text-muted">
                     <tr><th class="px-[18px] py-2 font-semibold">Date</th><th class="py-2 font-semibold">What</th><th class="py-2 font-semibold">Amount</th><th class="py-2 font-semibold">Status</th><th class="px-[18px] py-2"><span class="sr-only">Invoice</span></th></tr>
                 </thead>
@@ -212,10 +213,11 @@ const statusTone: Record<string, string> = { success: 'text-success', refunded: 
                         <td class="py-2.5">{{ p.what }}</td>
                         <td class="py-2.5 whitespace-nowrap">{{ p.amount }}</td>
                         <td class="py-2.5 font-semibold" :class="statusTone[p.status]">{{ p.status_label }}</td>
-                        <td class="px-[18px] py-2.5 text-right"><a v-if="p.invoice" :href="p.invoice" target="_blank" rel="noopener" class="font-semibold">Invoice</a></td>
+                        <td class="px-[18px] py-2.5 text-right"><a v-if="p.invoice" :href="p.invoice" target="_blank" rel="noopener" class="tap font-semibold">Invoice</a></td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </section>
     </DealerLayout>
 </template>

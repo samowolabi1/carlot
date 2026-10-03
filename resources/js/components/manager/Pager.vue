@@ -11,7 +11,7 @@ defineProps<{ links: { url: string | null; label: string; active: boolean }[]; l
                 v-if="link.url"
                 :href="link.url"
                 preserve-scroll
-                class="flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline"
+                class="flex h-11 min-w-11 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline"
                 :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-ivory'"
                 ><span v-html="link.label"
             /></Link>

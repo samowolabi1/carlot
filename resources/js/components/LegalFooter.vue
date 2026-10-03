@@ -14,12 +14,12 @@ const links = [
 
 <template>
     <footer class="flex flex-col gap-1.5 text-[12px]" :class="tone === 'dark' ? 'text-mist/80' : 'text-muted'">
-        <nav aria-label="Legal" class="flex flex-wrap gap-x-3 gap-y-1">
+        <nav aria-label="Legal" class="flex flex-wrap gap-x-4">
             <Link
                 v-for="l in links"
                 :key="l.key"
                 :href="route('legal.show', l.key)"
-                class="inline-flex min-h-8 items-center no-underline hover:underline"
+                class="inline-flex min-h-11 items-center no-underline hover:underline"
                 :class="tone === 'dark' ? 'text-mist/90 hover:text-white' : 'text-muted hover:text-ink'"
                 >{{ l.label }}</Link
             >

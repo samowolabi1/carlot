@@ -99,7 +99,7 @@ function submit() {
                     <InputError :message="form.errors.reason" />
                 </fieldset>
                 <label class="field-label">
-                    More details <span class="font-normal text-muted">(optional)</span>
+                    <span>More details <span class="font-normal text-muted">(optional)</span></span>
                     <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.details" rows="3" class="field h-auto py-2" />
                     <InputError :message="form.errors.details || form.errors.id" />
                 </label>

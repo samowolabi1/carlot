@@ -48,16 +48,16 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
 
             <nav class="card overflow-hidden" aria-label="Your LotLink">
                 <Link :href="route('conversations.index')" :class="row"
-                    >Messages<span v-if="unread?.messages" class="rounded-full bg-clay px-2 py-0.5 text-[12px] font-semibold text-white">{{ unread.messages }} new</span></Link
+                    >Messages<span class="flex items-center gap-2"><span v-if="unread?.messages" class="rounded-full bg-clay px-2 py-0.5 text-[12px] font-semibold text-white">{{ unread.messages }} new</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link
                 >
-                <Link :href="route('budget')" :class="row">My budget<span class="text-[13px] text-muted">{{ budgetLabel ? `Up to ${budgetLabel}` : 'Work it out' }}</span></Link>
-                <Link :href="route('bookings.index')" :class="row">Bookings<span class="text-[13px] text-muted">{{ counts.bookings ? `${counts.bookings} upcoming` : '' }}</span></Link>
-                <Link :href="route('saved')" :class="row">Saved cars<span class="text-[13px] text-muted">{{ counts.saved || '' }}</span></Link>
+                <Link :href="route('budget')" :class="row">My budget<span class="flex items-center gap-2"><span class="text-[13px] text-muted">{{ budgetLabel ? `Up to ${budgetLabel}` : 'Work it out' }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
+                <Link :href="route('bookings.index')" :class="row">Bookings<span class="flex items-center gap-2"><span v-if="counts.bookings" class="text-[13px] text-muted">{{ counts.bookings }} upcoming</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
+                <Link :href="route('saved')" :class="row">Saved cars<span class="flex items-center gap-2"><span v-if="counts.saved" class="text-[13px] text-muted">{{ counts.saved }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
                 <Link :href="`${route('bookings.index')}#offers`" :class="row">Offers and trade-ins<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('finance.index')" :class="row">Car loan applications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <Link :href="route('following')" :class="row">Lots I follow<span class="text-[13px] text-muted">{{ counts.following || '' }}</span></Link>
+                <Link :href="route('following')" :class="row">Lots I follow<span class="flex items-center gap-2"><span v-if="counts.following" class="text-[13px] text-muted">{{ counts.following }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link>
                 <Link v-for="l in lenders" :key="l.slug" :href="route('lender.dashboard', l.slug)" :class="row"
-                    >Lender portal<span class="text-[13px] text-muted">{{ l.name }}</span></Link
+                    >Lender portal<span class="flex items-center gap-2"><span class="text-[13px] text-muted">{{ l.name }}</span><Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></span></Link
                 >
             </nav>
 
@@ -80,7 +80,7 @@ const deleteAccount = () => deleteForm.delete(route('account.destroy'), { preser
                 <span v-else-if="install.available.value" :class="row" class="py-3 text-[14px]">{{ install.hint.value }}</span>
                 <Link :href="route('account.security')" :class="row">Sign-in and security<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <Link :href="route('notifications.settings')" :class="row">Notifications<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
-                <Link v-if="!lenders.length" :href="route('lenders.join')" :class="row">Lend with LotLink (banks and finance companies)<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
+                <Link v-if="!lenders.length" :href="route('lenders.join')" :class="row">Lend with LotLink<Icon name="chevronDown" :size="18" class="-rotate-90 text-muted" /></Link>
                 <button type="button" :class="row" class="w-full text-left" :aria-expanded="deleting" @click="deleting = !deleting">Privacy and my data<Icon name="chevronDown" :size="18" class="text-muted" :class="{ 'rotate-180': deleting }" /></button>
             </nav>
 

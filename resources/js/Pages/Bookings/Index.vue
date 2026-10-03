@@ -41,8 +41,8 @@ const badge: Record<string, string> = {
     cancelled: 'bg-divider text-muted',
 };
 
-const sm = 'inline-flex h-[38px] items-center rounded-[10px] border border-line-strong bg-white px-3 text-[13px] font-semibold text-forest no-underline';
-const smPrimary = 'inline-flex h-[38px] items-center rounded-[10px] bg-clay px-3 text-[13px] font-semibold text-white no-underline hover:text-white';
+const sm = 'inline-flex h-11 items-center rounded-[10px] border border-line-strong bg-white px-3 text-[13px] font-semibold text-forest no-underline';
+const smPrimary = 'inline-flex h-11 items-center rounded-[10px] bg-clay px-3 text-[13px] font-semibold text-white no-underline hover:text-white';
 
 function acceptCounter(o: BuyerOffer, reserve: boolean) {
     router.post(route('offers.accept', o.ulid), { reserve }, { preserveScroll: true });
@@ -69,7 +69,7 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
             </p>
             <article v-for="b in upcoming" :key="b.ulid" class="card flex flex-col gap-2 p-3.5">
                 <div class="flex items-start justify-between gap-3">
-                    <Link :href="b.url" class="text-[15px] font-semibold text-ink no-underline">{{ b.when }}</Link>
+                    <Link :href="b.url" class="tap text-[15px] font-semibold text-ink no-underline">{{ b.when }}</Link>
                     <span class="shrink-0 rounded-lg px-2 py-0.5 text-[12px] font-semibold" :class="badge[b.status]">{{ b.status_label }}</span>
                 </div>
                 <span class="text-[14px] text-[#4A4D53]">{{ b.type }}<template v-if="b.car"> · {{ b.car.title }}</template> · {{ b.lot.name }}</span>
@@ -87,7 +87,7 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
 
             <article v-for="r in reservations" :key="r.ulid" class="card flex flex-col gap-2 p-3.5" :class="{ 'border-2 border-clay': r.status === 'pending' }">
                 <div class="flex items-start justify-between gap-3">
-                    <Link :href="r.car_url" class="text-[15px] font-semibold text-ink no-underline">{{ r.status === 'pending' ? 'Reservation requested' : 'Reserved' }}: {{ r.car }}</Link>
+                    <Link :href="r.car_url" class="tap text-[15px] font-semibold text-ink no-underline">{{ r.status === 'pending' ? 'Reservation requested' : 'Reserved' }}: {{ r.car }}</Link>
                     <span v-if="r.left" class="shrink-0 text-[12px] font-semibold text-clay-dark">{{ r.left }}</span>
                 </div>
                 <span v-if="r.status === 'pending'" class="text-[14px] text-[#4A4D53]">Transfer the {{ r.deposit }} deposit to {{ r.lot }}. The car is held once they confirm it.</span>
@@ -103,7 +103,7 @@ function answerTradeIn(t: BuyerTradeIn, accept: boolean) {
 
             <article v-for="o in offers" :key="o.ulid" class="card flex flex-col gap-2 p-3.5" :class="{ 'border-2 border-clay': o.status === 'countered' }">
                 <div class="flex items-start justify-between gap-3">
-                    <Link :href="o.car_url" class="text-[15px] font-semibold text-ink no-underline">
+                    <Link :href="o.car_url" class="tap text-[15px] font-semibold text-ink no-underline">
                         {{ o.status === 'countered' ? 'Counter-offer on' : o.status === 'accepted' ? 'Offer accepted:' : 'Offer on' }} {{ o.car }}
                     </Link>
                     <span v-if="o.left" class="shrink-0 text-[12px] font-semibold text-clay-dark">{{ o.left }}</span>

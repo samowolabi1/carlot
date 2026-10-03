@@ -95,7 +95,7 @@ const kpis: { label: string; note: string; key?: string }[] = [
             <div class="card flex flex-col gap-2 p-[18px]">
                 <div class="flex justify-between">
                     <h2 class="font-sans text-[16px] font-bold">Your stock</h2>
-                    <Link :href="route('dealer.vehicles.index', lot.slug)" class="text-[13px] font-semibold">Open stock</Link>
+                    <Link :href="route('dealer.vehicles.index', lot.slug)" class="-my-3 inline-flex min-h-11 items-center text-[13px] font-semibold">Open stock</Link>
                 </div>
                 <template v-if="stock.live + stock.drafts > 0">
                     <div class="flex justify-between border-t border-divider py-2.5 text-[14px]">
@@ -104,7 +104,7 @@ const kpis: { label: string; note: string; key?: string }[] = [
                     </div>
                     <div class="flex justify-between border-t border-divider py-2.5 text-[14px]">
                         <span>Drafts to finish</span>
-                        <Link v-if="stock.drafts" :href="route('dealer.vehicles.index', { lot: lot.slug, status: 'draft' })" class="font-semibold">{{ stock.drafts }}</Link>
+                        <Link v-if="stock.drafts" :href="route('dealer.vehicles.index', { lot: lot.slug, status: 'draft' })" class="tap font-semibold">{{ stock.drafts }}</Link>
                         <strong v-else>0</strong>
                     </div>
                     <div v-if="stock.ageing" class="flex justify-between border-t border-divider py-2.5 text-[14px] text-clay-dark">
@@ -118,7 +118,7 @@ const kpis: { label: string; note: string; key?: string }[] = [
             <div class="card flex flex-col gap-1 p-[18px]">
                 <div class="flex justify-between">
                     <h2 class="font-sans text-[16px] font-bold">Today's visits</h2>
-                    <Link :href="route('dealer.calendar', lot.slug)" class="text-[13px] font-semibold">Calendar</Link>
+                    <Link :href="route('dealer.calendar', lot.slug)" class="-my-3 inline-flex min-h-11 items-center text-[13px] font-semibold">Calendar</Link>
                 </div>
                 <p v-if="!visits.today.length" class="text-[14px] text-muted">No visits today. Buyers book viewings and test drives in your opening hours.</p>
                 <div v-for="v in visits.today" :key="v.ulid" class="flex items-center justify-between gap-2 border-t border-divider py-2.5 text-[14px]">

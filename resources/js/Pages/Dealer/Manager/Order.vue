@@ -316,7 +316,7 @@ async function copyLink() {
                     </div>
                     <dl class="flex flex-col gap-2 text-[14px]">
                         <div class="flex justify-between"><dt class="text-muted">Sale (after discount)</dt><dd>{{ profit.revenue }}</dd></div>
-                        <div class="flex justify-between"><dt class="text-muted">Car costs</dt><dd>−{{ profit.costs }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-muted">Car costs</dt><dd>{{ /^₦0$/.test(profit.costs) ? '' : '−' }}{{ profit.costs }}</dd></div>
                         <div class="flex justify-between border-t border-divider pt-2 font-semibold">
                             <dt>{{ profit.negative ? 'Loss' : 'Profit' }}</dt>
                             <dd :class="profit.negative ? 'text-danger' : 'text-success'">{{ profit.negative ? '−' : '' }}{{ profit.profit }}<template v-if="profit.margin !== null"> ({{ profit.margin }}%)</template></dd>
@@ -341,7 +341,7 @@ async function copyLink() {
                             </div>
                             <InputError :message="pay.errors.method" />
                         </fieldset>
-                        <label class="field-label">Reference (optional)<input v-field="'reference'" v-model="pay.reference" class="field" placeholder="Transfer or POS reference" /></label>
+                        <label class="field-label"><span>Reference <span class="font-normal text-muted">(optional)</span></span><input v-field="'reference'" v-model="pay.reference" class="field" placeholder="Transfer or POS reference" /></label>
                         <button type="submit" class="btn btn-primary" :disabled="pay.processing">{{ pay.processing ? 'Saving…' : 'Save and send receipt' }}</button>
                         <p class="text-[13px] text-muted">
                             {{ customer?.consent_whatsapp ? 'The receipt goes to the customer on WhatsApp.' : 'The customer has not agreed to WhatsApp, so share the receipt yourself.' }}
@@ -361,8 +361,8 @@ async function copyLink() {
                                 <a v-if="d.file_url" :href="d.file_url" class="inline-flex h-9 items-center gap-1 text-[13px] font-semibold"><Icon name="download" :size="14" /> Scan</a>
                             </div>
                             <div v-if="order.open || d.status !== 'handed_over'" class="flex flex-wrap gap-1.5">
-                                <button v-if="d.status === 'pending'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold" @click="setDocument(d, 'received')">Received</button>
-                                <button v-if="d.status === 'received'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold" @click="setDocument(d, 'handed_over')">Handed over</button>
+                                <button v-if="d.status === 'pending'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold tap" @click="setDocument(d, 'received')">Received</button>
+                                <button v-if="d.status === 'received'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold tap" @click="setDocument(d, 'handed_over')">Handed over</button>
                                 <button v-if="d.status !== 'pending'" type="button" class="h-9 px-1.5 text-[13px] text-muted" @click="setDocument(d, 'pending')">Undo</button>
                                 <label class="inline-flex h-9 cursor-pointer items-center rounded-lg border border-dashed border-line-strong px-2.5 text-[13px] font-semibold">
                                     {{ d.file_url ? 'Replace scan' : 'Add scan' }}

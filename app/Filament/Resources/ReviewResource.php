@@ -61,7 +61,7 @@ class ReviewResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('lot.name')->label('Lot')->searchable(),
-                Tables\Columns\TextColumn::make('rating')->formatStateUsing(fn (int $state) => str_repeat('★', $state).str_repeat('☆', 5 - $state))->sortable(),
+                Tables\Columns\TextColumn::make('rating')->formatStateUsing(fn (int $state) => "{$state} / 5")->sortable(),
                 Tables\Columns\TextColumn::make('body')->label('Review')->wrap()->limit(160)->placeholder('No text')->searchable()
                     ->description(fn (Review $r) => $r->authorName().($r->reply ? ' · lot replied: "'.Str::limit($r->reply, 60).'"' : '')),
                 Tables\Columns\TextColumn::make('open_reports_count')->label('Open reports')->badge()->color(fn (int $state) => $state > 0 ? 'danger' : 'gray'),

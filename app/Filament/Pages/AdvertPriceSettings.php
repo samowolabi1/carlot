@@ -9,6 +9,7 @@ use App\Domain\Advertising\Enums\AdStatus;
 use App\Domain\Advertising\Models\AdCampaign;
 use App\Domain\Advertising\Support\AdvertPricing;
 use App\Filament\Pages\Concerns\AdminPage;
+use App\Filament\Support\MoneyInput;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -58,9 +59,9 @@ class AdvertPriceSettings extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $prices = fn (string $key) => collect(AdvertPricing::DAYS)->map(fn (int $days) => Forms\Components\TextInput::make("{$key}.p{$days}")
-            ->label("{$days} days")->prefix('₦')->numeric()->integer()->minValue(100)->maxValue(100_000_000)->required()
-            ->helperText(fn (Forms\Get $get) => ($p = (int) $get("{$key}.p{$days}")) > 0 ? '₦'.number_format(intdiv($p, $days)).' a day' : null))->all();
+        $prices = fn (string $key) => collect(AdvertPricing::DAYS)->map(fn (int $days) => MoneyInput::make("{$key}.p{$days}")
+            ->label("{$days} days")->minValue(100)->maxValue(100_000_000)->required()
+            ->helperText(fn (Forms\Get $get) => ($p = MoneyInput::value($get("{$key}.p{$days}"))) > 0 ? '₦'.number_format(intdiv($p, $days)).' a day' : null))->all();
 
         $banner = fn (AdPlacement $placement) => Forms\Components\Section::make($placement->label())
             ->description($placement->description().' '.self::booked($placement))

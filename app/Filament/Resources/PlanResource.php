@@ -11,6 +11,7 @@ use App\Domain\Lots\Models\Plan;
 use App\Domain\Support\Money;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\PlanResource\Pages;
+use App\Filament\Support\MoneyInput;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -85,7 +86,7 @@ class PlanResource extends Resource
                     ->modalDescription(fn (Plan $record) => 'Now '.Money::format($record->price).' a month.'.($record->provider_plan_code || $record->flutterwave_plan_id ? ' The payment providers are updated too, so cards renew at the right amount (Flutterwave only for new subscribers).' : ''))
                     ->fillForm(fn (Plan $record) => ['price' => intdiv($record->price, 100), 'who' => 'new'])
                     ->form([
-                        Forms\Components\TextInput::make('price')->label('New price a month')->prefix('₦')->numeric()->integer()->minValue(100)->maxValue(100_000_000)->required(),
+                        MoneyInput::make('price')->label('New price a month')->minValue(100)->maxValue(100_000_000)->required(),
                         Forms\Components\Radio::make('who')->label('Who pays the new price?')->required()
                             ->options([
                                 'new' => 'Only lots that subscribe from now on (current subscribers keep their price)',

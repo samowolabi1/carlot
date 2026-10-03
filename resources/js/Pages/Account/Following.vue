@@ -22,7 +22,7 @@ function unfollow(slug: string) {
 
             <div v-if="lots.length === 0" class="card px-5 py-10 text-center text-[15px] text-muted">
                 Follow a lot from its page to hear about new stock first.
-                <Link :href="route('cars.index')" class="mt-2 block font-semibold">Browse cars</Link>
+                <Link :href="route('cars.index')" class="mt-1 inline-flex min-h-11 items-center font-semibold">Browse cars</Link>
             </div>
             <ul v-else class="card divide-y divide-divider overflow-hidden">
                 <li v-for="lot in lots" :key="lot.slug" class="flex items-center gap-3 px-4 py-3">

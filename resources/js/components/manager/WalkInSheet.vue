@@ -86,7 +86,7 @@ function submit() {
 <template>
     <div v-if="open" class="fixed inset-0 z-50 bg-ink/40" @click.self="emit('close')">
         <form
-            class="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl md:inset-y-0 md:right-0 md:left-auto md:max-h-none md:w-[440px] md:rounded-none"
+            class="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl *:shrink-0 md:inset-y-0 md:right-0 md:left-auto md:max-h-none md:w-[440px] md:rounded-none"
             role="dialog"
             aria-modal="true"
             aria-labelledby="walk-in-title"

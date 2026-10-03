@@ -19,6 +19,7 @@ use App\Domain\Support\PhoneNumber;
 use App\Domain\Support\Regions;
 use App\Filament\Resources\Concerns\AdminsOnly;
 use App\Filament\Resources\LenderResource\Pages;
+use App\Filament\Support\MoneyInput;
 use App\Rules\FieldPattern;
 use App\Rules\PhoneNumberRule;
 use Filament\Forms;
@@ -88,8 +89,8 @@ class LenderResource extends Resource
             ]),
             Forms\Components\Section::make('Car loan')->columns(3)->schema([
                 Forms\Components\TextInput::make('rate')->label('Rate from (% a year)')->numeric()->minValue(1)->maxValue(99)->step(0.01)->required(),
-                Forms\Components\TextInput::make('min_amount')->label('Smallest loan (₦)')->integer()->minValue(LenderRules::MIN_LOAN)->maxValue(Fields::MONEY_MAX)->required(),
-                Forms\Components\TextInput::make('max_amount')->label('Largest loan (₦)')->integer()->minValue(LenderRules::MIN_LOAN)->maxValue(Fields::MONEY_MAX)->required()->gte('min_amount'),
+                MoneyInput::make('min_amount')->label('Smallest loan')->minValue(LenderRules::MIN_LOAN)->maxValue(Fields::MONEY_MAX)->required(),
+                MoneyInput::make('max_amount')->label('Largest loan')->minValue(LenderRules::MIN_LOAN)->maxValue(Fields::MONEY_MAX)->required()->gte('min_amount'),
                 Forms\Components\TextInput::make('min_deposit_percent')->label('Smallest deposit (%)')->integer()->minValue(0)->maxValue(90)->required()->default(20),
                 Forms\Components\CheckboxList::make('tenors')->label('Loan lengths (months)')->options(collect(Lender::TENORS)->mapWithKeys(fn (int $t) => [$t => "{$t}"]))->columns(5)->required()->columnSpan(2),
                 Forms\Components\Select::make('states')->label('States (empty: every state)')->multiple()->options($states)->searchable()->columnSpanFull(),

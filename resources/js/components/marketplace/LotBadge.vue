@@ -23,13 +23,13 @@ const distance = computed(() => (location.value && props.lot.location ? formatDi
                     <span v-if="lot.verified" class="sr-only">Verified lot</span>
                 </span>
                 <span class="truncate text-[12px] text-muted">
-                    <template v-if="lot.rating"><span class="font-semibold text-ink">★ {{ lot.rating.toFixed(1) }}</span> ({{ lot.reviews_count }}) · </template>
+                    <template v-if="lot.rating"><span class="inline-flex items-baseline gap-0.5 font-semibold text-ink"><Icon name="star" filled :size="13" class="self-center text-clay" />{{ lot.rating.toFixed(1) }}<span class="sr-only"> out of 5</span></span> ({{ lot.reviews_count }}) · </template>
                     <template v-if="distance">{{ distance }} · </template>
                     <span v-if="lot.open" :class="lot.open.open ? 'font-semibold text-success' : ''">{{ lot.open.label }}</span>
                     <template v-else>{{ lot.city }}</template>
                 </span>
             </span>
         </Link>
-        <a v-if="lot.directions_url" :href="lot.directions_url" target="_blank" rel="noopener" class="shrink-0 text-[14px] font-semibold">Directions</a>
+        <a v-if="lot.directions_url" :href="lot.directions_url" target="_blank" rel="noopener" class="inline-flex min-h-11 shrink-0 items-center text-[14px] font-semibold">Directions</a>
     </div>
 </template>

@@ -30,9 +30,12 @@ it('changes the price for new subscribers only: Paystack first, current subscrib
     Notification::fake();
     $this->actingAs($this->admin);
 
+    // Kobo is refused, never quietly rounded ("50000.50" must not become 5,000,050).
+    Livewire::test(ListPlans::class)->callTableAction('price', $this->pro, ['price' => '50000.50', 'who' => 'new'])->assertHasTableActionErrors(['price']);
+
     Livewire::test(ListPlans::class)
         ->assertTableColumnStateSet('paying', 1, $this->pro)
-        ->callTableAction('price', $this->pro, ['price' => 50000, 'who' => 'new'])
+        ->callTableAction('price', $this->pro, ['price' => '50,000', 'who' => 'new'])
         ->assertHasNoTableActionErrors();
 
     expect($this->pro->fresh()->price)->toBe(5_000_000)

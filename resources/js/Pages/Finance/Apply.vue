@@ -81,7 +81,7 @@ function submit() {
 <template>
     <Head title="Apply for a car loan" />
     <div class="flex min-h-dvh items-end justify-center bg-[#3A3D42] md:items-center md:p-6">
-        <form class="flex max-h-dvh w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-5 pb-8 md:rounded-3xl" @submit.prevent="submit">
+        <form class="flex max-h-dvh w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-5 pb-8 *:shrink-0 md:rounded-3xl" @submit.prevent="submit">
             <div class="flex items-center justify-between">
                 <h1 class="text-[22px] font-bold">Apply for a car loan</h1>
                 <Link :href="car.url" aria-label="Close" class="-mr-2 flex h-11 w-11 items-center justify-center text-ink"><Icon name="close" :size="22" /></Link>
@@ -135,7 +135,7 @@ function submit() {
                 <InputError :message="form.errors.lender" />
             </fieldset>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 items-end gap-3">
                 <label class="field-label">
                     Monthly income (₦)
                     <input v-field="{ kind: 'money', min: 30000, max: 1000000000 }" v-model="form.monthly_income" inputmode="numeric" class="field" required />
@@ -155,7 +155,7 @@ function submit() {
                     </select>
                 </label>
                 <label class="field-label">
-                    Employer <span class="font-normal text-muted">(optional)</span>
+                    <span>Employer <span class="font-normal text-muted">(optional)</span></span>
                     <input v-field="'business_name'" v-model="form.employer" class="field" />
                 </label>
             </div>

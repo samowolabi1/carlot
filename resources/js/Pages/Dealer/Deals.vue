@@ -167,7 +167,7 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                 <h1 class="text-[30px] font-bold">Offers and trade-ins</h1>
                 <p class="text-[14px] text-muted">Reply within 48 hours or offers expire automatically</p>
             </div>
-            <Link :href="`${route('dealer.settings', lot.slug)}#deals`" class="text-[14px] font-semibold">Offer and reservation settings</Link>
+            <Link :href="`${route('dealer.settings', lot.slug)}#deals`" class="inline-flex min-h-11 items-center text-[14px] font-semibold">Offer and reservation settings</Link>
         </div>
 
         <p v-if="actionError" role="alert" class="rounded-xl bg-[#FDECEC] px-4 py-3 text-[14px] text-danger">{{ actionError }}</p>
@@ -183,7 +183,7 @@ const btnDark = 'inline-flex h-10 items-center justify-center rounded-[10px] bg-
                 type="button"
                 role="tab"
                 :aria-selected="active === t.key"
-                class="h-9 rounded-[9px] px-3.5 text-[13px]"
+                class="h-9 rounded-[9px] px-3.5 text-[13px] tap"
                 :class="active === t.key ? 'bg-white font-semibold text-ink' : 'font-medium text-muted'"
                 @click="select(t.key)"
             >

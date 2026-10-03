@@ -7,6 +7,7 @@ use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Finance\Support\FinanceRates;
 use App\Filament\Pages\Concerns\AdminPage;
+use App\Filament\Support\MoneyInput;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -60,7 +61,7 @@ class FinanceSettings extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $naira = fn (string $name, string $label) => Forms\Components\TextInput::make($name)->label($label)->prefix('₦')->numeric()->integer()->minValue(0)->maxValue(100_000_000)->required();
+        $naira = fn (string $name, string $label) => MoneyInput::make($name)->label($label)->minValue(0)->maxValue(100_000_000)->required();
 
         return $form->statePath('data')->schema([
             Forms\Components\Section::make('Budget and loan estimates')
@@ -99,7 +100,7 @@ class FinanceSettings extends Page implements HasForms
                         ->helperText('Each row covers cars up to that age; the last row covers anything older.')
                         ->schema([
                             Forms\Components\TextInput::make('up_to')->label('Up to')->suffix('years old')->numeric()->integer()->minValue(0)->maxValue(99)->required(),
-                            Forms\Components\TextInput::make('value')->label('A year')->prefix('₦')->numeric()->integer()->minValue(0)->maxValue(100_000_000)->required(),
+                            MoneyInput::make('value')->label('A year')->minValue(0)->maxValue(100_000_000)->required(),
                         ])->columns(2)->minItems(1)->reorderable(false)->addActionLabel('Add age band'),
                 ]),
             Forms\Components\Section::make('Preview')

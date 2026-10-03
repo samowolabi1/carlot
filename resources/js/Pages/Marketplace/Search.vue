@@ -139,17 +139,17 @@ const heading = computed(() => {
                     <div class="relative flex h-11 grow items-center gap-2 rounded-xl bg-ivory px-3">
                         <Icon name="search" :size="18" class="text-muted" :stroke-width="2" />
                         <!-- Cars show live in the results below, so the list suggests makes, models, places and lots. -->
-                        <LiveSearchInput v-model="q" input-class="w-full bg-transparent text-[15px] font-medium outline-none" :with-cars="false" @submit="apply({})" />
+                        <LiveSearchInput v-model="q" input-class="h-11 w-full bg-transparent text-[15px] font-medium outline-none" :with-cars="false" @submit="apply({})" />
                     </div>
                     <button type="button" class="flex h-11 shrink-0 items-center rounded-xl border border-forest bg-white px-3 text-[14px] font-semibold text-forest lg:hidden" @click="sheetOpen = true">
                         Filters<template v-if="activeFilters"> · {{ activeFilters }}</template>
                     </button>
                 </form>
                 <div v-if="chips.length" class="-mr-5 flex gap-2 overflow-x-auto pr-5">
-                    <button v-for="chip in chips" :key="chip.label" type="button" class="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-map px-3 text-[13px] font-medium text-forest" :aria-label="`Remove ${chip.label}`" @click="apply(chip.remove)">
+                    <button v-for="chip in chips" :key="chip.label" type="button" class="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-map px-3 text-[13px] font-medium text-forest tap" :aria-label="`Remove ${chip.label}`" @click="apply(chip.remove)">
                         {{ chip.label }} <Icon name="close" :size="13" :stroke-width="2.2" />
                     </button>
-                    <button type="button" class="h-8 shrink-0 px-2 text-[13px] font-semibold text-clay" @click="apply(empty)">Clear all</button>
+                    <button type="button" class="h-8 shrink-0 px-2 text-[13px] font-semibold text-clay tap" @click="apply(empty)">Clear all</button>
                 </div>
             </div>
         </div>
@@ -171,7 +171,7 @@ const heading = computed(() => {
                     <h1 class="text-[26px] leading-tight font-bold md:text-[32px]">{{ landing.heading }}</h1>
                     <p class="max-w-3xl text-[15px] text-[#4A4D53]">{{ landing.intro }}</p>
                     <nav v-if="landing.related.length" aria-label="Related searches" class="-mr-5 flex gap-2 overflow-x-auto pr-5 pb-1">
-                        <Link v-for="r in landing.related" :key="r.url" :href="r.url" class="flex h-9 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-[13px] font-semibold text-ink no-underline ring-1 ring-line">
+                        <Link v-for="r in landing.related" :key="r.url" :href="r.url" class="flex h-9 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-[13px] font-semibold text-ink no-underline ring-1 ring-line tap">
                             {{ r.label }} <span class="font-normal text-muted">{{ r.count }}</span>
                         </Link>
                     </nav>
@@ -182,16 +182,16 @@ const heading = computed(() => {
                         <button
                             v-if="budget.maxPrice.value !== null && !budgetApplied"
                             type="button"
-                            class="flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[13px] font-semibold text-forest"
+                            class="flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[13px] font-semibold text-forest tap"
                             @click="apply({ price_min: null, price_max: budget.maxPrice.value })"
                         >
                             Within my budget ({{ shortNaira(budget.maxPrice.value) }})
                         </button>
-                        <Link :href="route('budget')" class="flex h-9 items-center px-1 text-[13px] font-semibold">{{ budget.maxPrice.value !== null ? 'Edit budget' : 'What can I afford?' }}</Link>
+                        <Link :href="route('budget')" class="flex h-9 items-center px-1 text-[13px] font-semibold tap">{{ budget.maxPrice.value !== null ? 'Edit budget' : 'What can I afford?' }}</Link>
                         <button
                             v-if="filters.lat === null"
                             type="button"
-                            class="flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[13px] font-semibold text-forest"
+                            class="flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[13px] font-semibold text-forest tap"
                             :disabled="locating"
                             @click="nearMe"
                         >
@@ -200,7 +200,7 @@ const heading = computed(() => {
                         <button
                             v-if="canSave"
                             type="button"
-                            class="flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold"
+                            class="flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold tap"
                             :class="savedSearch ? 'border-forest bg-forest text-white' : 'border-clay bg-white text-clay'"
                             :disabled="saving || !!savedSearch"
                             @click="saveSearch"
@@ -209,7 +209,7 @@ const heading = computed(() => {
                         </button>
                         <label class="flex items-center gap-1.5 text-[13px]">
                             <span class="text-muted">Sort</span>
-                            <select :value="filters.sort" class="h-9 rounded-lg border border-line bg-white px-2 font-medium" @change="apply({ sort: ($event.target as HTMLSelectElement).value })">
+                            <select :value="filters.sort" class="h-11 rounded-lg border border-line bg-white px-2 font-medium" @change="apply({ sort: ($event.target as HTMLSelectElement).value })">
                                 <option v-for="s in sorts" :key="s.value" :value="s.value">{{ s.label }}</option>
                             </select>
                         </label>
@@ -242,7 +242,7 @@ const heading = computed(() => {
                         <Link
                             v-if="link.url"
                             :href="link.url"
-                            class="flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-[14px] no-underline"
+                            class="flex h-11 min-w-11 items-center justify-center rounded-lg px-3 text-[14px] no-underline"
                             :class="link.active ? 'bg-forest text-white' : 'bg-white text-ink ring-1 ring-line'"
                             ><span v-html="link.label"
                         /></Link>

@@ -31,8 +31,8 @@ const quick = ['Is the price negotiable?', 'Can I see the papers?', 'Is it still
                 <Link :href="route('conversations.index')" aria-label="Back to messages" class="-ml-2 flex h-11 w-11 items-center justify-center text-ink"><Icon name="chevronLeft" :size="22" :stroke-width="2" /></Link>
                 <img v-if="lot.logo_url" :src="lot.logo_url" alt="" class="h-10 w-10 rounded-xl object-cover" />
                 <span v-else class="flex h-10 w-10 items-center justify-center rounded-xl bg-clay text-[14px] font-bold text-white">{{ lot.initials }}</span>
-                <Link :href="lot.url" class="flex grow flex-col text-ink no-underline">
-                    <span class="text-[15px] font-semibold">{{ lot.name }}</span>
+                <Link :href="lot.url" class="flex min-h-11 grow flex-col justify-center text-ink no-underline">
+                    <h1 class="m-0 font-sans text-[15px] leading-tight font-semibold">{{ lot.name }}</h1>
                     <span class="text-[12px] text-success">{{ chat.typing.value ? 'typing…' : 'Usually replies in minutes' }}</span>
                 </Link>
                 <a v-if="lot.phone" :href="`tel:${lot.phone}`" class="flex h-11 w-11 items-center justify-center text-ink" aria-label="Call the lot"><Icon name="phone" :size="20" /></a>
@@ -50,7 +50,7 @@ const quick = ['Is the price negotiable?', 'Can I see the papers?', 'Is it still
         <ChatThread :messages="chat.messages.value" me="customer" :typing="chat.typing.value" :empty-text="`Ask ${lot.name} anything about the car.`" />
 
         <div class="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
-            <button v-for="q in quick" :key="q" type="button" class="h-9 shrink-0 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="composer?.send(q)">{{ q }}</button>
+            <button v-for="q in quick" :key="q" type="button" class="h-9 shrink-0 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="composer?.send(q)">{{ q }}</button>
         </div>
         <div class="border-t border-line bg-white px-3 pt-2.5 pb-5">
             <ChatComposer

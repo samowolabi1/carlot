@@ -24,7 +24,6 @@ const paths = {
     chevronLeft: 'M15 6l-6 6 6 6',
     plus: 'M12 5v14M5 12h14',
     close: 'M6 6l12 12M18 6L6 18',
-    chevron: 'M6 9l6 6 6-6',
     logout: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
     locate: 'M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8M12 2v3M12 19v3M2 12h3M19 12h3',
     upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
@@ -72,7 +71,7 @@ const paths = {
 
 export type IconName = keyof typeof paths;
 
-const props = withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }>(), { size: 20, strokeWidth: 1.8 });
+const props = withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number; filled?: boolean }>(), { size: 20, strokeWidth: 1.8, filled: false });
 
 const d = computed(() => paths[props.name]);
 </script>
@@ -83,7 +82,7 @@ const d = computed(() => paths[props.name]);
         :height="size"
         viewBox="0 0 24 24"
         aria-hidden="true"
-        fill="none"
+        :fill="filled ? 'currentColor' : 'none'"
         stroke="currentColor"
         :stroke-width="strokeWidth"
         stroke-linecap="round"

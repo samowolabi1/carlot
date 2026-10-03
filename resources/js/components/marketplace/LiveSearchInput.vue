@@ -11,7 +11,7 @@ import { computed, ref, useId } from 'vue';
  */
 const query = defineModel<string>({ required: true });
 const props = withDefaults(defineProps<{ inputClass?: string; placeholder?: string; withCars?: boolean }>(), {
-    inputClass: 'w-full bg-transparent text-[15px] outline-none',
+    inputClass: 'h-11 w-full bg-transparent text-[15px] outline-none',
     placeholder: 'Search make, model or lot',
     withCars: true,
 });

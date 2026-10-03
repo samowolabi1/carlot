@@ -15,7 +15,7 @@ defineProps<{
             <component
                 :is="step.href ? Link : 'span'"
                 :href="step.href"
-                class="flex flex-col gap-1.5 no-underline"
+                class="flex min-h-11 flex-col gap-1.5 no-underline"
             >
                 <span class="h-1 rounded-full" :class="step.key === current ? 'bg-clay' : i <= reached ? 'bg-forest' : 'bg-[#DDD7CC]'" />
                 <span

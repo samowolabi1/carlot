@@ -162,7 +162,7 @@ function cancel() {
 
             <form v-if="cancelling" class="card flex flex-col gap-3 p-4" @submit.prevent="cancel">
                 <label class="field-label">
-                    Reason <span class="font-normal text-muted">(optional, shared with the lot)</span>
+                    <span>Reason <span class="font-normal text-muted">(optional, shared with the lot)</span></span>
                     <input v-field="{ kind: 'text', max: 200 }" v-model="cancelForm.reason" class="field" placeholder="e.g. Something came up" />
                 </label>
                 <div class="flex gap-2">
@@ -171,7 +171,7 @@ function cancel() {
                 </div>
             </form>
 
-            <Link v-if="user" :href="route('bookings.index')" class="self-center text-[14px] font-semibold">All your bookings</Link>
+            <Link v-if="user" :href="route('bookings.index')" class="inline-flex min-h-11 items-center self-center text-[14px] font-semibold">All your bookings</Link>
         </div>
     </CustomerLayout>
 </template>

@@ -155,12 +155,12 @@ const perks = [
                         <InputError :message="form.errors.contact_email" />
                     </label>
                     <label class="field-label">
-                        Website <span class="font-normal text-muted">(optional)</span>
+                        <span>Website <span class="font-normal text-muted">(optional)</span></span>
                         <input v-field="{ kind: 'text', max: 190 }" v-model="form.website" type="url" class="field h-11" placeholder="https://" />
                         <InputError :message="form.errors.website" />
                     </label>
                     <label class="field-label sm:col-span-2">
-                        About your car loans <span class="font-normal text-muted">(buyers see this)</span>
+                        <span>About your car loans <span class="font-normal text-muted">(buyers see this)</span></span>
                         <textarea v-field="{ kind: 'text', max: 600 }" v-model="form.about" rows="3" maxlength="600" class="field h-auto py-2.5" />
                         <InputError :message="form.errors.about" />
                     </label>
@@ -183,7 +183,7 @@ const perks = [
                 </div>
 
                 <label class="field-label">
-                    Next steps with you <span class="font-normal text-muted">(optional; shown to buyers you approve)</span>
+                    <span>Next steps with you <span class="font-normal text-muted">(optional; shown to buyers you approve)</span></span>
                     <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.next_steps" rows="2" maxlength="1000" class="field h-auto py-2.5" />
                     <InputError :message="form.errors.next_steps" />
                 </label>

@@ -131,7 +131,7 @@ const deleteSearch = (s: Search) => router.delete(route('saved-searches.destroy'
                         </span>
                         <span class="text-[12px] text-muted">{{ car.lot.name }}<template v-if="car.lot.city"> · {{ car.lot.city }}</template></span>
                     </span>
-                    <button type="button" class="relative z-10 self-center px-2 text-[13px] font-semibold text-muted hover:text-danger" :aria-label="`Remove ${car.title}`" @click="remove(car.ulid)">Remove</button>
+                    <button type="button" class="relative z-10 inline-flex min-h-11 items-center self-center px-2 text-[13px] font-semibold text-muted hover:text-danger" :aria-label="`Remove ${car.title}`" @click="remove(car.ulid)">Remove</button>
                 </li>
             </ul>
         </div>

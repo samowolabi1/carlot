@@ -30,7 +30,13 @@ Run all four before pushing.
   never bare `'string'`: every text field needs a type, a `max` within its column, and a pattern where the data has a shape.
   Money is whole naira through `Fields::cleanMoney()` (never strip all non-digits: "1500.50" must fail, not become 150,050).
   In Vue, every text input gets `v-field` (`directives/field.ts`, rules in `lib/fields.ts`, kept in step with PHP by
-  `tests/Unit/FieldsTest.php`); plain wording for Laravel's own messages and field names is in `lang/en/validation.php`.
+  `tests/Unit/FieldsTest.php`); plain wording for Laravel's own messages and field names is in `lang/en/validation.php`
+  (add a friendly name there for every new snake_case field). Money inputs use `v-field` kind `money`, which groups the digits
+  on load and on blur ("10,350,000"); readers parse with `parseAmount` / `Fields::cleanMoney()`. Admin amounts use
+  `App\Filament\Support\MoneyInput::make()` (₦ prefix, money mask, commas stripped before validation), never `->numeric()`.
+- **UI basics**: 44 px tap targets on phones (`min-h-11`, or the `tap` utility to widen a smaller chip's hit area without
+  changing its look); a field label's text and its "(optional)" note go in one `<span>` (`field-label` is a flex column);
+  scrolling flex panels add `*:shrink-0` so buttons never squash; wide tables sit in an `overflow-x-auto` box.
 - **Enums** are PHP backed enums, cast on models. Add `@property` docblocks for new columns so
   Larastan knows the types.
 - **Money**: unsigned bigint minor units (kobo) plus a `char(3)` currency. Never floats.

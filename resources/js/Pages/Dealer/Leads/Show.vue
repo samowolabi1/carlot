@@ -111,13 +111,13 @@ const whatsapp = computed(() =>
                 <div class="flex flex-col gap-2.5 border-t border-line px-4 pt-3 pb-4 md:px-6">
                     <InputError :message="error" />
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('location')">Send lot location</button>
-                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('similar')">Suggest similar cars</button>
-                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('bank')">Send bank details</button>
-                        <button v-if="lead.inspection" type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium" @click="preset('inspection')">
+                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('location')">Send lot location</button>
+                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('similar')">Suggest similar cars</button>
+                        <button type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('bank')">Send bank details</button>
+                        <button v-if="lead.inspection" type="button" class="h-9 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="preset('inspection')">
                             Send inspection report <span class="text-muted">· {{ lead.inspection.score }}/100</span>
                         </button>
-                        <Link v-else-if="lead.inspection_url" :href="lead.inspection_url" class="flex h-9 items-center rounded-full border border-dashed border-line-strong px-3 text-[13px] text-muted">
+                        <Link v-else-if="lead.inspection_url" :href="lead.inspection_url" class="flex h-9 items-center rounded-full border border-dashed border-line-strong px-3 text-[13px] text-muted tap">
                             Add an inspection report
                         </Link>
                     </div>
@@ -135,7 +135,7 @@ const whatsapp = computed(() =>
                     <dl class="text-[14px]">
                         <div class="flex justify-between gap-3 border-t border-divider py-2 first:border-0">
                             <dt class="text-muted">Phone</dt>
-                            <dd class="font-semibold"><a v-if="lead.phone" :href="`tel:${lead.phone.e164}`" class="text-ink">{{ lead.phone.display }}</a><template v-else>—</template></dd>
+                            <dd class="font-semibold"><a v-if="lead.phone" :href="`tel:${lead.phone.e164}`" class="-my-3 inline-flex min-h-11 items-center text-ink">{{ lead.phone.display }}</a><template v-else>—</template></dd>
                         </div>
                         <div class="flex justify-between gap-3 border-t border-divider py-2"><dt class="text-muted">Source</dt><dd class="font-semibold">{{ lead.source_label }}</dd></div>
                         <div class="flex justify-between gap-3 border-t border-divider py-2"><dt class="text-muted">First contact</dt><dd class="font-semibold">{{ lead.first_contact }}</dd></div>

@@ -113,7 +113,7 @@ function send(review: ReviewRow) {
 
         <nav v-if="reviews.last_page > 1" aria-label="Pages" class="flex flex-wrap gap-1">
             <template v-for="link in reviews.links" :key="link.label">
-                <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-white'"><span v-html="link.label" /></Link>
+                <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-11 min-w-11 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-white'"><span v-html="link.label" /></Link>
             </template>
         </nav>
     </DealerLayout>

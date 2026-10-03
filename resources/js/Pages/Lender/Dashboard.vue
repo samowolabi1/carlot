@@ -69,19 +69,19 @@ function acceptTerms() {
         </p>
 
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
-            <Link :href="route('lender.applications.index', { lender: slug, tab: 'new' })" class="card flex flex-col gap-1 p-4 text-ink no-underline">
+            <Link :href="route('lender.applications.index', { lender: slug, tab: 'new' })" class="card flex flex-col justify-between gap-1 p-4 text-ink no-underline">
                 <span class="text-[13px] text-muted">New</span><strong class="text-[26px]">{{ stats.new }}</strong>
             </Link>
-            <Link :href="route('lender.applications.index', { lender: slug, tab: 'open' })" class="card flex flex-col gap-1 p-4 text-ink no-underline">
+            <Link :href="route('lender.applications.index', { lender: slug, tab: 'open' })" class="card flex flex-col justify-between gap-1 p-4 text-ink no-underline">
                 <span class="text-[13px] text-muted">Open</span><strong class="text-[26px]">{{ stats.open }}</strong>
             </Link>
-            <Link :href="route('lender.applications.index', { lender: slug, tab: 'mine' })" class="card flex flex-col gap-1 p-4 text-ink no-underline">
+            <Link :href="route('lender.applications.index', { lender: slug, tab: 'mine' })" class="card flex flex-col justify-between gap-1 p-4 text-ink no-underline">
                 <span class="text-[13px] text-muted">Given to me</span><strong class="text-[26px]">{{ stats.mine }}</strong>
             </Link>
-            <div class="card flex flex-col gap-1 p-4">
+            <div class="card flex flex-col justify-between gap-1 p-4">
                 <span class="text-[13px] text-muted">Approved this month</span><strong class="text-[26px]">{{ stats.approved_month }}</strong>
             </div>
-            <div class="card flex flex-col gap-1 p-4">
+            <div class="card flex flex-col justify-between gap-1 p-4">
                 <span class="text-[13px] text-muted">Paid to lots this month</span><strong class="text-[26px]">{{ stats.disbursed_month }}</strong>
             </div>
         </div>

@@ -137,7 +137,7 @@ function submit() {
 
         <div class="card flex flex-col gap-4 p-4">
             <label class="field-label">
-                Summary for buyers <span class="font-normal text-muted">(optional)</span>
+                <span>Summary for buyers <span class="font-normal text-muted">(optional)</span></span>
                 <textarea v-field="{ kind: 'text', max: 1000 }" v-model="form.summary" rows="3" class="field h-auto py-2" placeholder="e.g. Serviced last month; front tyres due in about 5,000 km." />
                 <InputError :message="form.errors.summary" />
             </label>

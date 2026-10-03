@@ -62,13 +62,13 @@ function withdraw() {
                 <div class="flex items-start gap-3">
                     <img v-if="application.image" :src="application.image" alt="" class="h-14 w-20 shrink-0 rounded-[10px] object-cover" />
                     <div class="flex min-w-0 grow flex-col gap-0.5">
-                        <h1 class="text-[20px] leading-tight font-bold">
+                        <StatusChip class="self-start" :tone="application.tone" :label="application.status_label" />
+                        <h1 class="mt-1 text-[20px] leading-tight font-bold">
                             <Link v-if="application.car_url" :href="application.car_url" class="text-ink no-underline">{{ application.car }}</Link>
                             <template v-else>{{ application.car ?? 'Car no longer listed' }}</template>
                         </h1>
                         <span class="text-[14px] text-muted">{{ application.lot }} · {{ application.price }}</span>
                     </div>
-                    <StatusChip :tone="application.tone" :label="application.status_label" />
                 </div>
 
                 <dl class="grid grid-cols-2 gap-3 rounded-xl bg-ivory p-3 text-[14px]">

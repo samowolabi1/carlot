@@ -54,7 +54,7 @@ const exportUrl = computed(() => route('dealer.manager.reports', { lot: lot.valu
                     role="tab"
                     :aria-selected="type === t.value"
                     :disabled="t.locked"
-                    class="h-9 rounded-[9px] px-3.5 text-[13px] disabled:opacity-50"
+                    class="h-9 rounded-[9px] px-3.5 text-[13px] disabled:opacity-50 tap"
                     :class="type === t.value ? 'bg-white font-semibold text-ink' : 'font-medium text-muted'"
                     :title="t.locked ? 'Comes with the Pro plan' : undefined"
                     @click="go({ type: t.value })"

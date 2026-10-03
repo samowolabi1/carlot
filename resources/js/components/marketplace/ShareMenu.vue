@@ -21,10 +21,12 @@ const props = withDefaults(
         lot?: string;
         label?: string;
         compact?: boolean;
+        /** Match the lot page's action tiles (icon over label on phones). */
+        tile?: boolean;
         /** Offer the share-card images (for Status and Stories). */
         images?: boolean;
     }>(),
-    { text: '', label: 'Share', compact: false, images: false, vehicle: undefined, lot: undefined },
+    { text: '', label: 'Share', compact: false, tile: false, images: false, vehicle: undefined, lot: undefined },
 );
 
 const open = ref(false);
@@ -140,14 +142,20 @@ const item = 'flex h-11 w-full items-center gap-2.5 rounded-xl px-3 text-left te
     <div ref="root" class="relative">
         <button
             type="button"
-            :class="compact ? 'flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm' : 'btn btn-outline h-11 px-4 text-[14px]'"
+            :class="
+                compact
+                    ? 'flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm'
+                    : tile
+                      ? 'flex h-16 w-full flex-col items-center justify-center gap-1 rounded-[14px] border border-line bg-white text-[12px] font-semibold text-ink md:h-11 md:flex-row md:gap-2 md:px-4 md:text-[14px]'
+                      : 'btn btn-outline h-11 px-4 text-[14px]'
+            "
             :aria-label="compact ? label : undefined"
             :aria-expanded="open"
             aria-haspopup="menu"
             @pointerdown="link('native')"
             @click="share"
         >
-            <Icon name="share" :size="compact ? 20 : 18" /><span v-if="!compact">{{ label }}</span>
+            <Icon name="share" :size="compact || tile ? 20 : 18" /><span v-if="!compact">{{ label }}</span>
         </button>
         <div v-if="open" class="absolute right-0 z-40 mt-2 flex w-64 flex-col rounded-2xl border border-line bg-white p-1.5 text-[14px] shadow-xl" role="menu">
             <button type="button" :class="item" role="menuitem" @click="go('whatsapp', (u) => `https://wa.me/?text=${encodeURIComponent(message(u))}`)"><Icon name="whatsapp" :size="18" /> WhatsApp</button>

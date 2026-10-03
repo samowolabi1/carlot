@@ -25,7 +25,7 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
     <div class="min-h-dvh pb-24 md:pb-0">
         <header v-if="!bare" class="md:border-b md:border-line md:bg-white">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-5 pt-5 pb-2 md:py-4">
-                <Link :href="route('home')" class="no-underline" aria-label="LotLink home"><Logo /></Link>
+                <Link :href="route('home')" class="inline-flex min-h-11 items-center no-underline" aria-label="LotLink home"><Logo /></Link>
                 <nav class="hidden items-center gap-6 text-[15px] font-medium md:flex" aria-label="Main">
                     <Link :href="route('cars.index')" class="no-underline hover:text-clay" :class="active === 'search' ? 'text-clay' : 'text-ink'">Buy a car</Link>
                     <Link :href="route('saved')" class="no-underline hover:text-clay" :class="active === 'saved' ? 'text-clay' : 'text-ink'">Saved</Link>
@@ -67,8 +67,8 @@ const tabs: { key: string; label: string; icon: IconName; href?: string }[] = [
             <slot />
         </main>
 
-        <div class="mx-auto max-w-6xl border-t border-line px-5 pt-4 pb-24 md:pb-8">
-            <LegalFooter />
+        <div class="mx-auto max-w-6xl px-5 pb-24 md:pb-8">
+            <div class="border-t border-line pt-4"><LegalFooter /></div>
         </div>
 
         <nav aria-label="Main" class="fixed inset-x-0 bottom-0 z-40 grid h-[76px] grid-cols-5 border-t border-line bg-white pb-2 md:hidden">

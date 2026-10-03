@@ -93,7 +93,7 @@ function task(t: TaskRow, action: 'done' | 'tomorrow') {
                         <li v-for="t in tasks" :key="t.ulid" class="flex flex-col gap-2 px-4 py-3">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0">
-                                    <Link v-if="t.customer" :href="route('dealer.manager.customers.show', [lot.slug, t.customer.ulid])" class="font-semibold text-ink no-underline">
+                                    <Link v-if="t.customer" :href="route('dealer.manager.customers.show', [lot.slug, t.customer.ulid])" class="tap font-semibold text-ink no-underline">
                                         {{ t.type_label }} {{ t.customer.name }}
                                     </Link>
                                     <p class="text-[13px]" :class="t.overdue ? 'font-semibold text-clay-dark' : 'text-muted'">

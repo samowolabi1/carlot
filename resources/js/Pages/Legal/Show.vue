@@ -20,10 +20,10 @@ defineProps<{
             <aside class="order-2 flex flex-col gap-4 text-[14px] lg:sticky lg:top-6 lg:order-1 lg:self-start">
                 <nav v-if="sections.length" aria-label="On this page" class="flex flex-col gap-0.5">
                     <span class="pb-1 text-[12px] font-semibold tracking-wide text-muted uppercase">On this page</span>
-                    <a v-for="s in sections" :key="s.id" :href="`#${s.id}`" class="py-1 text-ink no-underline hover:text-clay">{{ s.title }}</a>
+                    <a v-for="s in sections" :key="s.id" :href="`#${s.id}`" class="flex min-h-11 items-center text-ink no-underline hover:text-clay">{{ s.title }}</a>
                 </nav>
                 <nav aria-label="Other documents" class="flex flex-col gap-0.5 border-t border-line pt-3">
-                    <Link v-for="o in others" :key="o.key" :href="route('legal.show', o.key)" class="py-1 font-semibold">{{ o.title }}</Link>
+                    <Link v-for="o in others" :key="o.key" :href="route('legal.show', o.key)" class="flex min-h-11 items-center font-semibold">{{ o.title }}</Link>
                 </nav>
             </aside>
             <article class="order-1 lg:order-2">

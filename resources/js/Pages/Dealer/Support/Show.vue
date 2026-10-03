@@ -107,7 +107,7 @@ const tone: Record<string, string> = {
                         :href="m.attachment.url"
                         target="_blank"
                         rel="noopener"
-                        class="inline-flex min-h-9 items-center gap-1.5 self-start rounded-lg px-2.5 text-[13px] font-semibold no-underline"
+                        class="inline-flex min-h-11 items-center gap-1.5 self-start rounded-lg px-2.5 text-[13px] font-semibold no-underline"
                         :class="m.mine ? 'bg-forest-700 text-white hover:text-white' : 'bg-ivory text-ink'"
                     >
                         <Icon name="paperclip" :size="16" /> {{ m.attachment.name }}

@@ -41,8 +41,9 @@ it('lets an admin change the finance rates buyers see', function () {
             'deposit_percent' => 20,
             'tenors' => [12, 24, 36, 48, 60],
             'tenor_months' => 48,
-            'fuel_price' => 1250,
-            'servicing' => [['up_to' => 99, 'value' => 700000], ['up_to' => 4, 'value' => 300000]],
+            // Amounts arrive grouped from the money mask ("₦1,250"): saved as plain numbers.
+            'fuel_price' => '1,250',
+            'servicing' => [['up_to' => 99, 'value' => '700,000'], ['up_to' => 4, 'value' => '300,000']],
         ])
         ->call('save')
         ->assertHasNoFormErrors();

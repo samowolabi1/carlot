@@ -302,7 +302,7 @@ function nextStep() {
 
             <p v-if="decodeMessage" class="rounded-xl bg-cream p-3 text-[14px] text-clay-dark" role="status">{{ decodeMessage }}</p>
 
-            <button v-if="!manual && !decoded" type="button" class="text-center text-[14px] font-semibold text-clay" @click="manual = true">
+            <button v-if="!manual && !decoded" type="button" class="min-h-11 text-center text-[14px] font-semibold text-clay" @click="manual = true">
                 No VIN? Choose make and model instead
             </button>
 
@@ -344,7 +344,7 @@ function nextStep() {
                     <InputError :message="identity.errors.year" />
                 </label>
                 <label class="field-label">
-                    Trim <span class="font-normal text-muted">(optional)</span>
+                    <span>Trim <span class="font-normal text-muted">(optional)</span></span>
                     <input v-field="'model'" v-model="identity.trim" class="field" placeholder="e.g. SE, XLE" />
                     <InputError :message="identity.errors.trim" />
                 </label>
@@ -448,7 +448,7 @@ function nextStep() {
             </fieldset>
 
             <label class="field-label">
-                Description <span class="font-normal text-muted">(optional)</span>
+                <span>Description <span class="font-normal text-muted">(optional)</span></span>
                 <textarea v-field="{ kind: 'text', max: 3000 }"
                     v-model="details.description"
                     rows="4"

@@ -32,7 +32,7 @@ function submit() {
             <InputError :message="form.errors.name" />
         </label>
         <label class="field-label">
-            Tagline <span class="font-normal text-muted">(optional)</span>
+            <span>Tagline <span class="font-normal text-muted">(optional)</span></span>
             <input v-field="{ kind: 'text', max: 120 }" v-model="form.tagline" class="field" placeholder="e.g. Clean Tokunbo SUVs in Ikeja" />
             <InputError :message="form.errors.tagline" />
         </label>
@@ -43,18 +43,18 @@ function submit() {
                 <InputError :message="form.errors.phone" />
             </label>
             <label class="field-label">
-                WhatsApp number <span class="font-normal text-muted">(if different)</span>
+                <span>WhatsApp number <span class="font-normal text-muted">(if different)</span></span>
                 <input v-field="'phone'" v-model="form.whatsapp" class="field" type="tel" inputmode="tel" placeholder="Same as business phone" />
                 <InputError :message="form.errors.whatsapp" />
             </label>
         </div>
         <label class="field-label">
-            Email <span class="font-normal text-muted">(optional)</span>
+            <span>Email <span class="font-normal text-muted">(optional)</span></span>
             <input v-field="'email'" v-model="form.email" class="field" type="email" autocomplete="email" placeholder="sales@yourlot.com" />
             <InputError :message="form.errors.email" />
         </label>
         <label class="field-label">
-            About the lot <span class="font-normal text-muted">(optional)</span>
+            <span>About the lot <span class="font-normal text-muted">(optional)</span></span>
             <textarea v-field="{ kind: 'text', max: 2000 }"
                 v-model="form.about"
                 rows="4"

@@ -136,7 +136,7 @@ function submit() {
 
             <template v-if="!reschedule">
                 <label class="field-label">
-                    Anything the lot should know? <span class="font-normal text-muted">(optional)</span>
+                    <span>Anything the lot should know? <span class="font-normal text-muted">(optional)</span></span>
                     <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.notes" rows="2" class="field h-auto py-3" placeholder="e.g. I'd like to bring my mechanic" />
                 </label>
                 <label class="card flex items-center gap-2.5 px-3.5 py-3 text-[14px]">

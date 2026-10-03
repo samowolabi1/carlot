@@ -35,7 +35,7 @@
     --color-cream: #fff6f0;
     --color-apricot: #f6c9ac;
 
-    --color-success: #15803d;
+    --color-success: #166534;
     --color-danger: #b91c1c;
 }
 
@@ -52,6 +52,20 @@
     h2,
     h3 {
         @apply font-display;
+    }
+}
+
+/* A 44 px tap area around a smaller control (chips, pills) without changing how it looks. Static elements only. */
+@utility tap {
+    position: relative;
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: max(100%, 44px);
+        height: max(100%, 44px);
+        transform: translate(-50%, -50%);
     }
 }
 

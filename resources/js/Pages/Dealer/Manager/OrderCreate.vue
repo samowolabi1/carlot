@@ -109,8 +109,8 @@ function submit() {
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="font-sans text-[16px] font-bold">Customer</h2>
                     <div class="flex rounded-xl bg-ivory p-1 text-[14px]" role="group" aria-label="Customer">
-                        <button type="button" class="h-9 rounded-lg px-3" :class="mode === 'existing' ? 'bg-white font-semibold shadow-sm' : ''" :aria-pressed="mode === 'existing'" @click="mode = 'existing'">From your book</button>
-                        <button type="button" class="h-9 rounded-lg px-3" :class="mode === 'new' ? 'bg-white font-semibold shadow-sm' : ''" :aria-pressed="mode === 'new'" @click="mode = 'new'">New</button>
+                        <button type="button" class="h-9 rounded-lg px-3 tap" :class="mode === 'existing' ? 'bg-white font-semibold shadow-sm' : ''" :aria-pressed="mode === 'existing'" @click="mode = 'existing'">From your book</button>
+                        <button type="button" class="h-9 rounded-lg px-3 tap" :class="mode === 'new' ? 'bg-white font-semibold shadow-sm' : ''" :aria-pressed="mode === 'new'" @click="mode = 'new'">New</button>
                     </div>
                 </div>
 

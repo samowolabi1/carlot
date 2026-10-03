@@ -155,7 +155,7 @@ defineProps<{
             </a>
 
             <footer class="flex items-center justify-center gap-1.5 pb-4 text-[13px] text-muted">
-                Powered by <a :href="poweredBy" class="no-underline"><Logo size="sm" /></a>
+                Powered by <a :href="poweredBy" class="inline-flex min-h-11 items-center no-underline"><Logo size="sm" /></a>
             </footer>
         </main>
     </div>

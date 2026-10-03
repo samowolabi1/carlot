@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class LotResource extends Resource
 {
@@ -87,7 +88,7 @@ class LotResource extends Resource
                         LotStatus::Suspended => 'danger',
                     }),
                 Tables\Columns\IconColumn::make('verified_at')->label('Verified')->boolean()->getStateUsing(fn (Lot $lot) => $lot->isVerified()),
-                Tables\Columns\TextColumn::make('rating')->formatStateUsing(fn (Lot $lot) => $lot->rating ? number_format($lot->rating, 1).' ★ ('.$lot->reviews_count.')' : null)->placeholder('—')->toggleable(),
+                Tables\Columns\TextColumn::make('rating')->formatStateUsing(fn (Lot $lot) => $lot->rating ? number_format($lot->rating, 1).' / 5 ('.$lot->reviews_count.' '.Str::plural('review', $lot->reviews_count).')' : null)->placeholder('—')->toggleable(),
                 Tables\Columns\TextColumn::make('submitted_at')->since()->placeholder('Still onboarding')->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->date()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])

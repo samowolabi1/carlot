@@ -150,7 +150,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                         <button type="button" class="absolute top-1/2 right-3 hidden h-11 w-11 -translate-y-1/2 rotate-180 items-center justify-center rounded-full bg-white/90 shadow md:flex" aria-label="Next photo" @click="goTo(slide + 1)">
                             <Icon name="chevronLeft" :size="20" :stroke-width="2" />
                         </button>
-                        <span class="absolute right-4 bottom-3.5 rounded-xl bg-black/40 px-2.5 py-1 text-[12px] font-semibold text-white text-shadow-sm">{{ slide + 1 }} / {{ car.photos.length }}</span>
+                        <span class="absolute right-4 bottom-3.5 rounded-xl bg-black/55 px-2.5 py-1 text-[12px] font-semibold text-white text-shadow-sm">{{ slide + 1 }} / {{ car.photos.length }}</span>
                     </template>
                     <!-- Just the icon on a see-through circle, so the car stays visible; the 44 px tap area around it is invisible. -->
                     <button
@@ -246,11 +246,13 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                     <button
                         v-if="!sold"
                         type="button"
-                        class="self-start text-[14px] font-semibold"
+                        class="inline-flex min-h-11 items-center gap-1.5 self-start text-[14px] font-semibold"
                         :class="compare.has(car.ulid) ? 'text-forest' : 'text-clay'"
+                        :aria-pressed="compare.has(car.ulid)"
                         @click="compare.toggle(car.ulid)"
                     >
-                        {{ compare.has(car.ulid) ? '✓ Added to compare' : 'Add to compare' }}
+                        <Icon v-if="compare.has(car.ulid)" name="check" :size="16" :stroke-width="2.2" />
+                        {{ compare.has(car.ulid) ? 'Added to compare' : 'Add to compare' }}
                     </button>
                     <Link v-if="compare.ids.value.length > 1" :href="compare.href.value" class="self-start text-[14px] font-semibold">Compare {{ compare.ids.value.length }} cars</Link>
 

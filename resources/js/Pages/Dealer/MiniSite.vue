@@ -71,7 +71,7 @@ async function copy() {
                 <section class="card flex flex-col gap-3 p-5" aria-labelledby="brand-heading">
                     <div class="flex items-center justify-between">
                         <h2 id="brand-heading" class="font-sans text-[15px] font-bold">Branding</h2>
-                        <Link v-if="canEdit" :href="`${route('dealer.settings', lot.slug)}#branding`" class="text-[14px] font-semibold">Edit</Link>
+                        <Link v-if="canEdit" :href="`${route('dealer.settings', lot.slug)}#branding`" class="inline-flex min-h-11 items-center text-[14px] font-semibold">Edit</Link>
                     </div>
                     <div class="flex items-center gap-3">
                         <img v-if="site.logo_url" :src="site.logo_url" alt="" class="h-16 w-16 shrink-0 rounded-[14px] object-cover" />

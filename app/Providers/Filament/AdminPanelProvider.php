@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Support\InitialsAvatar;
 use App\Http\Middleware\RequireAdminTwoFactor;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -35,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('LotLink Admin')
+            ->defaultAvatarProvider(InitialsAvatar::class)
             ->colors([
                 'primary' => Color::hex('#C2410C'),
                 'gray' => Color::Stone,

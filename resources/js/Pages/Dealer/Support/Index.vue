@@ -91,7 +91,7 @@ const tone: Record<string, string> = {
                             <InputError :message="form.errors.category" />
                         </label>
                         <label class="field-label">
-                            Which car? <span class="font-normal text-muted">(optional)</span>
+                            <span>Which car? <span class="font-normal text-muted">(optional)</span></span>
                             <select v-model="form.vehicle" class="field h-11">
                                 <option value="">Not about a car</option>
                                 <option v-for="c in props.form.cars" :key="c.value" :value="c.value">{{ c.label }}</option>
@@ -208,7 +208,7 @@ const tone: Record<string, string> = {
 
                 <nav v-if="tickets.last_page > 1" aria-label="Pages" class="flex flex-wrap gap-1">
                     <template v-for="link in tickets.links" :key="link.label">
-                        <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-white'"><span v-html="link.label" /></Link>
+                        <Link v-if="link.url" :href="link.url" preserve-scroll class="flex h-11 min-w-11 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline" :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-white'"><span v-html="link.label" /></Link>
                     </template>
                 </nav>
             </div>
@@ -219,9 +219,9 @@ const tone: Record<string, string> = {
                 <p>Anyone on your team can open a ticket; everyone on the team can follow it here.</p>
                 <h3 class="pt-1 font-sans text-[14px] font-bold">Quick answers</h3>
                 <ul class="flex flex-col gap-1">
-                    <li><Link :href="route('dealer.billing', lot.slug)" class="inline-flex min-h-9 items-center font-semibold">Change plan or card</Link></li>
-                    <li><Link :href="route('dealer.staff', lot.slug)" class="inline-flex min-h-9 items-center font-semibold">Add or remove staff</Link></li>
-                    <li><Link :href="route('dealer.settings', lot.slug)" class="inline-flex min-h-9 items-center font-semibold">Hours, location and verification</Link></li>
+                    <li><Link :href="route('dealer.billing', lot.slug)" class="inline-flex min-h-11 items-center font-semibold">Change plan or card</Link></li>
+                    <li><Link :href="route('dealer.staff', lot.slug)" class="inline-flex min-h-11 items-center font-semibold">Add or remove staff</Link></li>
+                    <li><Link :href="route('dealer.settings', lot.slug)" class="inline-flex min-h-11 items-center font-semibold">Hours, location and verification</Link></li>
                 </ul>
             </aside>
         </div>

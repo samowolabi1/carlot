@@ -1,3 +1,4 @@
+import { parseAmount } from '@/lib/format';
 import { FIELDS, fieldProblem, type FieldKind, type FieldOptions } from '@/lib/fields';
 import type { Directive } from 'vue';
 
@@ -59,6 +60,23 @@ function applyAttributes(el: FieldEl, options: FieldOptions): void {
     if (['email', 'code', 'reference', 'vin', 'otp', 'account_number'].includes(options.kind)) el.spellcheck = false;
 }
 
+/**
+ * Money reads better grouped ("10,350,000"): once typed (on blur) and when the form opens with an amount, the digits
+ * are grouped and v-model told. Every reader parses commas (parseAmount, Fields::cleanMoney). Fields that format
+ * themselves ("₦1,300,000") are already grouped and left alone.
+ */
+function groupMoney(el: FieldEl, state: FieldState): void {
+    if (state.options.kind !== 'money' || document.activeElement === el) return;
+    // Only a valid amount: "1500.50" must stay as typed (and fail), never quietly become 1,500.
+    if (fieldProblem(el.value, state.options)) return;
+    const amount = parseAmount(el.value);
+    if (amount === null) return;
+    const grouped = amount.toLocaleString('en-NG');
+    if (el.value.trim().replace(/^₦\s*/u, '') === grouped) return;
+    el.value = grouped;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 function validate(el: FieldEl, state: FieldState): void {
     const problem = fieldProblem(el.value, state.options);
     const message = problem ? `${labelOf(el, state.options)} ${problem}.` : '';
@@ -95,6 +113,7 @@ export const field: Directive<FieldEl, Binding> = {
             onInput: () => validate(el, state),
             onBlur: () => {
                 if (el.value.trim() !== '') state.touched = true;
+                groupMoney(el, state);
                 validate(el, state);
             },
             onInvalid: () => {
@@ -109,6 +128,8 @@ export const field: Directive<FieldEl, Binding> = {
         // A submit attempt shows every problem at once.
         el.addEventListener('invalid', state.onInvalid);
         validate(el, state);
+        // After v-model has filled the field (its mounted hook may run after this one).
+        queueMicrotask(() => groupMoney(el, state));
     },
     updated(el, binding) {
         const state = el.__field;
@@ -116,6 +137,7 @@ export const field: Directive<FieldEl, Binding> = {
         state.options = optionsOf(binding.value);
         applyAttributes(el, state.options);
         // v-model can change the value without an input event (form reset, prefill).
+        groupMoney(el, state);
         validate(el, state);
     },
     unmounted(el) {

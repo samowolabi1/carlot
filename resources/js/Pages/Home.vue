@@ -82,7 +82,7 @@ const chips = computed(() => [
                     v-for="chip in chips"
                     :key="chip.label"
                     :href="chip.href"
-                    class="flex h-9 shrink-0 items-center rounded-full border border-line bg-white px-3.5 text-[14px] text-ink no-underline hover:border-forest hover:text-forest"
+                    class="flex h-9 shrink-0 items-center rounded-full border border-line bg-white px-3.5 text-[14px] text-ink no-underline hover:border-forest hover:text-forest tap"
                     >{{ chip.label }}</Link
                 >
             </div>
@@ -95,7 +95,7 @@ const chips = computed(() => [
         <section v-if="spotlight.length" class="mx-auto mt-7 flex max-w-6xl flex-col gap-3 px-5" aria-labelledby="spotlight-heading">
             <div class="flex items-baseline justify-between gap-3">
                 <h2 id="spotlight-heading" class="text-xl font-bold">Spotlight</h2>
-                <Link :href="route('cars.index')" class="text-[14px] font-medium">See all</Link>
+                <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[14px] font-medium">See all</Link>
             </div>
             <div class="-mr-5 flex snap-x gap-3 overflow-x-auto pr-5 pb-1 [scrollbar-width:none]">
                 <div v-for="car in spotlight" :key="car.ulid" class="w-[290px] shrink-0 snap-start"><CarCard :car="car" /></div>
@@ -120,10 +120,10 @@ const chips = computed(() => [
             <div class="flex items-baseline justify-between gap-3">
                 <h2 class="text-xl font-bold">{{ nearMe ? 'Cars near you' : 'New arrivals' }}</h2>
                 <div class="flex items-center gap-4">
-                    <button v-if="!nearMe && arrivals.length" type="button" class="flex items-center gap-1 text-[14px] font-semibold text-forest" :disabled="locating" @click="showNearMe">
+                    <button v-if="!nearMe && arrivals.length" type="button" class="flex min-h-11 items-center gap-1 text-[14px] font-semibold text-forest" :disabled="locating" @click="showNearMe">
                         <Icon name="locate" :size="16" /> {{ locating ? 'Finding you…' : 'Near me' }}
                     </button>
-                    <Link :href="route('cars.index')" class="text-[14px] font-medium">See all {{ carCount.toLocaleString('en-NG') }}</Link>
+                    <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[14px] font-medium">See all {{ carCount.toLocaleString('en-NG') }}</Link>
                 </div>
             </div>
             <p v-if="error" class="text-[13px] text-danger" role="alert">{{ error }}</p>
@@ -139,13 +139,16 @@ const chips = computed(() => [
         </section>
 
         <section class="mx-auto mt-8 grid max-w-6xl gap-3 px-5 md:grid-cols-2">
-            <div class="card flex flex-col gap-2 p-5">
-                <h2 class="text-xl font-bold">What can I afford?</h2>
-                <p class="text-[15px] text-muted">
-                    <template v-if="budget.maxPrice.value !== null">Your budget is up to {{ formatNaira(budget.maxPrice.value) }}. Cars within reach are tagged.</template>
-                    <template v-else>Tell us your income and deposit. We'll tag every car within reach and show the monthly cost.</template>
-                </p>
-                <Link :href="route('budget')" class="btn btn-outline mt-1 h-[46px] self-start">{{ budget.maxPrice.value !== null ? 'Edit my budget' : 'Work out my budget' }}</Link>
+            <!-- Alone (no app prompt), it spans the row with the button beside the text, so there's no empty half. -->
+            <div class="card flex flex-col gap-2 p-5" :class="install.available.value ? '' : 'md:col-span-2 md:flex-row md:items-center md:justify-between md:gap-6'">
+                <div class="flex flex-col gap-2">
+                    <h2 class="text-xl font-bold">What can I afford?</h2>
+                    <p class="text-[15px] text-muted">
+                        <template v-if="budget.maxPrice.value !== null">Your budget is up to {{ formatNaira(budget.maxPrice.value) }}. Cars within reach are tagged.</template>
+                        <template v-else>Tell us your income and deposit. We'll tag every car within reach and show the monthly cost.</template>
+                    </p>
+                </div>
+                <Link :href="route('budget')" class="btn btn-outline mt-1 h-[46px] shrink-0 self-start md:self-center">{{ budget.maxPrice.value !== null ? 'Edit my budget' : 'Work out my budget' }}</Link>
             </div>
             <div v-if="install.available.value" class="card flex flex-col gap-2 p-5">
                 <h2 class="text-xl font-bold">Get the LotLink app</h2>

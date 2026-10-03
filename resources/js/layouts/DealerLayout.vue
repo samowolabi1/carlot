@@ -62,7 +62,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
 
         <nav
             aria-label="Dealer"
-            class="fixed bottom-0 left-0 z-40 flex w-[248px] shrink-0 -translate-x-full flex-col gap-5 overflow-y-auto bg-forest px-3.5 py-5 text-mist transition lg:sticky lg:translate-x-0"
+            class="fixed bottom-0 left-0 z-40 flex w-[248px] shrink-0 -translate-x-full flex-col gap-5 overflow-y-auto bg-forest *:shrink-0 px-3.5 py-5 text-mist transition lg:sticky lg:translate-x-0"
             :class="[{ 'translate-x-0': menuOpen }, supportView ? 'top-11 lg:top-11 lg:h-[calc(100dvh-2.75rem)]' : 'top-0 lg:top-0 lg:h-dvh']"
         >
             <div class="px-2.5"><Logo inverse size="sm" /></div>

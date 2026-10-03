@@ -56,9 +56,9 @@ defineExpose({ send });
             <button type="button" class="font-semibold text-clay" @click="photo = null">Remove</button>
         </p>
         <div class="flex items-center gap-2">
-            <label class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-ivory" aria-label="Attach a photo">
+            <label class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-ivory has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-forest/30">
                 <Icon name="plus" :size="22" :stroke-width="2" />
-                <input ref="fileInput" type="file" accept="image/*" class="sr-only" @change="pick" />
+                <input ref="fileInput" type="file" accept="image/*" class="sr-only" aria-label="Attach a photo" @change="pick" />
             </label>
             <label class="grow">
                 <span class="sr-only">Message</span>

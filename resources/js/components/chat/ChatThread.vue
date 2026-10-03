@@ -23,6 +23,12 @@ const items = computed(() => {
 });
 
 const URL_PATTERN = /(https?:\/\/[^\s<]+[^\s<.,;:!?)"'])/g;
+/** "https://www.google.com/maps/dir/?api=1&destination=…" → "google.com/maps/dir/…" (the link itself stays whole). */
+function shortLink(url: string): string {
+    const bare = url.replace(/^https?:\/\/(www\.)?/i, '');
+    return bare.length > 32 ? `${bare.slice(0, 30)}…` : bare;
+}
+
 function parts(text: string) {
     return text.split(URL_PATTERN).map((part, i) => ({ link: i % 2 === 1, text: part }));
 }
@@ -35,7 +41,7 @@ onMounted(scrollToEnd);
 </script>
 
 <template>
-    <div ref="scroller" class="flex grow flex-col gap-2.5 overflow-y-auto px-4 py-4 md:px-6" aria-live="polite">
+    <div ref="scroller" class="flex grow flex-col gap-2.5 overflow-y-auto px-4 py-4 *:shrink-0 md:px-6" aria-live="polite">
         <p v-if="messages.length === 0" class="m-auto max-w-xs text-center text-[14px] text-muted">{{ emptyText ?? 'No messages yet.' }}</p>
         <template v-for="(item, i) in items" :key="i">
             <span v-if="item.type === 'day'" class="self-center text-[11px] text-muted">{{ item.day }}</span>
@@ -54,7 +60,7 @@ onMounted(scrollToEnd);
                             <img :src="item.message.image" alt="Photo" class="max-h-64 rounded-xl object-cover" loading="lazy" />
                         </a>
                         <template v-for="(part, j) in parts(item.message.body)" :key="j">
-                            <a v-if="part.link" :href="part.text" target="_blank" rel="noopener nofollow ugc" class="underline" :class="item.message.side === me ? 'text-peach' : ''">{{ part.text }}</a>
+                            <a v-if="part.link" :href="part.text" target="_blank" rel="noopener nofollow ugc" class="underline" :class="item.message.side === me ? 'text-peach' : ''" :title="part.text">{{ shortLink(part.text) }}</a>
                             <template v-else>{{ part.text }}</template>
                         </template>
                     </div>

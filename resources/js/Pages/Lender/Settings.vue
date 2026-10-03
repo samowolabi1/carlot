@@ -65,7 +65,7 @@ async function copy(text: string) {
     <LenderLayout>
         <div>
             <h1 class="text-[30px] font-bold">Settings</h1>
-            <p class="text-[14px] text-muted">{{ values.name }} · {{ types.find((t) => t.value === values.licence_type)?.label }} {{ values.licence_number }}. To change these, contact LotLink.</p>
+            <p class="text-[14px] text-muted">{{ values.name }} · {{ types.find((t) => t.value === values.licence_type)?.label }}<template v-if="values.licence_number"> · licence {{ values.licence_number }}</template>. To change these, contact LotLink.</p>
         </div>
         <p v-if="!can_manage" class="rounded-xl bg-sand px-4 py-3 text-[14px]">Only your team's admins can change settings.</p>
 
@@ -95,12 +95,12 @@ async function copy(text: string) {
                         <InputError :message="form.errors.website" />
                     </label>
                     <label class="field-label sm:col-span-2">
-                        About your car loans <span class="font-normal text-muted">(buyers see this)</span>
+                        <span>About your car loans <span class="font-normal text-muted">(buyers see this)</span></span>
                         <textarea v-field="{ kind: 'text', max: 600 }" v-model="form.about" rows="3" maxlength="600" class="field h-auto py-2.5" />
                         <InputError :message="form.errors.about" />
                     </label>
                     <label class="field-label sm:col-span-2">
-                        Next steps with you <span class="font-normal text-muted">(shown to buyers you pre-approve or approve; you can change it per application)</span>
+                        <span>Next steps with you <span class="font-normal text-muted">(shown to buyers you pre-approve or approve; you can change it per application)</span></span>
                         <textarea
                             v-field="{ kind: 'text', max: 1000 }"
                             v-model="form.next_steps"

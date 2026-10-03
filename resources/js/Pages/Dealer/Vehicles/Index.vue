@@ -157,38 +157,38 @@ function editHref(row: Row) {
 
         <div v-else class="card overflow-hidden">
             <ul class="divide-y divide-divider">
-                <li v-for="row in vehicles.data" :key="row.ulid" class="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 md:flex-nowrap">
-                    <Link :href="editHref(row)" class="flex min-w-0 grow items-center gap-3 text-ink no-underline">
+                <li v-for="row in vehicles.data" :key="row.ulid" class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 pt-3 pb-1">
+                    <Link :href="editHref(row)" class="flex min-w-0 grow basis-64 items-center gap-3 text-ink no-underline">
                         <span class="flex h-14 w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sand">
                             <img v-if="row.thumb_url" :src="row.thumb_url" alt="" class="h-full w-full object-cover" loading="lazy" />
                             <CarGlyph v-else :width="44" />
                         </span>
                         <span class="flex min-w-0 flex-col">
                             <span class="truncate text-[15px] font-semibold">{{ row.title }}</span>
-                            <span class="text-[13px] text-muted">
-                                <template v-if="row.status === 'draft' && row.photos === 0">Needs photos</template>
-                                <template v-else-if="row.vin_tail">VIN ···{{ row.vin_tail }}</template>
-                                <template v-else>{{ row.photos }} photos</template>
-                                <span v-if="row.new_arrival" class="ml-1.5 rounded-lg bg-blush px-1.5 py-0.5 text-[11px] font-semibold text-clay-dark">New arrival</span>
-                                <span v-if="row.spotlight_until" class="ml-1.5 rounded-lg bg-forest px-1.5 py-0.5 text-[11px] font-semibold text-white">Spotlight to {{ row.spotlight_until }}</span>
-                                <span v-if="row.inspected" class="ml-1.5 rounded-lg bg-map px-1.5 py-0.5 text-[11px] font-semibold text-forest">Inspected</span>
-                                <span v-if="row.held" class="mt-0.5 block font-semibold text-danger">{{ row.held }}</span>
+                            <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-muted">
+                                <span v-if="row.status === 'draft' && row.photos === 0">Needs photos</span>
+                                <span v-else-if="row.vin_tail">VIN ···{{ row.vin_tail }}</span>
+                                <span v-else>{{ row.photos }} {{ row.photos === 1 ? 'photo' : 'photos' }}</span>
+                                <span v-if="row.new_arrival" class="rounded-lg bg-blush px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-clay-dark">New arrival</span>
+                                <span v-if="row.spotlight_until" class="rounded-lg bg-forest px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-white">Spotlight to {{ row.spotlight_until }}</span>
+                                <span v-if="row.inspected" class="rounded-lg bg-map px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-forest">Inspected</span>
+                                <span v-if="row.held" class="basis-full font-semibold text-danger">{{ row.held }}</span>
                             </span>
                         </span>
                     </Link>
 
-                    <span class="w-32 font-display text-[16px] font-bold text-forest">{{ row.price ?? '—' }}</span>
+                    <span class="w-32 shrink-0 font-display text-[16px] font-bold whitespace-nowrap text-forest">{{ row.price ?? '—' }}</span>
 
-                    <span class="w-24">
+                    <span class="w-24 shrink-0">
                         <span class="rounded-full px-2.5 py-1 text-[12px] font-semibold capitalize" :class="badge[row.status]">{{ row.status }}</span>
                     </span>
 
-                    <span class="w-28 text-[13px]" :class="row.ageing ? 'font-semibold text-clay-dark' : 'text-muted'">
+                    <span class="w-28 shrink-0 text-[13px]" :class="[row.ageing ? 'font-semibold text-clay-dark' : 'text-muted', { 'max-md:hidden': row.days_listed === null }]">
                         <template v-if="row.days_listed !== null">{{ row.days_listed }} {{ row.days_listed === 1 ? 'day' : 'days' }}<template v-if="row.ageing"> · Ageing</template></template>
                         <template v-else>—</template>
                     </span>
 
-                    <span class="ml-auto flex shrink-0 items-center gap-3 text-[13px] font-semibold">
+                    <span class="flex basis-full flex-wrap items-center gap-x-4 text-[13px] font-semibold *:inline-flex *:min-h-11 *:items-center md:pl-[86px]">
                         <ShareMenu
                             v-if="row.share_url"
                             :title="row.title"
@@ -233,7 +233,7 @@ function editHref(row: Row) {
                         v-if="link.url"
                         :href="link.url"
                         preserve-scroll
-                        class="flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline"
+                        class="flex h-11 min-w-11 items-center justify-center rounded-lg px-2.5 text-[14px] no-underline"
                         :class="link.active ? 'bg-forest text-white' : 'text-ink hover:bg-ivory'"
                         ><span v-html="link.label"
                     /></Link>

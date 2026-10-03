@@ -107,7 +107,7 @@ function submit() {
             </div>
 
             <label class="flex flex-col gap-1.5 text-[13px] font-semibold">
-                Message to the lot (optional)
+                <span>Message to the lot <span class="font-normal text-muted">(optional)</span></span>
                 <textarea v-field="{ kind: 'text', max: 500 }" v-model="form.message" rows="3" class="field h-auto py-3 font-normal" placeholder="e.g. I can pay this week and would like to test drive first." />
                 <InputError :message="form.errors.message" />
             </label>

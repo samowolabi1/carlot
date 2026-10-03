@@ -17,7 +17,7 @@ const id = useId();
                     {{ title }}
                     <span v-if="selected" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-forest px-1.5 text-[11px] font-semibold text-white" :aria-label="`${selected} chosen`">{{ selected }}</span>
                 </span>
-                <Icon name="chevron" :size="18" :stroke-width="2" class="shrink-0 text-muted transition-transform" :class="{ 'rotate-180': isOpen }" />
+                <Icon name="chevronDown" :size="18" :stroke-width="2" class="shrink-0 text-muted transition-transform" :class="{ 'rotate-180': isOpen }" />
             </button>
         </h3>
         <div v-show="isOpen" :id="id" class="pb-4">

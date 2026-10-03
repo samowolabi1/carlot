@@ -99,7 +99,7 @@ function save() {
                         <span v-if="i < timeline.length - 1" class="absolute top-10 bottom-0 left-[19px] w-px bg-line" aria-hidden="true" />
                         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ivory text-forest"><Icon :name="icons[item.kind]" :size="18" /></span>
                         <div class="min-w-0 pt-1">
-                            <component :is="item.href ? Link : 'span'" :href="item.href" class="font-semibold text-ink" :class="item.href ? '' : 'no-underline'">{{ item.title }}</component>
+                            <component :is="item.href ? Link : 'span'" :href="item.href" class="tap font-semibold text-ink" :class="item.href ? '' : 'no-underline'">{{ item.title }}</component>
                             <p v-if="item.detail" class="text-[14px] text-muted">{{ item.detail }}</p>
                             <p class="text-[12px] text-muted">{{ item.at }}<template v-if="item.by"> · {{ item.by }}</template></p>
                         </div>
