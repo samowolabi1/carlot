@@ -2,12 +2,14 @@
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Lots\Actions\InviteStaff;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotInvitation;
 use App\Domain\Lots\Models\Plan;
 use App\Domain\Lots\Notifications\StaffInvitation;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 
 function invite(Lot $lot, string $contact, string $role = 'sales')
 {
@@ -99,4 +101,17 @@ it('lets the owner change roles and remove staff, but not themselves', function 
 
     $this->actingAs($this->lot->owner)->delete(route('dealer.staff.destroy', [$this->lot, $sales->ulid]));
     expect($sales->roleIn($this->lot))->toBeNull();
+});
+
+it('lets the owner re-send an invitation when every seat is taken, without counting it twice', function () {
+    Notification::fake();
+    $invite = app(InviteStaff::class);
+    $invite->run($this->lot, $this->lot->owner, 'ada@prime.ng', LotRole::Sales);
+    $invite->run($this->lot, $this->lot->owner, 'bola@prime.ng', LotRole::Sales); // owner + 2 = the Starter plan's 3 seats
+
+    $invite->run($this->lot, $this->lot->owner, 'bola@prime.ng', LotRole::Manager); // a re-send, not a new seat
+
+    expect(LotInvitation::withoutGlobalScopes()->where('lot_id', $this->lot->id)->pluck('role', 'phone_or_email')->map->value->all())
+        ->toBe(['ada@prime.ng' => 'sales', 'bola@prime.ng' => 'manager'])
+        ->and(fn () => $invite->run($this->lot, $this->lot->owner, 'chidi@prime.ng', LotRole::Sales))->toThrow(ValidationException::class);
 });

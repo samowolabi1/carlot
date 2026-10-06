@@ -8,6 +8,7 @@ use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Admin\Impersonation;
 use App\Domain\Push\Models\PushSubscription;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -56,7 +57,7 @@ class OtpLoginController extends Controller
         $request->validate(['phone' => Fields::phone()]);
 
         try {
-            $phone = PhoneNumber::normalize($request->string('phone'));
+            $phone = PhoneNumber::normalize(Input::text($request, 'phone'));
             ['channel' => $channel] = $sendOtp->run($phone);
         } catch (InvalidArgumentException|OtpException $e) {
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
@@ -98,8 +99,8 @@ class OtpLoginController extends Controller
 
         try {
             $user = $request->session()->get('otp_method') === 'email'
-                ? $verifyOtp->forEmail($to, $request->string('code'))
-                : $verifyOtp->run($to, $request->string('code'));
+                ? $verifyOtp->forEmail($to, Input::text($request, 'code'))
+                : $verifyOtp->run($to, Input::text($request, 'code'));
         } catch (OtpException $e) {
             throw ValidationException::withMessages(['code' => $e->getMessage()]);
         }

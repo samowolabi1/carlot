@@ -10,6 +10,7 @@ use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Seo\StructuredData;
 use App\Domain\Sharing\Models\ShareLink;
 use App\Domain\Sharing\Support\ShareCard;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Account\BudgetController;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\DealsPresenter;
@@ -51,7 +52,7 @@ class CarController extends Controller
 
         // TDD M15: count the view (not the seller's own staff), attributed to a share link if it came from one.
         if ($public && ! $user?->hasLotRole($vehicle->lot)) {
-            $channel = $request->filled('ref') ? ShareLink::where('code', (string) $request->query('ref'))->first()?->platform->value : null;
+            $channel = $request->filled('ref') ? ShareLink::where('code', Input::query($request, 'ref'))->first()?->platform->value : null;
             Tracker::view($request, $vehicle, $channel);
         }
 

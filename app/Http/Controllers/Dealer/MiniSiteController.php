@@ -8,6 +8,7 @@ use App\Domain\Lots\Domains\CustomDomains;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Sharing\Support\Printables;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -49,7 +50,7 @@ class MiniSiteController extends Controller
     public function poster(Request $request, Lot $lot, Printables $printables): HttpResponse
     {
         Gate::authorize('view', $lot);
-        $size = in_array($request->query('size'), Printables::SIZES, true) ? (string) $request->query('size') : 'a4';
+        $size = in_array($request->query('size'), Printables::SIZES, true) ? Input::query($request, 'size') : 'a4';
 
         return $this->pdf($printables->poster($lot, $size), "{$lot->slug}-poster-{$size}.pdf");
     }

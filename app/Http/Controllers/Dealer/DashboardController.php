@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Dealer;
 
+use App\Domain\Analytics\Models\DailyVehicleStat;
 use App\Domain\Appointments\Enums\AppointmentStatus;
 use App\Domain\Appointments\Models\Appointment;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Leads\Enums\LeadStage;
+use App\Domain\Leads\Models\Lead;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Name;
 use App\Http\Controllers\Controller;
@@ -46,6 +49,13 @@ class DashboardController extends Controller
                     ]),
                 'week' => Appointment::query()->active()->whereBetween('starts_at', [now($lot->timezone)->startOfWeek()->utc(), now($lot->timezone)->endOfWeek()->utc()])->count(),
                 'pending' => Appointment::query()->where('status', AppointmentStatus::Pending)->where('starts_at', '>', now())->count(),
+            ],
+            // The other KPI tiles: views from the daily roll-up (like Analytics), leads still waiting for a first reply,
+            // and cars sold this calendar month in the seller's timezone.
+            'kpis' => [
+                'views' => (int) DailyVehicleStat::query()->where('date', '>=', now($lot->timezone)->subDays(7)->toDateString())->sum('views'),
+                'new_leads' => Lead::query()->where('stage', LeadStage::New)->count(),
+                'sold' => Vehicle::query()->where('status', VehicleStatus::Sold)->where('sold_at', '>=', now($lot->timezone)->startOfMonth()->utc())->count(),
             ],
             'stock' => [
                 'live' => Vehicle::live()->count(),

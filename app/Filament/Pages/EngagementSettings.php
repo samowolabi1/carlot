@@ -82,7 +82,7 @@ class EngagementSettings extends Page implements HasForms
                 Forms\Components\TextInput::make("rules.{$key}.cooldown")->label('At most every (days)')->numeric()->integer()->minValue(1)->maxValue(365)->required(),
                 Forms\Components\TextInput::make("rules.{$key}.subject")->label('Subject')->required()->maxLength(120)->columnSpanFull(),
                 Forms\Components\Textarea::make("rules.{$key}.intro")->label('Opening line')->required()->maxLength(600)->rows(2)->columnSpanFull()
-                    ->helperText('Placeholders: {name} (owner\'s first name), {lot}, {count}. The details (cars, chats…) are listed under it.'),
+                    ->helperText('Placeholders: {name} (owner\'s first name), {seller} (the business name), {count}. The details (cars, chats…) are listed under it.'),
             ]))->values()->all();
 
         return $form->statePath('data')->schema([

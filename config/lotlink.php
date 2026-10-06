@@ -64,6 +64,14 @@ return [
     // Admins must use an authenticator app (TDD M1). On by default in production.
     'admin_2fa' => (bool) env('ADMIN_2FA', env('APP_ENV') === 'production'),
 
+    // The first admin, created by `db:seed` (`lotlink:deploy --seed`). Outside a local install the seeder needs both
+    // an email and a password of 12+ characters, and it never changes the password of an admin that already exists.
+    'first_admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+        'phone' => env('ADMIN_PHONE'),
+    ],
+
     // Facebook/Instagram auto-post (TDD M9): log | meta
     'social_driver' => env('SOCIAL_DRIVER', 'log'),
 

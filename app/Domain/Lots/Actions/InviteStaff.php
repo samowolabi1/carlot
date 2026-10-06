@@ -25,7 +25,9 @@ class InviteStaff
         }
 
         $limit = $lot->plan?->staff_limit;
-        $seats = $lot->members()->count() + LotInvitation::withoutGlobalScopes()->where('lot_id', $lot->getKey())->pending()->count();
+        // Re-sending to someone already invited replaces their invitation, so it doesn't take another seat.
+        $seats = $lot->members()->count() + LotInvitation::withoutGlobalScopes()->where('lot_id', $lot->getKey())->pending()
+            ->where('phone_or_email', '!=', $contact)->count();
 
         if ($limit !== null && $seats >= $limit) {
             throw ValidationException::withMessages([

@@ -68,6 +68,9 @@ class DemoMarketplaceSeeder extends Seeder
     private function lot(array $data): Lot
     {
         $owner = User::firstOrCreate(['phone' => $data['phone']], ['name' => "{$data['name']} owner", 'phone_verified_at' => now()]);
+        if ($owner->name === str_replace('Seller', 'Lot', $data['name']).' owner') {
+            $owner->update(['name' => "{$data['name']} owner"]);
+        }
         // Databases seeded before the CarYard rename have "Demo Lot …": rename those rather than add a second set.
         $lot = Lot::whereIn('name', [$data['name'], str_replace('Seller', 'Lot', $data['name'])])->first()
             ?? app(CreateLot::class)->run($owner, ['name' => $data['name'], 'phone' => $data['phone'], 'tagline' => 'Demo seller for trying CarYard locally']);

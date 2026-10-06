@@ -10,6 +10,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\JsonResponse;
@@ -27,13 +28,13 @@ class BookingController extends Controller
         abort_unless($lot->status === LotStatus::Active, 404);
 
         $vehicle = $request->filled('car')
-            ? Vehicle::query()->marketplace()->where('vehicles.ulid', $request->string('car')->lower()->toString())->where('vehicles.lot_id', $lot->id)->with(['make', 'model', 'lot', 'cover'])->first()
+            ? Vehicle::query()->marketplace()->where('vehicles.ulid', strtolower(Input::text($request, 'car')))->where('vehicles.lot_id', $lot->id)->with(['make', 'model', 'lot', 'cover'])->first()
             : null;
 
         $reschedule = null;
 
         if ($request->filled('reschedule')) {
-            $reschedule = Appointment::withoutGlobalScopes()->where('ulid', $request->string('reschedule')->lower()->toString())->where('lot_id', $lot->id)->first();
+            $reschedule = Appointment::withoutGlobalScopes()->where('ulid', strtolower(Input::text($request, 'reschedule')))->where('lot_id', $lot->id)->first();
             abort_unless($reschedule && $request->user()->id === $reschedule->customer_id && $reschedule->isUpcoming(), 404);
             $vehicle ??= $reschedule->vehicle_id ? Vehicle::withoutGlobalScope('lot')->with(['make', 'model', 'lot', 'cover'])->find($reschedule->vehicle_id) : null;
         }
@@ -44,7 +45,7 @@ class BookingController extends Controller
             'types' => AppointmentType::options(),
             'days' => $slots->days($lot, ignore: $reschedule),
             'reschedule' => $reschedule ? ['ulid' => $reschedule->ulid, 'type' => $reschedule->type->value, 'starts_at' => $reschedule->starts_at->toIso8601String()] : null,
-            'defaultType' => AppointmentType::tryFrom((string) $request->query('type'))->value ?? 'viewing',
+            'defaultType' => AppointmentType::tryFrom(Input::query($request, 'type'))->value ?? 'viewing',
         ])->withViewData(['meta' => ['title' => "Book a visit — {$lot->name}", 'robots' => 'noindex']]);
     }
 

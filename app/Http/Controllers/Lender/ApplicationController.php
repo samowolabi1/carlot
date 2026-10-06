@@ -11,6 +11,7 @@ use App\Domain\Finance\Models\FinanceApplication;
 use App\Domain\Finance\Models\FinanceMessage;
 use App\Domain\Finance\Models\Lender;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\FinancePresenter;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,8 @@ class ApplicationController extends Controller
 
     public function index(Request $request, Lender $lender): Response
     {
-        $tab = in_array($request->query('tab'), self::TABS, true) ? (string) $request->query('tab') : 'open';
-        $q = Str::of((string) $request->query('q'))->squish()->limit(60, '')->replace(['%', '_'], '')->value() ?: null;
+        $tab = in_array($request->query('tab'), self::TABS, true) ? Input::query($request, 'tab') : 'open';
+        $q = Str::of(Input::query($request, 'q'))->squish()->limit(60, '')->replace(['%', '_'], '')->value() ?: null;
 
         $query = $lender->applications()->with(['vehicle.make', 'vehicle.model', 'lot', 'lender', 'assignee', 'user'])->latest('updated_at');
         match ($tab) {
@@ -80,7 +81,7 @@ class ApplicationController extends Controller
         foreach (['approved_amount', 'disbursed_amount'] as $key) {
             $request->merge([$key => Fields::cleanMoney($request->input($key))]);
         }
-        $action = (string) $request->input('action');
+        $action = Input::text($request, 'action');
         $data = $request->validate([
             'action' => ['required', Rule::in(['review', 'documents', 'pre_approve', 'approve', 'disburse', 'decline'])],
             'message' => ['nullable', ...array_slice(Fields::text(1000), 1), Rule::requiredIf(in_array($action, ['documents', 'decline'], true))],

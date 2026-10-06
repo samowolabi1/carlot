@@ -16,15 +16,31 @@ class SavedSearchMatch extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly SavedSearch $search, public readonly Vehicle $vehicle, public readonly bool $priceDrop = false)
+    /** The search by id and the two things the message needs: buyers can delete a search while the alert is queued. */
+    public readonly int $searchId;
+
+    public readonly string $searchName;
+
+    public readonly ?string $channel;
+
+    public function __construct(SavedSearch $search, public readonly Vehicle $vehicle, public readonly bool $priceDrop = false)
     {
+        $this->searchId = (int) $search->getKey();
+        $this->searchName = (string) $search->name;
+        $this->channel = $search->channel;
         $this->onQueue('notifications');
+    }
+
+    /** A search deleted in the meantime gets no alert. */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        return SavedSearch::query()->whereKey($this->searchId)->exists();
     }
 
     /** @return list<string> */
     public function via(object $notifiable): array
     {
-        $channel = match ($this->search->channel) {
+        $channel = match ($this->channel) {
             'phone' => ['phone'],
             'mail' => filled($notifiable->email ?? null) ? ['mail'] : [],
             default => [],
@@ -37,14 +53,14 @@ class SavedSearchMatch extends Notification implements ShouldQueue
     {
         $car = $this->vehicle->title().' ('.$this->vehicle->formattedPrice().') at '.$this->vehicle->lot->name;
 
-        return ($this->priceDrop ? 'Price drop on a match for ' : 'New match for ')."\"{$this->search->name}\": {$car}";
+        return ($this->priceDrop ? 'Price drop on a match for ' : 'New match for ')."\"{$this->searchName}\": {$car}";
     }
 
     public function toPhone(object $notifiable): Message
     {
         $url = url($this->vehicle->publicPath());
 
-        return new Message('saved_search_match', [$this->search->name, $this->vehicle->title(), (string) $this->vehicle->formattedPrice(), $this->vehicle->lot->name],
+        return new Message('saved_search_match', [$this->searchName, $this->vehicle->title(), (string) $this->vehicle->formattedPrice(), $this->vehicle->lot->name],
             $this->line().'. '.$url, Message::suffix($url));
     }
 

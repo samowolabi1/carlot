@@ -6,6 +6,7 @@ use App\Domain\Lots\Actions\SaveBankAccount;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,12 +43,12 @@ class BankAccountController extends Controller
     /** @return array{bank_name: string, account_number: string, account_name: string, is_default: bool} */
     private function validated(Request $request, Lot $lot, ?LotBankAccount $current = null): array
     {
-        $request->merge(['account_number' => preg_replace('/\D/', '', (string) $request->input('account_number'))]);
+        $request->merge(['account_number' => preg_replace('/\D/', '', Input::text($request, 'account_number'))]);
 
         $data = $request->validate([
             'bank_name' => Fields::businessName(max: 80),
             'account_number' => ['required', 'regex:'.config('lotlink.bank_account_pattern', '/^\d{10}$/'),
-                Rule::unique('lot_bank_accounts')->where('lot_id', $lot->id)->where('bank_name', (string) $request->input('bank_name'))->ignore($current?->id)],
+                Rule::unique('lot_bank_accounts')->where('lot_id', $lot->id)->where('bank_name', Input::text($request, 'bank_name'))->ignore($current?->id)],
             'account_name' => Fields::businessName(),
             'is_default' => ['boolean'],
         ], [

@@ -4,7 +4,9 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\System\ServerHealth;
 use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 it('keeps public images in public/media, served as plain files, with scripts blocked', function () {
@@ -69,4 +71,13 @@ it('works the queue from the cron job on shared hosting', function () {
     expect($event)->not->toBeNull()->and($event->expression)->toBe('* * * * *')
         ->and($event->command)->toContain('--stop-when-empty')->toContain('--queue=critical,media,notifications,default')
         ->and($event->withoutOverlapping)->toBeTrue();
+});
+
+it('trusts the configured proxy, so HTTPS behind Cloudflare is detected even with cached config', function () {
+    Route::get('/_proxy-probe', fn (Request $r) => $r->isSecure() ? 'https' : 'http');
+
+    $this->get('/_proxy-probe', ['X-Forwarded-Proto' => 'https'])->assertSeeText('http')->assertDontSeeText('https');
+
+    config(['trustedproxy.proxies' => '*']);
+    $this->get('/_proxy-probe', ['X-Forwarded-Proto' => 'https'])->assertSeeText('https');
 });

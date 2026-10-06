@@ -14,6 +14,9 @@ class TrackEvent implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
+    /** Something about a record that has since been deleted is dropped, not retried into failed_jobs. */
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly int $lotId,
         public readonly ?int $vehicleId,

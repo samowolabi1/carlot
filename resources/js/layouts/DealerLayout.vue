@@ -61,7 +61,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
         <div v-if="menuOpen" class="fixed inset-0 z-30 bg-ink/40 lg:hidden" @click="menuOpen = false" />
 
         <nav
-            aria-label="Dealer"
+            aria-label="Seller"
             class="fixed bottom-0 left-0 z-40 flex w-[248px] shrink-0 -translate-x-full flex-col gap-5 overflow-y-auto bg-forest *:shrink-0 px-3.5 py-5 text-mist transition lg:sticky lg:translate-x-0"
             :class="[{ 'translate-x-0': menuOpen }, supportView ? 'top-11 lg:top-11 lg:h-[calc(100dvh-2.75rem)]' : 'top-0 lg:top-0 lg:h-dvh']"
         >
@@ -221,7 +221,7 @@ const showPendingBanner = computed(() => lot.value.status !== 'active' && !page.
                 <button
                     v-if="queue.waiting.value"
                     type="button"
-                    class="ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border border-apricot bg-white px-3 font-semibold"
+                    class="tap ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border border-apricot bg-white px-3 font-semibold"
                     :disabled="queue.syncing.value"
                     @click="queue.sync()"
                 >

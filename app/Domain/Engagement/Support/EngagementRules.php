@@ -12,7 +12,7 @@ use Throwable;
  * The automated emails to sellers, with their defaults. Admins switch each on or off and change
  * when it goes (the threshold), how often (cooldown days), the subject and the opening line in
  * /admin → Settings → Automated emails; those overrides live in `platform_settings`.
- * Placeholders: {name} (owner's first name), {lot}, {count}.
+ * Placeholders: {name} (owner's first name), {seller} (the business name; {lot} also works), {count}.
  */
 final class EngagementRules
 {
@@ -28,23 +28,23 @@ final class EngagementRules
             'label' => 'Owner hasn\'t signed in',
             'description' => 'The seller is live but its owner hasn\'t used CarYard for a while. Includes the seller\'s views, leads and waiting chats.',
             'unit' => 'days', 'threshold' => 30, 'cooldown' => 30,
-            'subject' => 'Buyers are still looking at {lot}',
-            'intro' => 'It\'s been a while since you signed in to CarYard. Here\'s what has happened at {lot} in the last 30 days:',
+            'subject' => 'Buyers are still looking at {seller}',
+            'intro' => 'It\'s been a while since you signed in to CarYard. Here\'s what has happened at {seller} in the last 30 days:',
             'cta' => 'Open your dashboard',
         ],
         'no_cars' => [
             'label' => 'No cars uploaded',
             'description' => 'The seller is approved but has never added a car.',
             'unit' => 'days', 'threshold' => 3, 'cooldown' => 7,
-            'subject' => 'Add your first cars to {lot}',
-            'intro' => 'Buyers can\'t find {lot} until it has cars. Adding one takes about two minutes: photos, price, done. Sellers with 10 or more cars get most of the enquiries.',
+            'subject' => 'Add your first cars to {seller}',
+            'intro' => 'Buyers can\'t find {seller} until it has cars. Adding one takes about two minutes: photos, price, done. Sellers with 10 or more cars get most of the enquiries.',
             'cta' => 'Add a car',
         ],
         'drafts_waiting' => [
             'label' => 'Cars left as drafts',
             'description' => 'Cars saved as drafts and not touched for a while, so buyers can\'t see them.',
             'unit' => 'days', 'threshold' => 3, 'cooldown' => 7,
-            'subject' => 'Cars at {lot} aren\'t live yet',
+            'subject' => 'Cars at {seller} aren\'t live yet',
             'intro' => 'These cars are saved as drafts, so buyers can\'t see them. Add the missing details and publish them:',
             'cta' => 'Finish your cars',
         ],
@@ -52,16 +52,16 @@ final class EngagementRules
             'label' => 'Setup not finished',
             'description' => 'The seller was created but never submitted for approval.',
             'unit' => 'days', 'threshold' => 2, 'cooldown' => 5,
-            'subject' => 'Finish setting up {lot}',
-            'intro' => 'You\'re nearly there. Add your location and opening hours, then submit {lot} for approval so buyers can find you.',
+            'subject' => 'Finish setting up {seller}',
+            'intro' => 'You\'re nearly there. Add your location and opening hours, then submit {seller} for approval so buyers can find you.',
             'cta' => 'Finish setup',
         ],
         'pending_actions' => [
             'label' => 'Buyers waiting (daily digest)',
             'description' => 'Unanswered chats, bookings to confirm, offers, reservations and trade-ins waiting on the seller.',
             'unit' => 'hours', 'threshold' => 4, 'cooldown' => 1,
-            'subject' => 'Buyers are waiting at {lot}',
-            'intro' => 'Buyers are waiting for {lot} to answer. Quick replies win sales:',
+            'subject' => 'Buyers are waiting at {seller}',
+            'intro' => 'Buyers are waiting for {seller} to answer. Quick replies win sales:',
             'cta' => 'Open your dashboard',
         ],
     ];
@@ -108,9 +108,13 @@ final class EngagementRules
         AuditLog::record('admin.engagement_rules_changed', null, ['before' => $before, 'after' => self::current()], $by);
     }
 
-    /** "{count} cars at {lot}" → "3 cars at Prime Motors". */
+    /** "{count} cars at {seller}" → "3 cars at Prime Motors". {lot} (the old name, in saved wording) still works. */
     public static function fill(string $text, array $values): string
     {
+        if (array_key_exists('lot', $values)) {
+            $values += ['seller' => $values['lot']];
+        }
+
         return strtr($text, collect($values)->mapWithKeys(fn ($v, $k) => ['{'.$k.'}' => (string) $v])->all());
     }
 

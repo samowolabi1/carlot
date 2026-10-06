@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dealer\Manager;
 use App\Domain\LotManager\Support\ManagerReports;
 use App\Domain\LotManager\Support\ReportExport;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,8 +25,8 @@ class ReportController extends Controller
         Gate::authorize('viewReports', $lot);
 
         $pro = $request->user()->can('viewCosts', $lot);
-        $type = array_key_exists((string) $request->query('type'), ManagerReports::TYPES) ? (string) $request->query('type') : 'sales';
-        $period = array_key_exists((string) $request->query('period'), ManagerReports::PERIODS) ? (string) $request->query('period') : 'year';
+        $type = array_key_exists(Input::query($request, 'type'), ManagerReports::TYPES) ? Input::query($request, 'type') : 'sales';
+        $period = array_key_exists(Input::query($request, 'period'), ManagerReports::PERIODS) ? Input::query($request, 'period') : 'year';
         abort_if($type === 'staff' && ! $pro, 403, 'The staff report comes with the Pro plan.');
 
         $report = match ($type) {

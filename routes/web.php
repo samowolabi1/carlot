@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Legal\LegalDocuments;
+use App\Domain\Lots\Models\Lot;
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AccountDeletionController;
 use App\Http\Controllers\Account\BudgetController;
@@ -321,6 +322,7 @@ Route::middleware(['auth', 'profile.complete', 'terms.accepted'])->group(functio
         ->name('dealer.')
         ->scopeBindings()
         ->group(function () {
+            Route::get('/', fn (Lot $lot) => redirect()->route('dealer.dashboard', $lot))->name('root');
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
             Route::get('/onboarding/{step}', [OnboardingController::class, 'show'])->name('onboarding.show');

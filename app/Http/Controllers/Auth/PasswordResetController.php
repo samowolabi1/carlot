@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domain\Accounts\Actions\SetPassword;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class PasswordResetController extends Controller
 
     public function create(Request $request): Response
     {
-        return Inertia::render('Auth/ForgotPassword', ['email' => (string) $request->query('email', '')])
+        return Inertia::render('Auth/ForgotPassword', ['email' => Input::query($request, 'email')])
             ->withViewData(['meta' => ['title' => 'Reset your password', 'robots' => 'noindex']]);
     }
 
@@ -46,7 +47,7 @@ class PasswordResetController extends Controller
 
     public function edit(Request $request, string $token): Response
     {
-        return Inertia::render('Auth/ResetPassword', ['token' => $token, 'email' => (string) $request->query('email', '')])
+        return Inertia::render('Auth/ResetPassword', ['token' => $token, 'email' => Input::query($request, 'email')])
             ->withViewData(['meta' => ['title' => 'Choose a new password', 'robots' => 'noindex']]);
     }
 

@@ -24,9 +24,9 @@ final class Regions
     }
 
     /** The list's spelling of a state, or null if it isn't one. */
-    public static function normalize(?string $input): ?string
+    public static function normalize(mixed $input): ?string
     {
-        if ($input === null || trim($input) === '') {
+        if (! is_string($input) || trim($input) === '') {
             return null;
         }
 

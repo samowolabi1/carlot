@@ -138,3 +138,8 @@ it('records when people last used CarYard, at most every 15 minutes', function (
     $this->get(route('account'));
     expect($this->owner->fresh()->last_seen_at->toDateTimeString())->toBe('2026-10-05 09:25:00');
 });
+
+it('fills {seller} and still the old {lot} in saved wording', function () {
+    expect(EngagementRules::fill('{name}: {count} cars at {seller} ({lot})', ['name' => 'Ada', 'count' => 3, 'lot' => 'Prime Motors']))
+        ->toBe('Ada: 3 cars at Prime Motors (Prime Motors)');
+});

@@ -78,7 +78,7 @@ class FraudSignalResource extends Resource
                     FraudSignalType::DuplicateVin->value => 'Duplicate VIN',
                     FraudSignalType::DuplicatePhoto->value => 'Duplicate photo',
                     FraudSignalType::LowPrice->value => 'Low price',
-                    FraudSignalType::ListingBurst->value => 'New-lot burst',
+                    FraudSignalType::ListingBurst->value => 'New-seller burst',
                 ]),
             ])
             ->actions([

@@ -1,10 +1,10 @@
 <?php
 
 /*
- * CarYard front controller for "method C" in docs/deploy-cpanel.md: the app lives in ~/lotlink (outside the web
- * root) and the contents of lotlink/public were copied into ~/public_html. Copy this file to
- * ~/public_html/index.php (replacing the one copied from lotlink/public) and set MEDIA_ROOT in .env to
- * /home/<cpanel user>/public_html/media. If your folder isn't ~/lotlink, change $app below.
+ * CarYard front controller for "method C" in docs/deploy-cpanel.md: the app lives in ~/caryard (outside the web
+ * root) and the contents of caryard/public were copied into ~/public_html. Copy this file to
+ * ~/public_html/index.php (replacing the one copied from caryard/public) and set MEDIA_ROOT in .env to
+ * /home/<cpanel user>/public_html/media. If your folder isn't ~/caryard, change $app below.
  */
 
 use Illuminate\Foundation\Application;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-$root = dirname(__DIR__).'/lotlink';
+$root = dirname(__DIR__).'/caryard';
 
 if (file_exists($maintenance = $root.'/storage/framework/maintenance.php')) {
     require $maintenance;

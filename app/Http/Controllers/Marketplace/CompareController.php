@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketplace;
 
 use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\MarketplacePresenter;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class CompareController extends Controller
     /** /compare?ids=a,b,c */
     public function __invoke(Request $request): Response
     {
-        $ulids = array_slice(array_unique(array_filter(explode(',', strtolower((string) $request->query('ids'))))), 0, self::MAX);
+        $ulids = array_slice(array_unique(array_filter(explode(',', strtolower(Input::query($request, 'ids'))))), 0, self::MAX);
 
         $vehicles = Vehicle::query()
             ->marketplace()

@@ -7,6 +7,7 @@ use App\Domain\Inventory\Enums\Drivetrain;
 use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Enums\Transmission;
 use App\Domain\Inventory\Enums\VehicleCondition;
+use App\Domain\Support\Input;
 use App\Domain\Support\Regions;
 use Illuminate\Http\Request;
 
@@ -108,12 +109,12 @@ final class SearchCriteria
         $radius = $int('radius');
 
         return new self(
-            query: filled($request->input('q')) ? mb_substr(trim((string) $request->input('q')), 0, 80) : null,
+            query: filled($request->input('q')) ? mb_substr(trim(Input::text($request, 'q')), 0, 80) : null,
             makeIds: $ints('make'),
             modelIds: $ints('model'),
             bodyTypes: $enums('body', BodyType::class),
             conditions: $enums('condition', VehicleCondition::class),
-            transmission: Transmission::tryFrom((string) $request->input('transmission'))?->value,
+            transmission: Transmission::tryFrom(Input::text($request, 'transmission'))?->value,
             fuels: $enums('fuel', FuelType::class),
             drivetrains: $enums('drive', Drivetrain::class),
             colours: $colours,
@@ -124,7 +125,7 @@ final class SearchCriteria
             yearMin: $int('year_min'),
             yearMax: $int('year_max'),
             mileageMax: $int('mileage_max'),
-            city: filled($request->input('city')) ? mb_substr((string) $request->input('city'), 0, 80) : null,
+            city: filled($request->input('city')) ? mb_substr(Input::text($request, 'city'), 0, 80) : null,
             state: Regions::normalize(is_string($request->input('state')) ? $request->input('state') : null),
             lotId: $lotId,
             lat: $hasLocation ? $lat : null,

@@ -22,12 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Behind Caddy, Cloudflare or a load balancer, trust its X-Forwarded-* headers so HTTPS
-        // (HSTS, secure cookies, signed URLs) is detected. TRUSTED_PROXIES: "*" or a list of IPs.
-        if ($proxies = env('TRUSTED_PROXIES')) {
-            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', (string) $proxies)));
-        }
-
+        // Trusted proxies come from config/trustedproxy.php (TRUSTED_PROXIES), which Laravel's TrustProxies reads.
         $middleware->web(append: [
             SecurityHeaders::class,
             HandleInertiaRequests::class,

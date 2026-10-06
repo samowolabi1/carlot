@@ -8,6 +8,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     checklist: { key: string; label: string; done: boolean }[];
     staffCount: number;
+    kpis: { views: number; new_leads: number; sold: number };
     stock: { live: number; drafts: number; ageing: number; limit: number | null };
     visits: {
         today: { ulid: string; time: string; customer: string; type: string; status: string; checked_in: boolean; staff: string | null }[];
@@ -29,13 +30,13 @@ const remaining = computed(() => props.checklist.filter((i) => !i.done));
 const progress = computed(() => Math.round(((props.checklist.length - remaining.value.length) / props.checklist.length) * 100));
 const canEdit = computed(() => lot.value.role === 'owner' || lot.value.role === 'manager');
 
-// KPI tiles from the D2 design; they fill in once stock (S2) and bookings (S4) exist.
-const kpis: { label: string; note: string; key?: string }[] = [
-    { label: 'Views, last 7 days', note: 'View tracking arrives with analytics' },
-    { label: 'New leads', note: 'Enquiries arrive with chat and offers' },
-    { label: 'Visits booked this week', note: 'See the calendar', key: 'visits' },
-    { label: 'Sold this month', note: 'Record sales in Sales Manager' },
-];
+// KPI tiles from the D2 design, each opening the page behind its number.
+const kpis = computed(() => [
+    { label: 'Views, last 7 days', value: props.kpis.views, note: 'Buyers who opened your cars', href: canEdit.value ? route('dealer.analytics', lot.value.slug) : null },
+    { label: 'New leads', value: props.kpis.new_leads, note: props.kpis.new_leads ? 'Waiting for your reply' : 'All answered', href: route('dealer.leads.index', lot.value.slug) },
+    { label: 'Visits booked this week', value: props.visits.week, note: props.visits.pending ? `${props.visits.pending} need confirming` : 'See the calendar', href: route('dealer.calendar', lot.value.slug) },
+    { label: 'Sold this month', value: props.kpis.sold, note: 'Recorded in Sales Manager', href: route('dealer.manager.orders.index', lot.value.slug) },
+]);
 </script>
 
 <template>
@@ -47,7 +48,7 @@ const kpis: { label: string; note: string; key?: string }[] = [
                 <span class="text-[14px] text-muted">{{ today }} · {{ staffCount }} on the {{ lot.name }} team</span>
             </div>
             <div class="flex gap-2.5">
-                <span class="btn btn-outline h-11 cursor-not-allowed px-4 text-[14px] opacity-50" aria-disabled="true">Share stock</span>
+                <Link :href="route('dealer.minisite', lot.slug)" class="btn btn-outline h-11 px-4 text-[14px]"><Icon name="share" :size="16" /> Share stock</Link>
                 <Link :href="route('dealer.vehicles.create', lot.slug)" class="btn btn-primary h-11 px-4 text-[14px]"><Icon name="plus" :size="16" :stroke-width="2.4" /> Add car</Link>
             </div>
         </div>
@@ -81,14 +82,11 @@ const kpis: { label: string; note: string; key?: string }[] = [
         </section>
 
         <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <div v-for="kpi in kpis" :key="kpi.label" class="card p-[18px]">
+            <component :is="kpi.href ? Link : 'div'" v-for="kpi in kpis" :key="kpi.label" :href="kpi.href ?? undefined" class="card p-[18px] text-ink no-underline" :class="kpi.href ? 'hover:border-line-strong' : ''">
                 <div class="text-[13px] text-muted">{{ kpi.label }}</div>
-                <div class="font-display text-[28px] font-bold">{{ kpi.key === 'visits' ? visits.week : 0 }}</div>
-                <div class="text-[12px] text-muted">
-                    <template v-if="kpi.key === 'visits' && visits.pending">{{ visits.pending }} need confirming</template>
-                    <template v-else>{{ kpi.note }}</template>
-                </div>
-            </div>
+                <div class="font-display text-[28px] font-bold">{{ kpi.value.toLocaleString('en-NG') }}</div>
+                <div class="text-[12px] text-muted">{{ kpi.note }}</div>
+            </component>
         </div>
 
         <div class="grid gap-3 xl:grid-cols-[1.6fr_1fr]">

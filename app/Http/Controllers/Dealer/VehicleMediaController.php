@@ -10,6 +10,7 @@ use App\Domain\Inventory\Models\VehicleMedia;
 use App\Domain\Inventory\Support\MediaUploads;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VehicleResource;
 use Illuminate\Http\JsonResponse;
@@ -59,7 +60,7 @@ class VehicleMediaController extends Controller
             'file' => ['required', 'file', 'mimetypes:'.implode(',', array_keys(MediaUploads::MIME_TYPES)), 'max:'.(MediaUploads::MAX_BYTES / 1024)],
         ], ['file.max' => 'Photos can be up to 12 MB.', 'file.mimetypes' => 'Use JPEG, PNG or WebP photos.']);
 
-        $key = $request->string('key')->toString();
+        $key = Input::text($request, 'key');
         abort_unless($uploads->keyBelongsTo($key, $vehicle), 422, 'Invalid upload key.');
 
         $uploads->disk()->putFileAs(dirname($key), $request->file('file'), basename($key));

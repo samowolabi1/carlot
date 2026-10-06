@@ -39,6 +39,9 @@ Run all four before pushing.
   (add a friendly name there for every new snake_case field). Money inputs use `v-field` kind `money`, which groups the digits
   on load and on blur ("10,350,000"); readers parse with `parseAmount` / `Fields::cleanMoney()`. Admin amounts use
   `App\Filament\Support\MoneyInput::make()` (₦ prefix, money mask, commas stripped before validation), never `->numeric()`.
+  Read request values as text only through `App\Domain\Support\Input::text()` / `::query()`, never `(string) $request->input()` or
+  `$request->string()`: a tampered `field[]=…` makes those a PHP warning, which is a 500 on the server; helpers that take raw input
+  (`PhoneNumber::tryNormalize`, `Regions::normalize`, `Fields::cleanMoney`) accept `mixed` and treat non-text as invalid.
 - **UI basics**: 44 px tap targets on phones (`min-h-11`, or the `tap` utility to widen a smaller chip's hit area without
   changing its look); a field label's text and its "(optional)" note go in one `<span>` (`field-label` is a flex column);
   scrolling flex panels add `*:shrink-0` so buttons never squash; wide tables sit in an `overflow-x-auto` box.
@@ -388,8 +391,12 @@ job) run `queue:work --stop-when-empty` each minute (queues `lotlink.queue_names
 MySQL, chat polls, cache/sessions use the database. Public images go only to the `media` disk (= `public/media`, `MEDIA_ROOT`/`MEDIA_URL`;
 `.htaccess` there blocks scripts), always through `config('lotlink.media_disk')`; never the `public` disk or `storage:link`. Private
 files stay on `local`. `ServerHealth` backs `lotlink:doctor` and /admin → System health: add a check when you add a server requirement.
-`lotlink:deploy` is the post-upload command. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
+`lotlink:deploy` is the post-upload command. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
+proxies `config/trustedproxy.php`); the seeder creates no admin on a server without `ADMIN_EMAIL` and a 12+ character `ADMIN_PASSWORD`. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
 
 Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in
 `AppServiceProvider`; `HorizonServiceProvider` gates `/horizon` to admins with no local bypass; supervisors `app` and `media` in
 `config/horizon.php`). Keep every queue's `retry_after` above the longest job `timeout` (broadcasts: 900 s).
+Jobs set `$deleteWhenMissingModels = true`. Queued notifications and mail ignore that (Laravel wraps them), so they never hold a model
+that can be hard-deleted (invitations, saved searches, instalments): keep its id and check it in `shouldSend()`. Tests run jobs
+synchronously, so anything queue-only needs a `queue:work` test (`tests/Feature/System/QueueAndHorizonTest.php`).

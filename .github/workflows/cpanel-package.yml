@@ -1,6 +1,6 @@
 name: cPanel package
 
-# Builds lotlink-cpanel.zip (app + production vendor + built front end + admin assets) to download from the run's
+# Builds caryard-cpanel.zip (app + production vendor + built front end + admin assets) to download from the run's
 # "Artifacts" and upload to cPanel. Run it from Actions → "cPanel package" → Run workflow, or push a tag like v1.0.0.
 on:
   workflow_dispatch:
@@ -35,6 +35,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: lotlink-cpanel
-          path: build/lotlink-cpanel.zip
+          name: caryard-cpanel
+          path: build/caryard-cpanel.zip
           retention-days: 30

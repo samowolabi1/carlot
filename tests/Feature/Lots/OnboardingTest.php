@@ -2,6 +2,12 @@
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Analytics\Models\DailyVehicleStat;
+use App\Domain\Inventory\Enums\VehicleStatus;
+use App\Domain\Inventory\Models\Vehicle;
+use App\Domain\Leads\Enums\LeadSource;
+use App\Domain\Leads\Enums\LeadStage;
+use App\Domain\Leads\Models\Lead;
 use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
@@ -125,6 +131,26 @@ it('renders the dashboard with a setup checklist', function () {
             ->has('checklist', 6)
             ->where('currentLot.slug', $lot->slug)
             ->where('currentLot.role', 'owner'));
+});
+
+it('fills the dashboard tiles with real numbers: views, leads waiting, cars sold this month', function () {
+    $lot = Lot::factory()->active()->create();
+    $car = Vehicle::factory()->available()->create(['lot_id' => $lot->id]);
+    $sold = Vehicle::factory()->create(['lot_id' => $lot->id]);
+    $sold->forceFill(['status' => VehicleStatus::Sold, 'sold_at' => now()])->saveQuietly();
+    $old = Vehicle::factory()->create(['lot_id' => $lot->id]);
+    $old->forceFill(['status' => VehicleStatus::Sold, 'sold_at' => now()->subMonths(2)])->saveQuietly();
+    DailyVehicleStat::withoutGlobalScopes()->insert([
+        ['vehicle_id' => $car->id, 'lot_id' => $lot->id, 'date' => now()->subDays(2)->toDateString(), 'views' => 30],
+        ['vehicle_id' => $car->id, 'lot_id' => $lot->id, 'date' => now()->subDays(20)->toDateString(), 'views' => 500],
+    ]);
+    Lead::withoutGlobalScopes()->create(['lot_id' => $lot->id, 'vehicle_id' => $car->id, 'source' => LeadSource::Chat, 'stage' => LeadStage::New]);
+    Lead::withoutGlobalScopes()->create(['lot_id' => $lot->id, 'vehicle_id' => $car->id, 'source' => LeadSource::Chat, 'stage' => LeadStage::Contacted]);
+
+    $this->actingAs($lot->owner)->get(route('dealer.dashboard', $lot))
+        ->assertInertia(fn (Assert $page) => $page->where('kpis', ['views' => 30, 'new_leads' => 1, 'sold' => 1]));
+
+    $this->actingAs($lot->owner)->get("/dealer/{$lot->slug}")->assertRedirect(route('dealer.dashboard', $lot));
 });
 
 it('renders every onboarding step', function (string $step) {

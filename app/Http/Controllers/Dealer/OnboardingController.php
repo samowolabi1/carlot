@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Lots\Actions\CreateLot;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dealer\LotProfileRequest;
 use App\Http\Resources\LotSettingsResource;
@@ -22,7 +23,7 @@ class OnboardingController extends Controller
     {
         // /dealer/start?ref=CODE from another lot's invite (TDD M19: lot referrals).
         if ($request->filled('ref')) {
-            $request->session()->put('referral_code', strtoupper(substr((string) $request->query('ref'), 0, 12)));
+            $request->session()->put('referral_code', strtoupper(substr(Input::query($request, 'ref'), 0, 12)));
         }
 
         return Inertia::render('Dealer/Onboarding', [

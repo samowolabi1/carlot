@@ -9,5 +9,5 @@ class ListSupportTickets extends ListRecords
 {
     protected static string $resource = SupportTicketResource::class;
 
-    protected ?string $subheading = 'Tickets from lots. Open ones need a reply; sellers see replies as "CarYard Support" with your first name.';
+    protected ?string $subheading = 'Tickets from sellers. Open ones need a reply; sellers see replies as "CarYard Support" with your first name.';
 }

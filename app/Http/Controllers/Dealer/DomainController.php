@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Domain\Lots\Domains\CustomDomains;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class DomainController extends Controller
     /** Caddy on-demand TLS "ask" endpoint: certificates only for CarYard and verified seller domains. */
     public function allowed(Request $request): Response
     {
-        $domain = CustomDomains::normalise((string) $request->query('domain'));
+        $domain = CustomDomains::normalise(Input::query($request, 'domain'));
         $ok = $domain === CustomDomains::appHost() || CustomDomains::lotFor($domain) !== null;
 
         return response($ok ? 'ok' : 'unknown', $ok ? 200 : 404);

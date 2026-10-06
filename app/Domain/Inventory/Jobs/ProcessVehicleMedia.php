@@ -24,6 +24,9 @@ class ProcessVehicleMedia implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
+    /** Something about a record that has since been deleted is dropped, not retried into failed_jobs. */
+    public bool $deleteWhenMissingModels = true;
+
     public int $tries = 3;
 
     public int $timeout = 120;

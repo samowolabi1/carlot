@@ -3,12 +3,17 @@
 namespace Tests;
 
 use App\Domain\Billing\Gateways\PaymentGateways;
+use App\Domain\Lots\Support\CurrentLot;
 use App\Domain\Messaging\SmsGateway;
 use App\Domain\Messaging\WhatsAppGateway;
 use App\Domain\Push\Gateways\PushGateway;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Queue\Events\JobExceptionOccurred;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Event;
 use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakePushGateway;
 use Tests\Support\FakeSmsGateway;
@@ -55,8 +60,32 @@ abstract class TestCase extends BaseTestCase
         $this->push = new FakePushGateway;
         $this->app->instance(PushGateway::class, $this->push);
 
+        $this->runJobsWithoutSellerContext();
+
         if (in_array(RefreshDatabase::class, class_uses_recursive($this), true)) {
             $this->seed(PlanSeeder::class);
         }
+    }
+
+    /**
+     * On the server, queued jobs and notifications run in a worker that has no current seller. Tests run them
+     * synchronously inside the request, where the seller is set, which would hide a job that leans on it. So clear
+     * it while each job runs, and put it back afterwards.
+     */
+    private function runJobsWithoutSellerContext(): void
+    {
+        $saved = [];
+        Event::listen(JobProcessing::class, function () use (&$saved): void {
+            $current = app(CurrentLot::class);
+            $saved[] = $current->get();
+            $current->set(null);
+        });
+        $restore = function () use (&$saved): void {
+            if ($saved !== []) {
+                app(CurrentLot::class)->set(array_pop($saved));
+            }
+        };
+        Event::listen(JobProcessed::class, $restore);
+        Event::listen(JobExceptionOccurred::class, $restore);
     }
 }

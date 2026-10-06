@@ -21,6 +21,9 @@ class DeployLotLink extends Command
         $this->call('down', ['--retry' => 15]);
 
         try {
+            // Drop the previous release's cached config first, so migrations and seeders read this .env, not a stale copy.
+            // (Only config: the cache table doesn't exist yet on a first install.)
+            $this->call('config:clear');
             $this->call('migrate', ['--force' => true]);
             if ($this->option('seed')) {
                 $this->call('db:seed', ['--force' => true]);

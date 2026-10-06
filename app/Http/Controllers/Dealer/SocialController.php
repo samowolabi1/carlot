@@ -10,6 +10,7 @@ use App\Domain\Social\Gateways\SocialPublisher;
 use App\Domain\Social\Jobs\PublishToSocial;
 use App\Domain\Social\Models\SocialAccount;
 use App\Domain\Social\Models\SocialPost;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -61,7 +62,7 @@ class SocialController extends Controller
     public function callback(Request $request, SocialPublisher $publisher, ConnectSocialAccounts $connect): RedirectResponse
     {
         $pending = $request->session()->pull('social_oauth');
-        abort_unless(is_array($pending) && hash_equals((string) $pending['state'], (string) $request->query('state')), 403);
+        abort_unless(is_array($pending) && hash_equals((string) $pending['state'], Input::query($request, 'state')), 403);
 
         $lot = Lot::where('slug', $pending['lot'])->firstOrFail();
         Gate::authorize('update', $lot);
@@ -72,7 +73,7 @@ class SocialController extends Controller
         }
 
         try {
-            $accounts = $publisher->accounts((string) $request->query('code'), route('social.callback'));
+            $accounts = $publisher->accounts(Input::query($request, 'code'), route('social.callback'));
         } catch (Throwable $e) {
             report($e);
 

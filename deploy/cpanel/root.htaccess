@@ -1,6 +1,6 @@
-# Only for "method D" in docs/deploy-cpanel.md, when the whole lotlink folder had to be uploaded into the web root
+# Only for "method D" in docs/deploy-cpanel.md, when the whole caryard folder had to be uploaded into the web root
 # (public_html). Copy this file to that folder as .htaccess. It sends every request to public/ and refuses the app's
-# own files (.env, storage, vendor...). Prefer pointing the domain's document root at lotlink/public instead.
+# own files (.env, storage, vendor...). Prefer pointing the domain's document root at caryard/public instead.
 Options -Indexes
 
 <IfModule mod_rewrite.c>

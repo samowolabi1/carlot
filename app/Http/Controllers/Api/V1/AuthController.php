@@ -8,6 +8,7 @@ use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Controller;
@@ -120,7 +121,7 @@ class AuthController extends Controller
 
         $request->validate(['phone' => Fields::phone()]);
         try {
-            return ['whatsapp', PhoneNumber::normalize((string) $request->input('phone'))];
+            return ['whatsapp', PhoneNumber::normalize(Input::text($request, 'phone'))];
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
         }

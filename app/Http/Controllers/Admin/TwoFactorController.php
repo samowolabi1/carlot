@@ -6,6 +6,7 @@ use App\Domain\Accounts\Models\User;
 use App\Domain\Accounts\Support\Totp;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Sharing\Support\QrCode;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RequireAdminTwoFactor;
 use Illuminate\Contracts\View\View;
@@ -41,7 +42,7 @@ class TwoFactorController extends Controller
         $secret = (string) $request->session()->get('admin_2fa_secret');
         $this->throttle($request, $user);
 
-        if ($secret === '' || ! Totp::verify($secret, (string) $request->input('code'))) {
+        if ($secret === '' || ! Totp::verify($secret, Input::text($request, 'code'))) {
             throw ValidationException::withMessages(['code' => 'That code didn\'t match. Check the time on your phone and try the newest code.']);
         }
 
@@ -69,7 +70,7 @@ class TwoFactorController extends Controller
     {
         $user = $this->admin($request);
         $this->throttle($request, $user);
-        $input = trim((string) $request->input('code'));
+        $input = trim(Input::text($request, 'code'));
 
         $ok = Totp::verify((string) decrypt((string) $user->two_factor_secret), $input) || $this->useRecoveryCode($user, $input);
 

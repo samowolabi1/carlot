@@ -49,7 +49,7 @@ class PaymentResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')->dateTime('j M Y, H:i')->sortable(),
-                Tables\Columns\TextColumn::make('lot.name')->searchable(),
+                Tables\Columns\TextColumn::make('lot.name')->label('Seller')->searchable(),
                 Tables\Columns\TextColumn::make('description'),
                 Tables\Columns\TextColumn::make('amount')->formatStateUsing(fn (Payment $p) => $p->money()),
                 Tables\Columns\TextColumn::make('status')->badge()

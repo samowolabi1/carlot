@@ -108,3 +108,18 @@ it('checks model names on the add-car form', function () {
     $identity(['vehicle_model_id' => null, 'model_name' => '<script>alert(1)</script>'])->assertSessionHasErrors('model_name');
     $identity(['vehicle_model_id' => null, 'model_name' => 'C-Class', 'trim' => 'E 350 4Matic'])->assertSessionHasNoErrors();
 });
+
+it('treats a list sent where text belongs as invalid, never as a server error', function () {
+    $list = ['x' => ['y']];
+
+    // Public pages read the address bar: `?city[x]=y` is just ignored.
+    $this->get('/cars?'.http_build_query(['q' => $list, 'city' => $list, 'transmission' => $list]))->assertOk();
+    $this->get(route('compare', ['ids' => $list]))->assertOk();
+
+    $this->actingAs($this->owner);
+    $this->put(route('dealer.settings.profile', $this->lot), ['name' => 'Prime Motors', 'phone' => $list])->assertSessionHasErrors('phone');
+    $this->put(route('dealer.settings.location', $this->lot), ['state' => $list])->assertSessionHasErrors('state');
+    $this->post(route('dealer.bank-accounts.store', $this->lot), ['bank_name' => $list, 'account_number' => $list, 'account_name' => 'Prime Motors'])
+        ->assertSessionHasErrors(['bank_name', 'account_number']);
+    $this->post(route('dealer.vehicles.store', $this->lot), ['vin' => $list])->assertRedirect()->assertSessionHasErrors();
+});

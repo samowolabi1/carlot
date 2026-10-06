@@ -30,9 +30,10 @@ final class PhoneNumber
         return $util->format($number, PhoneNumberFormat::E164);
     }
 
-    public static function tryNormalize(?string $input, ?string $region = null): ?string
+    public static function tryNormalize(mixed $input, ?string $region = null): ?string
     {
-        if ($input === null || trim($input) === '') {
+        // Anything but text (a missing field, or `phone[]=…` from a tampered form) is simply not a number.
+        if (! is_string($input) || trim($input) === '') {
             return null;
         }
 

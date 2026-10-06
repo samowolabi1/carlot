@@ -8,6 +8,7 @@ use App\Domain\Leads\Models\Lead;
 use App\Domain\LotManager\Enums\OrderStatus;
 use App\Domain\LotManager\Models\SalesOrder;
 use App\Domain\Lots\Models\Lot;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +25,7 @@ class AnalyticsController extends Controller
 
         $allowed = $lot->planAllows('analytics');
         $full = $lot->planAllows('analytics_full');
-        $period = array_key_exists((string) $request->query('period'), DealerAnalytics::PERIODS) ? (string) $request->query('period') : '30d';
+        $period = array_key_exists(Input::query($request, 'period'), DealerAnalytics::PERIODS) ? Input::query($request, 'period') : '30d';
 
         if ($export = $request->query('export')) {
             abort_unless($full && in_array($export, ['stock', 'leads', 'sales'], true), 403, 'CSV export comes with the Pro plan.');

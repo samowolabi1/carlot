@@ -23,6 +23,9 @@ class DetectFraudSignals implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
+    /** Something about a record that has since been deleted is dropped, not retried into failed_jobs. */
+    public bool $deleteWhenMissingModels = true;
+
     /** A price below this share of the pricing-guide median is flagged. */
     public const LOW_PRICE_RATIO = 0.4;
 

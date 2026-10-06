@@ -8,6 +8,7 @@ use App\Domain\Inventory\Enums\FuelType;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -26,7 +27,7 @@ class VehicleIdentityRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->filled('vin')) {
-            $this->merge(['vin' => strtoupper(preg_replace('/\s+/', '', (string) $this->input('vin')) ?? '')]);
+            $this->merge(['vin' => strtoupper(preg_replace('/\s+/', '', Input::text($this, 'vin')) ?? '')]);
         }
     }
 

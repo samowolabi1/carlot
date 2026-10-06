@@ -22,6 +22,7 @@ use App\Domain\Lots\Enums\LotRole;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotBankAccount;
 use App\Domain\Lots\Models\Plan;
+use App\Domain\Support\Input;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\OrderRequest;
@@ -68,15 +69,16 @@ class OrderController extends Controller
     /** New order; "Mark sold" on the stock list opens this with the car picked. */
     public function create(Request $request, Lot $lot): Response
     {
-        $customer = $request->filled('customer') ? LotCustomer::query()->where('ulid', $request->string('customer'))->first() : null;
+        $customer = $request->filled('customer') ? LotCustomer::query()->where('ulid', Input::text($request, 'customer'))->first() : null;
 
         return Inertia::render('Dealer/Manager/OrderCreate', [
             'stock' => Presenter::stock(),
             'tradeIns' => Presenter::tradeIns(),
-            'vehicle' => $request->string('vehicle')->toString() ?: null,
+            'vehicle' => Input::text($request, 'vehicle') ?: null,
             'customer' => $customer ? Presenter::customer($customer) : null,
             'customers' => LotCustomer::query()->orderByDesc('last_seen_at')->limit(300)->get()
                 ->map(fn (LotCustomer $c) => ['ulid' => $c->ulid, 'name' => $c->name, 'phone_display' => PhoneNumber::display($c->phone)]),
+            'instalments' => $lot->planAllows('instalments'),
         ]);
     }
 

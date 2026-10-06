@@ -358,7 +358,7 @@ async function copyLink() {
                                     <span class="font-semibold">{{ d.name }}<span v-if="d.mandatory" class="text-clay" title="Needed before papers are ready"> *</span></span>
                                     <span class="text-[12px] text-muted">{{ d.status_label }}<template v-if="d.when"> · {{ d.when }}</template></span>
                                 </span>
-                                <a v-if="d.file_url" :href="d.file_url" class="inline-flex h-9 items-center gap-1 text-[13px] font-semibold"><Icon name="download" :size="14" /> Scan</a>
+                                <a v-if="d.file_url" :href="d.file_url" class="tap inline-flex h-9 items-center gap-1 text-[13px] font-semibold"><Icon name="download" :size="14" /> Scan</a>
                             </div>
                             <div v-if="order.open || d.status !== 'handed_over'" class="flex flex-wrap gap-1.5">
                                 <button v-if="d.status === 'pending'" type="button" class="h-9 rounded-lg border border-line-strong px-2.5 text-[13px] font-semibold tap" @click="setDocument(d, 'received')">Received</button>

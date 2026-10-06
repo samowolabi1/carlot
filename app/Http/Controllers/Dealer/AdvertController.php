@@ -15,6 +15,7 @@ use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Models\Lot;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Presenters\MarketplacePresenter;
@@ -59,7 +60,7 @@ class AdvertController extends Controller
     public function create(Request $request, Lot $lot): Response
     {
         Gate::authorize('buySpotlight', $lot);
-        $placement = AdPlacement::tryFrom((string) $request->query('placement')) ?? AdPlacement::HomeBanner;
+        $placement = AdPlacement::tryFrom(Input::query($request, 'placement')) ?? AdPlacement::HomeBanner;
         $today = AdSchedule::today();
 
         return Inertia::render('Dealer/Advertise/Create', [

@@ -16,6 +16,7 @@ use App\Domain\Lots\Models\Lot;
 use App\Domain\Lots\Models\LotHour;
 use App\Domain\Lots\Models\LotMember;
 use App\Domain\Support\Fields;
+use App\Domain\Support\Input;
 use App\Domain\Support\Name;
 use App\Domain\Support\PhoneNumber;
 use App\Http\Controllers\Controller;
@@ -36,7 +37,7 @@ class CalendarController extends Controller
     {
         $tz = $lot->timezone;
         $today = CarbonImmutable::now($tz)->startOfDay();
-        $weekStart = rescue(fn () => CarbonImmutable::parse((string) $request->query('week'), $tz), $today, false)->startOfWeek(CarbonImmutable::MONDAY);
+        $weekStart = rescue(fn () => CarbonImmutable::parse(Input::query($request, 'week'), $tz), $today, false)->startOfWeek(CarbonImmutable::MONDAY);
         $weekEnd = $weekStart->addDays(7);
 
         $load = fn ($query) => $query->with(['customer', 'staff', 'vehicle.make', 'vehicle.model'])->get();

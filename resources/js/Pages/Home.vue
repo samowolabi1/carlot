@@ -123,7 +123,7 @@ const chips = computed(() => [
                     <button v-if="!nearMe && arrivals.length" type="button" class="flex min-h-11 items-center gap-1 text-[14px] font-semibold text-forest" :disabled="locating" @click="showNearMe">
                         <Icon name="locate" :size="16" /> {{ locating ? 'Finding you…' : 'Near me' }}
                     </button>
-                    <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[14px] font-medium">See all {{ carCount.toLocaleString('en-NG') }}</Link>
+                    <Link :href="route('cars.index')" class="inline-flex min-h-11 items-center text-[14px] font-medium">See all<template v-if="carCount > 0"> {{ carCount.toLocaleString('en-NG') }}</template></Link>
                 </div>
             </div>
             <p v-if="error" class="text-[13px] text-danger" role="alert">{{ error }}</p>
