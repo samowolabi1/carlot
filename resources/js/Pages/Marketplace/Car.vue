@@ -201,6 +201,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[28px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
+                        <Link v-if="!sold && finance && !withinBudget" :href="route('budget')" class="tap self-start text-[13px] font-semibold">What can I afford?</Link>
                     </div>
 
                     <dl class="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -292,6 +293,7 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[30px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
+                        <Link v-if="!sold && finance && !withinBudget" :href="route('budget')" class="tap self-start text-[13px] font-semibold">What can I afford?</Link>
                         <template v-if="!sold && !preview">
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>
