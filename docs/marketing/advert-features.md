@@ -15,8 +15,7 @@ Before claiming "only us" in paid adverts, check what Jiji, Cars45, Autochek and
 4. **Loan details stay private**: income, employer and documents go only to the lender the buyer picks, never to the seller.
 5. **Filters that matter in Nigeria**: customs duty paid, registered in Nigeria, inspected, verified seller, car loans available,
    takes trade-ins, open to offers.
-6. **Know what you can afford first**: budget calculator, a monthly estimate on every car, and running costs (insurance, papers,
-   fuel, servicing).
+6. **Know what you can afford first**: a budget calculator that tags every car within reach.
 7. **Live "I'm on my way" location** shared with the seller for that visit only, never stored.
 8. **Price-drop alerts on WhatsApp** for saved searches and saved cars.
 

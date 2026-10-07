@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Analytics\Support\Tracker;
-use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Marketplace\Search\SearchCriteria;
 use App\Domain\Marketplace\Search\VehicleSearch;
@@ -52,7 +51,6 @@ class CarController extends Controller
             'price_value' => $price,
             'lot' => MarketplacePresenter::lot($vehicle->lot),
             'saved' => $user ? $user->favourites()->whereKey($vehicle->id)->exists() : false,
-            'from_monthly' => $price ? FinanceCalculator::fromPrice($price) : null,
         ]]);
     }
 

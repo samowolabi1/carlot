@@ -70,41 +70,6 @@ final class FinanceCalculator
         ];
     }
 
-    /**
-     * Yearly running costs on top of the price. Estimates only.
-     *
-     * @return array{items: list<array{label: string, amount: int}>, total: int}
-     */
-    public static function ownership(int $price, ?int $engineCc, ?int $year): array
-    {
-        /** @var array{insurance_percent: float, papers: int, fuel_price: int, km_per_month: int, km_per_litre: array<int, int>, servicing: array<int, int>} $f */
-        $f = config('lotlink.finance');
-
-        $kmPerLitre = self::band($f['km_per_litre'], $engineCc ?: 2000, 8);
-        $servicing = self::band($f['servicing'], $year ? max(0, (int) now()->year - $year) : 5, 600000);
-
-        $items = [
-            ['label' => 'Insurance (comprehensive)', 'amount' => self::roundTo($price * $f['insurance_percent'] / 100, 1000)],
-            ['label' => 'Registration and papers', 'amount' => (int) $f['papers']],
-            ['label' => 'Fuel', 'amount' => self::roundTo($f['km_per_month'] * 12 / $kmPerLitre * $f['fuel_price'], 1000)],
-            ['label' => 'Servicing and repairs', 'amount' => (int) $servicing],
-        ];
-
-        return ['items' => $items, 'total' => array_sum(array_column($items, 'amount'))];
-    }
-
-    /** The value for the first band whose upper limit covers $value. @param array<int, int> $bands */
-    private static function band(array $bands, int $value, int $fallback): int
-    {
-        foreach ($bands as $upTo => $result) {
-            if ($value <= $upTo) {
-                return $result;
-            }
-        }
-
-        return $fallback;
-    }
-
     private static function roundTo(float $value, int $step): int
     {
         return (int) (round($value / $step) * $step);

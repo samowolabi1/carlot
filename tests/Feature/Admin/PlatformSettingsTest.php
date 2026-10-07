@@ -41,9 +41,6 @@ it('lets an admin change the finance rates buyers see', function () {
             'deposit_percent' => 20,
             'tenors' => [12, 24, 36, 48, 60],
             'tenor_months' => 48,
-            // Amounts arrive grouped from the money mask ("₦1,250"): saved as plain numbers.
-            'fuel_price' => '1,250',
-            'servicing' => [['up_to' => 99, 'value' => '700,000'], ['up_to' => 4, 'value' => '300,000']],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -53,8 +50,7 @@ it('lets an admin change the finance rates buyers see', function () {
         ->interest_rate->toBe(18.5)
         ->tenor_months->toBe(48)
         ->tenors->toBe([12, 24, 36, 48, 60])
-        ->fuel_price->toBe(1250)
-        ->servicing->toBe([4 => 300000, 99 => 700000])
+        ->not->toHaveKey('fuel_price')
         ->and(FinanceCalculator::fromPrice(10_000_000))->deposit_percent->toBe(20)->months->toBe(48)
         ->and(FinanceCalculator::fromPrice(10_000_000)['monthly'])->not->toBe($before)
         ->and(AuditLog::where('action', 'admin.finance_rates_changed')->exists())->toBeTrue();

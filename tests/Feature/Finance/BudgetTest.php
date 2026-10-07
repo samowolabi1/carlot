@@ -64,14 +64,17 @@ it('counts the live cars a budget covers', function () {
     $this->getJson(route('budget.count', ['max' => 40_000_000]))->assertExactJson(['count' => 2]);
 });
 
-it('shows monthly cost and running costs on the car page', function () {
+it('shows no monthly estimate or running costs on the car page', function () {
     $lot = Lot::factory()->active()->create();
     $car = $this->car($lot, 'Toyota', 'Camry', ['price' => 1_250_000_000, 'engine_cc' => 2500, 'year' => 2018]);
 
     $this->get($car->publicPath())->assertInertia(fn (Assert $page) => $page
         ->where('finance.price', 12_500_000)
-        ->where('finance.from.monthly', 343_500)
-        ->has('finance.ownership.items', 4));
+        ->has('finance.defaults')
+        ->missing('finance.from')
+        ->missing('finance.ownership'));
+
+    $this->getJson("/api/v1/cars/{$car->ulid}")->assertOk()->assertJsonMissingPath('data.from_monthly');
 });
 
 it('keeps each buyer\'s budget to themselves', function () use ($design) {

@@ -7,7 +7,6 @@ use App\Domain\Admin\AdminArea;
 use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Finance\Support\FinanceRates;
 use App\Filament\Pages\Concerns\AdminPage;
-use App\Filament\Support\MoneyInput;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -19,8 +18,8 @@ use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Budget and ownership rates (TDD M10): what "What can I afford?", "From ₦X/mo" and the
- * cost-of-ownership card use. Shown to buyers as estimates, never loan offers.
+ * Budget and loan rates (TDD M10): what "What can I afford?" and the loan repayment calculator
+ * on car pages use. Shown to buyers as estimates, never loan offers.
  *
  * @property Form $form
  */
@@ -61,11 +60,9 @@ class FinanceSettings extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $naira = fn (string $name, string $label) => MoneyInput::make($name)->label($label)->minValue(0)->maxValue(100_000_000)->required();
-
         return $form->statePath('data')->schema([
             Forms\Components\Section::make('Budget and loan estimates')
-                ->description('Used by "What can I afford?", the monthly figure on car pages and the finance calculator.')
+                ->description('Used by "What can I afford?" and the loan repayment calculator on car pages.')
                 ->columns(2)
                 ->schema([
                     Forms\Components\TextInput::make('affordability_percent')->label('Share of spare income for a car loan')->suffix('%')
@@ -81,30 +78,8 @@ class FinanceSettings extends Page implements HasForms
                         ->options(collect(self::TENOR_CHOICES)->mapWithKeys(fn (int $m) => [$m => "{$m} months"])->all())
                         ->columns(4)->columnSpanFull(),
                 ]),
-            Forms\Components\Section::make('Cost of ownership (a year)')
-                ->description('The running-costs card on car pages.')
-                ->columns(2)
-                ->schema([
-                    Forms\Components\TextInput::make('insurance_percent')->label('Comprehensive insurance')->suffix('% of price')
-                        ->numeric()->minValue(0)->maxValue(20)->step(0.1)->required(),
-                    $naira('papers', 'Registration and papers'),
-                    $naira('fuel_price', 'Fuel price (a litre)'),
-                    Forms\Components\TextInput::make('km_per_month')->label('Distance driven a month')->suffix('km')->numeric()->integer()->minValue(0)->maxValue(50_000)->required(),
-                    Forms\Components\Repeater::make('km_per_litre')->maxItems(12)->label('Fuel economy by engine size')
-                        ->helperText('Each row covers engines up to that size; the last row covers anything bigger.')
-                        ->schema([
-                            Forms\Components\TextInput::make('up_to')->label('Engine up to')->suffix('cc')->numeric()->integer()->minValue(1)->maxValue(99_999)->required(),
-                            Forms\Components\TextInput::make('value')->label('Km a litre')->numeric()->integer()->minValue(1)->maxValue(50)->required(),
-                        ])->columns(2)->minItems(1)->reorderable(false)->addActionLabel('Add engine size'),
-                    Forms\Components\Repeater::make('servicing')->maxItems(12)->label('Servicing and repairs by car age')
-                        ->helperText('Each row covers cars up to that age; the last row covers anything older.')
-                        ->schema([
-                            Forms\Components\TextInput::make('up_to')->label('Up to')->suffix('years old')->numeric()->integer()->minValue(0)->maxValue(99)->required(),
-                            MoneyInput::make('value')->label('A year')->minValue(0)->maxValue(100_000_000)->required(),
-                        ])->columns(2)->minItems(1)->reorderable(false)->addActionLabel('Add age band'),
-                ]),
             Forms\Components\Section::make('Preview')
-                ->description('A ₦10,000,000, 2.5L, 5-year-old car with these values (save to apply).')
+                ->description('A loan on a ₦10,000,000 car with these values (save to apply).')
                 ->schema([
                     Forms\Components\Placeholder::make('preview')->hiddenLabel()
                         ->content(fn () => self::preview()),
@@ -147,20 +122,12 @@ class FinanceSettings extends Page implements HasForms
      */
     public static function toForm(array $finance): array
     {
-        $bands = fn (array $bands) => collect($bands)->map(fn ($value, $upTo) => ['up_to' => (int) $upTo, 'value' => (int) $value])->values()->all();
-
         return [
             'affordability_percent' => round((float) $finance['affordability_ratio'] * 100, 1),
             'interest_rate' => (float) $finance['interest_rate'],
             'deposit_percent' => (int) $finance['deposit_percent'],
             'tenor_months' => (int) $finance['tenor_months'],
             'tenors' => array_map('intval', (array) $finance['tenors']),
-            'insurance_percent' => (float) $finance['insurance_percent'],
-            'papers' => (int) $finance['papers'],
-            'fuel_price' => (int) $finance['fuel_price'],
-            'km_per_month' => (int) $finance['km_per_month'],
-            'km_per_litre' => $bands((array) $finance['km_per_litre']),
-            'servicing' => $bands((array) $finance['servicing']),
         ];
     }
 
@@ -170,20 +137,6 @@ class FinanceSettings extends Page implements HasForms
      */
     public static function fromForm(array $state): array
     {
-        $bands = function (string $field) use ($state): array {
-            $out = [];
-            foreach ((array) ($state[$field] ?? []) as $row) {
-                $upTo = (int) $row['up_to'];
-                if (array_key_exists($upTo, $out)) {
-                    throw ValidationException::withMessages(["data.{$field}" => 'Each row needs a different "up to" value.']);
-                }
-                $out[$upTo] = (int) $row['value'];
-            }
-            ksort($out);
-
-            return $out;
-        };
-
         $tenors = array_values(array_unique(array_map('intval', (array) $state['tenors'])));
         sort($tenors);
 
@@ -197,23 +150,13 @@ class FinanceSettings extends Page implements HasForms
             'deposit_percent' => (int) $state['deposit_percent'],
             'tenor_months' => (int) $state['tenor_months'],
             'tenors' => $tenors,
-            'insurance_percent' => (float) $state['insurance_percent'],
-            'papers' => (int) $state['papers'],
-            'fuel_price' => (int) $state['fuel_price'],
-            'km_per_month' => (int) $state['km_per_month'],
-            'km_per_litre' => $bands('km_per_litre'),
-            'servicing' => $bands('servicing'),
         ];
     }
 
     private static function preview(): string
     {
-        $price = 10_000_000;
-        $from = FinanceCalculator::fromPrice($price);
-        $own = FinanceCalculator::ownership($price, 2500, (int) now()->year - 5);
-        $format = fn (int $n) => '₦'.number_format($n);
+        $from = FinanceCalculator::fromPrice(10_000_000);
 
-        return "From {$format($from['monthly'])} a month ({$from['deposit_percent']}% down, {$from['months']} months) · running costs {$format($own['total'])} a year ("
-            .collect($own['items'])->map(fn (array $i) => strtolower($i['label']).' '.$format($i['amount']))->implode(', ').')';
+        return 'About ₦'.number_format($from['monthly'])." a month with {$from['deposit_percent']}% down over {$from['months']} months at {$from['rate']}% a year.";
     }
 }

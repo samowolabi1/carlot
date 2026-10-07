@@ -145,15 +145,6 @@ return [
         'deposit_percent' => (int) env('FINANCE_DEPOSIT_PERCENT', 30),
         'tenor_months' => (int) env('FINANCE_TENOR_MONTHS', 36),
         'tenors' => [12, 24, 36, 48],
-        // Cost of ownership, per year unless noted.
-        'insurance_percent' => (float) env('FINANCE_INSURANCE_PERCENT', 4),
-        'papers' => (int) env('FINANCE_PAPERS', 85000),
-        'fuel_price' => (int) env('FINANCE_FUEL_PRICE', 1000), // per litre
-        'km_per_month' => (int) env('FINANCE_KM_PER_MONTH', 1200),
-        // Engine size (cc, up to) => km per litre.
-        'km_per_litre' => [1600 => 14, 2500 => 11, 3500 => 8, 99999 => 6],
-        // Car age (years, up to) => servicing per year.
-        'servicing' => [3 => 250000, 8 => 400000, 99 => 600000],
     ],
 
     // Account numbers lots share with customers (Nigeria: 10-digit NUBAN). CarYard never takes

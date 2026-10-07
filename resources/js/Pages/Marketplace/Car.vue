@@ -14,7 +14,6 @@ import { useBudget } from '@/composables/useBudget';
 import { useCompare } from '@/composables/useCompare';
 import { useShared } from '@/composables/useShared';
 import CustomerLayout from '@/layouts/CustomerLayout.vue';
-import { formatNaira } from '@/lib/format';
 import { recordIntent } from '@/lib/leads';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -202,10 +201,6 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[28px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
-                        <p v-if="!sold && finance" class="text-[13px] text-muted">
-                            From <strong class="text-ink">{{ formatNaira(finance.from.monthly) }}/mo</strong> · {{ finance.from.deposit_percent }}% down, {{ finance.from.months }} mo,
-                            {{ finance.from.rate }}% p.a. (estimate) · <Link :href="route('budget')">Check budget</Link>
-                        </p>
                     </div>
 
                     <dl class="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -297,10 +292,6 @@ const shareText = computed(() => `${props.car.title}${props.car.price ? ` — ${
                             <span class="font-display text-[30px] font-bold text-forest">{{ car.price }}</span>
                             <span v-if="car.negotiable" class="text-[13px] text-muted">Negotiable</span>
                         </div>
-                        <p v-if="!sold && finance" class="text-[13px] text-muted">
-                            From <strong class="text-ink">{{ formatNaira(finance.from.monthly) }}/mo</strong> ({{ finance.from.deposit_percent }}% down, {{ finance.from.months }} mo, estimate) ·
-                            <Link :href="route('budget')">What can I afford?</Link>
-                        </p>
                         <template v-if="!sold && !preview">
                             <Link :href="bookHref" class="btn btn-primary w-full"><Icon name="calendar" :size="18" /> Book a viewing</Link>
                             <Link :href="testDriveHref" class="text-center text-[14px] font-semibold">or book a test drive</Link>

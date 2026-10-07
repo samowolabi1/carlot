@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
- * Budget and ownership rates (TDD M10). `config/lotlink.php` holds the defaults; an admin can
+ * Budget and loan rates (TDD M10). `config/lotlink.php` holds the defaults; an admin can
  * override them in /admin → Finance rates. The overrides are laid over `config('lotlink.finance')`
  * at boot and before each queued job, so `FinanceCalculator` and the pages keep reading config.
  */
@@ -22,7 +22,6 @@ final class FinanceRates
     /** The settings an admin may change (tenors, bands and all). */
     public const EDITABLE = [
         'affordability_ratio', 'interest_rate', 'deposit_percent', 'tenor_months', 'tenors',
-        'insurance_percent', 'papers', 'fuel_price', 'km_per_month', 'km_per_litre', 'servicing',
     ];
 
     /** @var array<string, mixed>|null the values from config/lotlink.php, before any override */
@@ -53,7 +52,7 @@ final class FinanceRates
 
             $value = array_intersect_key($value, array_flip(self::EDITABLE));
             // JSON turns 30.0 into 30; keep the types config/lotlink.php uses.
-            foreach (['affordability_ratio', 'interest_rate', 'insurance_percent'] as $float) {
+            foreach (['affordability_ratio', 'interest_rate'] as $float) {
                 if (isset($value[$float])) {
                     $value[$float] = (float) $value[$float];
                 }
@@ -85,11 +84,6 @@ final class FinanceRates
         $before = self::overrides();
         $values = array_intersect_key($values, array_flip(self::EDITABLE));
 
-        foreach (['km_per_litre', 'servicing'] as $bands) {
-            if (isset($values[$bands]) && is_array($values[$bands])) {
-                ksort($values[$bands]);
-            }
-        }
         if (isset($values['tenors']) && is_array($values['tenors'])) {
             $values['tenors'] = array_values(array_map('intval', $values['tenors']));
             sort($values['tenors']);

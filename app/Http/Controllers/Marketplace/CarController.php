@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Marketplace;
 
 use App\Domain\Analytics\Support\Tracker;
-use App\Domain\Finance\Support\FinanceCalculator;
 use App\Domain\Inventory\Enums\VehicleStatus;
 use App\Domain\Inventory\Models\Vehicle;
 use App\Domain\Lots\Enums\LotStatus;
@@ -72,8 +71,6 @@ class CarController extends Controller
             'inspector' => $public && ($user?->isInspector() ?? false),
             'finance' => $price ? [
                 'price' => $price,
-                'from' => FinanceCalculator::fromPrice($price),
-                'ownership' => FinanceCalculator::ownership($price, $vehicle->engine_cc, $vehicle->year),
                 'defaults' => BudgetController::finance(),
             ] : null,
         ])->withViewData(['meta' => [

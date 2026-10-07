@@ -22,12 +22,3 @@ it('handles an interest-free loan', function () {
     expect(FinanceCalculator::monthlyPayment(1_200_000, 0, 12))->toBe(100_000)
         ->and(FinanceCalculator::principalFor(100_000, 0, 12))->toBe(1_200_000.0);
 });
-
-it('estimates the yearly cost of ownership', function () {
-    $this->travelTo('2026-10-01');
-
-    $cost = FinanceCalculator::ownership(12_500_000, 2500, 2018);
-
-    expect(array_column($cost['items'], 'amount'))->toBe([500_000, 85_000, 1_309_000, 400_000])
-        ->and($cost['total'])->toBe(2_294_000);
-});

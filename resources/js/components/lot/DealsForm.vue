@@ -55,7 +55,7 @@ const toggle =
         <label class="flex items-start justify-between gap-4 border-b border-divider pb-4 text-[15px]">
             <span class="flex flex-col">
                 Take car loan applications
-                <span class="text-[13px] text-muted">Buyers can check if they qualify for a loan on your cars with our finance partner. Off: the application is hidden; buyers still see the monthly estimate.</span>
+                <span class="text-[13px] text-muted">Buyers can check if they qualify for a loan on your cars with our finance partner. Off: the application is hidden.</span>
             </span>
             <input v-model="form.accepts_finance" type="checkbox" role="switch" class="peer sr-only" />
             <span :class="toggle" />
