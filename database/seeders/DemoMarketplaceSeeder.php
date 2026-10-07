@@ -25,7 +25,7 @@ use RuntimeException;
  * Demo marketplace for local development and screenshots: four sellers in Lagos, Abuja and Port Harcourt with
  * real makes and models at realistic prices, pushed through the real add-car pipeline. The people and businesses
  * are made up. Photos come from database/seeders/demo-photos/{year}-{make}-{model}/ (jpg, png or webp, the first
- * is the cover) when that folder exists, otherwise a drawn placeholder in the car's colour.
+ * is the cover; credits in CREDITS.md there) when that folder exists, otherwise a drawn placeholder in the car's colour.
  *
  *     php artisan db:seed --class=DemoMarketplaceSeeder
  */
@@ -45,37 +45,37 @@ class DemoMarketplaceSeeder extends Seeder
 
     // seller, make, model, year, trim, price (naira), km, colour, RGB (placeholder), body, condition, engine cc, drivetrain, features, description
     private const CARS = [
-        [0, 'Lexus', 'RX 350', 2019, 'F Sport', 34_500_000, 48_200, 'Black', [30, 30, 35], 'suv', 'foreign_used', 3500, 'awd',
+        [0, 'Lexus', 'RX 350', 2019, 'F Sport', 34_500_000, 48_200, 'Nightfall Blue', [30, 30, 35], 'suv', 'foreign_used', 3500, 'awd',
             ['leather-seats', 'sunroof', 'reverse-camera', 'navigation', 'push-button-start', 'blind-spot-monitor'], 'Accident-free US import, full service history. Duty paid, customs papers and plate ready. Smooth V6, no warning lights.'],
         [0, 'Toyota', 'Camry', 2018, 'SE', 12_500_000, 62_400, 'Silver', [150, 155, 160], 'sedan', 'foreign_used', 2500, 'fwd',
             ['reverse-camera', 'bluetooth', 'keyless-entry', 'alloy-wheels'], 'Clean Tokunbo Camry, first body. Cold AC, new tyres, registered in Lagos.'],
-        [0, 'Honda', 'Accord', 2017, 'EX-L', 9_800_000, 81_000, 'Burgundy', [120, 20, 30], 'sedan', 'foreign_used', 2400, 'fwd',
+        [0, 'Honda', 'Accord', 2017, 'EX-L', 9_800_000, 81_000, 'White', [120, 20, 30], 'sedan', 'foreign_used', 2400, 'fwd',
             ['leather-seats', 'sunroof', 'apple-carplay-android-auto'], 'Leather interior, sunroof, Apple CarPlay. Engine and gear in perfect condition.'],
         [0, 'Toyota', 'Corolla', 2016, 'LE', 7_900_000, 91_000, 'White', [240, 240, 240], 'sedan', 'locally_used', 1800, 'fwd',
             ['air-conditioning', 'bluetooth'], 'One owner since 2019, buy and drive. Service records available.'],
-        [1, 'Toyota', 'RAV4', 2017, 'XLE', 14_200_000, 70_500, 'Blue', [40, 70, 120], 'suv', 'foreign_used', 2500, 'awd',
+        [1, 'Toyota', 'RAV4', 2017, 'XLE', 14_200_000, 70_500, 'Silver', [40, 70, 120], 'suv', 'foreign_used', 2500, 'awd',
             ['reverse-camera', 'sunroof', 'push-button-start'], 'AWD, sunroof, push start. Very clean inside and out.'],
-        [1, 'Toyota', 'Highlander', 2015, 'Limited', 11_300_000, 98_000, 'Grey', [90, 90, 95], 'suv', 'foreign_used', 3500, 'awd',
+        [1, 'Toyota', 'Highlander', 2015, 'Limited', 11_300_000, 98_000, 'Burgundy', [90, 90, 95], 'suv', 'foreign_used', 3500, 'awd',
             ['third-row-seating', 'leather-seats', 'reverse-camera'], 'Seven seats, captain chairs, rear camera. Ideal family car.'],
-        [1, 'Hyundai', 'Elantra', 2020, 'SEL', 11_000_000, 39_000, 'Pearl White', [220, 220, 225], 'sedan', 'foreign_used', 2000, 'fwd',
+        [1, 'Hyundai', 'Elantra', 2020, 'SEL', 11_000_000, 39_000, 'Silver', [220, 220, 225], 'sedan', 'foreign_used', 2000, 'fwd',
             ['apple-carplay-android-auto', 'blind-spot-monitor', 'reverse-camera'], 'Low mileage, very economical, CarPlay and blind-spot monitor.'],
-        [1, 'Mercedes-Benz', 'GLE', 2018, 'GLE 350 4MATIC', 29_000_000, 55_000, 'Obsidian Black', [20, 20, 22], 'suv', 'foreign_used', 3500, 'awd',
+        [1, 'Mercedes-Benz', 'GLE', 2018, 'GLE 350 4MATIC', 29_000_000, 55_000, 'Iridium Silver', [20, 20, 22], 'suv', 'foreign_used', 3500, 'awd',
             ['leather-seats', 'panoramic-roof', 'navigation', 'premium-sound', 'parking-sensors'], 'Panoramic roof, premium sound, 4MATIC. Inspected, no faults.'],
-        [2, 'Toyota', 'Sienna', 2014, 'XLE', 8_700_000, 120_000, 'Champagne', [180, 160, 130], 'van', 'locally_used', 3500, 'fwd',
+        [2, 'Toyota', 'Sienna', 2014, 'XLE', 8_700_000, 120_000, 'Black', [180, 160, 130], 'van', 'locally_used', 3500, 'fwd',
             ['third-row-seating', 'rear-entertainment'], 'Eight seats, rear DVD, power doors. Perfect for school runs and church.'],
-        [2, 'Kia', 'Sorento', 2017, 'LX', 9_800_000, 88_000, 'Red', [110, 25, 25], 'suv', 'foreign_used', 2400, 'fwd',
+        [2, 'Kia', 'Sorento', 2017, 'LX', 9_800_000, 88_000, 'Silver', [110, 25, 25], 'suv', 'foreign_used', 2400, 'fwd',
             ['reverse-camera', 'bluetooth'], 'Economical SUV, clean title, duty paid.'],
         [2, 'Toyota', 'Land Cruiser Prado', 2018, 'TX-L', 48_000_000, 64_000, 'White', [235, 235, 235], 'suv', 'foreign_used', 2700, 'awd',
             ['leather-seats', 'reverse-camera', 'navigation', 'tracker-installed'], 'Gulf spec Prado, tracker installed, ready for any road.'],
-        [2, 'Toyota', 'Venza', 2015, 'XLE', 10_500_000, 96_000, 'Brown', [100, 70, 50], 'wagon', 'foreign_used', 2700, 'fwd',
+        [2, 'Toyota', 'Venza', 2015, 'XLE', 10_500_000, 96_000, 'Black', [100, 70, 50], 'wagon', 'foreign_used', 2700, 'fwd',
             ['panoramic-roof', 'leather-seats'], 'Panoramic roof and leather seats. Strong engine, smooth drive.'],
-        [3, 'Toyota', 'Hilux', 2019, 'SR5', 32_000_000, 72_000, 'Silver', [175, 175, 180], 'pickup', 'foreign_used', 2800, 'awd',
+        [3, 'Toyota', 'Hilux', 2019, 'SR5', 32_000_000, 72_000, 'White', [175, 175, 180], 'pickup', 'foreign_used', 2800, 'awd',
             ['tracker-installed', 'reverse-camera'], 'Diesel 4x4 double cabin, tracker installed. Built for work.'],
-        [3, 'Honda', 'CR-V', 2018, 'EX', 16_500_000, 58_000, 'Grey', [100, 105, 110], 'suv', 'foreign_used', 1500, 'awd',
+        [3, 'Honda', 'CR-V', 2018, 'EX', 16_500_000, 58_000, 'White', [100, 105, 110], 'suv', 'foreign_used', 1500, 'awd',
             ['sunroof', 'apple-carplay-android-auto', 'reverse-camera'], 'Turbo engine, sunroof, CarPlay. Very fuel efficient.'],
-        [3, 'Lexus', 'ES 350', 2016, null, 13_500_000, 83_000, 'Black', [25, 25, 28], 'sedan', 'foreign_used', 3500, 'fwd',
+        [3, 'Lexus', 'ES 350', 2016, null, 13_500_000, 83_000, 'White', [25, 25, 28], 'sedan', 'foreign_used', 3500, 'fwd',
             ['leather-seats', 'navigation', 'premium-sound'], 'Comfortable executive saloon, quiet cabin, clean leather.'],
-        [3, 'Ford', 'Edge', 2016, 'SEL', 9_500_000, 90_000, 'White', [238, 238, 238], 'suv', 'foreign_used', 3500, 'fwd',
+        [3, 'Ford', 'Edge', 2016, 'SEL', 9_500_000, 90_000, 'Magnetic Grey', [238, 238, 238], 'suv', 'foreign_used', 3500, 'fwd',
             ['reverse-camera', 'keyless-entry'], 'Spacious SUV, good price, papers complete.'],
     ];
 
