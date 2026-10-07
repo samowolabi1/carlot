@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Queue;
 use RuntimeException;
 
 /**
- * S12 demo data on top of DemoMarketplaceSeeder: reviews and an inspection at Demo Lot Ikeja,
+ * S12 demo data on top of DemoMarketplaceSeeder: reviews and an inspection at Ade Motors (Ikeja),
  * and a registered inspector (sign in as 08000000200) to try independent inspections.
  *
  *     php artisan db:seed --class=DemoTrustSeeder
@@ -39,7 +39,7 @@ class DemoTrustSeeder extends Seeder
         config(['queue.default' => 'sync']);
         Queue::setDefaultDriver('sync');
 
-        $lot = Lot::where('name', 'Demo Seller Ikeja')->first() ?? throw new RuntimeException('Run DemoMarketplaceSeeder first.');
+        $lot = Lot::whereIn('name', ['Ade Motors', 'Demo Seller Ikeja'])->first() ?? throw new RuntimeException('Run DemoMarketplaceSeeder first.');
 
         foreach (self::REVIEWS as $i => [$phone, $name, $rating, $tags, $body]) {
             $buyer = User::firstOrCreate(['phone' => $phone], ['name' => $name, 'phone_verified_at' => now()]);
@@ -61,7 +61,7 @@ class DemoTrustSeeder extends Seeder
             $checklist = collect(InspectionChecklist::keys())->mapWithKeys(fn ($k) => [$k => ['status' => 'pass', 'note' => null]])->all();
             $checklist['paint'] = ['status' => 'advisory', 'note' => 'Light stone chips on the bonnet'];
             $checklist['tread_front'] = ['status' => 'advisory', 'note' => 'About 4 mm left'];
-            app(SaveInspection::class)->run($camry, $lot->owner, InspectorType::Dealer, $checklist, 'Serviced before listing. Duty paid, papers ready.', [], 'Demo workshop');
+            app(SaveInspection::class)->run($camry, $lot->owner, InspectorType::Dealer, $checklist, 'Serviced before listing. Duty paid, papers ready.', [], 'Allen Avenue Auto Clinic');
         }
 
         $inspector = User::firstOrCreate(['phone' => '+2348000000200'], ['name' => 'Tayo Bello', 'phone_verified_at' => now()]);
