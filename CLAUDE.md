@@ -399,7 +399,9 @@ disable `proc_open`, and then they run inside the cron job's process. `ServerHea
 `storage/app/deployed-version`; `AppVersion` also clears stale bootstrap caches and serves an "updating" page meanwhile. The same hook re-caches config
 when `.env` is saved and runs `Admin\Actions\EnsureFirstAdmin` (creates the first admin; takes a corrected `ADMIN_PASSWORD`
 only while the password is still the one from `.env`; `storage/app/reset-admin-password` resets it and its 2FA) and writes
-`APP_KEY` back into `.env` if it went missing (the running key, else a new one). Seeding never changes an existing admin. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
+`APP_KEY` back into `.env` if it went missing (the running key, else a new one). `storage/app/load-demo-data` makes it run
+`System\Actions\LoadDemoData` once (the demo seeders allow production only with `lotlink.demo_allowed`, set by it; demo
+accounts get `DEMO_PASSWORD` or a random one). Seeding never changes an existing admin. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
 proxies `config/trustedproxy.php`); the seeder creates no admin on a server without `ADMIN_EMAIL` and a 12+ character `ADMIN_PASSWORD`. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
 
 Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in

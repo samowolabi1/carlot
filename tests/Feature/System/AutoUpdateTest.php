@@ -45,6 +45,13 @@ function autoUpdate(string $base, int $deployResult = 0): object
 
             return $command === 'lotlink:deploy' ? $this->deployResult : 0;
         }
+
+        protected function runDemo(): array
+        {
+            $this->calls[] = ['demo', []];
+
+            return ['Demo data loaded (test).'];
+        }
     };
     $command->setLaravel(app());
     $command->run(new ArrayInput([]), new BufferedOutput);
@@ -164,4 +171,16 @@ it('passes list-style options to in-process commands as one command line', funct
         ->toBe('queue:work --queue=default,media --stop-when-empty --max-time=50')
         ->and(ScheduledTask::commandLine('sanctum:prune-expired --hours=24', []))->toBe('sanctum:prune-expired --hours=24')
         ->and(ScheduledTask::commandLine('demo', ['--name' => 'two words', '--force' => true, '--skip' => false]))->toBe('demo --name="two words" --force');
+});
+
+it('loads demo data once when asked with a file', function () {
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    AppVersion::markDeployed($this->base, 'abc123');
+    touch($this->base.'/storage/app/load-demo-data');
+    expect(AppVersion::needsAttention($this->base))->toBeTrue();
+
+    expect(autoUpdate($this->base)->calls)->toBe([['demo', []]])
+        ->and(is_file($this->base.'/storage/app/load-demo-data'))->toBeFalse()
+        ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('Demo data loaded (test).');
+    expect(autoUpdate($this->base)->calls)->toBe([]);
 });

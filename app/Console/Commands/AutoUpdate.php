@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Domain\Admin\Actions\EnsureFirstAdmin;
+use App\Domain\Lots\Models\Plan;
+use App\Domain\System\Actions\LoadDemoData;
 use App\Domain\System\AppVersion;
 use Illuminate\Console\Command;
 use Illuminate\Encryption\Encrypter;
@@ -16,6 +18,7 @@ use Throwable;
  *  - a new package (VERSION differs from the last deployed one): APP_KEY if empty, lotlink:deploy (with --seed on a first
  *    install), then the version is recorded; a failed update is retried each minute while the site shows "updating";
  *  - .env was saved: the settings are re-cached;
+ *  - storage/app/load-demo-data: the demo data is loaded once (LoadDemoData);
  *  - and each time, the first admin is created or fixed from ADMIN_EMAIL / ADMIN_PASSWORD, or reset on request (EnsureFirstAdmin).
  * Everything is written to storage/logs/auto-update.log, which can be read in cPanel's File Manager.
  */
@@ -33,7 +36,8 @@ class AutoUpdate extends Command
         $envChanged = AppVersion::envChanged($base);
         $reset = AppVersion::adminResetRequested($base);
         $keyMissing = blank(config('app.key')) || AppVersion::envKeyMissing($base);
-        if ($version === null || (! $pending && ! $envChanged && ! $reset && ! $keyMissing)) {
+        $demo = AppVersion::demoRequested($base);
+        if ($version === null || (! $pending && ! $envChanged && ! $reset && ! $keyMissing && ! $demo)) {
             $this->info('Up to date'.($version ? " ({$version})" : '').'.');
 
             return self::SUCCESS;
@@ -53,7 +57,7 @@ class AutoUpdate extends Command
                 if (! $this->update($base, $version)) {
                     return self::FAILURE;
                 }
-            } else {
+            } elseif ($envChanged || $reset || $keyMissing) {
                 $this->log(match (true) {
                     $reset => 'Admin password reset requested (storage/app/reset-admin-password).',
                     $envChanged => '.env was saved: refreshing the settings.',
@@ -64,6 +68,9 @@ class AutoUpdate extends Command
 
             $this->ensureAdmin();
             AppVersion::markEnvApplied($base);
+            if ($demo) {
+                $this->loadDemo($base);
+            }
 
             return self::SUCCESS;
         } finally {
@@ -78,7 +85,8 @@ class AutoUpdate extends Command
         $this->log("Updating to {$version} (was ".(AppVersion::deployed($base) ?? 'not installed').')');
 
         try {
-            $firstInstall = ! Schema::hasTable('migrations');
+            // Also when the tables exist but were never seeded (an earlier install stopped half-way): seeding is idempotent.
+            $firstInstall = ! Schema::hasTable('migrations') || ! Schema::hasTable('plans') || ! Plan::query()->exists();
         } catch (Throwable $e) {
             $this->log('Cannot reach the database: '.$e->getMessage().' Check DB_HOST, DB_DATABASE, DB_USERNAME and DB_PASSWORD in .env (put passwords in double quotes).');
 
@@ -135,6 +143,26 @@ class AutoUpdate extends Command
                 $this->laravel['config']->set(require $cached);
             }
         }
+    }
+
+    /** Demo data, once per request file (removed first, so a failure isn't retried every minute). */
+    private function loadDemo(string $base): void
+    {
+        @unlink($base.'/storage/app/load-demo-data');
+        $this->log('Loading demo data (storage/app/load-demo-data)…');
+        try {
+            foreach ($this->runDemo() as $line) {
+                $this->log($line);
+            }
+        } catch (Throwable $e) {
+            $this->log('Demo data could not be loaded: '.$e->getMessage().' Create the file again to retry.');
+        }
+    }
+
+    /** @return list<string> */
+    protected function runDemo(): array
+    {
+        return app(LoadDemoData::class)->run();
     }
 
     /** Create the first admin, or fix its password from .env, and say so in the log. */

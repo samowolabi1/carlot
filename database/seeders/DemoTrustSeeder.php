@@ -24,7 +24,7 @@ use RuntimeException;
  */
 class DemoTrustSeeder extends Seeder
 {
-    private const REVIEWS = [
+    public const REVIEWS = [
         ['+2348035550777', 'Tunde Adebayo', 5, ['as_described', 'friendly', 'on_time'], 'Kemi had the car ready when I arrived and let me drive on the expressway.'],
         ['+2348035550778', 'Ada Obi', 4, ['honest_price'], 'Fair price and no pressure. Paperwork took a little while.'],
         ['+2348035550779', 'Musa Bello', 5, ['quick_replies', 'friendly'], null],
@@ -32,7 +32,8 @@ class DemoTrustSeeder extends Seeder
 
     public function run(): void
     {
-        if (app()->isProduction()) {
+        // On a server only through LoadDemoData (storage/app/load-demo-data), which sets lotlink.demo_allowed.
+        if (app()->isProduction() && ! config('lotlink.demo_allowed')) {
             throw new RuntimeException('The demo seeder is for local development only.');
         }
 

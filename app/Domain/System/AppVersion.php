@@ -97,11 +97,17 @@ final class AppVersion
         return is_file($base.'/storage/app/reset-admin-password');
     }
 
+    /** An empty storage/app/load-demo-data asks the cron job to load the demo data (LoadDemoData). */
+    public static function demoRequested(string $base): bool
+    {
+        return is_file($base.'/storage/app/load-demo-data');
+    }
+
     /** Something for the cron job's lotlink:auto-update to do: a new upload, a saved .env or an admin reset. */
     public static function needsAttention(string $base): bool
     {
         return self::current($base) !== null
-            && (self::pending($base) || self::envChanged($base) || self::envKeyMissing($base) || self::adminResetRequested($base));
+            && (self::pending($base) || self::envChanged($base) || self::envKeyMissing($base) || self::adminResetRequested($base) || self::demoRequested($base));
     }
 
     /** Once per upload: forget the previous release's bootstrap caches (they can name classes the new code no longer has). */

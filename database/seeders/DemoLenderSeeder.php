@@ -20,7 +20,8 @@ class DemoLenderSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->isProduction()) {
+        // On a server only through LoadDemoData (storage/app/load-demo-data), which sets lotlink.demo_allowed.
+        if (app()->isProduction() && ! config('lotlink.demo_allowed')) {
             throw new RuntimeException('The demo seeder is for local development only.');
         }
 

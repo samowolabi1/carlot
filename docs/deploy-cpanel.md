@@ -95,6 +95,16 @@ on its own the next minute. Then sign in at `/admin`; **System health** should s
 
 **With a terminal** you can do the same by hand: `php artisan key:generate`, then `php artisan lotlink:deploy --seed`.
 
+## Demo data (test sites only)
+
+To fill a test site with example sellers, cars (with photos), lenders and reviews: optionally set `DEMO_PASSWORD="…"`
+(12+ characters) in `.env`, then create an empty file `caryard/storage/app/load-demo-data` in File Manager. Within a
+minute or two the cron job loads it, removes the file and writes the demo sign-ins to `storage/logs/auto-update.log`:
+sellers `0800 000 0101` to `0800 000 0104`, buyer `0803 555 0777`, inspector `0800 000 0200` and lender
+`lender@lotlink.test`, all with `DEMO_PASSWORD` (or a random password shown in the log). Sign in at `/login` → **Sign in
+with a password**; admins can also use **Log in as** on a seller. The people and businesses are made up, so don't do this
+on the live site.
+
 ## 6. Services and webhooks
 
 Set these in each provider's dashboard once the site is live (replace the domain):

@@ -32,7 +32,7 @@ use RuntimeException;
 class DemoMarketplaceSeeder extends Seeder
 {
     // Phones match the earlier demo, so existing logins keep working (0800 000 0101, password lagos2026cars).
-    private const LOTS = [
+    public const LOTS = [
         ['name' => 'Ade Motors', 'owner' => 'Adebayo Ogunleye', 'phone' => '+2348000000101', 'city' => 'Ikeja', 'state' => 'Lagos', 'address' => '14 Allen Avenue', 'lat' => 6.6018, 'lng' => 3.3515, 'color' => '#16302B',
             'tagline' => 'Clean Tokunbo and Nigerian-used cars on Allen Avenue since 2009', 'old' => ['Demo Seller Ikeja', 'Demo Lot Ikeja']],
         ['name' => 'Lekki Prestige Autos', 'owner' => 'Chukwuemeka Obi', 'phone' => '+2348000000102', 'city' => 'Lekki', 'state' => 'Lagos', 'address' => '22 Admiralty Way', 'lat' => 6.4474, 'lng' => 3.4723, 'color' => '#1E3A8A',
@@ -81,7 +81,8 @@ class DemoMarketplaceSeeder extends Seeder
 
     public function run(): void
     {
-        if (app()->isProduction()) {
+        // On a server only through LoadDemoData (storage/app/load-demo-data), which sets lotlink.demo_allowed.
+        if (app()->isProduction() && ! config('lotlink.demo_allowed')) {
             throw new RuntimeException('The demo seeder is for local development only.');
         }
 

@@ -67,6 +67,11 @@ return [
     // Run scheduled commands inside the cron job's process (ScheduledTask). Empty = automatic: only where proc_open is disabled.
     'schedule_in_process' => env('SCHEDULE_IN_PROCESS'),
 
+    // Demo data on a server (storage/app/load-demo-data, LoadDemoData): the demo accounts' password (12+ characters, else
+    // a random one is written to storage/logs/auto-update.log). demo_allowed is set at runtime by LoadDemoData only.
+    'demo_password' => env('DEMO_PASSWORD'),
+    'demo_allowed' => false,
+
     // The first admin, created by `db:seed` (`lotlink:deploy --seed`). Outside a local install the seeder needs both
     // an email and a password of 12+ characters, and it never changes the password of an admin that already exists.
     'first_admin' => [
