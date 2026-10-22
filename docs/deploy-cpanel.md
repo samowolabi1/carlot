@@ -33,7 +33,8 @@ your local `.env` before building.
    `pdo_mysql, mbstring, openssl, intl, gd (with WebP), fileinfo, curl, xml, dom, ctype, tokenizer, iconv, zip`, and
    ideally `exif` and `gmp`.
 2. **PHP options** (*MultiPHP INI Editor* or *Select PHP Version → Options*): `memory_limit 256M`,
-   `upload_max_filesize 16M`, `post_max_size 20M`, `max_execution_time 120`. Leave `proc_open` enabled (the scheduler uses it).
+   `upload_max_filesize 16M`, `post_max_size 20M`, `max_execution_time 120`. If the host disables `proc_open`, that's fine:
+   scheduled tasks then run inside the cron job itself (`ScheduledTask`; force with `SCHEDULE_IN_PROCESS=true|false`).
 3. **Database:** *MySQL Databases* → create a database and a user, and add the user to the database with **All Privileges**.
    MySQL 8 is recommended. MariaDB 10.6+ also works (the optional spatial index is skipped there), but our automated
    tests run on MySQL 8.
@@ -128,7 +129,8 @@ After changing `.env` (not uploading code) there's nothing to run: the cron job 
 | Symptom | Fix |
 |---|---|
 | 500 error straight after upload | `storage` or `bootstrap/cache` not writable; or `APP_KEY` empty (`php artisan key:generate`). Look in `storage/logs`. |
-| Photos stay "processing" | The cron job isn't running (System health → Cron), or `proc_open` is disabled. |
+| Photos stay "processing" | The cron job isn't running (System health → Cron job running). With `memory_limit` 128M large photos can fail: set 256M. |
+| Errors on every page after re-creating `.env` | `APP_KEY` was lost. The cron job writes it back (or creates one) within a minute; `.env` must be writable. |
 | Emails/sign-in codes by email don't arrive | Check SMTP settings; use port 465 with `MAIL_SCHEME=smtps`, or 587 with `MAIL_SCHEME=smtp`. |
 | Images 404 | `LOTLINK_MEDIA_DISK=media`; with method C set `MEDIA_ROOT`. Run `php artisan media:move-to-public` if older images were saved in `storage/app/public`. |
 | Page styles missing | `public/build` wasn't uploaded: rebuild the package. Admin styles: `php artisan filament:assets`. |

@@ -47,17 +47,20 @@ final class ServerHealth
         $add('PHP', 'GD can write WebP', $webp ? self::OK : self::FAIL, $webp ? '' : 'Car photos are saved as WebP. Ask the host for GD with WebP support.');
         $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
         $procOpen = function_exists('proc_open') && ! in_array('proc_open', $disabled, true);
-        $add('PHP', 'proc_open allowed', $procOpen ? self::OK : self::FAIL, $procOpen ? '' : 'The scheduler starts its tasks with proc_open. Ask the host to allow it, or remove it from disable_functions.');
+        $add('PHP', 'proc_open allowed', $procOpen ? self::OK : self::WARN, $procOpen ? '' : 'Disabled by the host: scheduled tasks run inside the cron job instead (fine; a slow task delays the next ones).');
         $memory = self::bytes((string) ini_get('memory_limit'));
         $add('PHP', 'memory_limit', $memory === -1 || $memory >= 256 * 1024 * 1024 ? self::OK : self::WARN, ini_get('memory_limit').' (256M or more for photo processing)');
         $upload = min(self::bytes((string) ini_get('upload_max_filesize')), self::bytes((string) ini_get('post_max_size')));
         $add('PHP', 'Upload size', $upload >= 12 * 1024 * 1024 ? self::OK : self::WARN, ini_get('upload_max_filesize').' / post '.ini_get('post_max_size').' (12M or more: phone photos)');
 
         // App
-        $add('App', 'APP_KEY set', filled(config('app.key')) ? self::OK : self::FAIL, filled(config('app.key')) ? '' : 'Run php artisan key:generate.');
+        $add('App', 'APP_KEY set', filled(config('app.key')) ? self::OK : self::FAIL, filled(config('app.key')) ? '' : 'The cron job writes one into .env within a minute (.env must be writable). With a terminal: php artisan key:generate.');
         $add('App', 'Debug off in production', ! $production || ! config('app.debug') ? self::OK : self::FAIL, $production && config('app.debug') ? 'Set APP_DEBUG=false: debug pages show secrets.' : '');
         $https = str_starts_with((string) config('app.url'), 'https://');
-        $add('App', 'APP_URL uses https', $https || ! $production ? self::OK : self::WARN, (string) config('app.url'));
+        $url = (string) config('app.url');
+        $scheme = (bool) preg_match('#^https?://#', $url);
+        $add('App', 'APP_URL uses https', $https || ! $production ? self::OK : ($scheme ? self::WARN : self::FAIL),
+            $scheme ? $url : "{$url}: write the full address with https://, e.g. APP_URL=https://{$url}, or links and images break.");
         try {
             DB::select('select 1');
             $add('App', 'Database', self::OK, (string) config('database.default'));

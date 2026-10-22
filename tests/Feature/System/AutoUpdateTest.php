@@ -3,6 +3,8 @@
 use App\Console\Commands\AutoUpdate;
 use App\Domain\Accounts\Models\User;
 use App\Domain\System\AppVersion;
+use App\Domain\System\ScheduledTask;
+use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -81,13 +83,39 @@ it('keeps the site on "updating" and retries when the update fails', function ()
         ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('tried again in a minute');
 });
 
-it('installs the first time: creates the app key and seeds', function () {
+it('installs the first time: writes an app key into .env and seeds', function () {
     file_put_contents($this->base.'/VERSION', 'abc123');
+    file_put_contents($this->base.'/.env', "APP_NAME=CarYard\nAPP_KEY=\"\"\nDB_CONNECTION=mysql\n");
     config(['app.key' => '']);
     Schema::drop('migrations');
 
-    expect(autoUpdate($this->base)->calls)->toBe([['key:generate', ['--force' => true]], ['lotlink:deploy', ['--seed' => true]]])
-        ->and(AppVersion::deployed($this->base))->toBe('abc123');
+    expect(autoUpdate($this->base)->calls)->toBe([['lotlink:deploy', ['--seed' => true]]])
+        ->and(AppVersion::deployed($this->base))->toBe('abc123')
+        ->and(AppVersion::envKey($this->base))->toStartWith('base64:')->toBe(config('app.key'))
+        ->and(file_get_contents($this->base.'/.env'))->toContain("APP_NAME=CarYard\nAPP_KEY=base64:")->toContain("\nDB_CONNECTION=mysql\n")->not->toContain('""');
+});
+
+it('puts back the key the site was using when .env loses it', function () {
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    AppVersion::markDeployed($this->base, 'abc123');
+    file_put_contents($this->base.'/.env', "APP_NAME=CarYard\nAPP_KEY=\n");
+    AppVersion::markEnvApplied($this->base);
+    $running = config('app.key');
+    expect(AppVersion::needsAttention($this->base))->toBeTrue();
+
+    expect(autoUpdate($this->base)->calls)->toBe([['config:cache', []]])
+        ->and(AppVersion::envKey($this->base))->toBe($running)
+        ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('put back the key');
+    expect(AppVersion::needsAttention($this->base))->toBeFalse();
+});
+
+it('runs scheduled commands inside the cron job where proc_open is disabled', function () {
+    config(['lotlink.schedule_in_process' => true]);
+    expect(ScheduledTask::command('otp:prune'))->toBeInstanceOf(CallbackEvent::class)
+        ->description->toBe('otp:prune');
+
+    config(['lotlink.schedule_in_process' => false]);
+    expect(ScheduledTask::command('otp:prune'))->not->toBeInstanceOf(CallbackEvent::class);
 });
 
 it('drops the old release caches once per upload, before the app boots', function () {

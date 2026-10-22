@@ -57,6 +57,40 @@ final class AppVersion
         }
     }
 
+    /** APP_KEY as written in .env (quotes removed), or null when it's missing or empty. */
+    public static function envKey(string $base): ?string
+    {
+        $env = @file_get_contents($base.'/.env');
+        if (! is_string($env) || ! preg_match('/^\s*APP_KEY\s*=(.*)$/m', $env, $m)) {
+            return null;
+        }
+        $value = trim(trim($m[1]), '"\'');
+
+        return $value === '' ? null : $value;
+    }
+
+    /** .env exists but has no APP_KEY (for example it was re-created from the template). */
+    public static function envKeyMissing(string $base): bool
+    {
+        return is_file($base.'/.env') && self::envKey($base) === null;
+    }
+
+    /** Write APP_KEY into .env, replacing the line (whatever its quotes) or adding it. */
+    public static function writeEnvKey(string $base, string $key): bool
+    {
+        $path = $base.'/.env';
+        $env = @file_get_contents($path);
+        if (! is_string($env)) {
+            return false;
+        }
+        $line = 'APP_KEY='.$key;
+        $new = preg_match('/^\s*APP_KEY\s*=.*$/m', $env)
+            ? (string) preg_replace_callback('/^\s*APP_KEY\s*=.*$/m', fn () => $line, $env, 1)
+            : rtrim($env, PHP_EOL).PHP_EOL.$line.PHP_EOL;
+
+        return @file_put_contents($path, $new, LOCK_EX) !== false;
+    }
+
     /** An empty storage/app/reset-admin-password asks the cron job to reset the admin's password from .env. */
     public static function adminResetRequested(string $base): bool
     {
@@ -66,7 +100,8 @@ final class AppVersion
     /** Something for the cron job's lotlink:auto-update to do: a new upload, a saved .env or an admin reset. */
     public static function needsAttention(string $base): bool
     {
-        return self::current($base) !== null && (self::pending($base) || self::envChanged($base) || self::adminResetRequested($base));
+        return self::current($base) !== null
+            && (self::pending($base) || self::envChanged($base) || self::envKeyMissing($base) || self::adminResetRequested($base));
     }
 
     /** Once per upload: forget the previous release's bootstrap caches (they can name classes the new code no longer has). */

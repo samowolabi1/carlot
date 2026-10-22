@@ -64,6 +64,9 @@ return [
     // Admins must use an authenticator app (TDD M1). On by default in production.
     'admin_2fa' => (bool) env('ADMIN_2FA', env('APP_ENV') === 'production'),
 
+    // Run scheduled commands inside the cron job's process (ScheduledTask). Empty = automatic: only where proc_open is disabled.
+    'schedule_in_process' => env('SCHEDULE_IN_PROCESS'),
+
     // The first admin, created by `db:seed` (`lotlink:deploy --seed`). Outside a local install the seeder needs both
     // an email and a password of 12+ characters, and it never changes the password of an admin that already exists.
     'first_admin' => [

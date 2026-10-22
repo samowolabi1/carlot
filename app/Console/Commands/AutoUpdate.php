@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Domain\Admin\Actions\EnsureFirstAdmin;
 use App\Domain\System\AppVersion;
 use Illuminate\Console\Command;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -31,7 +32,8 @@ class AutoUpdate extends Command
         $pending = AppVersion::pending($base);
         $envChanged = AppVersion::envChanged($base);
         $reset = AppVersion::adminResetRequested($base);
-        if ($version === null || (! $pending && ! $envChanged && ! $reset)) {
+        $keyMissing = blank(config('app.key')) || AppVersion::envKeyMissing($base);
+        if ($version === null || (! $pending && ! $envChanged && ! $reset && ! $keyMissing)) {
             $this->info('Up to date'.($version ? " ({$version})" : '').'.');
 
             return self::SUCCESS;
@@ -44,12 +46,19 @@ class AutoUpdate extends Command
         }
 
         try {
+            if ($keyMissing) {
+                $this->ensureKey($base);
+            }
             if ($pending) {
                 if (! $this->update($base, $version)) {
                     return self::FAILURE;
                 }
             } else {
-                $this->log($reset ? 'Admin password reset requested (storage/app/reset-admin-password).' : '.env was saved: refreshing the settings.');
+                $this->log(match (true) {
+                    $reset => 'Admin password reset requested (storage/app/reset-admin-password).',
+                    $envChanged => '.env was saved: refreshing the settings.',
+                    default => 'Refreshing the settings.',
+                });
                 $this->refreshSettings();
             }
 
@@ -67,11 +76,6 @@ class AutoUpdate extends Command
     private function update(string $base, string $version): bool
     {
         $this->log("Updating to {$version} (was ".(AppVersion::deployed($base) ?? 'not installed').')');
-
-        if (blank(config('app.key'))) {
-            $this->log('APP_KEY is empty: creating one.');
-            $this->runArtisan('key:generate', ['--force' => true]);
-        }
 
         try {
             $firstInstall = ! Schema::hasTable('migrations');
@@ -94,6 +98,31 @@ class AutoUpdate extends Command
         $this->log("Done: running {$version}.");
 
         return true;
+    }
+
+    /**
+     * APP_KEY must be in .env (the settings cache is rebuilt from it). If .env lost it but the site still runs with one
+     * (from the cached settings), that key is written back, so encrypted data stays readable; otherwise a new one is made.
+     */
+    private function ensureKey(string $base): void
+    {
+        $key = (string) config('app.key');
+        if ($key !== '' && AppVersion::envKey($base) === $key) {
+            return;
+        }
+        if ($key === '') {
+            $key = 'base64:'.base64_encode(Encrypter::generateKey((string) config('app.cipher', 'AES-256-CBC')));
+            $message = 'APP_KEY is empty: created one in .env.';
+        } else {
+            $message = 'APP_KEY was missing from .env: put back the key the site was using.';
+        }
+        if (! AppVersion::writeEnvKey($base, $key)) {
+            $this->log('APP_KEY is missing and .env could not be written: check that caryard/.env exists and is writable (644).');
+
+            return;
+        }
+        config(['app.key' => $key]);
+        $this->log($message);
     }
 
     /** Re-cache the settings from the saved .env, and use them in this run too (the scheduler carries on after this). */

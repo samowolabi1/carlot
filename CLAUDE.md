@@ -392,12 +392,14 @@ action "cPanel package"). Nothing may require an always-running process: `QUEUE_
 job) run `queue:work --stop-when-empty` each minute (queues `lotlink.queue_names`; add new queue names there); search falls back to
 MySQL, chat polls, cache/sessions use the database. Public images go only to the `media` disk (= `public/media`, `MEDIA_ROOT`/`MEDIA_URL`;
 `.htaccess` there blocks scripts), always through `config('lotlink.media_disk')`; never the `public` disk or `storage:link`. Private
-files stay on `local`. `ServerHealth` backs `lotlink:doctor` and /admin → System health: add a check when you add a server requirement.
+files stay on `local`. Schedule artisan commands with `System\ScheduledTask::command()` (not `Schedule::command()`): many hosts
+disable `proc_open`, and then they run inside the cron job's process. `ServerHealth` backs `lotlink:doctor` and /admin → System health: add a check when you add a server requirement.
 `lotlink:deploy` is the post-upload command; without a terminal the cron job runs it (`lotlink:auto-update`, from a
 `CommandStarting` hook on `schedule:run`) whenever the package's `VERSION` (written by `build-cpanel.sh`) differs from
 `storage/app/deployed-version`; `AppVersion` also clears stale bootstrap caches and serves an "updating" page meanwhile. The same hook re-caches config
 when `.env` is saved and runs `Admin\Actions\EnsureFirstAdmin` (creates the first admin; takes a corrected `ADMIN_PASSWORD`
-only while the password is still the one from `.env`; `storage/app/reset-admin-password` resets it and its 2FA). Seeding never changes an existing admin. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
+only while the password is still the one from `.env`; `storage/app/reset-admin-password` resets it and its 2FA) and writes
+`APP_KEY` back into `.env` if it went missing (the running key, else a new one). Seeding never changes an existing admin. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
 proxies `config/trustedproxy.php`); the seeder creates no admin on a server without `ADMIN_EMAIL` and a 12+ character `ADMIN_PASSWORD`. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
 
 Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in
