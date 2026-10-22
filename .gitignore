@@ -28,3 +28,6 @@ Thumbs.db
 
 # cPanel package output (scripts/build-cpanel.sh)
 /build/
+
+# Version stamp written into cPanel packages (AppVersion)
+/VERSION

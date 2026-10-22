@@ -353,8 +353,9 @@ same variables and button, then enter its name in `/admin` → Message templates
 ### Hosting on cPanel
 
 Everything needed is in [docs/deploy-cpanel.md](docs/deploy-cpanel.md): build the zip (`./scripts/build-cpanel.sh` or the
-**cPanel package** GitHub Action), upload, `.env` from `.env.cpanel.example`, `php artisan lotlink:deploy --seed`, and one
-cron job (`* * * * * cd ~/caryard && php artisan schedule:run`). Check the server any time at /admin → System health or
+**cPanel package** GitHub Action), upload, `.env` from `.env.cpanel.example`, and one
+cron job (`* * * * * cd ~/caryard && php artisan schedule:run`), which also installs and updates the app by itself when a new
+package is uploaded (no terminal needed). Check the server any time at /admin → System health or
 with `php artisan lotlink:doctor`.
 
 ### Going live checklist

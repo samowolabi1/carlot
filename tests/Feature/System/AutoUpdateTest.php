@@ -1,0 +1,112 @@
+<?php
+
+use App\Console\Commands\AutoUpdate;
+use App\Domain\System\AppVersion;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+
+/* cPanel without a terminal: an uploaded package (VERSION) is finished by the cron job (AppVersion + lotlink:auto-update). */
+
+beforeEach(function () {
+    $this->base = sys_get_temp_dir().'/caryard-update-'.uniqid();
+    foreach (['storage/app', 'storage/logs', 'storage/framework', 'bootstrap/cache'] as $dir) {
+        File::ensureDirectoryExists($this->base.'/'.$dir);
+    }
+});
+
+afterEach(fn () => File::deleteDirectory($this->base));
+
+/** Runs lotlink:auto-update against the temporary folder, recording the artisan commands instead of running them. */
+function autoUpdate(string $base, int $deployResult = 0): object
+{
+    $command = new class($base, $deployResult) extends AutoUpdate
+    {
+        /** @var list<array{string, array<string, mixed>}> */
+        public array $calls = [];
+
+        public function __construct(private string $folder, private int $deployResult)
+        {
+            parent::__construct();
+        }
+
+        protected function base(): string
+        {
+            return $this->folder;
+        }
+
+        protected function runArtisan(string $command, array $arguments): int
+        {
+            $this->calls[] = [$command, $arguments];
+
+            return $command === 'lotlink:deploy' ? $this->deployResult : 0;
+        }
+    };
+    $command->setLaravel(app());
+    $command->run(new ArrayInput([]), new BufferedOutput);
+
+    return $command;
+}
+
+it('does nothing without a version stamp (local and CI)', function () {
+    expect(AppVersion::pending($this->base))->toBeFalse()
+        ->and(autoUpdate($this->base)->calls)->toBe([]);
+});
+
+it('finishes an uploaded package once and records its version', function () {
+    file_put_contents($this->base.'/VERSION', "abc123-202610220900\n");
+    expect(AppVersion::pending($this->base))->toBeTrue();
+
+    expect(autoUpdate($this->base)->calls)->toBe([['lotlink:deploy', []]])
+        ->and(AppVersion::deployed($this->base))->toBe('abc123-202610220900')
+        ->and(AppVersion::pending($this->base))->toBeFalse()
+        ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('Done: running abc123-202610220900');
+
+    // The next cron run has nothing to do; a newer upload is picked up again.
+    expect(autoUpdate($this->base)->calls)->toBe([]);
+    file_put_contents($this->base.'/VERSION', "def456-202611010900\n");
+    expect(autoUpdate($this->base)->calls)->toBe([['lotlink:deploy', []]]);
+});
+
+it('keeps the site on "updating" and retries when the update fails', function () {
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    AppVersion::markDeployed($this->base, 'old999');
+
+    autoUpdate($this->base, deployResult: 1);
+
+    expect(AppVersion::deployed($this->base))->toBe('old999')
+        ->and(AppVersion::pending($this->base))->toBeTrue()
+        ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('tried again in a minute');
+});
+
+it('installs the first time: creates the app key and seeds', function () {
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    config(['app.key' => '']);
+    Schema::drop('migrations');
+
+    expect(autoUpdate($this->base)->calls)->toBe([['key:generate', ['--force' => true]], ['lotlink:deploy', ['--seed' => true]]])
+        ->and(AppVersion::deployed($this->base))->toBe('abc123');
+});
+
+it('drops the old release caches once per upload, before the app boots', function () {
+    file_put_contents($this->base.'/bootstrap/cache/config.php', '<?php return [];');
+    file_put_contents($this->base.'/bootstrap/cache/routes-v7.php', '<?php');
+
+    AppVersion::clearStaleCaches($this->base); // no VERSION: nothing touched
+    expect(is_file($this->base.'/bootstrap/cache/config.php'))->toBeTrue();
+
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    AppVersion::clearStaleCaches($this->base);
+    expect(is_file($this->base.'/bootstrap/cache/config.php'))->toBeFalse()
+        ->and(is_file($this->base.'/bootstrap/cache/routes-v7.php'))->toBeFalse();
+
+    // The new release's caches (written by lotlink:deploy) are kept from then on.
+    file_put_contents($this->base.'/bootstrap/cache/config.php', '<?php return [];');
+    AppVersion::clearStaleCaches($this->base);
+    expect(is_file($this->base.'/bootstrap/cache/config.php'))->toBeTrue();
+});
+
+it('shows visitors a short updating page while an update waits', function () {
+    expect(AppVersion::updatingPage())->toContain('is updating')->toContain('try again in a minute');
+});

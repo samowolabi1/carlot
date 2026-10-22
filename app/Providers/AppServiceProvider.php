@@ -42,6 +42,7 @@ use App\Domain\Push\Gateways\WebPushGateway;
 use App\Domain\Social\Gateways\LogSocialPublisher;
 use App\Domain\Social\Gateways\MetaSocialPublisher;
 use App\Domain\Social\Gateways\SocialPublisher;
+use App\Domain\System\AppVersion;
 use App\Domain\Trust\Models\FraudSignal;
 use App\Domain\Trust\Models\LotVerification;
 use App\Domain\Trust\Models\Report;
@@ -49,8 +50,11 @@ use App\Domain\Trust\Registry\CompanyRegistry;
 use App\Domain\Trust\Registry\DojahCompanyRegistry;
 use App\Domain\Trust\Registry\NoCompanyRegistry;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
@@ -130,6 +134,16 @@ class AppServiceProvider extends ServiceProvider
             FinanceRates::apply();
             AdvertPricing::apply();
         });
+
+        // cPanel without a terminal: after a new package is uploaded, the cron job's schedule:run finishes the update
+        // (migrations, caches; the whole install the first time) before running anything else. See AppVersion.
+        if ($this->app->runningInConsole()) {
+            Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+                if ($event->command === 'schedule:run' && AppVersion::pending(base_path())) {
+                    Artisan::call('lotlink:auto-update');
+                }
+            });
+        }
 
         // The admin menu badges and review queue (AdminCounters) refresh as soon as a queue changes.
         foreach ([Lot::class, LotVerification::class, FraudSignal::class, Report::class, AdCampaign::class, SupportTicket::class, VehicleModel::class] as $model) {

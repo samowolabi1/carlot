@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\System\AppVersion;
 use App\Http\Middleware\EnsureProfileComplete;
 use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -12,6 +13,9 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+
+// After a new cPanel package is extracted, drop the old release's cached config/routes before they're loaded.
+AppVersion::clearStaleCaches(dirname(__DIR__));
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

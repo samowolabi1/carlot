@@ -58,31 +58,33 @@ your local `.env` before building.
 
 ## 4. Configure
 
-1. In `caryard`, copy `.env.cpanel.example` to `.env` and fill it in: `APP_URL`, the database, SMTP, the `LEGAL_*`
-   details, `ADMIN_EMAIL` / `ADMIN_PASSWORD` (12+ characters; without them no admin is created), and later WhatsApp, Termii, Paystack/Flutterwave.
-2. *Terminal* (or *Cron Jobs* → a one-off job if you have no terminal), in `~/caryard`:
+In *File Manager* → **Settings** (top right), tick **Show Hidden Files (dotfiles)**. In `caryard`, copy
+`.env.cpanel.example` to `.env` and edit it: `APP_URL`, the database, SMTP, the `LEGAL_*` details and `ADMIN_EMAIL` /
+`ADMIN_PASSWORD` (12+ characters; without them no admin is created). Leave `APP_KEY` empty: it's created for you. WhatsApp,
+Termii and Paystack/Flutterwave can be added later.
 
-   ```bash
-   php artisan key:generate
-   php artisan lotlink:deploy --seed
-   ```
-
-   `lotlink:deploy` runs the migrations, seeds plans, the car catalogue and your admin (`--seed`, first time only),
-   prepares `public/media`, caches config, routes and views, and ends with the health check.
-
-   If `php` is the wrong version in the terminal, use the full path of the version you picked, e.g.
-   `/opt/cpanel/ea-php83/root/usr/bin/php` or `/usr/local/bin/ea-php83`.
-
-## 5. The cron job (required)
+## 5. The cron job (required, and it does the install)
 
 *Cron Jobs* → Add New Cron Job → **Once Per Minute** (`* * * * *`), command:
 
 ```bash
-cd /home/myuser/caryard && /usr/local/bin/ea-php83 artisan schedule:run >> /dev/null 2>&1
+cd $HOME/caryard && /usr/local/bin/ea-php83 artisan schedule:run >> /dev/null 2>&1
 ```
 
-(Use the same PHP path as above.) This one line runs reminders, expiries, summaries, sitemap, data clean-up, **and the
-queue**. After two minutes, /admin → System health should show "Cron job running: last run … seconds ago".
+Use the PHP of the version you picked: usually `/usr/local/bin/ea-php83` or `/opt/cpanel/ea-php83/root/usr/bin/php`
+(CloudLinux: `/opt/alt/php83/usr/bin/php`).
+
+This one line runs reminders, expiries, summaries, sitemap, data clean-up and **the queue**, and it **installs and updates
+the app by itself**: each package carries a `VERSION` file, and whenever it differs from the last version set up, the cron
+job first creates `APP_KEY` if it's empty, runs `lotlink:deploy` (with `--seed` the first time: tables, plans, car catalogue,
+your admin) and records the version (`lotlink:auto-update`, `App\Domain\System\AppVersion`). Meanwhile visitors see a short
+"CarYard is updating" page instead of errors.
+
+Within two minutes, open `caryard/storage/logs/auto-update.log` in File Manager: it ends with **Done: running …**. If it
+says the update failed, the lines above it say why (usually the database details in `.env`); fix `.env` and it tries again
+on its own the next minute. Then sign in at `/admin`; **System health** should show "Cron job running" and the version.
+
+**With a terminal** you can do the same by hand: `php artisan key:generate`, then `php artisan lotlink:deploy --seed`.
 
 ## 6. Services and webhooks
 
@@ -100,9 +102,13 @@ Web push: run `php artisan push:vapid` once (writes the keys to `.env`), then `p
 
 ## 7. Updating to a new version
 
-1. Build a new package (step 1) and upload/extract it over `~/caryard`. Keep your `.env`, `storage/` and `public/media/`.
-   Extracting the zip doesn't overwrite them, because the zip doesn't contain `.env` or any uploaded images.
-2. `php artisan lotlink:deploy` (no `--seed`).
+1. Build a new package (step 1), upload it and extract it over `~/caryard`. Your `.env`, `storage/` and `public/media/` are
+   kept: the zip doesn't contain `.env` or any uploaded images.
+2. Wait a minute. The cron job sees the new `VERSION`, migrates, refreshes the caches and records it (see
+   `storage/logs/auto-update.log`). No terminal needed. (With one, `php artisan lotlink:deploy` does it straight away.)
+
+After changing `.env` (not uploading code), the settings cache needs refreshing: `php artisan config:cache`, or without a
+terminal a one-off cron job `cd $HOME/caryard && /usr/local/bin/ea-php83 artisan config:cache`, deleted after a minute.
 
 ## 8. Backups
 
@@ -120,3 +126,4 @@ Web push: run `php artisan push:vapid` once (writes the keys to `.env`), then `p
 | Images 404 | `LOTLINK_MEDIA_DISK=media`; with method C set `MEDIA_ROOT`. Run `php artisan media:move-to-public` if older images were saved in `storage/app/public`. |
 | Page styles missing | `public/build` wasn't uploaded: rebuild the package. Admin styles: `php artisan filament:assets`. |
 | After changing `.env` nothing changes | `php artisan config:cache` (or `php artisan lotlink:deploy`). |
+| The site keeps saying "CarYard is updating" | The cron job isn't running, or the update fails: read `storage/logs/auto-update.log`. |

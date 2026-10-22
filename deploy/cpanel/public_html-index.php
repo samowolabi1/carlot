@@ -7,6 +7,7 @@
  * /home/<cpanel user>/public_html/media. If your folder isn't ~/caryard, change $app below.
  */
 
+use App\Domain\System\AppVersion;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,11 @@ if (file_exists($maintenance = $root.'/storage/framework/maintenance.php')) {
 }
 
 require $root.'/vendor/autoload.php';
+
+// A new package was uploaded and the cron job hasn't finished updating yet: a short "updating" page, not errors.
+if (AppVersion::pending($root)) {
+    AppVersion::respondUpdating();
+}
 
 /** @var Application $app */
 $app = require_once $root.'/bootstrap/app.php';

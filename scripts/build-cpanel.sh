@@ -19,6 +19,8 @@ rm -rf "$STAGE" "$OUT/caryard-cpanel.zip"
 mkdir -p "$STAGE"
 git archive HEAD | tar -x -C "$STAGE"
 cp -R public/build "$STAGE/public/build"
+# The version stamp: when it changes after an upload, the cron job finishes the update by itself (AppVersion).
+echo "$(git rev-parse --short HEAD)-$(date -u +%Y%m%d%H%M)" > "$STAGE/VERSION"
 
 echo "→ Installing production PHP packages"
 (cd "$STAGE" && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress)

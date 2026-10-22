@@ -64,6 +64,13 @@ final class ServerHealth
             $add('App', "{$dir} writable", is_writable(base_path($dir)) ? self::OK : self::FAIL, is_writable(base_path($dir)) ? '' : 'Set the folder to 755 (owned by your cPanel user).');
         }
         $built = is_file(public_path('build/manifest.json'));
+        $version = AppVersion::current(base_path());
+        if ($version !== null) {
+            $pending = AppVersion::pending(base_path());
+            $add('App', 'Version', $pending ? self::WARN : self::OK, $pending
+                ? "{$version} uploaded, waiting for the cron job to finish the update (see storage/logs/auto-update.log)"
+                : $version);
+        }
         $add('App', 'Front end built', $built ? self::OK : self::FAIL, $built ? '' : 'Upload public/build from npm run build (the cPanel package includes it).');
         $filament = is_dir(public_path('js/filament'));
         $add('App', 'Admin assets published', $filament ? self::OK : self::WARN, $filament ? '' : 'Run php artisan filament:assets.');
