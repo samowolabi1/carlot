@@ -395,7 +395,9 @@ MySQL, chat polls, cache/sessions use the database. Public images go only to the
 files stay on `local`. `ServerHealth` backs `lotlink:doctor` and /admin → System health: add a check when you add a server requirement.
 `lotlink:deploy` is the post-upload command; without a terminal the cron job runs it (`lotlink:auto-update`, from a
 `CommandStarting` hook on `schedule:run`) whenever the package's `VERSION` (written by `build-cpanel.sh`) differs from
-`storage/app/deployed-version`; `AppVersion` also clears stale bootstrap caches and serves an "updating" page meanwhile. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
+`storage/app/deployed-version`; `AppVersion` also clears stale bootstrap caches and serves an "updating" page meanwhile. The same hook re-caches config
+when `.env` is saved and runs `Admin\Actions\EnsureFirstAdmin` (creates the first admin; takes a corrected `ADMIN_PASSWORD`
+only while the password is still the one from `.env`; `storage/app/reset-admin-password` resets it and its 2FA). Seeding never changes an existing admin. It caches config, so never call `env()` outside `config/` (seeders read `config('lotlink.first_admin')`,
 proxies `config/trustedproxy.php`); the seeder creates no admin on a server without `ADMIN_EMAIL` and a 12+ character `ADMIN_PASSWORD`. Keep SQL portable (MySQL 8 and MariaDB; the spatial column is MySQL-only and optional).
 
 Queues: the database queue on Laragon and in tests; Redis + Horizon on the server (`QUEUE_CONNECTION=redis` registers Horizon in

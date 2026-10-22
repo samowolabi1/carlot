@@ -139,7 +139,7 @@ class AppServiceProvider extends ServiceProvider
         // (migrations, caches; the whole install the first time) before running anything else. See AppVersion.
         if ($this->app->runningInConsole()) {
             Event::listen(CommandStarting::class, function (CommandStarting $event): void {
-                if ($event->command === 'schedule:run' && AppVersion::pending(base_path())) {
+                if ($event->command === 'schedule:run' && AppVersion::needsAttention(base_path())) {
                     Artisan::call('lotlink:auto-update');
                 }
             });

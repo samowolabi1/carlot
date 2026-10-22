@@ -42,6 +42,15 @@ RFC 6238 codes (verified against the RFC test vector), 30-second steps with one 
 8 single-use recovery codes stored hashed, 5 attempts per 5 minutes. Setup and challenge pages run
 before the Filament panel. On by default in production (`ADMIN_2FA`).
 
+### First admin and recovery without a terminal (added later)
+
+On cPanel without a terminal, the cron job (`lotlink:auto-update`) creates the first admin from `ADMIN_EMAIL` /
+`ADMIN_PASSWORD` (`EnsureFirstAdmin`: 12+ characters outside local, never a default). A corrected `ADMIN_PASSWORD` is applied
+only while the admin's hash is still the one set from `.env` (remembered in `storage/app/first-admin-password`), so a password
+changed in the app is never overwritten. An empty `storage/app/reset-admin-password` resets the password from `.env` and clears
+TOTP, then is deleted. Both need write access to the app's files or `.env`, which already means full control of the site, so
+they add no new attacker capability. Keep `storage/` outside the web root (it is: the document root is `public/`).
+
 ### Things to do outside the code before launch
 - Set `APP_DEBUG=false`, `APP_ENV=production`, and `TRUSTED_PROXIES` to your proxy.
 - Serve only over HTTPS (Caddy does this, including on-demand certificates for custom domains using

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domain\Admin\Actions\EnsureFirstAdmin;
 use App\Domain\System\AppVersion;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -10,10 +11,12 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
 /**
- * Finishes an uploaded cPanel package without a terminal (see AppVersion). The cron job's schedule:run calls it first
- * whenever VERSION differs from the last deployed one: creates APP_KEY if it's empty, runs lotlink:deploy (with --seed
- * on a first install), then records the version. Everything is written to storage/logs/auto-update.log, which can be
- * read in cPanel's File Manager. A failed update is retried on the next minute; the site shows "updating" meanwhile.
+ * The cron job's helper on cPanel without a terminal (see AppVersion); schedule:run calls it first when there's work:
+ *  - a new package (VERSION differs from the last deployed one): APP_KEY if empty, lotlink:deploy (with --seed on a first
+ *    install), then the version is recorded; a failed update is retried each minute while the site shows "updating";
+ *  - .env was saved: the settings are re-cached;
+ *  - and each time, the first admin is created or fixed from ADMIN_EMAIL / ADMIN_PASSWORD, or reset on request (EnsureFirstAdmin).
+ * Everything is written to storage/logs/auto-update.log, which can be read in cPanel's File Manager.
  */
 class AutoUpdate extends Command
 {
@@ -25,7 +28,10 @@ class AutoUpdate extends Command
     {
         $base = $this->base();
         $version = AppVersion::current($base);
-        if ($version === null || ! AppVersion::pending($base)) {
+        $pending = AppVersion::pending($base);
+        $envChanged = AppVersion::envChanged($base);
+        $reset = AppVersion::adminResetRequested($base);
+        if ($version === null || (! $pending && ! $envChanged && ! $reset)) {
             $this->info('Up to date'.($version ? " ({$version})" : '').'.');
 
             return self::SUCCESS;
@@ -38,38 +44,80 @@ class AutoUpdate extends Command
         }
 
         try {
-            $this->log("Updating to {$version} (was ".(AppVersion::deployed($base) ?? 'not installed').')');
-
-            if (blank(config('app.key'))) {
-                $this->log('APP_KEY is empty: creating one.');
-                $this->runArtisan('key:generate', ['--force' => true]);
+            if ($pending) {
+                if (! $this->update($base, $version)) {
+                    return self::FAILURE;
+                }
+            } else {
+                $this->log($reset ? 'Admin password reset requested (storage/app/reset-admin-password).' : '.env was saved: refreshing the settings.');
+                $this->refreshSettings();
             }
 
-            try {
-                $firstInstall = ! Schema::hasTable('migrations');
-            } catch (Throwable $e) {
-                $this->log('Cannot reach the database: '.$e->getMessage().' Check DB_HOST, DB_DATABASE, DB_USERNAME and DB_PASSWORD in .env.');
-
-                return self::FAILURE;
-            }
-            if ($firstInstall) {
-                $this->log('First install: creating the tables, plans, car catalogue and the admin from ADMIN_EMAIL / ADMIN_PASSWORD.');
-            }
-
-            $code = $this->runDeploy($firstInstall);
-            if ($code !== self::SUCCESS) {
-                $this->log('The update failed (see above). It will be tried again in a minute; the site shows "updating" until it works.');
-
-                return self::FAILURE;
-            }
-
-            AppVersion::markDeployed($base, $version);
-            $this->log("Done: running {$version}.");
+            $this->ensureAdmin();
+            AppVersion::markEnvApplied($base);
 
             return self::SUCCESS;
         } finally {
             flock($lock, LOCK_UN);
             fclose($lock);
+        }
+    }
+
+    /** A new package: APP_KEY if empty, then lotlink:deploy (with --seed on a first install), then record the version. */
+    private function update(string $base, string $version): bool
+    {
+        $this->log("Updating to {$version} (was ".(AppVersion::deployed($base) ?? 'not installed').')');
+
+        if (blank(config('app.key'))) {
+            $this->log('APP_KEY is empty: creating one.');
+            $this->runArtisan('key:generate', ['--force' => true]);
+        }
+
+        try {
+            $firstInstall = ! Schema::hasTable('migrations');
+        } catch (Throwable $e) {
+            $this->log('Cannot reach the database: '.$e->getMessage().' Check DB_HOST, DB_DATABASE, DB_USERNAME and DB_PASSWORD in .env (put passwords in double quotes).');
+
+            return false;
+        }
+        if ($firstInstall) {
+            $this->log('First install: creating the tables, plans, car catalogue and the admin from ADMIN_EMAIL / ADMIN_PASSWORD.');
+        }
+
+        if ($this->runDeploy($firstInstall) !== self::SUCCESS) {
+            $this->log('The update failed (see above). It will be tried again in a minute; the site shows "updating" until it works.');
+
+            return false;
+        }
+
+        AppVersion::markDeployed($base, $version);
+        $this->log("Done: running {$version}.");
+
+        return true;
+    }
+
+    /** Re-cache the settings from the saved .env, and use them in this run too (the scheduler carries on after this). */
+    private function refreshSettings(): void
+    {
+        $started = time();
+        if ($this->runArtisan('config:cache', []) === self::SUCCESS) {
+            $cached = $this->laravel->getCachedConfigPath();
+            if (is_file($cached) && filemtime($cached) >= $started) {
+                $this->laravel['config']->set(require $cached);
+            }
+        }
+    }
+
+    /** Create the first admin, or fix its password from .env, and say so in the log. */
+    private function ensureAdmin(): void
+    {
+        try {
+            $result = app(EnsureFirstAdmin::class)->run(fromEnvChange: true);
+            if ($result['status'] !== 'kept') {
+                $this->log($result['message']);
+            }
+        } catch (Throwable $e) {
+            $this->log('Could not check the admin account: '.$e->getMessage());
         }
     }
 

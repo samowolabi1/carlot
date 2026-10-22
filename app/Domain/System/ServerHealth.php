@@ -2,11 +2,15 @@
 
 namespace App\Domain\System;
 
+use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Accounts\Models\User;
+use App\Domain\Admin\Actions\EnsureFirstAdmin;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -57,6 +61,9 @@ final class ServerHealth
         try {
             DB::select('select 1');
             $add('App', 'Database', self::OK, (string) config('database.default'));
+            $admins = User::where('role', UserRole::Admin)->count();
+            $add('App', 'Admin account', $admins > 0 ? self::OK : self::FAIL, $admins > 0 ? "{$admins} admin".($admins > 1 ? 's' : '')
+                : EnsureFirstAdmin::why(Str::lower(trim((string) config('lotlink.first_admin.email'))), (string) config('lotlink.first_admin.password')));
         } catch (Throwable $e) {
             $add('App', 'Database', self::FAIL, $e->getMessage());
         }

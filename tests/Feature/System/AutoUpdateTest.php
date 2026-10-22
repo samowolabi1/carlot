@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\AutoUpdate;
+use App\Domain\Accounts\Models\User;
 use App\Domain\System\AppVersion;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -109,4 +110,23 @@ it('drops the old release caches once per upload, before the app boots', functio
 
 it('shows visitors a short updating page while an update waits', function () {
     expect(AppVersion::updatingPage())->toContain('is updating')->toContain('try again in a minute');
+});
+
+it('applies a saved .env: re-caches the settings and creates the admin, once per save', function () {
+    file_put_contents($this->base.'/VERSION', 'abc123');
+    AppVersion::markDeployed($this->base, 'abc123');
+    file_put_contents($this->base.'/.env', "ADMIN_EMAIL=boss@caryardng.com\n");
+    config(['lotlink.first_admin' => ['email' => 'boss@caryardng.com', 'password' => 'a-long-first-password', 'phone' => null]]);
+    expect(AppVersion::needsAttention($this->base))->toBeTrue();
+
+    expect(autoUpdate($this->base)->calls)->toBe([['config:cache', []]])
+        ->and(User::where('email', 'boss@caryardng.com')->exists())->toBeTrue()
+        ->and(file_get_contents($this->base.'/storage/logs/auto-update.log'))->toContain('.env was saved')->toContain('Admin account created');
+
+    expect(AppVersion::needsAttention($this->base))->toBeFalse()
+        ->and(autoUpdate($this->base)->calls)->toBe([]);
+
+    file_put_contents($this->base.'/.env', "ADMIN_EMAIL=boss@caryardng.com\nMAIL_HOST=mail.caryardng.com\n");
+    expect(autoUpdate($this->base)->calls)->toBe([['config:cache', []]]);
+    @unlink(storage_path('app/first-admin-password'));
 });

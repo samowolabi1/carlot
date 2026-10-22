@@ -63,6 +63,14 @@ In *File Manager* → **Settings** (top right), tick **Show Hidden Files (dotfil
 `ADMIN_PASSWORD` (12+ characters; without them no admin is created). Leave `APP_KEY` empty: it's created for you. WhatsApp,
 Termii and Paystack/Flutterwave can be added later.
 
+Keep every password **inside the double quotes** (`ADMIN_PASSWORD="my#Strong pass 2026"`): without them, `#` and anything
+after it is ignored, so a password like `Lagos#2026Cars` would become `Lagos`. Don't use `"` or `\` inside a password.
+
+You can edit `.env` at any time: within a minute the cron job notices, refreshes the settings and creates the admin (or
+puts a corrected `ADMIN_PASSWORD` in place, as long as you haven't changed the password in the app yet). Locked out of
+/admin later? Create an empty file `caryard/storage/app/reset-admin-password` in File Manager: on its next run the cron
+job sets the admin's password back to `ADMIN_PASSWORD` and clears two-step sign-in so you can set it up again.
+
 ## 5. The cron job (required, and it does the install)
 
 *Cron Jobs* → Add New Cron Job → **Once Per Minute** (`* * * * *`), command:
@@ -107,8 +115,7 @@ Web push: run `php artisan push:vapid` once (writes the keys to `.env`), then `p
 2. Wait a minute. The cron job sees the new `VERSION`, migrates, refreshes the caches and records it (see
    `storage/logs/auto-update.log`). No terminal needed. (With one, `php artisan lotlink:deploy` does it straight away.)
 
-After changing `.env` (not uploading code), the settings cache needs refreshing: `php artisan config:cache`, or without a
-terminal a one-off cron job `cd $HOME/caryard && /usr/local/bin/ea-php83 artisan config:cache`, deleted after a minute.
+After changing `.env` (not uploading code) there's nothing to run: the cron job re-caches the settings within a minute.
 
 ## 8. Backups
 
@@ -126,4 +133,5 @@ terminal a one-off cron job `cd $HOME/caryard && /usr/local/bin/ea-php83 artisan
 | Images 404 | `LOTLINK_MEDIA_DISK=media`; with method C set `MEDIA_ROOT`. Run `php artisan media:move-to-public` if older images were saved in `storage/app/public`. |
 | Page styles missing | `public/build` wasn't uploaded: rebuild the package. Admin styles: `php artisan filament:assets`. |
 | After changing `.env` nothing changes | `php artisan config:cache` (or `php artisan lotlink:deploy`). |
+| /admin says the email or password is wrong | Read `storage/logs/auto-update.log` (or System health → Admin account): it says whether the admin exists and why not. Usually the password had a `#` or space without double quotes, or was under 12 characters: fix `.env` and wait a minute. Still stuck: create `storage/app/reset-admin-password`. |
 | The site keeps saying "CarYard is updating" | The cron job isn't running, or the update fails: read `storage/logs/auto-update.log`. |

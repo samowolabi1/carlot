@@ -8,7 +8,8 @@ namespace App\Domain\System;
  *  - bootstrap/app.php drops the previous release's cached config/routes/events (clearStaleCaches) so the new code boots;
  *  - public/index.php shows a short "updating" page (pending) instead of half-updated pages;
  *  - the cron job's schedule:run runs lotlink:auto-update first, which migrates (and installs, the first time),
- *    re-caches and records the version.
+ *    re-caches and records the version. It also re-caches the settings when .env is saved, and creates or fixes the
+ *    first admin from ADMIN_EMAIL / ADMIN_PASSWORD (EnsureFirstAdmin), so no terminal is ever needed.
  * Plain PHP on purpose: it runs before the application (and its config) exists. Without VERSION (local, CI) it does nothing.
  */
 final class AppVersion
@@ -39,6 +40,33 @@ final class AppVersion
     {
         @mkdir($base.'/storage/app', 0755, true);
         file_put_contents($base.'/storage/app/deployed-version', $version.PHP_EOL, LOCK_EX);
+    }
+
+    /** .env was saved since the cron job last applied it (its settings are cached, so they need refreshing). */
+    public static function envChanged(string $base): bool
+    {
+        $env = $base.'/.env';
+
+        return is_file($env) && sha1_file($env) !== self::read($base.'/storage/app/env-hash');
+    }
+
+    public static function markEnvApplied(string $base): void
+    {
+        if (is_file($base.'/.env')) {
+            @file_put_contents($base.'/storage/app/env-hash', sha1_file($base.'/.env').PHP_EOL, LOCK_EX);
+        }
+    }
+
+    /** An empty storage/app/reset-admin-password asks the cron job to reset the admin's password from .env. */
+    public static function adminResetRequested(string $base): bool
+    {
+        return is_file($base.'/storage/app/reset-admin-password');
+    }
+
+    /** Something for the cron job's lotlink:auto-update to do: a new upload, a saved .env or an admin reset. */
+    public static function needsAttention(string $base): bool
+    {
+        return self::current($base) !== null && (self::pending($base) || self::envChanged($base) || self::adminResetRequested($base));
     }
 
     /** Once per upload: forget the previous release's bootstrap caches (they can name classes the new code no longer has). */
