@@ -158,3 +158,10 @@ it('applies a saved .env: re-caches the settings and creates the admin, once per
     expect(autoUpdate($this->base)->calls)->toBe([['config:cache', []]]);
     @unlink(storage_path('app/first-admin-password'));
 });
+
+it('passes list-style options to in-process commands as one command line', function () {
+    expect(ScheduledTask::commandLine('queue:work', ['--queue=default,media', '--stop-when-empty', '--max-time=50']))
+        ->toBe('queue:work --queue=default,media --stop-when-empty --max-time=50')
+        ->and(ScheduledTask::commandLine('sanctum:prune-expired --hours=24', []))->toBe('sanctum:prune-expired --hours=24')
+        ->and(ScheduledTask::commandLine('demo', ['--name' => 'two words', '--force' => true, '--skip' => false]))->toBe('demo --name="two words" --force');
+});

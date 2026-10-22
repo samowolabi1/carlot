@@ -21,7 +21,36 @@ final class ScheduledTask
             return Schedule::command($command, $parameters);
         }
 
-        return Schedule::call(fn () => Artisan::call($command, $parameters))->name($command);
+        $line = self::commandLine($command, $parameters);
+
+        return Schedule::call(fn () => Artisan::call($line))->name($command);
+    }
+
+    /**
+     * One command line, as Schedule::command() would build it: Artisan::call() ignores list-style options
+     * (['--queue=default', '--stop-when-empty']), which left the in-process queue worker without its settings.
+     *
+     * @param  array<int|string, mixed>  $parameters
+     */
+    public static function commandLine(string $command, array $parameters): string
+    {
+        $parts = [$command];
+        foreach ($parameters as $key => $value) {
+            if (is_int($key)) {
+                $parts[] = self::quote((string) $value);
+            } elseif ($value === true) {
+                $parts[] = $key;
+            } elseif ($value !== false && $value !== null) {
+                $parts[] = $key.'='.self::quote((string) $value);
+            }
+        }
+
+        return implode(' ', $parts);
+    }
+
+    private static function quote(string $value): string
+    {
+        return preg_match('/[\s"\']/', $value) ? '"'.str_replace('"', '\\"', $value).'"' : $value;
     }
 
     public static function inProcess(): bool
