@@ -34,6 +34,6 @@ class SystemHealth extends Page
     /** @return array<string, list<array{group: string, label: string, status: string, detail: string}>> */
     public function groups(): array
     {
-        return collect(ServerHealth::checks())->groupBy('group')->map(fn ($c) => $c->values()->all())->all();
+        return collect(ServerHealth::checks(request()->getHost()))->groupBy('group')->map(fn ($c) => $c->values()->all())->all();
     }
 }

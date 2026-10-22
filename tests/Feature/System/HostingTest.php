@@ -81,3 +81,13 @@ it('trusts the configured proxy, so HTTPS behind Cloudflare is detected even wit
     config(['trustedproxy.proxies' => '*']);
     $this->get('/_proxy-probe', ['X-Forwarded-Proto' => 'https'])->assertSeeText('https');
 });
+
+it('flags an APP_URL that is not the address the admin is visiting (images and links would point elsewhere)', function () {
+    config(['app.url' => 'https://caryardng.com']);
+    $check = collect(ServerHealth::checks('caryardngdev.larnexa.com'))->firstWhere('label', 'APP_URL matches this site');
+    expect($check['status'])->toBe(ServerHealth::FAIL)->and($check['detail'])->toContain('APP_URL=https://caryardngdev.larnexa.com');
+
+    config(['app.url' => 'https://caryardngdev.larnexa.com']);
+    expect(collect(ServerHealth::checks('caryardngdev.larnexa.com'))->firstWhere('label', 'APP_URL matches this site')['status'])->toBe(ServerHealth::OK)
+        ->and(collect(ServerHealth::checks())->firstWhere('label', 'APP_URL matches this site'))->toBeNull();
+});

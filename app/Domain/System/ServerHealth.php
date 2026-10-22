@@ -26,8 +26,11 @@ final class ServerHealth
 
     public const FAIL = 'fail';
 
-    /** @return list<array{group: string, label: string, status: string, detail: string}> */
-    public static function checks(): array
+    /**
+     * @param  string|null  $visitedHost  the host the admin is browsing on (System health page); null from the command line
+     * @return list<array{group: string, label: string, status: string, detail: string}>
+     */
+    public static function checks(?string $visitedHost = null): array
     {
         $checks = [];
         $add = function (string $group, string $label, string $status, string $detail = '') use (&$checks): void {
@@ -61,6 +64,13 @@ final class ServerHealth
         $scheme = (bool) preg_match('#^https?://#', $url);
         $add('App', 'APP_URL uses https', $https || ! $production ? self::OK : ($scheme ? self::WARN : self::FAIL),
             $scheme ? $url : "{$url}: write the full address with https://, e.g. APP_URL=https://{$url}, or links and images break.");
+        if ($visitedHost !== null) {
+            // Images, emails and share links are built from APP_URL: a different address than the site breaks them all.
+            $appHost = strtolower((string) parse_url($scheme ? $url : "https://{$url}", PHP_URL_HOST));
+            $add('App', 'APP_URL matches this site', $appHost === strtolower($visitedHost) ? self::OK : self::FAIL, $appHost === strtolower($visitedHost)
+                ? $visitedHost
+                : "You're on {$visitedHost} but APP_URL is {$url}: images and links point to the wrong site. Set APP_URL=https://{$visitedHost} in .env.");
+        }
         try {
             DB::select('select 1');
             $add('App', 'Database', self::OK, (string) config('database.default'));
