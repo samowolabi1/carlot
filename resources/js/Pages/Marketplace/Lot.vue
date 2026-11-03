@@ -163,7 +163,7 @@ function filter(query: Partial<Filters>) {
                     </ul>
 
                     <template v-if="tab === 'stock'">
-                        <div class="-mr-5 flex gap-2 overflow-x-auto pr-5">
+                        <div class="-mr-5 flex gap-2 scroll-row pr-5">
                             <button
                                 v-for="q in quick"
                                 :key="q.label"

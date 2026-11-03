@@ -77,7 +77,7 @@ const chips = computed(() => [
                     <Icon name="filters" :stroke-width="2" />
                 </Link>
             </form>
-            <div class="-mr-5 flex gap-2 overflow-x-auto pr-5">
+            <div class="-mr-5 flex gap-2 scroll-row pr-5">
                 <Link
                     v-for="chip in chips"
                     :key="chip.label"

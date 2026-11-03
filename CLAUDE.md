@@ -44,7 +44,8 @@ Run all four before pushing.
   (`PhoneNumber::tryNormalize`, `Regions::normalize`, `Fields::cleanMoney`) accept `mixed` and treat non-text as invalid.
 - **UI basics**: 44 px tap targets on phones (`min-h-11`, or the `tap` utility to widen a smaller chip's hit area without
   changing its look); a field label's text and its "(optional)" note go in one `<span>` (`field-label` is a flex column);
-  scrolling flex panels add `*:shrink-0` so buttons never squash; wide tables sit in an `overflow-x-auto` box.
+  scrolling flex panels add `*:shrink-0` so buttons never squash; wide tables sit in an `overflow-x-auto` box; sideways rows of chips
+  or cards use `scroll-row` (no scrollbar, no vertical scroll: `tap` chips otherwise overflow the row and show a small scrollbar).
 - **Enums** are PHP backed enums, cast on models. Add `@property` docblocks for new columns so
   Larastan knows the types.
 - **Money**: unsigned bigint minor units (kobo) plus a `char(3)` currency. Never floats.

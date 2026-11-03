@@ -49,7 +49,7 @@ const quick = ['Is the price negotiable?', 'Can I see the papers?', 'Is it still
 
         <ChatThread :messages="chat.messages.value" me="customer" :typing="chat.typing.value" :empty-text="`Ask ${lot.name} anything about the car.`" />
 
-        <div class="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+        <div class="flex gap-2 scroll-row px-4">
             <button v-for="q in quick" :key="q" type="button" class="h-9 shrink-0 rounded-full border border-line-strong bg-white px-3 text-[13px] font-medium tap" @click="composer?.send(q)">{{ q }}</button>
         </div>
         <div class="border-t border-line bg-white px-3 pt-2.5 pb-5">

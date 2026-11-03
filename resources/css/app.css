@@ -69,6 +69,19 @@
     }
 }
 
+/* A sideways-scrolling row of chips or cards: no scrollbar, and never a vertical scroll. Chips with `tap` reach 4 px above
+   and below a 36 px row, which made such rows scroll up and down too (a small scrollbar beside them); the padding keeps
+   that touch area inside the row. Not for wide tables, which keep their scrollbar. */
+@utility scroll-row {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 4px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 @utility logo {
     @apply font-display font-bold tracking-tight text-forest;
 }

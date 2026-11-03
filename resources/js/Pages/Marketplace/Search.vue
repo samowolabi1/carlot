@@ -145,7 +145,7 @@ const heading = computed(() => {
                         Filters<template v-if="activeFilters"> · {{ activeFilters }}</template>
                     </button>
                 </form>
-                <div v-if="chips.length" class="-mr-5 flex gap-2 overflow-x-auto pr-5">
+                <div v-if="chips.length" class="-mr-5 flex gap-2 scroll-row pr-5">
                     <button v-for="chip in chips" :key="chip.label" type="button" class="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-map px-3 text-[13px] font-medium text-forest tap" :aria-label="`Remove ${chip.label}`" @click="apply(chip.remove)">
                         {{ chip.label }} <Icon name="close" :size="13" :stroke-width="2.2" />
                     </button>
@@ -170,7 +170,7 @@ const heading = computed(() => {
                 <header v-if="landing" class="flex flex-col gap-2">
                     <h1 class="text-[26px] leading-tight font-bold md:text-[32px]">{{ landing.heading }}</h1>
                     <p class="max-w-3xl text-[15px] text-[#4A4D53]">{{ landing.intro }}</p>
-                    <nav v-if="landing.related.length" aria-label="Related searches" class="-mr-5 flex gap-2 overflow-x-auto pr-5 pb-1">
+                    <nav v-if="landing.related.length" aria-label="Related searches" class="-mr-5 flex gap-2 scroll-row pr-5">
                         <Link v-for="r in landing.related" :key="r.url" :href="r.url" class="flex h-9 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-[13px] font-semibold text-ink no-underline ring-1 ring-line tap">
                             {{ r.label }} <span class="font-normal text-muted">{{ r.count }}</span>
                         </Link>
