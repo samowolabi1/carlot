@@ -15,7 +15,7 @@ JSON API for the CarYard mobile app, at `/api/v1`. Authentication is a Sanctum b
 
 | Method | Path | Body | Notes |
 |---|---|---|---|
-| POST | `/auth/code` | `phone` (e.g. `0803 123 4567`), or `method: "email"` + `email`; optional `channel: "sms"` | Sends a 6-digit code. `202 {sent_to, channel}` |
+| POST | `/auth/code` | `phone` (e.g. `0803 123 4567`), or `method: "email"` + `email`; optional `channel: "sms"` | Sends a 6-digit code. `202 {sent_to, channel}`. While WhatsApp codes are off (/admin → Settings → Sign-in, the default) a `phone` gets `422` on `phone`: ask for an email. |
 | POST | `/auth/token` | the same `phone`/`email` + `code` + `device_name` | Checks the code (creates the account if new). `201 {token, token_type, expires_at, data: user, needs_name}` |
 | POST | `/auth/password` | `login` (email or phone), `password`, `device_name` | For accounts that added a password. 5 tries a minute. |
 | DELETE | `/auth/token` | | Signs this device out. |

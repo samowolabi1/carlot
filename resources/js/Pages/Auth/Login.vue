@@ -6,12 +6,13 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
-const props = defineProps<{ method: 'whatsapp' | 'email' | 'password'; google: boolean }>();
+const props = defineProps<{ method: 'whatsapp' | 'email' | 'password'; google: boolean; whatsapp: boolean }>();
 
 // A one-time code (WhatsApp or email) is the default and also creates accounts; a password only
-// works for accounts that added one in Account → Sign-in and security.
+// works for accounts that added one in Account → Sign-in and security. While an admin has WhatsApp
+// codes off (/admin → Settings → Sign-in), the code form asks for an email address only.
 const mode = ref<'code' | 'password'>(props.method === 'password' ? 'password' : 'code');
-const form = useForm({ method: props.method === 'email' ? 'email' : 'whatsapp', phone: '', email: '' });
+const form = useForm({ method: props.method === 'email' || !props.whatsapp ? 'email' : 'whatsapp', phone: '', email: '' });
 const passwordForm = useForm({ login: '', password: '' });
 const showPassword = ref(false);
 // "Keep me signed in for a week": a remember cookie that lasts 7 days. Off: signed out after 2 hours without using CarYard.
@@ -46,7 +47,7 @@ function submitPassword() {
     <AuthLayout>
         <div class="flex flex-col gap-2">
             <h1 class="text-[30px] leading-[1.1] font-bold">Sign in or create an account</h1>
-            <p v-if="mode === 'code'" class="text-[15px] text-muted">We'll send you a 6-digit code. New here? This creates your account.</p>
+            <p v-if="mode === 'code'" class="text-[15px] text-muted">We'll {{ whatsapp ? 'send' : 'email' }} you a 6-digit code. New here? This creates your account.</p>
             <p v-else class="text-[15px] text-muted">For accounts that added a password.</p>
         </div>
 
@@ -61,7 +62,7 @@ function submitPassword() {
         </template>
 
         <template v-if="mode === 'code'">
-            <div class="grid grid-cols-2 gap-2 rounded-2xl bg-sand p-1" role="radiogroup" aria-label="Get your code by">
+            <div v-if="whatsapp" class="grid grid-cols-2 gap-2 rounded-2xl bg-sand p-1" role="radiogroup" aria-label="Get your code by">
                 <button
                     v-for="m in (['whatsapp', 'email'] as const)"
                     :key="m"
@@ -89,8 +90,8 @@ function submitPassword() {
                 </label>
                 <label v-else class="field-label">
                     Your email address
-                    <input v-field="'email'" ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required class="field" placeholder="you@example.com" />
-                    <span class="font-normal text-muted">Check your inbox (and spam folder) for the code.</span>
+                    <input v-field="'email'" ref="emailInput" v-model="form.email" type="email" inputmode="email" autocomplete="email" required :autofocus="!whatsapp" class="field" placeholder="you@example.com" />
+                    <span class="font-normal text-muted">We'll email you the code: check your inbox (and spam folder).</span>
                     <InputError :message="form.errors.email" />
                 </label>
                 <label class="flex min-h-11 cursor-pointer items-center gap-3 text-[14px]">
@@ -108,7 +109,7 @@ function submitPassword() {
         <template v-else>
             <form class="flex flex-col gap-4" @submit.prevent="submitPassword">
                 <label class="field-label">
-                    Email or WhatsApp number
+                    {{ whatsapp ? 'Email or WhatsApp number' : 'Email or phone number' }}
                     <input v-field="{ kind: 'text', max: 190 }" ref="loginInput" v-model="passwordForm.login" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus class="field" placeholder="you@example.com or 0803 123 4567" />
                     <InputError :message="passwordForm.errors.login" />
                 </label>

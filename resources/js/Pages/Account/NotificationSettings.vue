@@ -87,7 +87,7 @@ const status = computed(
                 </ul>
             </section>
 
-            <p class="text-[14px] text-muted">Everything also shows in your notifications here. Choose where else you hear about it. Sign-in codes and receipts always come by WhatsApp or SMS.</p>
+            <p class="text-[14px] text-muted">Everything also shows in your notifications here. Choose where else you hear about it. Sign-in codes and receipts always reach you.</p>
             <form class="card overflow-hidden" @submit.prevent="form.put(route('notifications.update'), { preserveScroll: true })">
                 <table class="w-full text-[14px]">
                     <thead class="text-left text-[12px] text-muted">

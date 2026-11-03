@@ -55,7 +55,8 @@ Run all four before pushing.
 - **Phone numbers**: always E.164 via `App\Domain\Support\PhoneNumber`; mask them in seller UI
   until the customer engages. Users (and lot customers from the marketplace) may have **no phone** when they
   signed up by email: never assume `$user->phone`; `PhoneNumber::display()/mask()` accept null.
-- **Sign-in**: one-time codes by WhatsApp (`SendOtp::run`, no SMS fallback unless `otp.sms_fallback`) or email
+- **Sign-in**: one-time codes by WhatsApp (`SendOtp::run`, no SMS fallback unless `otp.sms_fallback`; only while `SignInOptions::whatsappCodes()`,
+  the admin's /admin → Settings → Sign-in switch over `OTP_WHATSAPP`, default off: paid per code) or email
   (`SendOtp::toEmail` / `VerifyOtp::forEmail`) always work and create accounts. Optional extras: a password (`SetPassword`,
   `LogInWithPassword` by email or phone; never creates accounts) and Google (`SignInWithGoogle` via Socialite; links by
   email only when Google verified it). Forgotten passwords: `PasswordResetController` (broker, `ResetPasswordLink` mail, `SetPassword::reset()`). Every sign-in path calls `User::reopenForSignIn()`. Admins must keep a password.

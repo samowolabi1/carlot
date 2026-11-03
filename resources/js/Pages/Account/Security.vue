@@ -13,6 +13,7 @@ const props = defineProps<{
     passwordChanged: string | null;
     google: { enabled: boolean; connected: boolean };
     isAdmin: boolean;
+    whatsappCodes: boolean;
     apps: { id: number; name: string; last_used: string; since: string | null }[];
 }>();
 
@@ -63,7 +64,7 @@ const row = 'flex items-center gap-3 border-t border-divider px-4 py-3.5 first:b
                 <h2 id="codes-heading" class="border-b border-divider px-4 py-3 font-sans text-[15px] font-bold">One-time codes</h2>
                 <div v-if="phone" :class="row">
                     <Icon name="whatsapp" :size="20" class="shrink-0 text-[#1FAF57]" />
-                    <span class="flex grow flex-col"><span class="text-[15px]">{{ phone }}</span><span class="text-[13px] text-muted">Codes by WhatsApp</span></span>
+                    <span class="flex grow flex-col"><span class="text-[15px]">{{ phone }}</span><span class="text-[13px] text-muted">{{ whatsappCodes ? 'Codes by WhatsApp' : 'WhatsApp codes are paused for now: use your email or a password' }}</span></span>
                 </div>
                 <div v-if="email" :class="row">
                     <Icon name="mail" :size="20" class="shrink-0 text-muted" />

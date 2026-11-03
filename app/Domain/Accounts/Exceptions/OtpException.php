@@ -11,6 +11,11 @@ class OtpException extends RuntimeException
         return new self("Too many codes sent. Try again in {$minutes} minutes.");
     }
 
+    public static function emailOnly(): self
+    {
+        return new self('Codes are sent by email for now. Sign in with your email address, or with a password if you added one.');
+    }
+
     public static function invalid(): self
     {
         return new self('That code is not right. Check the message and try again.');

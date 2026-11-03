@@ -4,6 +4,7 @@ namespace App\Domain\Lots\Actions;
 
 use App\Domain\Accounts\Enums\UserRole;
 use App\Domain\Accounts\Models\User;
+use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Lots\Enums\LotStatus;
 use App\Domain\Lots\Mail\LotWelcome;
@@ -48,6 +49,9 @@ class OnboardLot
 
         if ($data['sign_in'] === 'email' && $email === null) {
             throw ValidationException::withMessages(['email' => 'Add the email address the owner will sign in with.']);
+        }
+        if ($data['sign_in'] === 'whatsapp' && ! SignInOptions::whatsappCodes()) {
+            throw ValidationException::withMessages(['sign_in' => 'Sign-in codes go by email for now (Settings → Sign-in): add the owner\'s email address.']);
         }
         if ($data['sign_in'] === 'whatsapp' && $phone === null) {
             throw ValidationException::withMessages(['phone' => 'Add the WhatsApp number the owner will sign in with.']);

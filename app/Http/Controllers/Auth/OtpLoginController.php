@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domain\Accounts\Actions\SendOtp;
 use App\Domain\Accounts\Actions\VerifyOtp;
 use App\Domain\Accounts\Exceptions\OtpException;
+use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Admin\Impersonation;
 use App\Domain\Push\Models\PushSubscription;
 use App\Domain\Support\Fields;
@@ -30,9 +31,14 @@ class OtpLoginController extends Controller
 {
     public function create(Request $request): Response
     {
+        $whatsapp = SignInOptions::whatsappCodes();
+        $asked = $request->query('method');
+
         return Inertia::render('Auth/Login', [
-            'method' => in_array($request->query('method'), ['email', 'password'], true) ? $request->query('method') : 'whatsapp',
+            'method' => in_array($asked, ['email', 'password'], true) ? $asked : ($whatsapp ? 'whatsapp' : 'email'),
             'google' => GoogleController::enabled(),
+            // Off (the admin's switch): codes by email only, so the page shows no WhatsApp option.
+            'whatsapp' => $whatsapp,
         ]);
     }
 
@@ -83,6 +89,7 @@ class OtpLoginController extends Controller
             'method' => $email ? 'email' : 'whatsapp',
             'channel' => $request->session()->get('otp_channel', 'whatsapp'),
             'smsAvailable' => ! $email && (bool) config('lotlink.otp.sms_fallback'),
+            'whatsapp' => SignInOptions::whatsappCodes(),
             'resendAfter' => 30,
         ]);
     }

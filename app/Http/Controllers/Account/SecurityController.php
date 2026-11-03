@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Account;
 
 use App\Domain\Accounts\Actions\SetPassword;
 use App\Domain\Accounts\Actions\SignInWithGoogle;
+use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Audit\AuditLog;
 use App\Domain\Support\Fields;
 use App\Domain\Support\PhoneNumber;
@@ -31,6 +32,7 @@ class SecurityController extends Controller
             'passwordChanged' => $user->password_changed_at?->timezone(config('lotlink.timezone', 'Africa/Lagos'))->format('j M Y'),
             'google' => ['enabled' => GoogleController::enabled(), 'connected' => $user->google_id !== null],
             'isAdmin' => $user->isAdmin(),
+            'whatsappCodes' => SignInOptions::whatsappCodes(),
             // Phones signed in to the CarYard app (API tokens).
             'apps' => $user->tokens()->latest()->get()->map(fn (PersonalAccessToken $t) => [
                 'id' => $t->getKey(),

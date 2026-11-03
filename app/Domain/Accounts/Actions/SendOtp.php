@@ -6,6 +6,7 @@ use App\Domain\Accounts\Enums\OtpPurpose;
 use App\Domain\Accounts\Exceptions\OtpException;
 use App\Domain\Accounts\Mail\LoginCode;
 use App\Domain\Accounts\Models\OtpCode;
+use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Messaging\Message;
 use App\Domain\Messaging\Messenger;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,8 @@ use Throwable;
 
 /**
  * One-time sign-in codes, to a WhatsApp number or an email address (people choose). WhatsApp
- * doesn't fall back to paid SMS unless OTP_SMS_FALLBACK is on; email costs nothing.
+ * doesn't fall back to paid SMS unless OTP_SMS_FALLBACK is on; email costs nothing. Codes to a phone
+ * are only sent while an admin has WhatsApp codes on (SignInOptions); otherwise it's email only.
  */
 class SendOtp
 {
@@ -28,6 +30,10 @@ class SendOtp
      */
     public function run(string $phone, OtpPurpose $purpose = OtpPurpose::Login, ?string $channel = null): array
     {
+        if (! SignInOptions::whatsappCodes()) {
+            throw OtpException::emailOnly();
+        }
+
         $config = config('lotlink.otp');
         $channel ??= $config['channel'];
         $fallback = (bool) ($config['sms_fallback'] ?? false);

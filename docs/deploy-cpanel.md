@@ -62,7 +62,8 @@ your local `.env` before building.
 In *File Manager* → **Settings** (top right), tick **Show Hidden Files (dotfiles)**. In `caryard`, copy
 `.env.cpanel.example` to `.env` and edit it: `APP_URL`, the database, SMTP, the `LEGAL_*` details and `ADMIN_EMAIL` /
 `ADMIN_PASSWORD` (12+ characters; without them no admin is created). Leave `APP_KEY` empty: it's created for you. WhatsApp,
-Termii and Paystack/Flutterwave can be added later.
+Termii and Paystack/Flutterwave can be added later. Until then people sign in with codes by **email** (so SMTP must work); once WhatsApp is
+connected, turn on WhatsApp codes in /admin → Settings → Sign-in.
 
 Keep every password **inside the double quotes** (`ADMIN_PASSWORD="my#Strong pass 2026"`): without them, `#` and anything
 after it is ignored, so a password like `Lagos#2026Cars` would become `Lagos`. Don't use `"` or `\` inside a password.

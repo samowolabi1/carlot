@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LotResource\Pages;
 
 use App\Domain\Accounts\Models\User;
+use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Admin\AdminArea;
 use App\Domain\Lots\Actions\OnboardLot;
 use App\Domain\Lots\Models\Plan;
@@ -32,9 +33,12 @@ class ListLots extends ListRecords
                 ->form([
                     Forms\Components\Section::make('Owner')->columns(2)->schema([
                         Forms\Components\TextInput::make('owner_name')->label('Full name')->required()->maxLength(80)->rules([new FieldPattern('person_name')])->columnSpanFull(),
-                        Forms\Components\Radio::make('sign_in')->label('They will sign in with')->required()->default('whatsapp')->inline()->live()
-                            ->options(['whatsapp' => 'WhatsApp number', 'email' => 'Email address'])->columnSpanFull(),
-                        Forms\Components\TextInput::make('phone')->label('WhatsApp number')->tel()->maxLength(20)->rules(['nullable', new FieldPattern('phone'), new PhoneNumberRule])->placeholder('0803 123 4567')
+                        Forms\Components\Radio::make('sign_in')->label('They will sign in with')->required()->default(fn () => SignInOptions::whatsappCodes() ? 'whatsapp' : 'email')->inline()->live()
+                            ->options(['whatsapp' => 'WhatsApp number', 'email' => 'Email address'])->columnSpanFull()
+                            // WhatsApp sign-in codes off (Settings → Sign-in): owners sign in by email.
+                            ->disableOptionWhen(fn (string $value) => $value === 'whatsapp' && ! SignInOptions::whatsappCodes())
+                            ->helperText(fn () => SignInOptions::whatsappCodes() ? null : 'WhatsApp sign-in codes are off (Settings → Sign-in), so owners sign in by email.'),
+                        Forms\Components\TextInput::make('phone')->label(fn (Get $get) => $get('sign_in') === 'email' ? 'WhatsApp number (optional)' : 'WhatsApp number')->tel()->maxLength(20)->rules(['nullable', new FieldPattern('phone'), new PhoneNumberRule])->placeholder('0803 123 4567')
                             ->required(fn (Get $get) => $get('sign_in') === 'whatsapp'),
                         Forms\Components\TextInput::make('email')->label('Email')->email()->rule('email:rfc,strict')->maxLength(190)
                             ->required(fn (Get $get) => $get('sign_in') === 'email'),

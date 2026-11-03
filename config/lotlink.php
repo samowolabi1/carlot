@@ -42,6 +42,9 @@ return [
         'send_window_minutes' => 15,
         // People sign in with a WhatsApp number or an email address. whatsapp (default) or sms.
         'channel' => env('OTP_CHANNEL', 'whatsapp'),
+        // Codes by WhatsApp (each one a paid Meta message). Off: email only. The admin's switch in
+        // /admin → Settings → Sign-in (SignInOptions) overrides this once saved.
+        'whatsapp' => (bool) env('OTP_WHATSAPP', false),
         // Off: a WhatsApp code never falls back to (paid) SMS; the person can use email instead.
         'sms_fallback' => (bool) env('OTP_SMS_FALLBACK', false),
     ],

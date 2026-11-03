@@ -4,7 +4,7 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
-const props = defineProps<{ destination: string; method: 'whatsapp' | 'email'; channel: 'whatsapp' | 'sms' | 'email'; smsAvailable: boolean; resendAfter: number }>();
+const props = defineProps<{ destination: string; method: 'whatsapp' | 'email'; channel: 'whatsapp' | 'sms' | 'email'; smsAvailable: boolean; resendAfter: number; whatsapp: boolean }>();
 
 const LENGTH = 6;
 const digits = ref<string[]>(Array(LENGTH).fill(''));
@@ -127,7 +127,7 @@ onBeforeUnmount(() => clearInterval(timer));
                     Send by SMS instead
                 </button>
                 <Link v-else-if="method === 'whatsapp'" :href="route('login', { method: 'email' })" class="font-semibold">Use email instead</Link>
-                <Link v-else :href="route('login', { method: 'whatsapp' })" class="font-semibold">Use WhatsApp instead</Link>
+                <Link v-else-if="whatsapp" :href="route('login', { method: 'whatsapp' })" class="font-semibold">Use WhatsApp instead</Link>
             </div>
 
             <button type="submit" class="btn btn-primary" :disabled="!complete || form.processing">Continue</button>
