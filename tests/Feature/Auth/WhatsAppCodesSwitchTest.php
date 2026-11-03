@@ -4,8 +4,10 @@ use App\Domain\Accounts\Models\OtpCode;
 use App\Domain\Accounts\Models\User;
 use App\Domain\Accounts\Support\SignInOptions;
 use App\Domain\Audit\AuditLog;
+use App\Domain\Lots\Actions\OnboardLot;
 use App\Filament\Pages\SignInSettings;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
 use Livewire\Livewire;
 
@@ -62,7 +64,7 @@ it('keeps the sign-in settings page for admins only', function () {
 it('onboards sellers by email while WhatsApp codes are off', function () {
     $admin = User::factory()->admin()->create();
 
-    expect(fn () => app(App\Domain\Lots\Actions\OnboardLot::class)->run($admin, [
+    expect(fn () => app(OnboardLot::class)->run($admin, [
         'owner_name' => 'Ada Obi', 'sign_in' => 'whatsapp', 'phone' => '08035551313', 'lot_name' => 'Ada Cars', 'state' => 'FCT', 'city' => 'Garki',
-    ]))->toThrow(Illuminate\Validation\ValidationException::class, 'Sign-in codes go by email for now');
+    ]))->toThrow(ValidationException::class, 'Sign-in codes go by email for now');
 });
